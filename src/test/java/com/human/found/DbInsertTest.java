@@ -22,7 +22,7 @@ public class DbInsertTest {
     @Commit
     public void 검증용_데이터_인서트_테스트() {
         log.info("★ 테스트 시작!"); // System.out 대신 log.info 사용
-        testMapper.insertTestData("데이터 확인");
+        testMapper.insertTestData("데이터 넣기 확인");
         log.info("🎉 삽입 성공!");
     }
 
