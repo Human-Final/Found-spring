@@ -51,7 +51,7 @@ out/
 .vscode/
 
 # 암호화를 위해 비밀번호가 들어간 파일은 깃에서 제외
-src/main/resources/application-jasypt.properties
+# src/main/resources/application-jasypt.properties
 
 # 이것도 제외하는게 가장 마음이 편합니다..
-application.properties
+# application.properties
