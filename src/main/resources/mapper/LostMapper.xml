@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.human.found.domain.lost.mapper.LostMapper" >
+
+
+
+<insert id="insertLost"
+        parameterType="com.human.found.domain.lost.vo.LostVO"
+        useGeneratedKeys="true"
+        keyProperty="num"
+        >
+INSERT INTO lost(
+atc_id,
+id,
+lst_place,
+lst_prdt_num,
+lst_sbjt,
+lst_ymd,
+prdt_cl_num,
+done,
+deleted
+
+)VALUES(
+#{atcId},
+#{id},
+#{lstPlace},
+#{lstPrdtNum},
+#{lstSbjt},
+#{lstYmd},
+#{prdtClNum},
+#{done},
+#{deleted}   
+)         
+
+</insert>
+
+<select id="selectLostList"
+resultType="com.human.found.domain.lost.vo.LostVO"
+>
+SELECT 
+num,
+atc_id,
+id,
+lst_place,
+lst_prdt_num,
+lst_sbjt,
+lst_ymd,
+prdt_cl_num,
+created,
+updated,
+done,
+deleted
+FROM lost
+WHERE 
+        deleted=0
+UNION ALL   
+
+SELECT 
+num,
+atc_id,
+id,
+lst_place,
+lst_prdt_num,
+lst_sbjt,
+lst_ymd,
+prdt_cl_num,
+created,
+updated,
+done,
+deleted
+FROM lost_police
+WHERE 
+        deleted=0
+UNION ALL  
+
+SELECT 
+num,
+atc_id,
+id,
+lst_place,
+lst_prdt_num,
+lst_sbjt,
+lst_ymd,
+prdt_cl_num,
+created,
+updated,
+done,
+deleted
+FROM lost_portal
+WHERE 
+        deleted=0 
+ORDER BY lst_ymd DESC
+
+
+
+</select>
+</mapper>       
