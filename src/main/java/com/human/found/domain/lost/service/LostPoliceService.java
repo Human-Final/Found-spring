@@ -1,7 +1,7 @@
 package com.human.found.domain.lost.service;
 
-import com.human.found.domain.lost.mapper.LostMapper;
-import com.human.found.domain.lost.vo.LostVO;
+import com.human.found.domain.lost.mapper.LostPoliceMapper;
+import com.human.found.domain.lost.vo.LostPoliceVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
@@ -20,15 +20,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class LostService {
+public class LostPoliceService {
 
     @Autowired
-    private LostMapper lostMapper;
+    private LostPoliceMapper lostMapper;
 
     private final String serviceKey = "51cb7bbc7238b3a05c50974e40c97261a36015bddc473118eae5cc3c273094ce";
 
     public void fetchAndSaveLostGoods(int pageNo, int numOfRows) {
-        List<LostVO> list = new ArrayList<>();
+        List<LostPoliceVO> list = new ArrayList<>();
         
         try {
             String baseUrl = "https://apis.data.go.kr/1320000/LostGoodsInfoInqireService/getLostGoodsInfoAccToClAreaPd";
@@ -71,7 +71,7 @@ public class LostService {
                     Element el = (Element) node;
                     
                     // 수정할 for 루프 내부 (내용 태그가 없다면 이대로 두십시오)
-                LostVO vo = new LostVO();
+                LostPoliceVO vo = new LostPoliceVO();
                 vo.setAtcId(getTagValue("atcId", el));
                 vo.setLstSbjt(getTagValue("lstSbjt", el)); // 제목
 
@@ -97,11 +97,11 @@ public class LostService {
         }
     }
 
-    public List<LostVO> getLostGoodsFromDB() {
+    public List<LostPoliceVO> getLostGoodsFromDB() {
         return lostMapper.selectLostGoodsList();
     }
 
-    public LostVO getDetailByAtcId(String atcId) {
+    public LostPoliceVO getDetailByAtcId(String atcId) {
         return lostMapper.selectLostDetail(atcId);
     }
 

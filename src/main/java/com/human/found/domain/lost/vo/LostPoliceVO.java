@@ -1,6 +1,6 @@
 package com.human.found.domain.lost.vo;
 
-public class LostVO {
+public class LostPoliceVO {
     private Long num;
     private String atcId;
     private String id;
@@ -14,7 +14,7 @@ public class LostVO {
     private Integer done;
     private Integer deleted;
 
-    public LostVO() {}
+    public LostPoliceVO() {}
 
     public Long getNum() { return num; }
     public void setNum(Long num) { this.num = num; }

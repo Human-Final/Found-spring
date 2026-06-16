@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.human.found.domain.lost.mapper.LostMapper">
+<mapper namespace="com.human.found.domain.lost.mapper.LostPoliceMapper">
 
     <insert id="insertLostGoodsBatch" parameterType="java.util.List">
         INSERT INTO lost_police (
@@ -29,7 +29,7 @@
             prdt_cl_num  = VALUES(prdt_cl_num)
     </insert>
 
-    <select id="selectLostDetail" resultType="com.human.found.domain.lost.vo.LostVO">
+    <select id="selectLostDetail" resultType="com.human.found.domain.lost.vo.LostPoliceVO">
         SELECT 
             num, 
             atc_id AS atcId, 
@@ -47,7 +47,7 @@
         WHERE atc_id = #{atcId}
     </select>
 
-    <select id="selectLostGoodsList" resultType="com.human.found.domain.lost.vo.LostVO">
+    <select id="selectLostGoodsList" resultType="com.human.found.domain.lost.vo.LostPoliceVO">
         SELECT 
             num, 
             atc_id AS atcId, 
