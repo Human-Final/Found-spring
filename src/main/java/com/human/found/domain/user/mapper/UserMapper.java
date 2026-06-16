@@ -12,4 +12,10 @@ public interface UserMapper {
 
     // 회원가입
     void insertUser(UserVO user);
+
+    // 아이디 중복검사
+    int countById(@Param("id") String id);
+    
+    // 이메일 중복 확인
+    int countByEmail(@Param("email") String email);
 }

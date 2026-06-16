@@ -1,68 +1,99 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.human.found.domain.lost.mapper.LostMapper" >
 
-<mapper namespace="com.human.found.domain.lost.mapper.LostPoliceMapper">
 
-    <insert id="insertLostGoodsBatch" parameterType="java.util.List">
-        INSERT INTO lost_police (
-            atc_id,
-            lst_place,
-            lst_prdt_num,
-            lst_sbjt,
-            lst_ymd,
-            prdt_cl_num,
-            done,
-            deleted
-        ) VALUES 
-        <foreach collection="list" item="item" separator=",">
-        (
-            #{item.atcId},
-            LEFT(#{item.lstPlace}, 100),   LEFT(#{item.lstNm}, 100),      LEFT(#{item.fdPrdtNm}, 100),  STR_TO_DATE(REPLACE(#{item.lstYmd}, '-', ''), '%Y%m%d'), 
-            
-            LEFT(#{item.clNm}, 50),       0,                            0                             )
-        </foreach>
-        ON DUPLICATE KEY UPDATE
-            lst_place    = VALUES(lst_place),
-            lst_prdt_num = VALUES(lst_prdt_num),
-            lst_sbjt     = VALUES(lst_sbjt),
-            lst_ymd      = VALUES(lst_ymd),
-            prdt_cl_num  = VALUES(prdt_cl_num)
-    </insert>
 
-    <select id="selectLostDetail" resultType="com.human.found.domain.lost.vo.LostPoliceVO">
-        SELECT 
-            num, 
-            atc_id AS atcId, 
-            id, 
-            lst_place AS lstPlace, 
-            lst_prdt_num AS lstPrdtNum, 
-            lst_sbjt AS lstSbjt, 
-            lst_ymd AS lstYmd, 
-            prdt_cl_num AS prdtClNum, 
-            created, 
-            updated, 
-            done, 
-            deleted
-        FROM lost_police
-        WHERE atc_id = #{atcId}
-    </select>
+<insert id="insertLost"
+        parameterType="com.human.found.domain.lost.vo.LostVO"
+        useGeneratedKeys="true"
+        keyProperty="num"
+        >
+INSERT INTO lost(
+atc_id,
+id,
+lst_place,
+lst_prdt_nm,
+lst_sbjt,
+lst_ymd,
+prdt_cl_nm,
+done,
+is_deleted
 
-    <select id="selectLostGoodsList" resultType="com.human.found.domain.lost.vo.LostPoliceVO">
-        SELECT 
-            num, 
-            atc_id AS atcId, 
-            id, 
-            lst_place AS lstPlace, 
-            lst_prdt_num AS lstPrdtNum, 
-            lst_sbjt AS lstSbjt, 
-            lst_ymd AS lstYmd, 
-            prdt_cl_num AS prdtClNum, 
-            created, 
-            updated, 
-            done, 
-            deleted
-        FROM lost_police
-        ORDER BY num DESC
-    </select>
+)VALUES(
+#{atcId},
+#{id},
+#{lstPlace},
+#{lstPrdtNm},
+#{lstSbjt},
+#{lstYmd},
+#{prdtClNm},
+#{done},
+#{isDeleted}   
+)         
 
-</mapper>
+</insert>
+
+<select id="selectLostList"
+resultType="com.human.found.domain.lost.vo.LostVO"
+>
+SELECT 
+num,
+atc_id,
+id,
+lst_place,
+lst_prdt_nm,
+lst_sbjt,
+lst_ymd,
+prdt_cl_nm,
+created_at,
+updated_at,
+done,
+is_deleted
+FROM lost
+WHERE 
+        is_deleted=0
+UNION ALL   
+
+SELECT 
+num,
+atc_id,
+id,
+lst_place,
+lst_prdt_nm,
+lst_sbjt,
+lst_ymd,
+prdt_cl_nm,
+created_at,
+updated_at,
+done,
+is_deleted
+FROM lost_police
+WHERE 
+        is_deleted=0
+UNION ALL  
+
+SELECT 
+num,
+atc_id,
+id,
+lst_place,
+lst_prdt_nm,
+lst_sbjt,
+lst_ymd,
+prdt_cl_nm,
+created_at,
+updated_at,
+done,
+is_deleted
+FROM lost_portal
+WHERE 
+        is_deleted=0 
+ORDER BY lst_ymd DESC
+
+
+
+</select>
+</mapper>       
