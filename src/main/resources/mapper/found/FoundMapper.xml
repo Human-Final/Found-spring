@@ -13,28 +13,28 @@
     INSERT INTO found(
     atc_id,
     id,
-    clr_num,
+    clr_nm,
     dep_place,
     fd_filepath_img,
-    fd_prdt_num,
+    fd_prdt_nm,
     fd_sbjt,
     fd_ymd,
-    prdt_cl_num,
+    prdt_cl_nm,
     done,
-    deleted
+    is_deleted
 
     )VALUES(
     #{atcId},
     #{id},
-    #{clrNum},
+    #{clrNm},
     #{depPlace},
     #{fdFilepathImg},
-    #{fdPrdtNum},
+    #{fdPrdtNm},
     #{fdSbjt},
     #{fdYmd},
-    #{prdtClNum},
+    #{prdtClNm},
     #{done},
-    #{deleted}
+    #{isDeleted}
     )
     
     
@@ -68,18 +68,20 @@
             num,
             atc_id,
             id,
-            clr_num,
+            clr_nm,
             dep_place,
             fd_filepath_img,
-            fd_prdt_num,
+            fd_prdt_nm,
             fd_sbjt,
             fd_ymd,
-            prdt_cl_num,
+            prdt_cl_nm,
+            created_at,
+            updated_at,
             done,
-            deleted
+            is_deleted
         FROM found
         WHERE 
-            deleted=0 
+            is_deleted=0 
         
         UNION ALL   
         
@@ -87,18 +89,20 @@
             num,
             atc_id,
             id,
-            clr_num,
+            clr_nm,
             dep_place,
             fd_filepath_img,
-            fd_prdt_num,
+            fd_prdt_nm,
             fd_sbjt,
             fd_ymd,
-            prdt_cl_num,
+            prdt_cl_nm,
+            created_at,
+            updated_at,
             done,
-            deleted
+            is_deleted
         FROM found_police
         WHERE 
-            deleted=0 
+            is_deleted=0 
         ORDER BY fd_ymd DESC
 
     </select>

@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.human.found.domain.lost.service.LostService;
 import com.human.found.domain.lost.vo.LostVO;
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class LostController {
     private final LostService lostService;
     @PostMapping("/api/lost")
-    public String LostRegister(@ModelAttribute LostVO lostVO, Principal principal) {
+    public String LostRegister(@ModelAttribute LostVO lostVO,MultipartFile[]files, Principal principal) {
         
         if(principal != null){
             lostVO.setId(principal.getName());
@@ -31,7 +32,7 @@ public class LostController {
             lostVO.setId("test_member");
         }
         
-        lostService.LostRegister(lostVO);
+        lostService.LostRegister(lostVO,files);
         
         return "성공";
     }
