@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>게시판</title>
+
+  <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <link rel="stylesheet" th:href="@{/css/board/list.css}">
+
+</head>
+
+<body>
+
+<div th:replace="layout/header :: headerFragment"></div>
+
+<main class="board-page">
+
+  <!-- 분실 게시판이면 lost, 습득 게시판이면 found로 변경 -->
+  <section class="board-hero lost">
+    <div>
+      <h2>분실 게시판</h2>
+      <p>잃어버린 물건을 등록하고 도움을 요청하세요</p>
+    </div>
+
+    <a href="/write" class="write-btn">글쓰기</a>
+  </section>
+
+  <section class="filter-box">
+    <div class="board-search">
+      <span>⌕</span>
+      <input type="text" id="keywordInput" placeholder="게시글 검색...">
+    </div>
+
+    <div class="filter-row">
+    <span class="filter-label">카테고리</span>
+
+    <div id="categoryFilter" class="chip-group">
+        <button type="button" class="chip active" data-category="">전체</button>
+        <button type="button" class="chip" data-category="가방">가방</button>
+        <button type="button" class="chip" data-category="귀금속">귀금속</button>
+        <button type="button" class="chip" data-category="도서">도서</button>
+        <button type="button" class="chip" data-category="의류">의류</button>
+        <button type="button" class="chip" data-category="자동차">자동차</button>
+        <button type="button" class="chip" data-category="전자기기">전자기기</button>
+        <button type="button" class="chip" data-category="핸드폰">핸드폰</button>
+        <button type="button" class="chip" data-category="지갑">지갑</button>
+        <button type="button" class="chip" data-category="카드">카드</button>
+        <button type="button" class="chip" data-category="기타">기타</button>
+    </div>
+
+    <span class="filter-label" style="margin-left: 10px;">상태</span>
+
+    <div id="statusFilter" class="chip-group">
+        <button type="button" class="chip active" data-status="">전체</button>
+        <button type="button" class="chip" data-status="진행중">진행중</button>
+        <button type="button" class="chip" data-status="완료">완료</button>
+    </div>
+
+    <select class="sort-select" id="sortSelect">
+        <option value="latest">최신순</option>
+        <option value="oldest">오래된순</option>
+    </select>
+    </div>
+  </section>
+
+  <section class="post-grid">
+
+    <article class="post-card">
+      <div class="post-top">
+        <div class="tag-group">
+          <span class="type-tag lost">분실</span>
+          <span class="category-tag">전자기기</span>
+        </div>
+        <span class="status-tag progress">진행중</span>
+      </div>
+
+      <a href="#" class="post-title">아이폰 15 Pro 분실</a>
+
+      <p class="post-desc">
+        어제 밤 홍대 클럽거리에서 아이폰 15 Pro를 분실했습니다. 뒷면에 고양이 스티커가 붙어 있습니다.
+      </p>
+
+      <div class="post-info">
+        <div class="info-item">
+          <strong>물품명</strong>
+          아이폰 15 Pro
+        </div>
+        <div class="info-item">
+          <strong>색상명</strong>
+          블랙 티타늄
+        </div>
+        <div class="info-item">
+          <strong>분실지역</strong>
+          서울 마포구
+        </div>
+        <div class="info-item">
+          <strong>분실일자</strong>
+          2026-06-15
+        </div>
+        <div class="info-item">
+          <strong>물품분류</strong>
+          전자기기
+        </div>
+        <div class="info-item">
+          <strong>작성자</strong>
+          관리자
+        </div>
+      </div>
+
+      <div class="post-bottom">
+        <span>1일 전</span>
+        <div class="post-counts">
+          <span>조회 89</span>
+          <span>댓글 0</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="post-card">
+      <div class="post-top">
+        <div class="tag-group">
+          <span class="type-tag lost">분실</span>
+          <span class="category-tag">지갑</span>
+        </div>
+        <span class="status-tag progress">진행중</span>
+      </div>
+
+      <a href="#" class="post-title">파란 카드홀더 분실</a>
+
+      <p class="post-desc">
+        신촌역 2호선 부근에서 파란색 카드홀더를 잃어버렸습니다. 안에 교통카드와 명함이 들어있습니다.
+      </p>
+
+      <div class="post-info">
+        <div class="info-item">
+          <strong>물품명</strong>
+          카드홀더
+        </div>
+        <div class="info-item">
+          <strong>색상명</strong>
+          파란색
+        </div>
+        <div class="info-item">
+          <strong>분실지역</strong>
+          서울 서대문구
+        </div>
+        <div class="info-item">
+          <strong>분실일자</strong>
+          2026-06-14
+        </div>
+        <div class="info-item">
+          <strong>물품분류</strong>
+          지갑
+        </div>
+        <div class="info-item">
+          <strong>작성자</strong>
+          관리자
+        </div>
+      </div>
+
+      <div class="post-bottom">
+        <span>4일 전</span>
+        <div class="post-counts">
+          <span>조회 19</span>
+          <span>댓글 0</span>
+        </div>
+      </div>
+    </article>
+
+  </section>
+
+  <p class="total-count">총 2건</p>
+
+</main>
+
+<div th:replace="layout/footer :: footerFragment"></div>
+
+<script>
+  let selectedCategory = "";
+  let selectedStatus = "";
+
+  function bindCategoryFilter() {
+    const buttons = document.querySelectorAll("#categoryFilter .chip");
+
+    buttons.forEach(button => {
+      button.addEventListener("click", function () {
+        buttons.forEach(btn => btn.classList.remove("active"));
+        this.classList.add("active");
+
+        selectedCategory = this.dataset.category;
+
+        loadBoardList();
+      });
+    });
+  }
+
+  function bindStatusFilter() {
+    const buttons = document.querySelectorAll("#statusFilter .chip");
+
+    buttons.forEach(button => {
+      button.addEventListener("click", function () {
+        buttons.forEach(btn => btn.classList.remove("active"));
+        this.classList.add("active");
+
+        selectedStatus = this.dataset.status;
+
+        loadBoardList();
+      });
+    });
+  }
+
+  function getCategoryLabel(prdtClNm) {
+    if (!prdtClNm) return "기타";
+
+    if (["가방", "백"].some(word => prdtClNm.includes(word))) return "가방";
+    if (["귀금속", "반지", "목걸이", "귀걸이", "시계"].some(word => prdtClNm.includes(word))) return "귀금속";
+    if (["도서", "책", "서적", "소설"].some(word => prdtClNm.includes(word))) return "도서";
+    if (["의류", "모자", "신발"].some(word => prdtClNm.includes(word))) return "의류";
+    if (["자동차", "네비", "번호판"].some(word => prdtClNm.includes(word))) return "자동차";
+    if (["전자", "핸드폰", "휴대폰", "아이폰", "노트북", "컴퓨터"].some(word => prdtClNm.includes(word))) return "전자기기";
+    if (prdtClNm.includes("지갑")) return "지갑";
+    if (prdtClNm.includes("카드")) return "카드";
+
+    return "기타";
+  }
+
+  async function loadBoardList() {
+    const params = new URLSearchParams();
+    const keyword = document.querySelector("#keywordInput").value.trim();
+
+    if (keyword) {
+      params.append("keyword", keyword);
+    }
+
+    if (selectedCategory) {
+      params.append("category", selectedCategory);
+    }
+
+    if (selectedStatus) {
+      params.append("status", selectedStatus);
+    }
+
+    const sort = document.querySelector("#sortSelect").value;
+    params.append("sort", sort);
+
+    const response = await fetch("/api/lost?" + params.toString());
+    const data = await response.json();
+
+    console.log(data);
+  }
+
+  document.querySelector("#sortSelect").addEventListener("change", loadBoardList);
+
+  bindCategoryFilter();
+  bindStatusFilter();
+</script>
+
+</body>
+</html>
