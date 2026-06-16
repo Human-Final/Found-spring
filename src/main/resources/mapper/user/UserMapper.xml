@@ -40,7 +40,7 @@
             tel,
             role,
             sign_up,
-            deleted
+            is_deleted
         )
         VALUES (
             #{id},
@@ -53,4 +53,22 @@
         )
     </insert>
 
+    <select id = "countById"
+            parameterType = "String"
+            resultType = "int">
+
+            SELECT COUNT(*)
+            FROM member
+            WHERE id = #{id}
+    </select>
+
+    <select id="countByEmail"
+            parameterType="String"
+            resultType="int">
+
+        SELECT COUNT(*)
+        FROM member
+        WHERE email = #{email}
+
+    </select>
 </mapper>
