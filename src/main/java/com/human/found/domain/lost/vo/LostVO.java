@@ -10,12 +10,12 @@ public class LostVO {
     private String atcId;
     private String id;
     private String lstPlace;
-    private String lstPrdtNum;
+    private String lstPrdtNm;
     private String lstSbjt;
     private LocalDateTime lstYmd;
-    private String prdtClNum;
-    private LocalDateTime created;
-    private LocalDateTime updated;
+    private String prdtClNm;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private Integer done = 0;
-    private Integer deleted = 0;
+    private Integer isDeleted = 0;
 }
