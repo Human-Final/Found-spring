@@ -15,5 +15,5 @@ public class UserVO {
     private LocalDateTime signUp;
     private LocalDateTime deletedAt;
     
-    private int deleted;
+    private int isDeleted;
 }

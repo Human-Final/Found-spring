@@ -17,7 +17,7 @@
 
         <result property="signUp" column="sign_up"/>
         <result property="deletedAt" column="deleted_at"/>
-        <result property="deleted" column="deleted"/>
+        <result property="isDeleted" column="is_deleted"/>
 
     </resultMap>
 
@@ -40,7 +40,7 @@
             tel,
             role,
             sign_up,
-            deleted
+            is_deleted
         )
         VALUES (
             #{id},

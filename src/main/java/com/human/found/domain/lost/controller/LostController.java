@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Tag(name = "분실물 관리 테스트 API", description = "VS Code에서 확인하는 스웨거")
 @RestController
 @AllArgsConstructor
-public class LostCountroller {
+public class LostController {
     private final LostService lostService;
     @PostMapping("/api/lost")
     public String LostRegister(@ModelAttribute LostVO lostVO, Principal principal) {
