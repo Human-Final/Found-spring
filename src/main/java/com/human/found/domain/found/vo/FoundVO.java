@@ -26,12 +26,4 @@ public class FoundVO {
     private Integer done = 0;
     private Integer isDeleted = 0;
     
-
-    private String prdtClNm;
-
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
-    private Integer done;
-    private Integer isDeleted;
 }

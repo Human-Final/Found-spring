@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <link rel="stylesheet" th:href="@{/css/board/write.css}">
+  
+  <title>게시글 작성 | 분실물 센터</title>
+
+</head>
+<body>
+  <div th:replace="layout/header :: headerFragment"></div>
+
+  <main class="page">
+    <section class="write-card">
+      <a href="javascript:history.back()" class="back-link">← 돌아가기</a>
+      <h1 class="page-title">게시글 작성</h1>
+
+        <form
+        id="postForm"
+        action="/found/write"
+        method="post"
+        enctype="multipart/form-data"
+        data-found-action="/found/write"
+        data-lost-action="/lost/write"
+        >         
+          <div class="form-section">
+          <span class="form-label">게시판 선택 <span class="required-mark">*</span></span>
+
+          <div class="board-selector">
+            <label class="radio-card">
+              <input type="radio" name="boardType" value="FOUND" required>
+              <span class="radio-dot found" aria-hidden="true"></span>
+              <span>습득물 등록</span>
+            </label>
+
+            <label class="radio-card lost-card">
+              <input type="radio" name="boardType" value="LOST" required>
+              <span class="radio-dot lost" aria-hidden="true"></span>
+              <span>분실물 등록</span>
+            </label>
+          </div>
+
+        </div>
+
+        <div class="form-section">
+          <span class="form-label">카테고리 <span class="required-mark">*</span></span>
+
+            <div class="category-list">
+            <label class="category-chip">
+                <input type="radio" name="category" value="가방" checked required>
+                <span>가방</span>
+            </label>
+            <label class="category-chip">
+                <input type="radio" name="category" value="귀금속" required>
+                <span>귀금속</span>
+            </label>
+            <label class="category-chip">
+                <input type="radio" name="category" value="도서" required>
+                <span>도서</span>
+            </label>
+            <label class="category-chip">
+                <input type="radio" name="category" value="의류" required>
+                <span>의류</span>
+            </label>
+            <label class="category-chip">
+                <input type="radio" name="category" value="자동차" required>
+                <span>자동차</span>
+            </label>
+            <label class="category-chip">
+                <input type="radio" name="category" value="전자기기" required>
+                <span>전자기기</span>
+            </label>
+            <label class="category-chip">
+                <input type="radio" name="category" value="지갑" required>
+                <span>지갑</span>
+            </label>
+            <label class="category-chip">
+                <input type="radio" name="category" value="카드" required>
+                <span>카드</span>
+            </label>
+            <label class="category-chip">
+                <input type="radio" name="category" value="기타" required>
+                <span>기타</span>
+            </label>
+            </div>          
+
+        </div>
+
+        <div class="form-section">
+          <label for="title" class="form-label">제목 <span class="required-mark">*</span></label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            class="form-control title-input"
+            placeholder="제목을 입력하세요"
+            required
+          >
+        </div>
+
+        <div class="form-section">
+          <label for="content" class="form-label">내용 <span class="required-mark">*</span></label>
+          <textarea
+            id="content"
+            name="content"
+            class="form-control content-textarea"
+            placeholder="분실/습득 장소, 시간, 물건 특징 등을 자세히 적어주세요"
+            required
+          ></textarea>
+        </div>
+
+        <div class="form-section">
+          <span class="form-label">첨부파일</span>
+          <label class="upload-box" id="uploadBox">
+            <input type="file" id="fileUpload" name="files" multiple>
+            <span>
+              <span class="upload-icon" aria-hidden="true">↥</span>
+              <p class="upload-main">파일을 드래그하거나 클릭하여 업로드</p>
+              <p class="upload-sub">이미지, PDF, 문서 등</p>
+              <p class="file-name" id="fileName"></p>
+            </span>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="action-button cancel-button" onclick="history.back()">취소</button>
+          <button type="submit" class="action-button submit-button">등록하기</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <div th:replace="layout/footer :: footerFragment"></div>
+
+  <button type="button" class="help-button" aria-label="도움말">?</button>
+
+    <script>
+    const postForm = document.querySelector("#postForm");
+    const boardTypeInputs = document.querySelectorAll("input[name='boardType']");
+    const uploadBox = document.querySelector("#uploadBox");
+    const fileUpload = document.querySelector("#fileUpload");
+    const fileName = document.querySelector("#fileName");
+
+    function changeFormAction() {
+        const checkedBoardType = document.querySelector("input[name='boardType']:checked");
+
+        if (!checkedBoardType) {
+        return;
+        }
+
+        postForm.action = checkedBoardType.value === "LOST"
+        ? postForm.dataset.lostAction
+        : postForm.dataset.foundAction;
+    }
+
+    function updateFileName() {
+        const files = Array.from(fileUpload.files);
+
+        if (files.length === 0) {
+        fileName.textContent = "";
+        return;
+        }
+
+        fileName.textContent = files.length === 1
+        ? files[0].name
+        : files[0].name + " 외 " + (files.length - 1) + "개";
+    }
+
+    boardTypeInputs.forEach(function (input) {
+        input.addEventListener("change", changeFormAction);
+    });
+
+    changeFormAction();
+
+    fileUpload.addEventListener("change", updateFileName);
+
+    uploadBox.addEventListener("dragover", function (event) {
+        event.preventDefault();
+        uploadBox.classList.add("drag-over");
+    });
+
+    uploadBox.addEventListener("dragleave", function () {
+        uploadBox.classList.remove("drag-over");
+    });
+
+    uploadBox.addEventListener("drop", function (event) {
+        event.preventDefault();
+        uploadBox.classList.remove("drag-over");
+
+        fileUpload.files = event.dataTransfer.files;
+        updateFileName();
+    });
+    </script>
+</body>
+</html>
