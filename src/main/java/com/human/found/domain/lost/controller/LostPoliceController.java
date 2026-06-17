@@ -30,13 +30,6 @@ public class LostPoliceController {
         return "lost/list";
     }
 
-    // 2. 데이터 새로고침
-    @GetMapping("/refresh")
-    public String refresh() {
-        lostService.fetchAndSaveLostGoods(1, 10);
-        return "redirect:/lost/list";
-    }
-    
     // 3. 상세페이지 (매핑 경로를 /lost/detail로 고쳤습니다)
     @GetMapping("/detail")
     public String detail(@RequestParam("atcId") String atcId, Model model) {

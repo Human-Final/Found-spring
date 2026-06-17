@@ -16,5 +16,7 @@ public interface LostPoliceMapper {
 
     LostPoliceVO selectLostDetail(@Param("atcId") String atcId);
 
+    void lostPoliceDelete();
+
     
 }
