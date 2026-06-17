@@ -3,31 +3,40 @@
 
 <mapper namespace="com.human.found.domain.lost.mapper.LostPoliceMapper">
 
-    <insert id="insertLostGoodsBatch" parameterType="java.util.List">
+        <insert id="insertLostGoodsBatch" parameterType="java.util.List">
         INSERT INTO lost_police (
             atc_id,
             lst_place,
-            lst_prdt_num,
+            lst_prdt_nm,
             lst_sbjt,
             lst_ymd,
-            prdt_cl_num,
+            prdt_cl_nm,
             done,
-            deleted
+            is_deleted
         ) VALUES 
         <foreach collection="list" item="item" separator=",">
         (
             #{item.atcId},
-            LEFT(#{item.lstPlace}, 100),   LEFT(#{item.lstNm}, 100),      LEFT(#{item.fdPrdtNm}, 100),  STR_TO_DATE(REPLACE(#{item.lstYmd}, '-', ''), '%Y%m%d'), 
-            
-            LEFT(#{item.clNm}, 50),       0,                            0                             )
+            LEFT(#{item.lstPlace}, 100),   
+            LEFT(#{item.lstPrdtNm}, 100),      
+            LEFT(#{item.lstSbjt}, 100),  <!-- 👈 fdPrdtNm에서 lstSbjt로 수정 -->
+            STR_TO_DATE(REPLACE(#{item.lstYmd}, '-', ''), '%Y%m%d'), 
+            LEFT(#{item.prdtClNm}, 50),  <!-- 👈 clNm에서 prdtClNm으로 수정 -->
+            0,                            
+            0                             
+        )
         </foreach>
         ON DUPLICATE KEY UPDATE
             lst_place    = VALUES(lst_place),
-            lst_prdt_num = VALUES(lst_prdt_num),
+            lst_prdt_nm = VALUES(lst_prdt_nm),
             lst_sbjt     = VALUES(lst_sbjt),
             lst_ymd      = VALUES(lst_ymd),
-            prdt_cl_num  = VALUES(prdt_cl_num)
+            prdt_cl_nm  = VALUES(prdt_cl_nm)
     </insert>
+
+    <delete id="lostPoliceDelete">
+        delete from lost_police
+    </delete>
 
     <select id="selectLostDetail" resultType="com.human.found.domain.lost.vo.LostPoliceVO">
         SELECT 
@@ -35,14 +44,14 @@
             atc_id AS atcId, 
             id, 
             lst_place AS lstPlace, 
-            lst_prdt_num AS lstPrdtNum, 
+            lst_prdt_nm AS lstPrdtNm, 
             lst_sbjt AS lstSbjt, 
             lst_ymd AS lstYmd, 
-            prdt_cl_num AS prdtClNum, 
-            created, 
-            updated, 
+            prdt_cl_nm AS prdtClNm, 
+            created_at, 
+            updated_at, 
             done, 
-            deleted
+            is_deleted
         FROM lost_police
         WHERE atc_id = #{atcId}
     </select>
@@ -53,14 +62,14 @@
             atc_id AS atcId, 
             id, 
             lst_place AS lstPlace, 
-            lst_prdt_num AS lstPrdtNum, 
+            lst_prdt_nm AS lstPrdtNm, 
             lst_sbjt AS lstSbjt, 
             lst_ymd AS lstYmd, 
-            prdt_cl_num AS prdtClNum, 
-            created, 
-            updated, 
+            prdt_cl_nm AS prdtClNm, 
+            created_at, 
+            updated_at, 
             done, 
-            deleted
+            is_deleted
         FROM lost_police
         ORDER BY num DESC
     </select>
