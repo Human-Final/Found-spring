@@ -69,7 +69,7 @@
         SELECT COUNT(*)
         FROM member
         WHERE email = #{email}
-
+    
     </select>
 
     <!-- UserMapper.xml 내부에 추가할 코드 -->
