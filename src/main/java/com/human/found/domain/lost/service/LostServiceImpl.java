@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.human.found.domain.lost.mapper.LostFileMapper;
@@ -21,10 +22,16 @@ public class LostServiceImpl implements LostService {
     private final LostFileMapper lostFileMapper;
 
     @Override
+    @Transactional
     public void LostRegister(LostVO lostVO, MultipartFile[] files) {
+
+        if(lostVO.getPrdtClNm()==null||lostVO.getPrdtClNm().isEmpty()){
+            lostVO.setPrdtClNm("기타물품");
+        }
+        
+        // 게시글 인서트 (이후 lostVO에 atcId가 자동으로 채워짐)
         lostMapper.insertLost(lostVO);
         String atcid = lostVO.getAtcId();
-
         if (files != null && files.length > 0) {
 
             String uploadPath = "c:/upload/lost/";// 파일위치
