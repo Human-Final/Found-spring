@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko" 
+    xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+  <meta charset="UTF-8" />
+
+</head>
+    
+  <header th:fragment="headerFragment">
+    <div class="header-left">
+      <a href="/" class="header-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M12 21s7-4.8 7-11a7 7 0 0 0-14 0c0 6.2 7 11 7 11z"></path>
+          <circle cx="12" cy="10" r="2.5"></circle>
+        </svg>
+        분실물 센터
+      </a>
+
+      <nav>
+        <a href="api/found">습득 게시판</a>
+        <a href="api/lost">분실 게시판</a>
+        <a href="api/notices">공지사항</a>
+      </nav>
+    </div>
+
+    <div class="header-right">
+      <div class="top-search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <input type="text" placeholder="검색..." />
+      </div>
+      <th:block sec:authorize="isAnonymous()">
+        <a href="/login" class="login-btn">로그인</a>
+      </th:block>
+
+      <th:block sec:authorize="isAuthenticated()">
+        <a href="/mypage">마이페이지</a>
+        <a href="/logout" class="logout-btn" onclick="return confirm('로그아웃 하시겠습니까?')">로그아웃</a>
+      </th:block>
+    </div>
+  </header>

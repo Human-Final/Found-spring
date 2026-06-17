@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.human.found.domain.found.mapper.FoundMapper">
+
+
+<insert id="insertfound"
+        parameterType="com.human.found.domain.found.vo.FoundVO"
+        useGeneratedKeys="true"
+        keyProperty="num">
+    
+    INSERT INTO found(
+    atc_id,
+    id,
+    clr_nm,
+    dep_place,
+    fd_filepath_img,
+    fd_prdt_nm,
+    fd_sbjt,
+    fd_ymd,
+    prdt_cl_nm,
+    done,
+    is_deleted
+
+    )VALUES(
+    #{atcId},
+    #{id},
+    #{clrNm},
+    #{depPlace},
+    #{fdFilepathImg},
+    #{fdPrdtNm},
+    #{fdSbjt},
+    #{fdYmd},
+    #{prdtClNm},
+    #{done},
+    #{isDeleted}
+    )
+    
+    
+    </insert>
+
+    <!-- <select id="selectFoundList"
+    resultType="com.human.found.domain.found.vo.FoundVO">
+        SELECT 
+            num,
+            atc_id,
+            id,
+            clr_num,
+            dep_place,
+            fd_filepath_img,
+            fd_prdt_num,
+            fd_sbjt,
+            fd_ymd,
+            prdt_cl_num,
+            done,
+            deleted
+        FROM found
+        WHERE 
+            deleted=0 ORDER BY num DESC    
+
+    </select> -->
+
+    <!--유니온-->
+        <select id="selectFoundList"
+    resultType="com.human.found.domain.found.vo.FoundVO">
+        SELECT 
+            num,
+            atc_id,
+            id,
+            clr_nm,
+            dep_place,
+            fd_filepath_img,
+            fd_prdt_nm,
+            fd_sbjt,
+            fd_ymd,
+            prdt_cl_nm,
+            created_at,
+            updated_at,
+            done,
+            is_deleted
+        FROM found
+        WHERE 
+            is_deleted=0 
+        
+        UNION ALL   
+        
+                SELECT 
+            num,
+            atc_id,
+            id,
+            clr_nm,
+            dep_place,
+            fd_filepath_img,
+            fd_prdt_nm,
+            fd_sbjt,
+            fd_ymd,
+            prdt_cl_nm,
+            created_at,
+            updated_at,
+            done,
+            is_deleted
+        FROM found_police
+        WHERE 
+            is_deleted=0 
+        ORDER BY fd_ymd DESC
+
+    </select>
+
+
+
+
+</mapper>        

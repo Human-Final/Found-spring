@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Commit; // 이 import 추가
+import org.springframework.test.annotation.Commit; 
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,7 @@ public class DbInsertTest {
     @Commit
     public void 검증용_데이터_인서트_테스트() {
         log.info("★ 테스트 시작!"); // System.out 대신 log.info 사용
-        testMapper.insertTestData("데이터 확인");
+        testMapper.insertTestData("데이터 넣기 확인");
         log.info("🎉 삽입 성공!");
     }
 
