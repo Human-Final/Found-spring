@@ -1,11 +1,13 @@
 package com.human.found.domain.found.controller;
 
+import org.springframework.http.MediaType;//스웨거 확인
 import java.security.Principal;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.human.found.domain.found.service.FoundService;
 import com.human.found.domain.found.vo.FoundVO;
@@ -24,8 +26,10 @@ public class FoundController {
     private final FoundService foundService;
 
     //습득물 등록
-    @PostMapping("/api/found")
-    public String postRegister(@ModelAttribute FoundVO foundvo , Principal principal ) {
+    @PostMapping(value = "/api/found", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String postRegister(@ModelAttribute FoundVO foundvo ,
+        
+        @RequestParam(value="files",required = false) MultipartFile[]files, Principal principal ) {
 
         //작성자 자동설정
         if (principal != null){
@@ -34,7 +38,7 @@ public class FoundController {
             foundvo.setId("test_member");
         }
 
-        foundService.Register(foundvo);
+        foundService.Register(foundvo,files);
 
         return "성공";
     }

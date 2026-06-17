@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>분실물 상세 정보</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="text/javascript" th:src="@{'//dapi.kakao.com/v2/maps/sdk.js?appkey=' + ${kakaoJsKey} + '&libraries=services'}"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-xl" th:object="${goods}">
+        <h1 class="text-3xl font-bold mb-6 text-gray-900 border-b pb-4" th:text="*{lstSbjt}">제목이 표시되는 곳</h1>
+        
+        <div class="space-y-4 mb-8 text-gray-700 bg-gray-50 p-6 rounded-xl border">
+            <div>
+                <strong class="text-gray-900 block mb-1">상세 정보 (제품번호):</strong>
+                <p class="text-gray-600" th:text="*{lstPrdtNum}"></p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <p><strong class="text-gray-900">분실장소:</strong> <span th:text="*{lstPlace}"></span></p>
+                <p><strong class="text-gray-900">날짜:</strong> <span th:text="*{lstYmd}"></span></p>
+                <p><strong class="text-gray-900">제품 분류:</strong> <span th:text="*{prdtClNum}"></span></p>
+                <p><strong class="text-gray-900">처리상태:</strong> 
+                    <span th:text="*{done == 0 ? '미완료' : '완료'}" 
+                          th:classappend="*{done == 0 ? 'text-red-500' : 'text-green-500'}" class="font-bold"></span>
+                </p>
+            </div>
+        </div>
+
+        <h2 class="text-xl font-bold mb-4 text-gray-800">🔍 분실물 위치</h2>
+        <div id="map" style="width:100%; height:300px;" class="rounded-xl mb-6 shadow-md border"></div>
+        <div id="mapMessage" class="hidden text-red-500 font-bold p-4 bg-red-50 rounded-lg mb-6 border border-red-200 text-center">
+            위치를 찾을 수 없습니다.
+        </div>
+        
+        <div class="mt-8">
+            <a href="/lost/list" class="bg-indigo-600 text-white py-3 px-6 rounded-lg font-bold hover:bg-indigo-700">목록으로</a>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        var address = /*[[${goods.lstPlace}]]*/ '';
+        function initMap() {
+            var mapContainer = document.getElementById('map');
+            var mapMessage = document.getElementById('mapMessage');
+            var mapOption = { center: new kakao.maps.LatLng(37.5665, 126.9780), level: 3 };
+            var map = new kakao.maps.Map(mapContainer, mapOption);
+            var ps = new kakao.maps.services.Places();
+
+            if (!address) {
+                mapContainer.style.display = 'none';
+                mapMessage.classList.remove('hidden');
+                return;
+            }
+
+            ps.keywordSearch(address, function(result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                    var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                    new kakao.maps.Marker({ map: map, position: coords });
+                    map.setCenter(coords);
+                } else {
+                    mapContainer.style.display = 'none';
+                    mapMessage.classList.remove('hidden');
+                }
+            });
+        }
+        if (typeof kakao !== 'undefined') { kakao.maps.load(initMap); }
+    </script>
+</body>
+</html>
