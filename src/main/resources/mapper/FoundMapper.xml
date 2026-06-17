@@ -21,7 +21,7 @@
     fd_ymd,
     prdt_cl_num,
     done,
-    deleted
+    is_deleted
 
     )VALUES(
     #{atcId},
@@ -95,7 +95,7 @@
             fd_ymd,
             prdt_cl_num,
             done,
-            deleted
+            is_deleted
         FROM found_police
         WHERE 
             deleted=0 

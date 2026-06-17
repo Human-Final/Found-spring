@@ -51,7 +51,7 @@ prdt_cl_num,
 created,
 updated,
 done,
-deleted
+is_deleted
 FROM lost
 WHERE 
         deleted=0

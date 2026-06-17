@@ -13,12 +13,12 @@
         <div class="space-y-4 mb-8 text-gray-700 bg-gray-50 p-6 rounded-xl border">
             <div>
                 <strong class="text-gray-900 block mb-1">상세 정보 (제품번호):</strong>
-                <p class="text-gray-600" th:text="*{lstPrdtNum}"></p>
+                <p class="text-gray-600" th:text="*{lstPrdtNm}"></p>
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <p><strong class="text-gray-900">분실장소:</strong> <span th:text="*{lstPlace}"></span></p>
                 <p><strong class="text-gray-900">날짜:</strong> <span th:text="*{lstYmd}"></span></p>
-                <p><strong class="text-gray-900">제품 분류:</strong> <span th:text="*{prdtClNum}"></span></p>
+                <p><strong class="text-gray-900">제품 분류:</strong> <span th:text="*{prdtClNm}"></span></p>
                 <p><strong class="text-gray-900">처리상태:</strong> 
                     <span th:text="*{done == 0 ? '미완료' : '완료'}" 
                           th:classappend="*{done == 0 ? 'text-red-500' : 'text-green-500'}" class="font-bold"></span>
@@ -26,7 +26,27 @@
             </div>
         </div>
 
-        <h2 class="text-xl font-bold mb-4 text-gray-800">🔍 분실물 위치</h2>
+                <!-- 📸 이미지 표시 영역 추가 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">📸 분실물 이미지</h2>
+            
+            <!-- case 1: 서버에 저장된 사진(id 또는 파일명이 존재할 때) -->
+            <!-- *{id} 부분은 실제 VO의 파일명 변수명에 맞게 고쳐주세요 (예: *{imgUrl} 등) -->
+            <div th:if="*{id != null and id != ''}" class="rounded-xl overflow-hidden shadow-md border bg-gray-100 flex justify-content-center">
+                <img th:src="@{'/uploads/' + *{id}}" alt="분실물 이미지" class="max-w-full h-auto mx-auto max-h-[400px] object-contain">
+            </div>
+
+            <!-- case 2: 이미지 정보가 없을 때 (회색 바탕에 안내 문구) -->
+            <div th:unless="*{id != null and id != ''}" class="w-full h-[200px] bg-gray-200 border rounded-xl flex flex-col items-center justify-center text-gray-400 shadow-inner">
+                <svg xmlns="http://w3.org" class="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span class="font-semibold">이미지 정보 없음</span>
+            </div>
+        </div>
+
+
+        <h2 class="text-xl font-bold mb-4 text-gray-800">🔍 분실한 위치</h2>
         <div id="map" style="width:100%; height:300px;" class="rounded-xl mb-6 shadow-md border"></div>
         <div id="mapMessage" class="hidden text-red-500 font-bold p-4 bg-red-50 rounded-lg mb-6 border border-red-200 text-center">
             위치를 찾을 수 없습니다.

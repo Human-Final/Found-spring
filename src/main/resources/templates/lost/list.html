@@ -18,10 +18,14 @@
                 </tr>
             </thead>
             <tbody class="text-gray-600 text-sm">
-                <tr th:each="item : ${goodsList}" class="border-b border-gray-200 hover:bg-gray-50">
-                    <td class="py-3 px-4" th:text="${item.num}"></td>
+                <!-- 1. item 뒤에 ', status'를 추가하여 상태 변수를 활성화합니다. -->
+                <tr th:each="item, status : ${goodsList}" class="border-b border-gray-200 hover:bg-gray-50">
+                    
+                    <!-- 2. ${item.num} 대신 ${status.count}를 넣어 화면에 1, 2, 3... 순서대로 찍히게 합니다. -->
+                    <td class="py-3 px-4" th:text="${status.count}"></td>
+                    
                     <td class="py-3 px-4 font-bold text-blue-600 underline">
-                        <a th:href="@{/lost/detail(atcId=${item.atcId})}" th:text="${item.lstPrdtNum}"></a>
+                        <a th:href="@{/lost/detail(atcId=${item.atcId})}" th:text="${item.lstPrdtNm}"></a>
                     </td>
                     <td class="py-3 px-4" th:text="${item.lstPlace}"></td>
                     <td class="py-3 px-4" th:text="${item.lstYmd}"></td>

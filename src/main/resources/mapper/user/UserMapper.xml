@@ -14,7 +14,7 @@
         <result property="email" column="email"/>
         <result property="tel" column="tel"/>
         <result property="role" column="role"/>
-
+        
         <result property="signUp" column="sign_up"/>
         <result property="deletedAt" column="deleted_at"/>
         <result property="deleted" column="deleted"/>
