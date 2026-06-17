@@ -1,4 +1,4 @@
-package com.human.found.domain.found.servuce;
+package com.human.found.domain.found.service;
 
 import java.util.List;
 

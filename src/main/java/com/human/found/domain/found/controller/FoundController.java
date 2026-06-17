@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.human.found.domain.found.servuce.FoundService;
+import com.human.found.domain.found.service.FoundService;
 import com.human.found.domain.found.vo.FoundVO;
 
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -6,19 +6,25 @@ import lombok.Data;
 
 @Data
 public class FoundVO {
+    
     private Long num;
+
     private String atcId;
     private String id;
-    private String clrNum;
+
+    private String clrNm;
     private String depPlace;
     private String fdFilepathImg;
-    private String fdPrdtNum;
+    private String fdPrdtNm;
     private String fdSbjt;
-    private LocalDateTime fdYmd;
-    private String prdtClNum;
-    private LocalDateTime created;
-    private LocalDateTime updated;
-    private Integer done = 0;
-    private Integer deleted = 0;
 
+    private LocalDateTime fdYmd;
+
+    private String prdtClNm;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    private Integer done;
+    private Integer isDeleted;
 }
