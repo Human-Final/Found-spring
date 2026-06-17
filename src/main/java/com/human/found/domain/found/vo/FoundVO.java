@@ -8,7 +8,9 @@ import lombok.Data;
 
 @Data
 public class FoundVO {
+    
     private Long num;
+
     private String atcId;
     private String id;
     private String clrNm;
@@ -16,6 +18,7 @@ public class FoundVO {
     private String fdFilepathImg;
     private String fdPrdtNm;
     private String fdSbjt;
+
     private LocalDateTime fdYmd;
     private String prdtClNm;
     private LocalDateTime createdAt;
@@ -23,5 +26,4 @@ public class FoundVO {
     private Integer done = 0;
     private Integer isDeleted = 0;
     
-
 }
