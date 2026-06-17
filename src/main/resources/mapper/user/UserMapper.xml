@@ -71,4 +71,14 @@
         WHERE email = #{email}
 
     </select>
+
+    <!-- UserMapper.xml 내부에 추가할 코드 -->
+    <update id="updateUser" parameterType="com.human.found.domain.user.vo.UserVO">
+        UPDATE member
+        SET email = #{email},
+        tel = #{tel},
+        pw = #{pw}
+        WHERE id = #{id}
+    </update>
+
 </mapper>

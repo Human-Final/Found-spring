@@ -514,16 +514,23 @@
         </div>
 
         <div class="hero-profile">
-          <strong th:text="${memberName} ?: '김분실 님'">김분실 님</strong>
+          <!-- 🌟 [수정] 오타와 Null 에러를 완벽하게 방어하는 타임리프 정석 문법입니다. -->
+          <strong th:text="${user != null} ? |${user.name} 님| : '김분실 님'">김분실 님</strong>
           <span th:text="${memberGrade} ?: '일반회원 · 최근 접속 2026. 6. 17.'">일반회원 · 최근 접속 2026. 6. 17.</span>
         </div>
       </section>
 
       <section class="mypage-layout">
         <aside class="mypage-side">
-          <div class="profile-avatar" th:text="${memberInitial} ?: '김'">김</div>
-          <p class="profile-name" th:text="${memberName} ?: '김분실'">김분실</p>
-          <p class="profile-email" th:text="${memberEmail} ?: 'lostuser@email.com'">lostuser@email.com</p>
+            <!-- [수정] user가 null이 아니면 이름의 첫 글자(인덱스 0~1)를 추출, null이면 기본값 '김' -->
+            <div class="profile-avatar" 
+                th:text="${user != null && user.name != null && !#strings.isEmpty(user.name)} ? ${#strings.substring(user.name, 0, 1)} : '김'">김</div>
+            
+            <!-- [수정] 리터럴 대체 기호(|)를 사용하여 안전하게 '님' 부착 -->
+            <p class="profile-name" th:text="${user != null} ? |${user.name}님| : '김분실'">김분실</p>
+            
+            <!-- [수정] 닫는 작은따옴표(') 누락 오류 해결 및 안전한 이메일 출력 -->
+            <p class="profile-email" th:text="${user != null} ? ${user.email} : 'lostuser@email.com'">lostuser@email.com</p>
 
           <nav class="side-menu" aria-label="마이페이지 메뉴">
             <a href="#mypageMain" class="is-active" data-view="mypageMain">마이페이지 메인</a>
@@ -538,30 +545,32 @@
         <section class="mypage-content">
           <section class="mypage-view is-active" id="mypageMain">
             <div class="summary-grid">
-              <article class="summary-card">
+            <article class="summary-card">
                 <span class="summary-icon blue">글</span>
                 <span class="summary-label">내가 쓴 글</span>
-                <strong class="summary-value" th:text="${postCount} ?: 6">6</strong>
-              </article>
+                <!-- 🌟 변수명 뒤에 ?를 붙여주면 데이터가 없어도 에러 없이 우측의 기본값(6)이 정상 출력됩니다. -->
+                <strong class="summary-value" th:text="${postCount?.toString()} ?: 6">6</strong>
+            </article>
 
-              <article class="summary-card">
+            <article class="summary-card">
                 <span class="summary-icon yellow">중</span>
                 <span class="summary-label">진행중 게시글</span>
-                <strong class="summary-value" th:text="${progressPostCount} ?: 3">3</strong>
-              </article>
+                <strong class="summary-value" th:text="${progressPostCount?.toString()} ?: 3">3</strong>
+            </article>
 
-              <article class="summary-card">
+            <article class="summary-card">
                 <span class="summary-icon green">완</span>
                 <span class="summary-label">완료 게시글</span>
-                <strong class="summary-value" th:text="${donePostCount} ?: 2">2</strong>
-              </article>
+                <strong class="summary-value" th:text="${donePostCount?.toString()} ?: 2">2</strong>
+            </article>
 
-              <article class="summary-card">
+            <article class="summary-card">
                 <span class="summary-icon red">채</span>
                 <span class="summary-label">열린 채팅방</span>
-                <strong class="summary-value" th:text="${chatRoomCount} ?: 4">4</strong>
-              </article>
+                <strong class="summary-value" th:text="${chatRoomCount?.toString()} ?: 4">4</strong>
+            </article>
             </div>
+
 
             <section class="mypage-panel">
               <div class="panel-head">
@@ -607,31 +616,49 @@
                 </div>
               </div>
 
-              <form action="/mypage/profile" method="post" class="edit-form">
+            <form th:action="@{/mypage/profile}" method="post" class="edit-form">
+    
+                <!-- 1. 이름 (읽기 전용, 수정 불가능) -->
                 <label class="form-row">
-                  <span class="form-label">이름</span>
-                  <input type="text" name="name" class="form-input" th:value="${memberName}" value="김분실">
+                    <span class="form-label">이름</span>
+                    <input type="text" name="name" class="form-input readonly-input" th:value="${user.name}" readonly>
                 </label>
 
+                <!-- 2. 이메일 (UserVO의 email 필드로 수집) -->
                 <label class="form-row">
-                  <span class="form-label">이메일</span>
-                  <input type="email" name="email" class="form-input" th:value="${memberEmail}" value="lostuser@email.com">
+                    <span class="form-label">이메일</span>
+                    <input type="email" name="email" class="form-input" th:value="${user.email}">
                 </label>
 
+                <!-- 3. 연락처 (UserVO의 tel 필드로 수집) -->
                 <label class="form-row">
-                  <span class="form-label">연락처</span>
-                  <input type="tel" name="phone" class="form-input" th:value="${memberPhone}" value="010-1234-5678">
+                    <span class="form-label">연락처</span>
+                    <input type="tel" name="tel" class="form-input" th:value="${user.tel}">
                 </label>
 
+                <hr class="form-divider" style="margin: 20px 0; border: 0; border-top: 1px dashed #dfe7f2;">
+
+                <!-- 4. 현재 비밀번호 확인 (UserVO의 pwCheck 필드로 수집하여 검증용으로 사용) -->
                 <label class="form-row">
-                  <span class="form-label">새 비밀번호</span>
-                  <input type="password" name="password" class="form-input" placeholder="변경할 때만 입력">
+                    <span class="form-label">현재 비밀번호</span>
+                    <input type="password" name="pwCheck" class="form-input" placeholder="본인 확인을 위해 입력해 주세요" required>
                 </label>
 
-                <button type="submit" class="primary-button">저장하기</button>
-              </form>
-            </section>
-          </section>
+                <!-- 5. 새 비밀번호 입력 (UserVO의 pw 필드로 수집하여 새로 변경할 비밀번호 저장) -->
+                <label class="form-row">
+                    <span class="form-label">새 비밀번호</span>
+                    <input type="password" id="newPassword" name="pw" class="form-input" placeholder="변경할 때만 입력">
+                </label>
+
+                <!-- 6. 새 비밀번호 확인 (자바스크립트 비교용으로 사용하므로 name 제외 또는 자유 지정) -->
+                <label class="form-row">
+                    <span class="form-label">새 비밀번호 확인</span>
+                    <input type="password" id="confirmPassword" class="form-input" placeholder="새 비밀번호를 한번 더 입력">
+                    <span id="passwordMatchMessage" class="error-message" style="display:none; font-size:12px; margin-top:4px;"></span>
+                </label>
+
+                <button type="submit" class="primary-button" style="margin-top: 15px;">저장하기</button>
+            </form>
 
           <section class="mypage-view" id="myPosts">
             <section class="mypage-panel">
