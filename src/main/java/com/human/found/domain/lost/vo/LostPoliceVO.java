@@ -5,15 +5,15 @@ public class LostPoliceVO {
     private String atcId;
     private String id;
     private String lstPlace;
-    private String lstPrdtNum;
+    private String lstPrdtNm;
     private String lstSbjt;
     private String lstYmd;
-    private String prdtClNum;
-    private String created;
-    private String updated;
+    private String prdtClNm;
+    private String created_at;
+    private String updated_at;
     private Integer done;
-    private Integer deleted;
-
+    private Integer is_deleted;
+    
     public LostPoliceVO() {}
 
     public Long getNum() { return num; }
@@ -28,8 +28,8 @@ public class LostPoliceVO {
     public String getLstPlace() { return lstPlace; }
     public void setLstPlace(String lstPlace) { this.lstPlace = lstPlace; }
 
-    public String getLstPrdtNum() { return lstPrdtNum; }
-    public void setLstPrdtNum(String lstPrdtNum) { this.lstPrdtNum = lstPrdtNum; }
+    public String getLstPrdtNm() { return lstPrdtNm; }
+    public void setLstPrdtNm(String lstPrdtNm) { this.lstPrdtNm = lstPrdtNm; }
 
     public String getLstSbjt() { return lstSbjt; }
     public void setLstSbjt(String lstSbjt) { this.lstSbjt = lstSbjt; }
@@ -37,18 +37,18 @@ public class LostPoliceVO {
     public String getLstYmd() { return lstYmd; }
     public void setLstYmd(String lstYmd) { this.lstYmd = lstYmd; }
 
-    public String getPrdtClNum() { return prdtClNum; }
-    public void setPrdtClNum(String prdtClNum) { this.prdtClNum = prdtClNum; }
+    public String getPrdtClNm() { return prdtClNm; }
+    public void setPrdtClNm(String prdtClNm) { this.prdtClNm = prdtClNm; }
 
-    public String getCreated() { return created; }
-    public void setCreated(String created) { this.created = created; }
+    public String getCreated() { return created_at; }
+    public void setCreated(String created_at) { this.created_at = created_at; }
 
-    public String getUpdated() { return updated; }
-    public void setUpdated(String updated) { this.updated = updated; }
+    public String getUpdated() { return updated_at; }
+    public void setUpdated(String updated_at) { this.updated_at = updated_at; }
 
     public Integer getDone() { return done; }
     public void setDone(Integer done) { this.done = done; }
 
-    public Integer getDeleted() { return deleted; }
-    public void setDeleted(Integer deleted) { this.deleted = deleted; }
+    public Integer getDeleted() { return is_deleted; }
+    public void setDeleted(Integer is_deleted) { this.is_deleted = is_deleted; }
 }

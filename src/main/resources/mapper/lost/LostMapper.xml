@@ -15,23 +15,23 @@ INSERT INTO lost(
 atc_id,
 id,
 lst_place,
-lst_prdt_nm,
+lst_prdt_num,
 lst_sbjt,
 lst_ymd,
-prdt_cl_nm,
+prdt_cl_num,
 done,
-is_deleted
+deleted
 
 )VALUES(
 #{atcId},
 #{id},
 #{lstPlace},
-#{lstPrdtNm},
+#{lstPrdtNum},
 #{lstSbjt},
 #{lstYmd},
-#{prdtClNm},
+#{prdtClNum},
 #{done},
-#{isDeleted}   
+#{deleted}   
 )         
 
 </insert>
@@ -44,17 +44,17 @@ num,
 atc_id,
 id,
 lst_place,
-lst_prdt_nm,
+lst_prdt_num,
 lst_sbjt,
 lst_ymd,
-prdt_cl_nm,
-created_at,
-updated_at,
+prdt_cl_num,
+created,
+updated,
 done,
 is_deleted
 FROM lost
 WHERE 
-        is_deleted=0
+        deleted=0
 UNION ALL   
 
 SELECT 
@@ -62,17 +62,17 @@ num,
 atc_id,
 id,
 lst_place,
-lst_prdt_nm,
+lst_prdt_num,
 lst_sbjt,
 lst_ymd,
-prdt_cl_nm,
-created_at,
-updated_at,
+prdt_cl_num,
+created,
+updated,
 done,
-is_deleted
+deleted
 FROM lost_police
 WHERE 
-        is_deleted=0
+        deleted=0
 UNION ALL  
 
 SELECT 
@@ -80,17 +80,17 @@ num,
 atc_id,
 id,
 lst_place,
-lst_prdt_nm,
+lst_prdt_num,
 lst_sbjt,
 lst_ymd,
-prdt_cl_nm,
-created_at,
-updated_at,
+prdt_cl_num,
+created,
+updated,
 done,
-is_deleted
+deleted
 FROM lost_portal
 WHERE 
-        is_deleted=0 
+        deleted=0 
 ORDER BY lst_ymd DESC
 
 
