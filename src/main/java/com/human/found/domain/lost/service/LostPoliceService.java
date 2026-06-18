@@ -1,33 +1,46 @@
 package com.human.found.domain.lost.service;
 
-import com.human.found.domain.lost.mapper.LostPoliceMapper;
-import com.human.found.domain.lost.vo.LostPoliceVO;
+import java.io.ByteArrayInputStream;
+import java.net.URI;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import com.human.found.domain.lost.mapper.LostPoliceMapper;
+import com.human.found.domain.lost.vo.LostVO;
 
 @Service
 public class LostPoliceService {
 
     @Autowired
     private LostPoliceMapper lostPoliceMapper;
+
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    @Value("${api.lost-goods.base-url}")
+    private String baseUrl;
+
+    @Value("${api.lost-goods.service-key}")
+    private String serviceKey;
 
     // 카테고리 매핑 규칙 메서드
     private String getCategoryLabel(String prdtClNm) {
@@ -74,13 +87,10 @@ public class LostPoliceService {
         // 조건에 맞지 않는 "증명서" 등의 데이터는 모두 "기타"로 분류됨
         return "기타";
     }
-
-
-    private final String serviceKey = "51cb7bbc7238b3a05c50974e40c97261a36015bddc473118eae5cc3c273094ce";
     
     //스케줄러 메서드
     //매일 새벽 1시에 자동으로 아래 fetchAndSaveLostGoods 메서드 호출하기
-    @Scheduled(cron = "0 12 12 * * *")
+    @Scheduled(cron = "0 10 11 * * *")
     public void runDailyLostGoodsFetch() {
         System.out.println("⏰ [스케줄러 시작] 기존 데이터를 삭제하고 경찰청의 모든 유실물 데이터를 처음부터 끝까지 수집합니다.");
         
@@ -88,7 +98,7 @@ public class LostPoliceService {
         lostPoliceMapper.lostPoliceDelete();        
         
         int pageNo = 1;
-        int numOfRows = 1000; // API가 허용하는 안전한 최대 한도치로 설정
+        int numOfRows = 10; // API가 허용하는 안전한 최대 한도치로 설정
         
         while (true) {
             System.out.println("🔄 현재 " + pageNo + "페이지 수집 중... (한 번에 " + numOfRows + "개씩 요청)");
@@ -124,48 +134,49 @@ public class LostPoliceService {
     }
 
     public void fetchAndSaveLostGoods(int pageNo, int numOfRows) {
-        List<LostPoliceVO> list = new ArrayList<>();
-        //날짜 포매터
+        List<LostVO> list = new ArrayList<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-        //오늘 날짜와 오늘로부터 6개월 전 날짜 계산
+        
         LocalDate today = LocalDate.now();
         LocalDate sixAgo = today.minusMonths(6);
 
-        //문자열로 포맷시키기
-        String endDate=today.format(formatter);
-        String startDate=sixAgo.format(formatter);
+        String endDate = today.format(formatter);
+        String startDate = sixAgo.format(formatter);
         
         try {
-            String baseUrl = "https://apis.data.go.kr/1320000/LostGoodsInfoInqireService/getLostGoodsInfoAccToClAreaPd";
-            StringBuilder sbUrl = new StringBuilder(baseUrl);
-            
-            sbUrl.append("?serviceKey=").append(serviceKey);
-            sbUrl.append("&START_YMD=").append(URLEncoder.encode(startDate, "UTF-8"));
-            sbUrl.append("&END_YMD=").append(URLEncoder.encode(endDate, "UTF-8"));
-            sbUrl.append("&pageNo=").append(URLEncoder.encode(String.valueOf(pageNo), "UTF-8"));
-            sbUrl.append("&numOfRows=").append(URLEncoder.encode(String.valueOf(numOfRows), "UTF-8"));
+            // 주소 및 파라미터 조립 (인증키 분리 결합 구조 유지)
+            String policeUrl = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                    .queryParam("START_YMD", startDate)
+                    .queryParam("END_YMD", endDate)
+                    .queryParam("pageNo", pageNo)
+                    .queryParam("numOfRows", numOfRows)
+                    .build()
+                    .toUriString();
 
-            URL url = new URL(sbUrl.toString());
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("Accept", "application/xml");
+            URI uri = URI.create(policeUrl + "&serviceKey=" + serviceKey);
 
-            int responseCode = conn.getResponseCode();
-            BufferedReader rd = new BufferedReader(new InputStreamReader(
-                responseCode >= 200 && responseCode <= 300 ? conn.getInputStream() : conn.getErrorStream(), "UTF-8"
-            ));
-            
-            StringBuilder response = new StringBuilder();
-            String line;
-            while ((line = rd.readLine()) != null) {
-                response.append(line);
+            // 📌 [수정] XML 통신 데이터의 깨짐을 막기 위해 헤더에 application/xml을 명시합니다.
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Accept", "application/xml");
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            // 📌 [수정] 문자열(String.class) 대신 바이트 배열(byte[].class)로 받아야 
+            // 눈에 보이지 않는 공백이나 인코딩 부호(BOM)로 인한 프롤로그 파싱 오류를 원천 차단할 수 있습니다.
+            ResponseEntity<byte[]> response = restTemplate.exchange(uri, HttpMethod.GET, entity, byte[].class);
+            byte[] xmlBytes = response.getBody();
+
+            if (xmlBytes == null || xmlBytes.length == 0) {
+                System.out.println("⚠️ 경찰청 API로부터 데이터를 수신하지 못했습니다.");
+                return;
             }
-            rd.close();
-            conn.disconnect();
 
-            String rawXml = response.toString();
+            // 📌 [디버깅용 정보 확인] 데이터가 잘 가공되어 출력되는지 검증하기 위함입니다.
+            String checkXmlText = new String(xmlBytes, "UTF-8");
+            System.out.println("🌐 [경찰청 API XML 실제 데이터 확인]:\n" + checkXmlText);
+
+            // 📌 [기존 로직 100% 유지] 바이트 배열을 파싱 기기에 그대로 주입합니다.
             Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-                    .parse(new ByteArrayInputStream(rawXml.getBytes("UTF-8")));
+                    .parse(new ByteArrayInputStream(xmlBytes));
             doc.getDocumentElement().normalize();
 
             NodeList nList = doc.getElementsByTagName("item");
@@ -175,41 +186,58 @@ public class LostPoliceService {
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
                     Element el = (Element) node;
                     
-                    LostPoliceVO vo = new LostPoliceVO();
+                    // LostVO 규칙 매핑
+                    LostVO vo = new LostVO();
+                    
                     vo.setAtcId(getTagValue("atcId", el));
                     vo.setLstSbjt(getTagValue("lstSbjt", el)); 
 
-                    String rawPlace = getTagValue("lstPlace", el);
-                    String cleanedPlace = rawPlace.replaceAll("\\s*\\(.*?\\)", "");
-                    vo.setLstPlace(cleanedPlace);
+                    if (getTagValue("lstPlace", el) != null) {
+                        vo.setLstPlace(getTagValue("lstPlace", el).replaceAll("\\s*\\(.*?\\)", ""));
+                    }
 
                     vo.setLstPrdtNm(getTagValue("lstPrdtNm", el));
-                    vo.setLstYmd(getTagValue("lstYmd", el));
 
-                    // 🌟 [수정] 자체 카테고리 매핑 함수를 통해 정제된 값 세팅
-                    String rawPrdtClNm = getTagValue("prdtClNm", el); // 원본 카테고리명 추출
-                    String customCategory = getCategoryLabel(rawPrdtClNm); // 매핑 필터 작동
-                    
-                    vo.setPrdtClNm(customCategory); // 우리 기준 카테고리(예: "전자기기", "기타") 주입
+                    if (getTagValue("lstYmd", el) != null && !getTagValue("lstYmd", el).trim().isEmpty()) {
+                        try {
+                            LocalDate parsedDate = LocalDate.parse(getTagValue("lstYmd", el).trim(), DateTimeFormatter.ISO_LOCAL_DATE);
+                            vo.setLstYmd(parsedDate.atStartOfDay()); 
+                        } catch (Exception e) {
+                            vo.setLstYmd(LocalDateTime.now()); 
+                        }
+                    }
+
+                    vo.setPrdtClNm(getCategoryLabel(getTagValue("prdtClNm", el))); 
+
+                    vo.setCreatedAt(LocalDateTime.now());
+                    vo.setUpdatedAt(LocalDateTime.now());
+                    vo.setDone(0);
+                    vo.setIsDeleted(0);
 
                     list.add(vo); 
                 }
-            }// 👈 for 루프가 여기서 끝납니다.
+            }
 
+            // 대량 데이터 배치 적재 실행
             if (!list.isEmpty()) {
-                lostPoliceMapper.insertLostGoodsBatch(list);
+                int insertedCount = lostPoliceMapper.insertLostPolice(list);
+                System.out.println("✅ [DB 적재 성공] " + insertedCount + "건의 경찰청 유실물 데이터를 저장했습니다.");
+            } else {
+                System.out.println("⚠️ 파싱된 유실물 데이터 리스트가 비어있습니다.");
             }
 
         } catch (Exception e) {
+            System.out.println("❌ XML 파싱 또는 DB 처리 중 에러 발생");
             e.printStackTrace();
         }
     }
 
-    public List<LostPoliceVO> getLostGoodsFromDB() {
+
+    public List<LostVO> getLostGoodsFromDB() {
         return lostPoliceMapper.selectLostGoodsList();
     }
 
-    public LostPoliceVO getDetailByAtcId(String atcId) {
+    public LostVO getDetailByAtcId(String atcId) {
         return lostPoliceMapper.selectLostDetail(atcId);
     }
 

@@ -32,7 +32,7 @@ public class UserController {
             return "redirect:/login"; // 혹시나 로그인이 안 되어 있다면 로그인창으로 복귀
         }
         String loginUserId = principal.getName(); 
-
+        
         // 2. DB에서 유저 정보(UserVO)를 가져옵니다.
         UserVO user = userService.getUserInfo(loginUserId);
 
