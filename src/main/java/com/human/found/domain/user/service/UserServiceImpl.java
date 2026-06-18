@@ -9,9 +9,14 @@ import com.human.found.domain.user.vo.UserVO;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 회원 관련 서비스 구현체
+ * - UserService 인터페이스의 실제 로직을 구현
+ * - Controller → Service → Mapper 구조에서 Service 역할 수행
+ */
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
@@ -21,6 +26,7 @@ public class UserServiceImpl implements UserService{
      * - 비밀번호 암호화
      * - 회원 정보 저장
      */
+    @Override
     public void join(UserVO user) {
 
         // 비밀번호 암호화
@@ -35,6 +41,7 @@ public class UserServiceImpl implements UserService{
      * 아이디로 회원 조회
      * 로그인 시 Security에서 사용
      */
+    @Override
     public UserVO findById(String id) {
         return userMapper.findById(id);
     }
@@ -44,6 +51,7 @@ public class UserServiceImpl implements UserService{
      * true : 중복
      * false : 사용 가능
      */
+    @Override
     public boolean isDuplicatedId(String id) {
         return userMapper.countById(id) > 0;
     }
@@ -53,12 +61,15 @@ public class UserServiceImpl implements UserService{
      * true : 중복
      * false : 사용 가능
      */
+    @Override
     public boolean isDuplicatedEmail(String email) {
         return userMapper.countByEmail(email) > 0;
     }
 
-
-    // 회원가입 입력값 검증
+    /**
+     * 회원가입 입력값 검증
+     */
+    @Override
     public String validateJoin(UserVO user) {
 
         // 아이디 중복
@@ -165,7 +176,8 @@ public class UserServiceImpl implements UserService{
         String encryptedPw = passwordEncoder.encode(newPw);
         userMapper.updatePasswordOnly(id, encryptedPw); // 매퍼 호출
     }
-
+  
+    @Override
     @Transactional
     public void updateUserInfo(UserVO userVO) {
         // 1. DB에서 현재 로그인한 유저의 원본 암호 정보 가져오기
@@ -189,7 +201,10 @@ public class UserServiceImpl implements UserService{
         userMapper.updateUser(userVO);
     }
 
-    // 마이페이지 뷰를 띄울 때 회원 정보를 안전하게 꺼내오기 위한 메서드
+    /**
+     * 마이페이지 뷰를 띄울 때 회원 정보를 안전하게 꺼내오기 위한 메서드
+     */
+    @Override
     public UserVO getUserInfo(String id) {
         return userMapper.findById(id);
     }
@@ -218,8 +233,6 @@ public class UserServiceImpl implements UserService{
 
         // 회원탈퇴 처리
         userMapper.withdrawUser(id);
-    }
-
-    
+    }    
 
 }

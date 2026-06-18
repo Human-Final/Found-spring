@@ -41,7 +41,7 @@ public class UserController {
         // 2. DB에서 유저 정보(UserVO)를 가져옵니다.
         UserVO user = userService.getUserInfo(loginUserId);
 
-        // 3. 🌟 중요: 화면(Thymeleaf)으로 데이터를 던져줍니다.
+        // 3. 중요: 화면(Thymeleaf)으로 데이터를 던져줍니다.
         model.addAttribute("user", user);
 
         // 4. 마이페이지 파일 경로를 리턴합니다.
@@ -148,42 +148,41 @@ public class UserController {
 
     @PostMapping("/withdraw")
     public String withdrawUser(
-    @RequestParam("password") String password,
-    Principal principal,
-    HttpServletRequest request,
-    RedirectAttributes redirectAttributes) {
+        @RequestParam("password") String password,
+        Principal principal,
+        HttpServletRequest request,
+        RedirectAttributes redirectAttributes) {
 
-        // 로그인 여부 확인
-        if(principal == null) {
-            return "redirect:/login";
-        }
-
-        // 로그인한 사용자 ID 가져오기
-        String loginUserId = principal.getName();
-
-        try {
-            // 비밀번호 확인 후 회원탈퇴 처리
-            userService.withdrawUser(loginUserId, password);
-
-            // 현재 세션 가져오기
-            HttpSession session = request.getSession(false);
-
-            // 세션 있을 시 무효화
-            if(session != null) {
-                session.invalidate();
+            // 로그인 여부 확인
+            if(principal == null) {
+                return "redirect:/login";
             }
 
-            // 로그인 페이지로 이동
-            return "redirect:/login?withdraw";
-        
-        } catch (IllegalArgumentException e) {
+            // 로그인한 사용자 ID 가져오기
+            String loginUserId = principal.getName();
 
-            // 비밀번호 불일치 시 등 오류 발생 시 마이페이지로 복귀
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/login?withdraw";
+            try {
+                // 비밀번호 확인 후 회원탈퇴 처리
+                userService.withdrawUser(loginUserId, password);
+
+                // 현재 세션 가져오기
+                HttpSession session = request.getSession(false);
+
+                // 세션 있을 시 무효화
+                if(session != null) {
+                    session.invalidate();
+                }
+
+                // 로그인 페이지로 이동
+                return "redirect:/login?withdraw";
+            
+            } catch (IllegalArgumentException e) {
+
+                // 비밀번호 불일치 시 등 오류 발생 시 마이페이지로 복귀
+                redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+                return "redirect:/login?withdraw";
+            }
+
         }
-
-    }
-
 
 }

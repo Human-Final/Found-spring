@@ -825,13 +825,23 @@
 
               <div class="withdraw-box">
                 <p>탈퇴하면 회원정보와 채팅방 이용 내역을 더 이상 확인할 수 없습니다.</p>
-                <form action="/mypage/withdraw" method="post" class="edit-form">
-                  <label class="form-row">
-                    <span class="form-label">비밀번호 확인</span>
-                    <input type="password" name="password" class="form-input" placeholder="비밀번호 입력">
-                  </label>
-                  <button type="submit" class="danger-button">회원탈퇴 진행</button>
-                </form>
+                  <form action="/mypage/withdraw"
+                        method="post"
+                        class="edit-form"
+                        onsubmit="return confirmWithdraw();">
+                    <input type="hidden"
+                          th:name="${_csrf.parameterName}"
+                          th:value="${_csrf.token}">
+                    <label class="form-row">
+                      <span class="form-label">비밀번호 확인</span>
+                      <input type="password"
+                            name="password"
+                            class="form-input"
+                            placeholder="비밀번호 입력"
+                            required>
+                    </label>
+                    <button type="submit" class="danger-button">회원탈퇴 진행</button>
+                  </form>
               </div>
             </section>
           </section>
@@ -881,7 +891,10 @@
     if (initialView && document.getElementById(initialView)) {
       showView(initialView);
     }
-
+    
+    function confirmWithdraw() {
+        return confirm("정말 회원탈퇴를 진행하시겠습니까?\n탈퇴 후에는 계정 이용이 제한됩니다.");
+      }
 
     // -------------------------------------------------------------
     // 📌 [신규 로직] 회원정보 수정 본인인증 & 비밀번호 변경 모달 시스템

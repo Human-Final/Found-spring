@@ -28,6 +28,7 @@
         SELECT *
         FROM member
         WHERE id = #{id}
+            AND is_deleted = 0
 
     </select>
 
@@ -36,6 +37,7 @@
         INSERT INTO member (
             id,
             pw,
+            name,
             email,
             tel,
             role,
@@ -45,6 +47,7 @@
         VALUES (
             #{id},
             #{pw},
+            #{name},
             #{email},
             #{tel},
             'USER',
@@ -97,4 +100,13 @@
         WHERE id = #{id}
     </update>
 
+    <!-- 회원탈퇴 , 5년 보존 때문에 소프트 삭제-->
+    <update id="withdrawUser"
+            parameterType = "string">
+        UPDATE member
+        SET
+            is_deleted = 1,
+            deleted_at = NOW()
+        WHERE id = #{id}
+    </update>
 </mapper>
