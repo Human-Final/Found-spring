@@ -41,14 +41,22 @@ public interface UserService {
      */
     String validateJoin(UserVO user);
 
+    /*
+    비밀번호 본인 인증 판정
+    */
+    boolean checkPassword(String id, String pwCheck);
+
+    /*
+    비밀번호 수정하기
+    */
+    public void updateUserPassword(String id, String newPw);
+
     /**
      * 회원정보 수정
-     * - 현재 비밀번호 확인
-     * - 새 비밀번호 입력 시 암호화
      * - 회원 정보 업데이트
      */
     void updateUserInfo(UserVO userVO);
-
+    
     /**
      * 마이페이지 뷰를 띄울 때 회원 정보를 안전하게 꺼내오기 위한 메서드
      */
@@ -59,5 +67,9 @@ public interface UserService {
      * 비밀번호 확인 후 소프트 삭제 처리
      */
     void withdrawUser(String id, String password);
+
+    
+
+
 
 }

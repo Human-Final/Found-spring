@@ -33,10 +33,13 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
+        
         http
             // 사용자 인증 정보 조회
             .userDetailsService(customUserDetailsService)
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/mypage/verify-password")
+             )
 
             .authorizeHttpRequests(auth -> auth
 
@@ -47,14 +50,15 @@ public class SecurityConfig {
                     "/notices/*/delete"
                 ).hasAnyRole("MANAGER", "ADMIN")
 
-                // 게시글 작성/수정/삭제는 로그인 사용자만
+                // 게시글 작성/수정/삭제/마이페이지는 로그인 사용자만
                 .requestMatchers(
                     "/lost/write",
                     "/lost/*/edit",
                     "/lost/*/delete",
                     "/found/write",
                     "/found/*/edit",
-                    "/found/*/delete"
+                    "/found/*/delete",
+                    "/mypage/**"
                 ).authenticated()
 
                 // 채팅은 로그인 사용자만

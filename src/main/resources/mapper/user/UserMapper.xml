@@ -75,12 +75,28 @@
     
     </select>
 
+    <!-- 비밀번호만 업데이트 하는 매퍼 -->
+    <update id="updatePasswordOnly">
+        UPDATE member 
+        SET pw = #{pw} 
+        WHERE id = #{id}
+    </update>
+
     <!-- UserMapper.xml 내부에 추가할 코드 -->
     <update id="updateUser" parameterType="com.human.found.domain.user.vo.UserVO">
         UPDATE member
         SET email = #{email},
-        tel = #{tel},
-        pw = #{pw}
+        tel = #{tel}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 회원탈퇴 , 5년 보존 때문에 소프트 삭제-->
+    <update id="withdrawUser"
+            parameterType = "string">
+        UPDATE member
+        SET
+            is_deleted = 1,
+            deleted_at = NOW()
         WHERE id = #{id}
     </update>
 
