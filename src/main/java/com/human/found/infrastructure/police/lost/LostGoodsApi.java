@@ -107,11 +107,11 @@ public class LostGoodsApi {
                     String lstYmd = getTagValue("lstYmd", eElement);     // 분실일자
                     String lstPlace = getTagValue("lstPlace", eElement); // 분실장소
 
-                    System.out.println("■ 관리번호: " + atcId);
-                    System.out.println("  물품명  : " + lstNm);
-                    System.out.println("  분실일자: " + lstYmd);
-                    System.out.println("  분실장소: " + lstPlace);
-                    System.out.println("------------------------------");
+                    // System.out.println("■ 관리번호: " + atcId);
+                    // System.out.println("  물품명  : " + lstNm);
+                    // System.out.println("  분실일자: " + lstYmd);
+                    // System.out.println("  분실장소: " + lstPlace);
+                    // System.out.println("------------------------------");
                 }
             }
         } catch (Exception e) {

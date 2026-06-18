@@ -17,7 +17,7 @@
 
         <result property="signUp" column="sign_up"/>
         <result property="deletedAt" column="deleted_at"/>
-        <result property="deleted" column="deleted"/>
+        <result property="isdeleted" column="is_deleted"/>
 
     </resultMap>
 

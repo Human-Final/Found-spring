@@ -29,13 +29,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class LostController {
     private final LostService lostService;
     @PostMapping("/api/lost")
-    public String LostRegister(@Valid @ModelAttribute LostVO lostVO,BindingResult bindingResult,Model model,
+    public String LostRegister(@Valid @ModelAttribute LostVO lostVO,
+        BindingResult bindingResult,Model model,
         @RequestParam(value="files",required = false) MultipartFile[]files, Principal principal) {
         
         // [입구 컷] 검증 에러가 있다면 정상 로직 수행 전에 리턴!    
         if(bindingResult.hasErrors()){
             model.addAttribute("writetype", "lost");
-            return "write";
+            return "/found/write";
         }
             
         if(principal != null){
