@@ -35,6 +35,12 @@
       gap: 32px;
     }
 
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
     .header-title {
       display: flex;
       align-items: center;
@@ -47,6 +53,14 @@
     .header-title svg {
       width: 20px;
       height: 20px;
+    }
+
+    .header-right .top-search {
+      margin-right: 8px;
+    }
+
+    .header-right a[href="/mypage"] {
+      margin-right: 8px;
     }
 
     nav {
@@ -100,6 +114,16 @@
       font-weight: 700;
       font-size: 13px;
       text-decoration: none;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      }
+
+    .logout-btn {
+      border: none;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
     }
 
     /* 푸터 */

@@ -40,27 +40,6 @@
     
     </insert>
 
-    <!-- <select id="selectFoundList"
-    resultType="com.human.found.domain.found.vo.FoundVO">
-        SELECT 
-            num,
-            atc_id,
-            id,
-            clr_num,
-            dep_place,
-            fd_filepath_img,
-            fd_prdt_num,
-            fd_sbjt,
-            fd_ymd,
-            prdt_cl_num,
-            done,
-            deleted
-        FROM found
-        WHERE 
-            deleted=0 ORDER BY num DESC    
-
-    </select> -->
-
     <!--유니온-->
         <select id="selectFoundList"
     resultType="com.human.found.domain.found.vo.FoundVO">
@@ -106,6 +85,17 @@
         ORDER BY fd_ymd DESC
 
     </select>
+<select id="SelectFoundById"
+resultType="com.human.found.domain.found.vo.FoundVO">
+    SELECT * 
+    FROM found
+    WHERE num =#{foundNum}
+</select>
+<update id="FoundupdateDelete">
+    UPDATE found
+    SET is_deleted=1
+    WHERE num =#{foundNum}
+</update>
 
 
 

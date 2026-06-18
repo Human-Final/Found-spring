@@ -29,11 +29,58 @@ public class LostPoliceService {
     @Autowired
     private LostPoliceMapper lostPoliceMapper;
 
+    // 카테고리 매핑 규칙 메서드
+    private String getCategoryLabel(String prdtClNm) {
+        if (prdtClNm == null || prdtClNm.trim().isEmpty()) {
+            return "기타";
+        }
+
+        // [가방] "가방", "백" 포함 여부
+        if (prdtClNm.contains("가방") || prdtClNm.contains("백")) {
+            return "가방";
+        }
+        // [귀금속] "귀금속", "반지", "목걸이", "귀걸이", "시계" 포함 여부
+        if (prdtClNm.contains("귀금속") || prdtClNm.contains("반지") || 
+            prdtClNm.contains("목걸이") || prdtClNm.contains("귀걸이") || prdtClNm.contains("시계")) {
+            return "귀금속";
+        }
+        // [도서] "도서", "책", "서적", "소설" 포함 여부
+        if (prdtClNm.contains("도서") || prdtClNm.contains("책") || 
+            prdtClNm.contains("서적") || prdtClNm.contains("소설")) {
+            return "도서";
+        }
+        // [의류] "의류", "모자", "신발" 포함 여부
+        if (prdtClNm.contains("의류") || prdtClNm.contains("모자") || prdtClNm.contains("신발")) {
+            return "의류";
+        }
+        // [자동차] "자동차", "네비", "번호판" 포함 여부
+        if (prdtClNm.contains("자동차") || prdtClNm.contains("네비") || prdtClNm.contains("번호판")) {
+            return "자동차";
+        }
+        // [전자기기] "전자", "핸드폰", "휴대폰", "아이폰", "노트북", "컴퓨터" 포함 여부
+        if (prdtClNm.contains("전자") || prdtClNm.contains("핸드폰") || prdtClNm.contains("휴대폰") || 
+            prdtClNm.contains("아이폰") || prdtClNm.contains("노트북") || prdtClNm.contains("컴퓨터")) {
+            return "전자기기";
+        }
+        // [지갑]
+        if (prdtClNm.contains("지갑")) {
+            return "지갑";
+        }
+        // [카드]
+        if (prdtClNm.contains("카드")) {
+            return "카드";
+        }
+
+        // 조건에 맞지 않는 "증명서" 등의 데이터는 모두 "기타"로 분류됨
+        return "기타";
+    }
+
+
     private final String serviceKey = "51cb7bbc7238b3a05c50974e40c97261a36015bddc473118eae5cc3c273094ce";
     
     //스케줄러 메서드
     //매일 새벽 1시에 자동으로 아래 fetchAndSaveLostGoods 메서드 호출하기
-    @Scheduled(cron = "0 0 1 * * *")
+    @Scheduled(cron = "0 12 12 * * *")
     public void runDailyLostGoodsFetch() {
         System.out.println("⏰ [스케줄러 시작] 기존 데이터를 삭제하고 경찰청의 모든 유실물 데이터를 처음부터 끝까지 수집합니다.");
         
@@ -41,7 +88,7 @@ public class LostPoliceService {
         lostPoliceMapper.lostPoliceDelete();        
         
         int pageNo = 1;
-        int numOfRows = 10000; // API가 허용하는 안전한 최대 한도치로 설정
+        int numOfRows = 1000; // API가 허용하는 안전한 최대 한도치로 설정
         
         while (true) {
             System.out.println("🔄 현재 " + pageNo + "페이지 수집 중... (한 번에 " + numOfRows + "개씩 요청)");
@@ -59,7 +106,7 @@ public class LostPoliceService {
                 pageNo++; // 다음 페이지 준비
                 
                 // 안전장치: 너무 무한루프가 돌지 않도록 최대 30페이지(3만 건)까지만 수집하도록 제한
-                if (pageNo > 30) {
+                if (pageNo > 1) {
                     break;
                 }
                 
@@ -130,9 +177,8 @@ public class LostPoliceService {
                     
                     LostPoliceVO vo = new LostPoliceVO();
                     vo.setAtcId(getTagValue("atcId", el));
-                    vo.setLstSbjt(getTagValue("lstSbjt", el)); // 제목
+                    vo.setLstSbjt(getTagValue("lstSbjt", el)); 
 
-                    // 주소 정제 로직은 그대로 유지
                     String rawPlace = getTagValue("lstPlace", el);
                     String cleanedPlace = rawPlace.replaceAll("\\s*\\(.*?\\)", "");
                     vo.setLstPlace(cleanedPlace);
@@ -140,19 +186,15 @@ public class LostPoliceService {
                     vo.setLstPrdtNm(getTagValue("lstPrdtNm", el));
                     vo.setLstYmd(getTagValue("lstYmd", el));
 
-                    // 🌟 [수정] 카테고리 대분류 정제 로직을 for 루프 안쪽으로 이동
-                    String rawPrdtClNm = getTagValue("prdtClNm", el); // 예: "전자기기 > 휴대폰"
-                    String cleanedPrdtClNm = rawPrdtClNm;
-
-                    if (rawPrdtClNm != null && rawPrdtClNm.contains(">")) {
-                        // ">" 기호로 나누어 첫 번째 배열 요소(대분류)만 선택 후 공백 제거
-                        cleanedPrdtClNm = rawPrdtClNm.split(">")[0].trim(); // 예: "전자기기"
-                    }
-                    vo.setPrdtClNm(cleanedPrdtClNm);
+                    // 🌟 [수정] 자체 카테고리 매핑 함수를 통해 정제된 값 세팅
+                    String rawPrdtClNm = getTagValue("prdtClNm", el); // 원본 카테고리명 추출
+                    String customCategory = getCategoryLabel(rawPrdtClNm); // 매핑 필터 작동
+                    
+                    vo.setPrdtClNm(customCategory); // 우리 기준 카테고리(예: "전자기기", "기타") 주입
 
                     list.add(vo); 
                 }
-            } // 👈 for 루프가 여기서 끝납니다.
+            }// 👈 for 루프가 여기서 끝납니다.
 
             if (!list.isEmpty()) {
                 lostPoliceMapper.insertLostGoodsBatch(list);

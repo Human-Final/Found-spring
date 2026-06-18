@@ -22,42 +22,17 @@ public class ViewTestController {
         return "found/list";
     }
 
-    @GetMapping("/mypage")
-    public String mypage() {
-        return "user/mypage";
-    }
+    // @GetMapping("/mypage")
+    // public String mypage() {
+    //     return "user/mypage";
+    // }
 
-//     @PostMapping("/found/write")
-//     public String createFound(@Valid @ModelAttribute("postForm") PostForm postForm,
-//                             BindingResult bindingResult,
-//                             Model model) {
-//         if (bindingResult.hasErrors()) {
-//             model.addAttribute("categories", categories());
-//             return "write-post";
-//     }
-
-//     foundService.save(postForm);
-//     return "redirect:/found";
-
-//     @PostMapping("/lost/write")
-//     public String createLost(@Valid @ModelAttribute("postForm") PostForm postForm,
-//                             BindingResult bindingResult,
-//                             Model model) {
-//         if (bindingResult.hasErrors()) {
-//             model.addAttribute("categories", categories());
-//             return "write-post";
-//         }
-
-//         lostService.save(postForm);
-//         return "redirect:/lost";
-//     }
-// }
-    @GetMapping("/api/write")
-    public String writeForm() {
-        // model.addAttribute("postForm", new PostForm());
-        // model.addAttribute("categories", categories());
-        return "found/write";
-    }
+    // @GetMapping("/api/write")
+    // public String writeForm() {
+    //     // model.addAttribute("postForm", new PostForm());
+    //     // model.addAttribute("categories", categories());
+    //     return "found/write";
+    // }
 
 
 }

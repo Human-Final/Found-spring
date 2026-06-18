@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.human.found.domain.found.mapper.FoundPortalMapper">
+<select id="existsByAtcId"
+        parameterType="string"
+        resultType="int">
+
+    SELECT COUNT(*)
+    FROM found_portal
+    WHERE atc_id = #{atcId}
+
+</select>
+
+<insert id="insertFoundPortal"
+        parameterType="FoundVO">
+
+    INSERT INTO found_portal(
+        atc_id,
+        clr_nm,
+        dep_place,
+        fd_filepath_img,
+        fd_prdt_nm,
+        fd_sbjt,
+        fd_ymd,
+        prdt_cl_nm,
+        done,
+        is_deleted
+    )VALUES (
+        #{atcId},
+        #{clrNm},
+        #{depPlace},
+        #{fdFilepathImg},
+        #{fdPrdtNm},
+        #{fdSbjt},
+        #{fdYmd},
+        #{prdtClNm},
+        #{done},
+        #{isDeleted}
+    )
+
+</insert>
+</mapper>

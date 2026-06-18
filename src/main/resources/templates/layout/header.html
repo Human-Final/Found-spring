@@ -17,7 +17,7 @@
         </svg>
         분실물 센터
       </a>
-
+      
       <nav>
         <a href="api/found">습득 게시판</a>
         <a href="api/lost">분실 게시판</a>
@@ -33,13 +33,22 @@
         </svg>
         <input type="text" placeholder="검색..." />
       </div>
+
       <th:block sec:authorize="isAnonymous()">
         <a href="/login" class="login-btn">로그인</a>
       </th:block>
 
       <th:block sec:authorize="isAuthenticated()">
         <a href="/mypage">마이페이지</a>
-        <a href="/logout" class="logout-btn" onclick="return confirm('로그아웃 하시겠습니까?')">로그아웃</a>
+
+        <form th:action="@{/logout}" method="post" class="logout-form">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <button type="submit" class="logout-btn"
+                  onclick="return confirm('로그아웃 하시겠습니까?')">
+            로그아웃
+          </button>
+        </form>
       </th:block>
+
     </div>
   </header>
