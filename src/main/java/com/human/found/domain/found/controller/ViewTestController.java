@@ -27,12 +27,12 @@ public class ViewTestController {
         return "user/mypage";
     }
 
-    @GetMapping("/api/write")
-    public String writeForm() {
-        // model.addAttribute("postForm", new PostForm());
-        // model.addAttribute("categories", categories());
-        return "found/write";
-    }
+    // @GetMapping("/api/write")
+    // public String writeForm() {
+    //     // model.addAttribute("postForm", new PostForm());
+    //     // model.addAttribute("categories", categories());
+    //     return "found/write";
+    // }
 
 
 }

@@ -10,7 +10,7 @@ public class JasyptTest {
         encryptor.setAlgorithm("PBEWithMD5AndDES");
         encryptor.setIvGenerator(new NoIvGenerator());
 
-        String target = "seon"; // 여기에 실제 MariaDB 비밀번호 입력
+        String target = "hwa"; // 여기에 실제 MariaDB 비밀번호 입력
         String encrypted = encryptor.encrypt(target);
         
         System.out.println("새로운 암호화 값: ENC(" + encrypted + ")");

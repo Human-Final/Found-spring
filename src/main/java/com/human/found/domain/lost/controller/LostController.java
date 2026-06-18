@@ -12,36 +12,59 @@ import com.human.found.domain.lost.service.LostService;
 import com.human.found.domain.lost.vo.LostVO;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 
 
-@Tag(name = "분실물 관리 테스트 API", description = "VS Code에서 확인하는 스웨거")
-@RestController
+
+@Controller
 @AllArgsConstructor
 public class LostController {
     private final LostService lostService;
     @PostMapping("/api/lost")
-    public String LostRegister(@ModelAttribute LostVO lostVO,MultipartFile[]files, Principal principal) {
+    public String LostRegister(@Valid @ModelAttribute LostVO lostVO,BindingResult bindingResult,Model model,
+        @RequestParam(value="files",required = false) MultipartFile[]files, Principal principal) {
         
+        // [입구 컷] 검증 에러가 있다면 정상 로직 수행 전에 리턴!    
+        if(bindingResult.hasErrors()){
+            model.addAttribute("writetype", "lost");
+            return "write";
+        }
+            
         if(principal != null){
             lostVO.setId(principal.getName());
         }else{
             lostVO.setId("test_member");
         }
-        
+
         lostService.LostRegister(lostVO,files);
         
-        return "성공";
+        return "redirect:/api/lost";
     }
     
     @GetMapping("/api/lost")
-    public List<LostVO> Lostlist() {
-        List<LostVO>lostlist=lostService.getLostlist();
-        return lostlist;
+    public String Lostlist(Model model) {
+        List<LostVO>getList=lostService.getLostlist();
+        model.addAttribute("getList", getList);
+        return "lost/list";
     }
+
+    // @GetMapping("/api/write")
+    // public String lostWriteForm(Model model) {
+    //     // 화면에 습득물(lost) 타입을 구분하기 위한 값 전달
+    //     model.addAttribute("lostVO",new LostVO());
+    //     model.addAttribute("writetype", "lost");
+    //     return "found/write";
+    // }
+    
+    
     
     
 }

@@ -19,19 +19,22 @@
       <h1 class="page-title">게시글 작성</h1>
 
         <form
-        id="postForm"
-        action="/found/write"
-        method="post"
-        enctype="multipart/form-data"
-        data-found-action="/found/write"
-        data-lost-action="/lost/write"
+            id="postForm"
+            action="/api/found"
+            method="post"
+            enctype="multipart/form-data"
+            data-found-action="/api/found"
+            data-lost-action="/api/lost"
         >         
+        <input type="hidden"
+            th:name="${_csrf.parameterName}"
+            th:value="${_csrf.token}">
           <div class="form-section">
           <span class="form-label">게시판 선택 <span class="required-mark">*</span></span>
 
           <div class="board-selector">
             <label class="radio-card">
-              <input type="radio" name="boardType" value="FOUND" required>
+              <input type="radio" name="boardType" value="FOUND" checked required>
               <span class="radio-dot found" aria-hidden="true"></span>
               <span>습득물 등록</span>
             </label>
@@ -50,39 +53,39 @@
 
             <div class="category-list">
             <label class="category-chip">
-                <input type="radio" name="category" value="가방" checked required>
+                <input type="radio" name="prdtClNm" value="가방" checked required>
                 <span>가방</span>
             </label>
             <label class="category-chip">
-                <input type="radio" name="category" value="귀금속" required>
+                <input type="radio" name="prdtClNm" value="귀금속" required>
                 <span>귀금속</span>
             </label>
             <label class="category-chip">
-                <input type="radio" name="category" value="도서" required>
+                <input type="radio" name="prdtClNm" value="도서" required>
                 <span>도서</span>
             </label>
             <label class="category-chip">
-                <input type="radio" name="category" value="의류" required>
+                <input type="radio" name="prdtClNm" value="의류" required>
                 <span>의류</span>
             </label>
             <label class="category-chip">
-                <input type="radio" name="category" value="자동차" required>
+                <input type="radio" name="prdtClNm" value="자동차" required>
                 <span>자동차</span>
             </label>
             <label class="category-chip">
-                <input type="radio" name="category" value="전자기기" required>
+                <input type="radio" name="prdtClNm" value="전자기기" required>
                 <span>전자기기</span>
             </label>
             <label class="category-chip">
-                <input type="radio" name="category" value="지갑" required>
+                <input type="radio" name="prdtClNm" value="지갑" required>
                 <span>지갑</span>
             </label>
             <label class="category-chip">
-                <input type="radio" name="category" value="카드" required>
+                <input type="radio" name="prdtClNm" value="카드" required>
                 <span>카드</span>
             </label>
             <label class="category-chip">
-                <input type="radio" name="category" value="기타" required>
+                <input type="radio" name="prdtClNm" value="기타" required>
                 <span>기타</span>
             </label>
             </div>          
@@ -90,11 +93,12 @@
         </div>
 
         <div class="form-section">
-          <label for="title" class="form-label">제목 <span class="required-mark">*</span></label>
+          <label for="title" class="form-label">제목 
+            <span class="required-mark">*</span></label>
           <input
             type="text"
             id="title"
-            name="title"
+            name="fdSbjt"
             class="form-control title-input"
             placeholder="제목을 입력하세요"
             required
@@ -102,14 +106,27 @@
         </div>
 
         <div class="form-section">
-          <label for="content" class="form-label">내용 <span class="required-mark">*</span></label>
+          <label for="content" class="form-label">내용 
+            <span class="required-mark">*</span>
+          </label>
           <textarea
             id="content"
-            name="content"
+            name="fdPrdtNm"
             class="form-control content-textarea"
             placeholder="분실/습득 장소, 시간, 물건 특징 등을 자세히 적어주세요"
             required
           ></textarea>
+        </div>
+
+        <div class="form-section">
+            <label for="fdYmd" class="form-label">습득일자 <span class="required-mark">*</span></label>
+            <input
+                type="datetime-local"
+                id="fdYmd"
+                name="fdYmd"
+                class="form-control title-input"
+                required
+            >
         </div>
 
         <div class="form-section">
