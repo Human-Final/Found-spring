@@ -1,197 +1,63 @@
 package com.human.found.domain.user.service;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.human.found.domain.user.mapper.UserMapper;
 import com.human.found.domain.user.vo.UserVO;
 
-import lombok.RequiredArgsConstructor;
-
-@Service
-@RequiredArgsConstructor
-public class UserService {
-
-    private final UserMapper userMapper;
-    private final PasswordEncoder passwordEncoder;
+/**
+ * 회원 관련 서비스 인터페이스
+ * - Controller가 직접 구현체를 알지 않도록 기능 목록만 정의
+ * - 실제 로직은 UserServiceImpl에서 구현
+ */
+public interface UserService {
 
     /**
      * 회원가입
      * - 비밀번호 암호화
      * - 회원 정보 저장
      */
-    public void join(UserVO user) {
-
-        // 비밀번호 암호화
-        String encodedPw = passwordEncoder.encode(user.getPw());
-        user.setPw(encodedPw);
-
-        // 회원 저장
-        userMapper.insertUser(user);
-    }
+    void join(UserVO user);
 
     /**
      * 아이디로 회원 조회
      * 로그인 시 Security에서 사용
      */
-    public UserVO findById(String id) {
-        return userMapper.findById(id);
-    }
+    UserVO findById(String id);
 
     /**
      * 아이디 중복 확인
      * true : 중복
      * false : 사용 가능
      */
-    public boolean isDuplicatedId(String id) {
-        return userMapper.countById(id) > 0;
-    }
+    boolean isDuplicatedId(String id);
 
     /**
      * 이메일 중복 확인
      * true : 중복
      * false : 사용 가능
      */
-    public boolean isDuplicatedEmail(String email) {
-        return userMapper.countByEmail(email) > 0;
-    }
-
-
-    // 회원가입 입력값 검증
-    public String validateJoin(UserVO user) {
-
-        // 아이디 중복
-        if (isDuplicatedId(user.getId())) {
-            return "이미 사용중인 아이디입니다.";
-        }
-
-        // 이메일 중복
-        if (isDuplicatedEmail(user.getEmail())) {
-            return "이미 사용중인 이메일입니다.";
-        }
-
-        // 비밀번호 확인
-        if (!user.getPw().equals(user.getPwCheck())) {
-            return "비밀번호가 일치하지 않습니다.";
-        }
-
-        // 비밀번호 길이
-        if (user.getPw().length() < 8) {
-            return "비밀번호는 8자 이상이어야 합니다.";
-        }
-
-        // 비밀번호 조합 검사
-        // 대문자, 소문자, 숫자, 특수문자 중 3가지 이상 포함
-        int count = 0;
-
-        if (user.getPw().matches(".*[A-Z].*")) count++;
-        if (user.getPw().matches(".*[a-z].*")) count++;
-        if (user.getPw().matches(".*[0-9].*")) count++;
-        if (user.getPw().matches(".*[^a-zA-Z0-9].*")) count++;
-
-        if (count < 3) {
-            return "대문자, 소문자, 숫자, 특수문자 중 3가지 이상 포함해야 합니다.";
-        }
-
-        // 검증 통과
-        return null;
-    }
+    boolean isDuplicatedEmail(String email);
 
     /**
-     * 🔒 [최종 보정 완료] 현재 비밀번호 본인 인증 판정 로직
+     * 회원가입 입력값 검증
      */
-    public boolean checkPassword(String id, String pwCheck) {
-        // 1. DB에서 아이디로 해당 회원 정보를 단건 조회합니다.
-        UserVO user = userMapper.findById(id); 
-        if (user == null || user.getPw() == null) {
-            System.out.println("❌ [인증 실패] 존재하지 않는 유저이거나 DB 비밀번호가 null입니다.");
-            return false;
-        }
-        
-        // 2. 📌 [가장 중요] 브라우저와 DB 통신 과정에서 생길 수 있는 미세 공백(\n, 스페이스)을 완벽히 제거합니다.
-        String cleanPwCheck = (pwCheck != null) ? pwCheck.trim() : "";
-        String cleanDbPassword = user.getPw().trim();
-        
-        // 3. 스프링 시큐리티 인코더 객체를 사용하여 정확하게 1:1 대조를 수행합니다.
-        // matches(평문, 암호문) 순서 엄격 준수
-        boolean isMatch = passwordEncoder.matches(cleanPwCheck, cleanDbPassword);
-        
-        // 콘솔 디버깅을 통해 데이터 무결성을 검증합니다.
-        System.out.println("=========================================");
-        System.out.println("📊 [마이페이지 본인 인증 디버깅 데이터]");
-        System.out.println("👤 조회 대상 아이디 : " + id);
-        System.out.println("⌨️ 전달된 입력 평문 : [" + cleanPwCheck + "] (길이: " + cleanPwCheck.length() + ")");
-        System.out.println("🔒 가져온 DB 암호문: [" + cleanDbPassword + "]");
-        System.out.println("📊 최종 매칭 일치여부: " + isMatch);
-        System.out.println("=========================================");
-
-        return isMatch; 
-    }
+    String validateJoin(UserVO user);
 
     /**
-     * 🔑 2. 새 비밀번호 유효성 검사 및 변경 처리
+     * 회원정보 수정
+     * - 현재 비밀번호 확인
+     * - 새 비밀번호 입력 시 암호화
+     * - 회원 정보 업데이트
      */
-    public void updateUserPassword(String id, String newPw) {
-        // 📌 [디버깅 추가] 서비스단 진입 확인용
-        System.out.println("⚙️ [서비스단] updateUserPassword 비즈니스 로직 가동 시작");
-        System.out.println("⚙️ [서비스단] 입력 파라미터 글자수: " + (newPw != null ? newPw.length() : "null"));
+    void updateUserInfo(UserVO userVO);
 
-        // 📌 [재사용] 기존 비밀번호 조합 검사 로직 적용 (길이, 대소문자 특수문자 3형태 만족 확인)
-        // 기존 validateJoin은 회원가입용 객체를 받으므로, 여기선 임시 객체를 만들어 검증 규칙만 통과시킵니다.
-        UserVO dummyUser = new UserVO();
-        dummyUser.setPw(newPw);
-        dummyUser.setPwCheck(newPw); // 일치 여부는 프론트에서 검증했으므로 동일하게 세팅
+    /**
+     * 마이페이지 뷰를 띄울 때 회원 정보를 안전하게 꺼내오기 위한 메서드
+     */
+    UserVO getUserInfo(String id);
 
-        // 글자 수 및 패턴 검사 진행
-        // 📌 테스트를 위해 임시 주석 처리 진행
-        /* 
-        if (newPw.length() < 8) {
-            throw new IllegalArgumentException("비밀번호는 8자 이상이어야 합니다.");
-        }
-
-        int count = 0;
-        if (newPw.matches(".*[A-Z].*")) count++;
-        if (newPw.matches(".*[a-z].*")) count++;
-        if (newPw.matches(".*[0-9].*")) count++;
-        if (newPw.matches(".*[^a-zA-Z0-9].*")) count++;
-
-        if (count < 3) {
-            throw new IllegalArgumentException("대문자, 소문자, 숫자, 특수문자 중 3가지 이상 포함해야 합니다.");
-        }
-        */
-
-        // 📌 검증 통과 시 암호화하여 DB 업데이트 진행
-        String encryptedPw = passwordEncoder.encode(newPw);
-        userMapper.updatePasswordOnly(id, encryptedPw); // 매퍼 호출
-    }
-
-    @Transactional
-    public void updateUserInfo(UserVO userVO) {
-        // 1. DB에서 현재 로그인한 유저의 원본 암호 정보 가져오기
-        UserVO dbUser = userMapper.findById(userVO.getId());
-        
-        // 2. 입력한 현재 비밀번호(pwCheck)와 DB에 암호화되어 저장된 비밀번호(pw)가 일치하는지 검증
-        // passwordEncoder.matches(평문비밀번호, 암호화된비밀번호)
-        if (!passwordEncoder.matches(userVO.getPwCheck(), dbUser.getPw())) {
-            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
-        }
-
-        // 3. 새 비밀번호를 입력한 경우에만 암호화해서 세팅, 입력 안 했으면 기존 암호 유지
-        if (userVO.getPw() != null && !userVO.getPw().trim().isEmpty()) {
-            String encodedNewPw = passwordEncoder.encode(userVO.getPw());
-            userVO.setPw(encodedNewPw);
-        } else {
-            userVO.setPw(dbUser.getPw()); // 새 비밀번호 입력 안 했으면 기존 암호 그대로 바구니에 담기
-        }
-
-        // 4. DB 업데이트 실행
-        userMapper.updateUser(userVO);
-    }
-
-    // 마이페이지 뷰를 띄울 때 회원 정보를 안전하게 꺼내오기 위한 메서드
-    public UserVO getUserInfo(String id) {
-        return userMapper.findById(id);
-    }
+    /**
+     * 회원탈퇴
+     * 비밀번호 확인 후 소프트 삭제 처리
+     */
+    void withdrawUser(String id, String password);
 
 }

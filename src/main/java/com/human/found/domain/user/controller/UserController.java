@@ -11,10 +11,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.human.found.domain.user.service.UserService;
+import com.human.found.domain.user.service.UserServiceImpl;
 import com.human.found.domain.user.vo.UserVO;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class UserController {
 
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userService;
 
     // /mypage 또는 /mypage/ 로 요청이 들어왔을 때 마이페이지 화면을 보여줍니다.
     @GetMapping({"", "/"})
@@ -92,7 +93,7 @@ public class UserController {
         if (principal == null) return "redirect:/login";
 
         String loginUserId = principal.getName();
-        
+
         try {
             // 📌 서비스단을 호출하여 유효성 검사 및 패스워드 암호화 변경 동시 수행
             userService.updateUserPassword(loginUserId, newPw);
@@ -136,6 +137,52 @@ public class UserController {
         }
 
         return "redirect:/mypage";
+    }
+
+     /**
+     * - 로그인한 사용자 ID 확인
+     * - 입력한 비밀번호 검증
+     * - 회원정보 소프트 삭제
+     * - 세션 무효화 후 로그인 페이지 이동
+     */
+
+    @PostMapping("/withdraw")
+    public String withdrawUser(
+    @RequestParam("password") String password,
+    Principal principal,
+    HttpServletRequest request,
+    RedirectAttributes redirectAttributes) {
+
+        // 로그인 여부 확인
+        if(principal == null) {
+            return "redirect:/login";
+        }
+
+        // 로그인한 사용자 ID 가져오기
+        String loginUserId = principal.getName();
+
+        try {
+            // 비밀번호 확인 후 회원탈퇴 처리
+            userService.withdrawUser(loginUserId, password);
+
+            // 현재 세션 가져오기
+            HttpSession session = request.getSession(false);
+
+            // 세션 있을 시 무효화
+            if(session != null) {
+                session.invalidate();
+            }
+
+            // 로그인 페이지로 이동
+            return "redirect:/login?withdraw";
+        
+        } catch (IllegalArgumentException e) {
+
+            // 비밀번호 불일치 시 등 오류 발생 시 마이페이지로 복귀
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/login?withdraw";
+        }
+
     }
 
 

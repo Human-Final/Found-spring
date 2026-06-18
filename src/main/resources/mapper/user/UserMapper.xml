@@ -87,4 +87,14 @@
         WHERE id = #{id}
     </update>
 
+    <!-- 회원탈퇴 , 5년 보존 때문에 소프트 삭제-->
+    <update id="withdrawUser"
+            parameterType = "string">
+        UPDATE member
+        SET
+            is_deleted = 1,
+            deleted_at = NOW()
+        WHERE id = #{id}
+    </update>
+
 </mapper>

@@ -24,4 +24,7 @@ public interface UserMapper {
 
     // 비밀번호만 단독 변경하는 쿼리
     int updatePasswordOnly(@Param("id") String id, @Param("pw") String pw);
+
+    // 회원탈퇴 처리 (실제 삭제는 아니고 is_deleted, deleted_at변경)
+    int withdrawUser(String id);
 }
