@@ -24,9 +24,16 @@ public class AuthController {
      * Method : GET
      */
     @GetMapping("/login")
-    public String loginPage() {
+    public String loginPage( 
+        @RequestParam(required = false) String withdraw,
+        Model model) {
+            
+            if(withdraw != null) {
+                model.addAttribute("message", "회원탈퇴가 완료되었습니다.");
+            }
+
         return "user/login";
-    }
+        }
 
     /**
      * 회원가입 페이지 이동

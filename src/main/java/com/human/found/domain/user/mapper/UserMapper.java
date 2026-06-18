@@ -21,4 +21,7 @@ public interface UserMapper {
     
     // 회원정보 수정할 때 사용하는 쿼리매핑
     void updateUser(UserVO user);
+
+    // 회원탈퇴 처리 (실제 삭제는 아니고 is_deleted, deleted_at변경)
+    int withdrawUser(String id);
 }
