@@ -33,13 +33,13 @@ public class LostPoliceService {
 
     @Autowired
     private LostPoliceMapper lostPoliceMapper;
-
+    
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @Value("${api.lost-goods.base-url}")
+    @Value("${api.policelost.url}")
     private String baseUrl;
 
-    @Value("${api.lost-goods.service-key}")
+    @Value("${police.api.key}")
     private String serviceKey;
 
     // 카테고리 매핑 규칙 메서드

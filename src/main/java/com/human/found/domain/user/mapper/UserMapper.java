@@ -21,4 +21,7 @@ public interface UserMapper {
     
     // 회원정보 수정할 때 사용하는 쿼리매핑
     void updateUser(UserVO user);
+
+    // 비밀번호만 단독 변경하는 쿼리
+    int updatePasswordOnly(@Param("id") String id, @Param("pw") String pw);
 }
