@@ -146,6 +146,20 @@ public class UserController {
      * - 세션 무효화 후 로그인 페이지 이동
      */
 
+    @ResponseBody
+    @GetMapping("/check-email")
+    public String checkEmail(@RequestParam("email") String email) {
+
+        // true면 중복, false면 사용 가능
+        boolean isDuplicated = userService.isDuplicatedEmail(email); 
+
+        if (isDuplicated) {
+            return "duplicated"; // 중복됨
+        }
+
+        return "available"; // 사용 가능
+    }
+
     @PostMapping("/withdraw")
     public String withdrawUser(
         @RequestParam("password") String password,

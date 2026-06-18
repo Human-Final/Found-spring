@@ -77,7 +77,8 @@ public class SecurityConfig {
                     "/images/**",
                     "/notices/**",
                     "/lost/**",
-                    "/found/**"
+                    "/found/**",
+                    "/check-email"
                 ).permitAll()
 
                 // 나머지는 모두 허용

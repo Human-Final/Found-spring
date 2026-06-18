@@ -100,13 +100,10 @@
         WHERE id = #{id}
     </update>
 
-    <!-- 회원탈퇴 , 5년 보존 때문에 소프트 삭제-->
-    <update id="withdrawUser"
-            parameterType = "string">
-        UPDATE member
-        SET
-            is_deleted = 1,
-            deleted_at = NOW()
-        WHERE id = #{id}
-    </update>
+    <!-- 이메일 중복 확인 -->
+    <select id="isDuplicatedEmail" parameterType="string" resultType="int">
+        SELECT COUNT(*) 
+        FROM member 
+        WHERE email = #{email}
+    </select>
 </mapper>

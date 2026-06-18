@@ -25,9 +25,8 @@ public class AuthController {
      */
     @GetMapping("/login")
     public String loginPage( 
-        @RequestParam(required = false) String withdraw,
+        @RequestParam(name = "withdraw", required = false) String withdraw,
         Model model) {
-            
             if(withdraw != null) {
                 model.addAttribute("message", "회원탈퇴가 완료되었습니다.");
             }

@@ -523,7 +523,7 @@
       <section class="mypage-layout">
         <aside class="mypage-side">
             <!-- [수정] user가 null이 아니면 이름의 첫 글자(인덱스 0~1)를 추출, null이면 기본값 '김' -->
-            <div class="profile-avatar" 
+            <div class="profile-avatar"
                 th:text="${user != null && user.name != null && !#strings.isEmpty(user.name)} ? ${#strings.substring(user.name, 0, 1)} : '김'">김</div>
             
             <!-- [수정] 리터럴 대체 기호(|)를 사용하여 안전하게 '님' 부착 -->
@@ -915,9 +915,22 @@
         const passwordMatchMessage = document.getElementById("passwordMatchMessage");
         const pwChangeForm = document.getElementById("pwChangeForm");
 
+        const profileForm = document.getElementById("profileForm");         // 전체 수정 폼
+        const emailInput = document.getElementById("currentEmail");         // 이메일 입력창
+        const btnCheckEmail = document.getElementById("btnCheckEmail");     // 중복확인 버튼
+        const emailCheckMessage = document.getElementById("emailCheckMessage"); // 결과 메시지창
+
+        let originalEmail = "";    // 회원의 기존 이메일 저장 변수
+        let isEmailChecked = true; // 중복확인 상태 플래그
+
+        
+        
+
+
         // 📌 [보정 추가] 페이지 최초 진입 시 개인정보 영역이 멋대로 열려있지 않도록 확실하게 숨깁니다.
         if (infoSection) {
             infoSection.style.display = "none";
+
             infoSection.style.opacity = "0";
         }
 
@@ -950,6 +963,10 @@
 
                         // 🔓 인증 통과 시 개인정보 수정 창 및 비밀번호 변경 단추 동시 활성화 오픈
                         infoSection.style.display = "block";
+                        if (emailInput) {
+                            originalEmail = emailInput.value.trim();
+                            isEmailChecked = true; 
+                        }
                         setTimeout(() => infoSection.style.opacity = "1", 50);
                     } 
                     // 📌 [보정 추가] 비밀번호가 틀려 false가 내려왔을 때는 철저하게 차단막을 칩니다.
@@ -979,6 +996,73 @@
                 });
             });
         }
+        // 중복확인 버튼 클릭 이벤트
+        if (btnCheckEmail && emailInput) {
+              btnCheckEmail.addEventListener("click", function() {
+                  const emailValue = emailInput.value.trim();
+
+                  if (!emailValue) {
+                      alert("이메일을 입력해 주세요.");
+                      emailInput.focus();
+                      return;
+                  }
+
+                  // 📌 [정규식 추가] 영문, 숫자, 표준 특수문자 조합의 올바른 이메일 형식 형상 검증
+                  // 한글 이메일(ㅁㄴㅇ@ㄴㅇㄹㅁ)이나 점(.)이 없는 도메인은 여기서 전부 걸러집니다.
+                  //const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                  //if (!emailRegex.test(emailValue)) {
+                  //    emailCheckMessage.style.display = "block";
+                  //    emailCheckMessage.style.color = "#fa5252";
+                  //    emailCheckMessage.innerText = "✗ 올바른 이메일 형식(example@domain.com)이 아닙니다.";
+                  //    isEmailChecked = false;
+                  //    emailInput.focus();
+                  //    return; // 🛑 정규식을 통과하지 못하면 fetch 요청 자체를 보내지 않고 중단합니다.
+                  //}
+
+                  if (emailValue === originalEmail) {
+                      emailCheckMessage.style.display = "block";
+                      emailCheckMessage.style.color = "#2b8a3e";
+                      emailCheckMessage.innerText = "✓ 현재 본인이 사용 중인 이메일입니다.";
+                      isEmailChecked = true;
+                      return;
+                  }
+
+                  // 정규식을 통과한 정상적인 이메일 문자열만 서버로 전송합니다.
+                  fetch(`/mypage/check-email?email=${encodeURIComponent(emailValue)}`)
+                      .then(res => res.text())
+                      .then(data => {
+                          if (data === "available") {
+                              emailCheckMessage.style.display = "block";
+                              emailCheckMessage.style.color = "#2b8a3e";
+                              emailCheckMessage.innerText = "✓ 사용 가능한 이메일입니다.";
+                              isEmailChecked = true;
+                          } else {
+                              emailCheckMessage.style.display = "block";
+                              emailCheckMessage.style.color = "#fa5252";
+                              emailCheckMessage.innerText = "✗ 이미 사용 중인 이메일입니다.";
+                              isEmailChecked = false;
+                          }
+                      })
+                      .catch(err => {
+                          console.error("이메일 중복확인 통신 에러:", err);
+                          alert("이메일 중복확인 중 오류가 발생했습니다.");
+                      });
+              });
+
+              // 이메일 수정 시 상태 리셋 이벤트 (기존과 동일)
+              emailInput.addEventListener("input", function() {
+                  if (emailInput.value.trim() !== originalEmail) {
+                      isEmailChecked = false;
+                      emailCheckMessage.style.display = "block";
+                      emailCheckMessage.style.color = "#fd7e14";
+                      emailCheckMessage.innerText = "⚠ 이메일이 변경되었습니다. 중복확인을 다시 해주세요.";
+                  } else {
+                      isEmailChecked = true;
+                      emailCheckMessage.style.display = "none";
+                  }
+              });
+          }
+
 
         // 🪟 B. 회원정보 수정창 내 배치된 변경 단추 클릭 시 모달 레이어 제어
         if (btnOpenPwModal) {
@@ -1023,6 +1107,15 @@
                 if (newPassword.value !== confirmPassword.value) {
                     e.preventDefault();
                     alert("새 비밀번호 확인 사항이 일치하지 않습니다. 다시 확인해 주세요.");
+                }
+            });
+        }
+        if (profileForm) {
+            profileForm.addEventListener("submit", function(e) {
+                if (!isEmailChecked) {
+                    e.preventDefault(); // 폼 전송 중단
+                    alert("변경된 이메일의 중복확인이 완료되지 않았습니다.");
+                    if (btnCheckEmail) btnCheckEmail.focus();
                 }
             });
         }
