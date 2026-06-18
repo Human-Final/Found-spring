@@ -22,10 +22,10 @@ public class ViewTestController {
         return "found/list";
     }
 
-    @GetMapping("/mypage")
-    public String mypage() {
-        return "user/mypage";
-    }
+    // @GetMapping("/mypage")
+    // public String mypage() {
+    //     return "user/mypage";
+    // }
 
     // @GetMapping("/api/write")
     // public String writeForm() {
