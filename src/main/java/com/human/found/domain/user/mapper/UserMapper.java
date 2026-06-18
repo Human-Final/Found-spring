@@ -18,4 +18,7 @@ public interface UserMapper {
     
     // 이메일 중복 확인
     int countByEmail(@Param("email") String email);
+    
+    // 회원정보 수정할 때 사용하는 쿼리매핑
+    void updateUser(UserVO user);
 }

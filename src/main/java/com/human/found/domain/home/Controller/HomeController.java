@@ -15,6 +15,10 @@ public class HomeController {
     public String getMethodName() {
         return "home/home";
     }
+    @GetMapping("/logout")
+    public String logoutsuccess() {
+        return "redirect:/";
+    }
     
 
 }
