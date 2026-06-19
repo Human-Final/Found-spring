@@ -61,7 +61,7 @@
           </svg>
         </div>
         <h3>습득 게시판</h3>
-        <p>2개 게시글</p>
+        <p>주우신 물건을 등록해주세요</p>
       </a>
 
       <a th:href="@{/api/lost}" class="card">
@@ -73,7 +73,7 @@
           </svg>
         </div>
         <h3>분실 게시판</h3>
-        <p>2개 게시글</p>
+        <p>잃어버린 물건은 여기!</p>
       </a>
 
       <a th:href="@{/api/notices}" class="card">
@@ -140,8 +140,8 @@
           <div class="post-top">
             <div class="post-tags">
               <span class="badge badge-found">습득</span>
-
-              <span class="${foundVO.prdtClNm}">기타</span>
+              <span class="category"
+                    th:text="${foundVO.prdtClNm}">기타</span>
             </div>
 
               <span class="status"
@@ -165,7 +165,14 @@
 
               <span th:text="${foundVO.fdYmd !=null 
                 ? #temporals.format(foundVO.fdYmd, 'yyyy.MM.dd')
-                : '-'}">
+                : '-'}"> 변경 안내
+                2026년 1월 26일부터 LOST112 서비스가 경찰민원24로 통합됩니다.
+                01
+                시스템명 : 경찰민원24 (경찰민원 통합사이트)
+                02
+                도메인 : minwon24.police.go.kr
+                03
+                오픈일 : 2026년 1월 26일 오전 
                 작성날짜
               </span>
             </div>
@@ -202,8 +209,8 @@
           <div class="post-top">
             <div class="post-tags">
               <span class="badge badge-lost">분실</span>
-
-              <span class="${lostVO.prdtClNm}">기타</span>
+              <span class="category"
+                    th:text="${lostVO.prdtClNm}">기타</span>
             </div>
 
               <span class="status"
@@ -213,7 +220,6 @@
               </span>
           </div>
           <h4 th:text="${lostVO.lstPrdtNm}">습득물 제목</h4>
-
           <p th:text="${lostVO.lstSbjt}">습득물 내용</p>
 
           <div class="post-bottom">

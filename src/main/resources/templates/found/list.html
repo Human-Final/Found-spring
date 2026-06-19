@@ -59,114 +59,64 @@
       </select>
     </div>
   </section>
+  
+  <div>
+    <p class="total-count">총 2건</p>    
+  </div>
 
   <section class="post-grid">
+    <a 
+      th:each="foundVO : ${getList}"
+      th:href="@{/found/detail/{atcId}(atcId=${foundVO.atcId})}"
+      class="post-card">
 
-    <article class="post-card">
       <div class="post-top">
         <div class="tag-group">
           <span class="type-tag found">습득</span>
-          <span class="category-tag">지갑</span>
+          <span th:text="${foundVO.prdtClNm}" class="category-tag">카테고리</span>
         </div>
-        <span class="status-tag progress">진행중</span>
+        <span class="status-tag done">상태</span>
       </div>
 
-      <a href="#" class="post-title">검은색 지갑 습득</a>
-
-      <p class="post-desc">
-        강남역 2번 출구 근처에서 검은색 반지갑을 발견했습니다. 신분증이 들어있어 신원 확인 가능합니다.
-      </p>
+      <h4 th:text="${foundVO.fdPrdtNm}" class="post-title">제목</h4>
+      <p th:text="${foundVO.fdSbjt}" class="post-desc">글 내용</p>
 
       <div class="post-info">
         <div class="info-item">
           <strong>물품명</strong>
-          검은색 지갑
+          <p th:text="${foundVO.fdPrdtNm}">물품명</p>
         </div>
         <div class="info-item">
           <strong>색상명</strong>
-          검은색
+          <p th:text="${foundVO.clrNm}">색상명</p>
         </div>
         <div class="info-item">
           <strong>습득지역</strong>
-          서울 강남구
+          <p th:text="${foundVO.depPlace}">습득지역</p>
         </div>
         <div class="info-item">
           <strong>습득일자</strong>
-          2026-06-15
+          <p th:text="${foundVO.fdYmd}">습득일자</p>
         </div>
         <div class="info-item">
           <strong>물품분류</strong>
-          지갑
+          <p th:text="${foundVO.prdtClNm}">물품분류</p>
         </div>
         <div class="info-item">
           <strong>작성자</strong>
-          관리자
-        </div>
+          <p th:text="${foundVO.id !=null ? foundVO.id : foundVO.depPlace}">작성자</p>
+        </div>                
       </div>
-
       <div class="post-bottom">
-        <span>2일 전</span>
+        <span>작성날짜(몇일 전 로직으로 구현)</span>
         <div class="post-counts">
-          <span>조회 43</span>
-          <span>댓글 1</span>
+          <span>조회 수</span>
+          <span>댓글 수</span>
         </div>
       </div>
-    </article>
-
-    <article class="post-card">
-      <div class="post-top">
-        <div class="tag-group">
-          <span class="type-tag found">습득</span>
-          <span class="category-tag">전자기기</span>
-        </div>
-        <span class="status-tag done">완료</span>
-      </div>
-
-      <a href="#" class="post-title">에어팟 프로 케이스 습득</a>
-
-      <p class="post-desc">
-        143번 버스 안에서 에어팟 프로 케이스를 발견했습니다. 현재 보관 중이니 연락 주세요.
-      </p>
-
-      <div class="post-info">
-        <div class="info-item">
-          <strong>물품명</strong>
-          에어팟 프로 케이스
-        </div>
-        <div class="info-item">
-          <strong>색상명</strong>
-          흰색
-        </div>
-        <div class="info-item">
-          <strong>습득지역</strong>
-          서울 시내버스
-        </div>
-        <div class="info-item">
-          <strong>습득일자</strong>
-          2026-06-14
-        </div>
-        <div class="info-item">
-          <strong>물품분류</strong>
-          전자기기
-        </div>
-        <div class="info-item">
-          <strong>작성자</strong>
-          관리자
-        </div>
-      </div>
-
-      <div class="post-bottom">
-        <span>3일 전</span>
-        <div class="post-counts">
-          <span>조회 33</span>
-          <span>댓글 0</span>
-        </div>
-      </div>
-    </article>
-
+    </a>
   </section>
 
-  <p class="total-count">총 2건</p>
 
 </main>
 
