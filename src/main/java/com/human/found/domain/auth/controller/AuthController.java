@@ -90,4 +90,18 @@ public class AuthController {
 
         return "available";
     }
+
+    // 이메일 중복확인
+    @ResponseBody
+    @GetMapping("/check-email")
+    public String checkEmail(@RequestParam("email") String email) {
+
+        boolean duplicated = userService.isDuplicatedEmail(email);
+
+        if (duplicated) {
+            return "duplicated";
+        }
+
+        return "available";
+    }    
 }
