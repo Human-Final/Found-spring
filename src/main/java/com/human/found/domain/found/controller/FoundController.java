@@ -64,7 +64,7 @@ public class FoundController {
         return "found/list";
     }
     
-    @GetMapping("/found/write")
+    @GetMapping("/api/write")
     public String foundWriteForm(Model model) {
         // 화면에 습득물(found) 타입을 구분하기 위한 값 전달
         model.addAttribute("foundVO", new FoundVO());

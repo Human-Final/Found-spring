@@ -55,6 +55,9 @@ public class LostController {
         }else{
             lostVO.setId("test_member");
         }
+
+        lostVO.setAtcId("USER-" + System.currentTimeMillis());
+
         System.out.println("서비스 호출 직전");
         lostService.LostRegister(lostVO,files);
         
