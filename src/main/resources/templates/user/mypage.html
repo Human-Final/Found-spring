@@ -523,7 +523,7 @@
       <section class="mypage-layout">
         <aside class="mypage-side">
             <!-- [수정] user가 null이 아니면 이름의 첫 글자(인덱스 0~1)를 추출, null이면 기본값 '김' -->
-            <div class="profile-avatar" 
+            <div class="profile-avatar"
                 th:text="${user != null && user.name != null && !#strings.isEmpty(user.name)} ? ${#strings.substring(user.name, 0, 1)} : '김'">김</div>
             
             <!-- [수정] 리터럴 대체 기호(|)를 사용하여 안전하게 '님' 부착 -->
@@ -571,7 +571,6 @@
             </article>
             </div>
 
-
             <section class="mypage-panel">
               <div class="panel-head">
                 <div>
@@ -609,57 +608,109 @@
 
           <section class="mypage-view" id="memberEdit">
             <section class="mypage-panel">
-              <div class="panel-head">
-                <div>
-                  <h2 class="panel-title">회원정보 수정</h2>
-                  <p class="panel-sub">기본 회원정보를 변경합니다.</p>
+                <div class="panel-head">
+                    <div>
+                        <h2 class="panel-title">회원정보 수정</h2>
+                        <p class="panel-sub">본인 확인 완료 후 개인정보 변경 및 비밀번호 수정이 가능합니다.</p>
+                    </div>
                 </div>
-              </div>
 
-            <form th:action="@{/mypage/profile}" method="post" class="edit-form">
-    
-                <!-- 1. 이름 (읽기 전용, 수정 불가능) -->
-                <label class="form-row">
-                    <span class="form-label">이름</span>
-                    <input type="text" name="name" class="form-input readonly-input" th:value="${user.name}" readonly>
-                </label>
+                <form th:action="@{/mypage/profile}" method="post" class="edit-form" id="profileForm">
+                    
+                    <!-- 🔒 [1단계] 본인 인증 영역 (진입 시 최초 노출) -->
+                    <div id="authSection" class="form-section">
+                        <label class="form-row">
+                            <span class="form-label" style="font-weight: bold; color: #2c3e50;">현재 비밀번호 확인</span>
+                            <div style="display: flex; gap: 10px; width: 100%;">
+                                <input type="password" id="currentPw" name="pwCheck" class="form-input" placeholder="본인 확인을 위해 현재 비밀번호를 입력해 주세요" required style="flex: 1;">
+                                <button type="button" id="btnVerifyPw" class="primary-button" style="margin-top: 0; white-space: nowrap; background-color: #5c6bc0;">인증하기</button>
+                            </div>
+                            <span id="authMessage" style="font-size:12px; margin-top:4px; display:none;"></span>
+                        </label>
+                    </div>
 
-                <!-- 2. 이메일 (UserVO의 email 필드로 수집) -->
-                <label class="form-row">
-                    <span class="form-label">이메일</span>
-                    <input type="email" name="email" class="form-input" th:value="${user.email}">
-                </label>
+                    <hr class="form-divider" style="margin: 20px 0; border: 0; border-top: 1px dashed #dfe7f2;">
 
-                <!-- 3. 연락처 (UserVO의 tel 필드로 수집) -->
-                <label class="form-row">
-                    <span class="form-label">연락처</span>
-                    <input type="tel" name="tel" class="form-input" th:value="${user.tel}">
-                </label>
+                    <!-- 🔓 [2단계] 개인정보 수정 영역 (인증 성공 시 숨김 해제됨) -->
+                    <div id="infoSection" style="display: none; opacity: 0; transition: opacity 0.4s ease;">
+                        <!-- 이름 (읽기 전용) -->
+                        <label class="form-row">
+                            <span class="form-label">이름</span>
+                            <input type="text" name="name" class="form-input readonly-input" th:value="${user.name}" readonly>
+                        </label>
 
-                <hr class="form-divider" style="margin: 20px 0; border: 0; border-top: 1px dashed #dfe7f2;">
+                        <!-- 이메일 -->
+                        <label class="form-row">
+                            <span class="form-label">이메일</span>
+                            <div style="display: flex; gap: 10px; width: 100%;">
+                                <!-- 📌 기존 이메일 태그에 id="currentEmail" 추가 -->
+                                <input type="email" id="currentEmail" name="email" class="form-input" th:value="${user.email}" required style="flex: 1;">
+                                <!-- 📌 중복확인 버튼 추가 -->
+                                <button type="button" id="btnCheckEmail" class="primary-button" style="margin-top: 0; white-space: nowrap; background-color: #495057; font-size: 13px; padding: 0 15px;">중복확인</button>
+                            </div>
+                            <!-- 📌 결과 메시지 출력 공간 추가 -->
+                            <span id="emailCheckMessage" style="font-size:12px; margin-top:4px; display:none;"></span>
+                        </label>
 
-                <!-- 4. 현재 비밀번호 확인 (UserVO의 pwCheck 필드로 수집하여 검증용으로 사용) -->
-                <label class="form-row">
-                    <span class="form-label">현재 비밀번호</span>
-                    <input type="password" name="pwCheck" class="form-input" placeholder="본인 확인을 위해 입력해 주세요" required>
-                </label>
+                        <!-- 연락처 -->
+                        <label class="form-row">
+                            <span class="form-label">연락처</span>
+                            <input type="tel" name="tel" class="form-input" th:value="${user.tel}" required>
+                        </label>
 
-                <!-- 5. 새 비밀번호 입력 (UserVO의 pw 필드로 수집하여 새로 변경할 비밀번호 저장) -->
-                <label class="form-row">
-                    <span class="form-label">새 비밀번호</span>
-                    <input type="password" id="newPassword" name="pw" class="form-input" placeholder="변경할 때만 입력">
-                </label>
+                        <!-- 📌 회원정보 수정 내 배치된 비밀번호 변경 유도 인터페이스 -->
+                        <div style="margin: 25px 0; padding: 15px; background-color: #f8f9fa; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e9ecef;">
+                            <div>
+                                <span style="font-size: 14px; font-weight: bold; color: #495057; display: block;">비밀번호 변경</span>
+                                <span style="font-size: 12px; color: #868e96;">주기적인 비밀번호 변경으로 개인정보를 안전하게 보호하세요.</span>
+                            </div>
+                            <!-- 클릭 시 모달창 팝업 -->
+                            <button type="button" id="btnOpenPwModal" class="sub-button" style="background-color: #ffffff; border: 1px solid #ced4da; color: #495057; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">비밀번호 변경하기 ➡️</button>
+                        </div>
 
-                <!-- 6. 새 비밀번호 확인 (자바스크립트 비교용으로 사용하므로 name 제외 또는 자유 지정) -->
-                <label class="form-row">
-                    <span class="form-label">새 비밀번호 확인</span>
-                    <input type="password" id="confirmPassword" class="form-input" placeholder="새 비밀번호를 한번 더 입력">
-                    <span id="passwordMatchMessage" class="error-message" style="display:none; font-size:12px; margin-top:4px;"></span>
-                </label>
+                        <!-- 회원정보 최종 저장 버튼 -->
+                        <div style="display: flex; justify-content: flex-end;">
+                            <button type="submit" class="primary-button" style="margin-top: 0; width: 160px; background-color: #228be6;">회원정보 저장</button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </section>
 
-                <button type="submit" class="primary-button" style="margin-top: 15px;">저장하기</button>
-            </form>
+        <!-- 🪟 [별도 모달] 새 비밀번호 변경 팝업 레이어 (최종 완성본) -->
+        <div id="passwordModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+            <div style="background: white; padding: 30px; border-radius: 8px; width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                <h3 style="margin-top: 0; margin-bottom: 10px;">비밀번호 변경</h3>
+                <p style="font-size: 13px; color: #6c757d; margin-bottom: 20px;">새롭게 사용할 비밀번호를 입력하세요.</p>
+                
+                <!-- 📌 1. th:action 대신 순수 절대 경로로 주소를 완전히 박아버립니다 -->
+                <form action="/mypage/change-password" method="post" id="pwChangeForm">
+                    
+                    <!-- 📌 2. [가장 중요] 시큐리티가 요청을 증발시키지 못하게 만드는 CSRF 차단막 파괴 태그 -->
+                    <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
+                    <!-- 새 비밀번호 입력란 (자동완성 경고 해결) -->
+                    <label class="form-row" style="margin-bottom: 15px; display: block;">
+                        <span class="form-label" style="display:block; margin-bottom:5px;">새 비밀번호</span>
+                        <input type="password" id="newPassword" name="pw" class="form-input" placeholder="새 비밀번호 입력" autocomplete="new-password" required style="width:100%; box-sizing:border-box;">
+                    </label>
+
+                    <!-- 📌 3. 새 비밀번호 확인란 (id/name 및 자동완성 경고 전부 해결) -->
+                    <label class="form-row" style="margin-bottom: 15px; display: block;">
+                        <span class="form-label" style="display:block; margin-bottom:5px;">새 비밀번호 확인</span>
+                        <input type="password" id="confirmPassword" name="pwCheck" class="form-input" placeholder="한번 더 입력" autocomplete="new-password" required style="width:100%; box-sizing:border-box;">
+                        <span id="passwordMatchMessage" style="font-size:12px; margin-top:4px; display:none;"></span>
+                    </label>
+
+                    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                        <button type="button" id="btnCloseModal" style="background: #e9ecef; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">취소</button>
+                        <button type="submit" class="primary-button" style="margin-top: 0; background: #e03131;">변경하기</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+          
           <section class="mypage-view" id="myPosts">
             <section class="mypage-panel">
               <div class="panel-head">
@@ -774,13 +825,23 @@
 
               <div class="withdraw-box">
                 <p>탈퇴하면 회원정보와 채팅방 이용 내역을 더 이상 확인할 수 없습니다.</p>
-                <form action="/mypage/withdraw" method="post" class="edit-form">
-                  <label class="form-row">
-                    <span class="form-label">비밀번호 확인</span>
-                    <input type="password" name="password" class="form-input" placeholder="비밀번호 입력">
-                  </label>
-                  <button type="submit" class="danger-button">회원탈퇴 진행</button>
-                </form>
+                  <form action="/mypage/withdraw"
+                        method="post"
+                        class="edit-form"
+                        onsubmit="return confirmWithdraw();">
+                    <input type="hidden"
+                          th:name="${_csrf.parameterName}"
+                          th:value="${_csrf.token}">
+                    <label class="form-row">
+                      <span class="form-label">비밀번호 확인</span>
+                      <input type="password"
+                            name="password"
+                            class="form-input"
+                            placeholder="비밀번호 입력"
+                            required>
+                    </label>
+                    <button type="submit" class="danger-button">회원탈퇴 진행</button>
+                  </form>
               </div>
             </section>
           </section>
@@ -795,7 +856,7 @@
     const viewButtons = document.querySelectorAll("[data-view], [data-view-button]");
     const views = document.querySelectorAll(".mypage-view");
     const sideLinks = document.querySelectorAll("[data-view]");
-
+    
     function showView(targetId) {
       views.forEach((view) => {
         view.classList.toggle("is-active", view.id === targetId);
@@ -804,6 +865,11 @@
       sideLinks.forEach((link) => {
         link.classList.toggle("is-active", link.dataset.view === targetId);
       });
+
+      // 📌 [추가 기능] 다른 메뉴로 이동했다가 'memberEdit' 탭으로 올 때 인증 폼 잠금 초기화
+      if (targetId !== 'memberEdit') {
+         resetMemberEditAuth();
+      }
     }
 
     viewButtons.forEach((button) => {
@@ -825,6 +891,250 @@
     if (initialView && document.getElementById(initialView)) {
       showView(initialView);
     }
-  </script>
+    
+    function confirmWithdraw() {
+        return confirm("정말 회원탈퇴를 진행하시겠습니까?\n탈퇴 후에는 계정 이용이 제한됩니다.");
+      }
+
+    // -------------------------------------------------------------
+    // 📌 [신규 로직] 회원정보 수정 본인인증 & 비밀번호 변경 모달 시스템
+    // -------------------------------------------------------------
+    document.addEventListener("DOMContentLoaded", function () {
+        // 1단계 인증 요소
+        const btnVerifyPw = document.getElementById("btnVerifyPw");
+        const currentPwInput = document.getElementById("currentPw");
+        const authMessage = document.getElementById("authMessage");
+        const infoSection = document.getElementById("infoSection");
+        
+        // 2단계 모달 및 패스워드 변경 요소
+        const passwordModal = document.getElementById("passwordModal");
+        const btnOpenPwModal = document.getElementById("btnOpenPwModal");
+        const btnCloseModal = document.getElementById("btnCloseModal");
+        const newPassword = document.getElementById("newPassword");
+        const confirmPassword = document.getElementById("confirmPassword");
+        const passwordMatchMessage = document.getElementById("passwordMatchMessage");
+        const pwChangeForm = document.getElementById("pwChangeForm");
+
+        const profileForm = document.getElementById("profileForm");         // 전체 수정 폼
+        const emailInput = document.getElementById("currentEmail");         // 이메일 입력창
+        const btnCheckEmail = document.getElementById("btnCheckEmail");     // 중복확인 버튼
+        const emailCheckMessage = document.getElementById("emailCheckMessage"); // 결과 메시지창
+
+        let originalEmail = "";    // 회원의 기존 이메일 저장 변수
+        let isEmailChecked = true; // 중복확인 상태 플래그
+
+        
+        
+
+
+        // 📌 [보정 추가] 페이지 최초 진입 시 개인정보 영역이 멋대로 열려있지 않도록 확실하게 숨깁니다.
+        if (infoSection) {
+            infoSection.style.display = "none";
+
+            infoSection.style.opacity = "0";
+        }
+
+        // 🔒 A. 현재 비밀번호 비동기 Ajax 매칭 검증 루틴
+        if (btnVerifyPw) {
+            btnVerifyPw.addEventListener("click", function() {
+                const pwCheck = currentPwInput.value;
+                if (!pwCheck) {
+                    alert("비밀번호를 입력해 주세요.");
+                    return;
+                }
+
+                // 백엔드 컨트롤러로 비동기 검증 요청전송
+                fetch("/mypage/verify-password", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: new URLSearchParams({ pwCheck: pwCheck })
+                })
+                .then(res => res.json())
+                .then(isSuccess => {
+                    // 📌 [엄격한 비교 일치] 백엔드에서 true를 보내왔을 때만 정보 수정을 활성화합니다.
+                    if (isSuccess === true) {
+                        // 인증 성공 인터페이스 잠금 및 완료 처리
+                        authMessage.style.display = "block";
+                        authMessage.style.color = "#2b8a3e";
+                        authMessage.innerText = "✓ 본인 인증 완료";
+                        currentPwInput.style.backgroundColor = "#e8f5e9";
+                        currentPwInput.readOnly = true;
+                        btnVerifyPw.disabled = true;
+
+                        // 🔓 인증 통과 시 개인정보 수정 창 및 비밀번호 변경 단추 동시 활성화 오픈
+                        infoSection.style.display = "block";
+                        if (emailInput) {
+                            originalEmail = emailInput.value.trim();
+                            isEmailChecked = true; 
+                        }
+                        setTimeout(() => infoSection.style.opacity = "1", 50);
+                    } 
+                    // 📌 [보정 추가] 비밀번호가 틀려 false가 내려왔을 때는 철저하게 차단막을 칩니다.
+                    else {
+                        // 인증 실패 시 경고
+                        authMessage.style.display = "block";
+                        authMessage.style.color = "#fa5252";
+                        authMessage.innerText = "✗ 비밀번호가 일치하지 않습니다.";
+                        
+                        // 🔒 개인정보 수정 섹션을 열지 않고 물리적으로 무조건 숨김 유지합니다.
+                        infoSection.style.display = "none";
+                        infoSection.style.opacity = "0";
+                        
+                        currentPwInput.value = "";
+                        currentPwInput.focus();
+                    }
+                })
+                .catch(err => {
+                    console.error("비밀번호 서버 인증 통신 에러:", err);
+                    alert("인증 처리 중 서버 에러가 발생했습니다.");
+                    
+                    // 에러 발생 시에도 안전을 위해 무조건 숨김 상태로 처리합니다.
+                    if (infoSection) {
+                        infoSection.style.display = "none";
+                        infoSection.style.opacity = "0";
+                    }
+                });
+            });
+        }
+        // 중복확인 버튼 클릭 이벤트
+        if (btnCheckEmail && emailInput) {
+              btnCheckEmail.addEventListener("click", function() {
+                  const emailValue = emailInput.value.trim();
+
+                  if (!emailValue) {
+                      alert("이메일을 입력해 주세요.");
+                      emailInput.focus();
+                      return;
+                  }
+
+                  // 📌 [정규식 추가] 영문, 숫자, 표준 특수문자 조합의 올바른 이메일 형식 형상 검증
+                  // 한글 이메일(ㅁㄴㅇ@ㄴㅇㄹㅁ)이나 점(.)이 없는 도메인은 여기서 전부 걸러집니다.
+                  //const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                  //if (!emailRegex.test(emailValue)) {
+                  //    emailCheckMessage.style.display = "block";
+                  //    emailCheckMessage.style.color = "#fa5252";
+                  //    emailCheckMessage.innerText = "✗ 올바른 이메일 형식(example@domain.com)이 아닙니다.";
+                  //    isEmailChecked = false;
+                  //    emailInput.focus();
+                  //    return; // 🛑 정규식을 통과하지 못하면 fetch 요청 자체를 보내지 않고 중단합니다.
+                  //}
+
+                  if (emailValue === originalEmail) {
+                      emailCheckMessage.style.display = "block";
+                      emailCheckMessage.style.color = "#2b8a3e";
+                      emailCheckMessage.innerText = "✓ 현재 본인이 사용 중인 이메일입니다.";
+                      isEmailChecked = true;
+                      return;
+                  }
+
+                  // 정규식을 통과한 정상적인 이메일 문자열만 서버로 전송합니다.
+                  fetch(`/mypage/check-email?email=${encodeURIComponent(emailValue)}`)
+                      .then(res => res.text())
+                      .then(data => {
+                          if (data === "available") {
+                              emailCheckMessage.style.display = "block";
+                              emailCheckMessage.style.color = "#2b8a3e";
+                              emailCheckMessage.innerText = "✓ 사용 가능한 이메일입니다.";
+                              isEmailChecked = true;
+                          } else {
+                              emailCheckMessage.style.display = "block";
+                              emailCheckMessage.style.color = "#fa5252";
+                              emailCheckMessage.innerText = "✗ 이미 사용 중인 이메일입니다.";
+                              isEmailChecked = false;
+                          }
+                      })
+                      .catch(err => {
+                          console.error("이메일 중복확인 통신 에러:", err);
+                          alert("이메일 중복확인 중 오류가 발생했습니다.");
+                      });
+              });
+
+              // 이메일 수정 시 상태 리셋 이벤트 (기존과 동일)
+              emailInput.addEventListener("input", function() {
+                  if (emailInput.value.trim() !== originalEmail) {
+                      isEmailChecked = false;
+                      emailCheckMessage.style.display = "block";
+                      emailCheckMessage.style.color = "#fd7e14";
+                      emailCheckMessage.innerText = "⚠ 이메일이 변경되었습니다. 중복확인을 다시 해주세요.";
+                  } else {
+                      isEmailChecked = true;
+                      emailCheckMessage.style.display = "none";
+                  }
+              });
+          }
+
+
+        // 🪟 B. 회원정보 수정창 내 배치된 변경 단추 클릭 시 모달 레이어 제어
+        if (btnOpenPwModal) {
+            btnOpenPwModal.addEventListener("click", () => passwordModal.style.display = "flex");
+        }
+        if (btnCloseModal) {
+            btnCloseModal.addEventListener("click", () => {
+                passwordModal.style.display = "none";
+                pwChangeForm.reset();
+                passwordMatchMessage.style.display = "none";
+            });
+        }
+
+        // ✍️ C. 모달 내 새 비밀번호 실시간 동일 체크 검증
+        function checkPasswordMatch() {
+            if (!confirmPassword.value) {
+                passwordMatchMessage.style.display = "none";
+                return;
+            }
+            passwordMatchMessage.style.display = "block";
+            if (newPassword.value === confirmPassword.value) {
+                passwordMatchMessage.style.color = "#2b8a3e";
+                passwordMatchMessage.innerText = "새 비밀번호가 서로 일치합니다.";
+            } else {
+                passwordMatchMessage.style.color = "#fa5252";
+                passwordMatchMessage.innerText = "새 비밀번호가 일치하지 않습니다.";
+            }
+        }
+        if (newPassword && confirmPassword) {
+            newPassword.addEventListener("input", checkPasswordMatch);
+            confirmPassword.addEventListener("input", checkPasswordMatch);
+        }
+
+        // 🚀 D. 최종 전송 제어 자바스크립트 검증 차단막
+        if (pwChangeForm) {
+            pwChangeForm.addEventListener("submit", function(e) {
+                // 📌 [디버깅 추가] 전송 버튼을 누르면 무조건 브라우저 개발자도구 콘솔에 찍혀야 합니다.
+                console.log("🚀 [프론트엔드] 모달창 변경하기 버튼 클릭됨! 서버로 전송을 시도합니다.");
+                console.log("⌨️ 입력한 새 비밀번호:", newPassword.value);
+                console.log("⌨️ 입력한 확인 비밀번호:", confirmPassword.value);
+                
+                if (newPassword.value !== confirmPassword.value) {
+                    e.preventDefault();
+                    alert("새 비밀번호 확인 사항이 일치하지 않습니다. 다시 확인해 주세요.");
+                }
+            });
+        }
+        if (profileForm) {
+            profileForm.addEventListener("submit", function(e) {
+                if (!isEmailChecked) {
+                    e.preventDefault(); // 폼 전송 중단
+                    alert("변경된 이메일의 중복확인이 완료되지 않았습니다.");
+                    if (btnCheckEmail) btnCheckEmail.focus();
+                }
+            });
+        }
+
+        // 🔄 E. 다른 탭을 눌러 떠날 때 수정 폼을 다시 숨기고 리셋하는 내부 헬퍼 함수
+        window.resetMemberEditAuth = function() {
+            if (currentPwInput && infoSection && btnVerifyPw && authMessage) {
+                currentPwInput.value = "";
+                currentPwInput.readOnly = false;
+                currentPwInput.style.backgroundColor = "";
+                btnVerifyPw.disabled = false;
+                authMessage.style.display = "none";
+                
+                // 정보 수정 영역 초기 상태(숨김)로 롤백
+                infoSection.style.display = "none";
+                infoSection.style.opacity = "0";
+            }
+        }
+    });
+</script>
 </body>
 </html>

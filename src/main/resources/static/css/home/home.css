@@ -9,7 +9,7 @@
       background: linear-gradient(135deg, #2454e8 0%, #3b82f6 100%);
       color: white;
       border-radius: 16px;
-      padding: 48px 36px 46px;
+      padding: 32px 36px;
       position: relative;
       text-align: center;
       overflow: hidden;
@@ -68,6 +68,20 @@
       color: white;
       font-weight: 700;
       cursor: pointer;
+    }
+
+    .weekly-status {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .weekly-status span,
+    .weekly-status .stats {
+      margin: 0;
     }
 
     .stats {

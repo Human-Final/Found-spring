@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.human.found.domain.home.mapper.HomeMapper" >
+
+<select id="selectRecentFoundList"
+        resultType="FoundVO">
+    select * 
+    from ((select * 
+        from found
+        where is_deleted=0
+        order by fd_ymd desc
+        limit 2)
+        
+        union all
+        
+        (select * 
+        from found_police
+        where is_deleted=0
+        order by fd_ymd desc
+        limit 2)
+        
+        union all
+        
+        (select * 
+        from found_portal
+        where is_deleted=0
+        order by fd_ymd desc
+        limit 2)) as total_found
+
+    order by fd_ymd desc
+    limit 2
+</select>
+
+<select id="selectRecentLostList"
+        resultType="LostVO">
+    
+    select * 
+    from ((select * 
+        from lost
+        where is_deleted=0
+        order by lst_ymd desc
+        limit 2)
+        
+        union all
+        
+        (select * 
+        from lost_police
+        where is_deleted=0
+        order by lst_ymd desc
+        limit 2)) as total_lost
+    
+    order by lst_ymd desc
+    limit 2
+    
+</select>
+
+<select id="countWeeklyFound"
+        resultType="long">
+
+    select sum(cnt)
+    from(select count(*) cnt 
+        from found
+        where is_deleted=0
+            and fd_ymd >= curdate() - interval 6 day
+            and fd_ymd &lt; curdate() + interval 1 day
+    
+        union all
+        
+        select count(*) cnt 
+        from found_police
+        where is_deleted=0
+            and fd_ymd >= curdate() - interval 6 day
+            and fd_ymd &lt; curdate() + interval 1 day
+        
+        union all
+        
+        select count(*) cnt 
+        from found_portal
+        where is_deleted=0
+            and fd_ymd >= curdate() - interval 6 day
+            and fd_ymd &lt; curdate() + interval 1 day) as total_found
+
+</select>
+
+<select id="countWeeklyLost"
+        resultType="long">
+        
+    select sum(cnt)
+    from(select count(*) cnt 
+        from lost
+        where is_deleted=0
+            and lst_ymd >= curdate() - interval 6 day
+            and lst_ymd &lt; curdate() + interval 1 day
+    
+        union all
+        
+        select count(*) cnt 
+        from lost_police
+        where is_deleted=0
+            and lst_ymd >= curdate() - interval 6 day
+            and lst_ymd &lt; curdate() + interval 1 day) as total_lost
+
+</select>
+
+<select id="countWeeklyDone"
+        resultType="long">
+        
+    select sum(cnt)
+    from(select count(*) cnt 
+        from lost
+        where is_deleted=0
+            and done=1
+            and lst_ymd >= curdate() - interval 6 day
+            and lst_ymd &lt; curdate() + interval 1 day
+    
+        union all
+        
+        select count(*) cnt 
+        from lost_police
+        where is_deleted=0
+            and done=1
+            and lst_ymd >= curdate() - interval 6 day
+            and lst_ymd &lt; curdate() + interval 1 day
+        union all 
+
+        select count(*) cnt 
+        from found
+        where is_deleted=0
+            and done=1
+            and fd_ymd >= curdate() - interval 6 day
+            and fd_ymd &lt; curdate() + interval 1 day
+    
+        union all
+        
+        select count(*) cnt 
+        from found_police
+        where is_deleted=0
+            and done=1        
+            and fd_ymd >= curdate() - interval 6 day
+            and fd_ymd &lt; curdate() + interval 1 day
+        
+        union all
+        
+        select count(*) cnt 
+        from found_portal
+        where is_deleted=0
+            and done=1
+            and fd_ymd >= curdate() - interval 6 day
+            and fd_ymd &lt; curdate() + interval 1 day) as total
+
+</select>
+
+</mapper>

@@ -17,7 +17,7 @@
 
         <result property="signUp" column="sign_up"/>
         <result property="deletedAt" column="deleted_at"/>
-        <result property="deleted" column="deleted"/>
+        <result property="isdeleted" column="is_deleted"/>
 
     </resultMap>
 
@@ -28,6 +28,7 @@
         SELECT *
         FROM member
         WHERE id = #{id}
+            AND is_deleted = 0
 
     </select>
 
@@ -36,6 +37,7 @@
         INSERT INTO member (
             id,
             pw,
+            name,
             email,
             tel,
             role,
@@ -45,6 +47,7 @@
         VALUES (
             #{id},
             #{pw},
+            #{name},
             #{email},
             #{tel},
             'USER',
@@ -72,13 +75,35 @@
     
     </select>
 
+    <!-- 비밀번호만 업데이트 하는 매퍼 -->
+    <update id="updatePasswordOnly">
+        UPDATE member 
+        SET pw = #{pw} 
+        WHERE id = #{id}
+    </update>
+
     <!-- UserMapper.xml 내부에 추가할 코드 -->
     <update id="updateUser" parameterType="com.human.found.domain.user.vo.UserVO">
         UPDATE member
         SET email = #{email},
-        tel = #{tel},
-        pw = #{pw}
+        tel = #{tel}
         WHERE id = #{id}
     </update>
 
+    <!-- 회원탈퇴 , 5년 보존 때문에 소프트 삭제-->
+    <update id="withdrawUser"
+            parameterType = "string">
+        UPDATE member
+        SET
+            is_deleted = 1,
+            deleted_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 이메일 중복 확인 -->
+    <select id="isDuplicatedEmail" parameterType="string" resultType="int">
+        SELECT COUNT(*) 
+        FROM member 
+        WHERE email = #{email}
+    </select>
 </mapper>
