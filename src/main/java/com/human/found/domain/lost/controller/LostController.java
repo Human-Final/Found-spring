@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.human.found.domain.lost.service.LostService;
+import com.human.found.domain.lost.vo.LostFileVO;
 import com.human.found.domain.lost.vo.LostVO;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -44,7 +45,7 @@ public class LostController {
             bindingResult.getFieldErrors()
             .forEach(error -> System.out.println(
                 error.getField() + " = " + error.getDefaultMessage()));
-               
+            
 
             model.addAttribute("writetype", "lost");
             return "found/write";
@@ -63,7 +64,7 @@ public class LostController {
         
         return "redirect:/api/lost";
     }
-    
+    //조회
     @GetMapping("/api/lost")
     public String Lostlist(Model model) {
         List<LostVO>getList=lostService.getLostlist();
@@ -82,27 +83,40 @@ public class LostController {
     @PostMapping("/api/lost/{lostNum}")
     //비밀번호/게시글번호(lostnum)/사용자검증(principla)/
     // 삭제가 성공하거나 실패했을 때, 리다이렉트 되는 페이지(목록이나 상세페이지)로 일회성 메시지 전달
-    public String DeletedLost(@RequestParam("password")String inputpw,
-    @PathVariable("lostNum")Long lostNum,Principal principal,RedirectAttributes redirectAttributes){
+    public String DeletedLost(
+        @RequestParam("password")String inputpw,@PathVariable("lostNum")Long lostNum,Principal principal,
+        RedirectAttributes redirectAttributes){
         
         //로그인체크
         if(principal==null){
             redirectAttributes.addFlashAttribute("errorMessage", "로그인이 필요합니다.");
-            return "redirect:/api/lost";
+            return "redirect:/api/lost/";
         }
+        String targetAtcId=null;
         try {
             //서비스단에 글 id 입력번호, 로그인한 유저 id 를 넘겨받아 검증 및 삭제
-            lostService.deletelost(inputpw,lostNum,principal.getName());
+            targetAtcId=lostService.deletelost(inputpw,lostNum,principal.getName());
             redirectAttributes.addFlashAttribute("Message", "삭제완료");
+            return "redirect:/api/lost";
         } catch (Exception e) {
             // 검증 실패 시 에러 메시지를 들고 원래 상세 페이지로 리턴
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/api/lost"+lostNum;
 
-        }
-        return "redirect:/api/lost/";
-   }
-   
+            if(targetAtcId!=null){
+                return "redirect:/api/lost/detail/"+targetAtcId;
+            }else{
+                return "redirect:/api/lost/";
+            }
+        }        
+    }
+    //==상세보기==
+    @GetMapping("/api/lost/detail/{atcId}")
+    public String lostDetaile(@PathVariable("atcId")String atcId,Model model) {
+        LostVO lostVO=lostService.lostdetail(atcId);
+        model.addAttribute("lostVO", lostVO);
+        return "lost/detail";
+    }
+    
         
 }
     

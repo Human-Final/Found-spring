@@ -22,5 +22,18 @@
 
 </insert>    
 
+<select id="findById"
+resultType="com.human.found.domain.lost.vo.LostFileVO">
+SELECT *
+FROM lost_file
+WHERE atc_id=#{atcId}
+</select>
+
+<delete id="deleteByAtcId">
+DELETE FROM lost_file
+WHERE atc_id=#{atcId}
+
+</delete>
+
 
 </mapper>  

@@ -21,10 +21,15 @@
     )    
 
 </insert>
+
 <select id="findById"
 resultType="com.human.found.domain.found.vo.FoundFileVO">
-Select * FROM found_file
+SELECT * FROM found_file
 WHERE atc_id = #{atcId}
 </select>
 
+<delete id="deleteByAtcId">
+    DELETE FROM found_file
+    WHERE atc_id =#{atcId}
+</delete>
 </mapper>        
