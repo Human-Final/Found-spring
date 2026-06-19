@@ -126,3 +126,16 @@
 .login-submit:hover {
   background: #1d4ed8;
 }
+
+/* 회원탈퇴/안내 메시지 */
+.alert-message {
+  margin-bottom: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #dcfce7;
+  border: 1px solid #16a34a;
+  color: #166534;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.5;
+}
