@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.human.found.domain.lost.service.LostPoliceService;
+import com.human.found.domain.lost.service.LostPoliceServiceImpl;
 import com.human.found.domain.lost.vo.LostVO;
 
 @Controller
@@ -17,7 +17,7 @@ import com.human.found.domain.lost.vo.LostVO;
 public class LostPoliceController {
 
     @Autowired
-    private LostPoliceService lostService;
+    private LostPoliceServiceImpl lostService;
 
     @Autowired
     private com.human.found.infrastructure.map.KakaoMapConfig kakaoMapConfig;
