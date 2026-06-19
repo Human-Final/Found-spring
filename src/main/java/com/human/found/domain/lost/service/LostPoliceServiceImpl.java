@@ -90,7 +90,7 @@ public class LostPoliceServiceImpl implements LostPoliceService{
     
     //스케줄러 메서드
     //매일 새벽 1시에 자동으로 아래 fetchAndSaveLostGoods 메서드 호출하기
-    @Scheduled(cron = "0 3 11 * * *")
+    @Scheduled(cron = "0 0 1 * * *")
     public void ScheduledSavePoliceLost() {
         System.out.println("⏰ [스케줄러 시작] 기존 데이터를 삭제하고 경찰청의 모든 유실물 데이터를 처음부터 끝까지 수집합니다.");
         
@@ -98,7 +98,7 @@ public class LostPoliceServiceImpl implements LostPoliceService{
         lostPoliceMapper.lostPoliceDelete();        
         
         int pageNo = 1;
-        int numOfRows = 10; // API가 허용하는 안전한 최대 한도치로 설정
+        int numOfRows = 10000; // API가 허용하는 안전한 최대 한도치로 설정
         
         while (true) {
             System.out.println("🔄 현재 " + pageNo + "페이지 수집 중... (한 번에 " + numOfRows + "개씩 요청)");
@@ -116,7 +116,7 @@ public class LostPoliceServiceImpl implements LostPoliceService{
                 pageNo++; // 다음 페이지 준비
                 
                 // 안전장치: 너무 무한루프가 돌지 않도록 최대 30페이지(3만 건)까지만 수집하도록 제한
-                if (pageNo > 1) {
+                if (pageNo > 30) {
                     break;
                 }
                 
