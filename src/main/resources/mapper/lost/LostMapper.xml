@@ -73,7 +73,7 @@ is_deleted
 FROM lost_police
 WHERE 
         is_deleted=0
-UNION ALL  
+<!-- UNION ALL  
 
 SELECT 
 num,
@@ -90,10 +90,22 @@ done,
 is_deleted
 FROM lost_portal
 WHERE 
-        is_deleted=0 
+        is_deleted=0  -->
 ORDER BY lst_ymd DESC
-
-
+LIMIT 10
 
 </select>
+
+<select id="selectlostbyId"
+resultType="com.human.found.domain.lost.vo.LostVO">
+        SELECT *
+        FROM lost
+        WHERE num=#{lostNum}
+</select>
+
+<update id="lostupdateDelte">
+        UPDATE lost
+        SET is_deleted=1
+        WHERE num=#{lostNum}
+</update>
 </mapper>       

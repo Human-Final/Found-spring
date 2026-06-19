@@ -13,4 +13,5 @@ public interface FoundMapper {
     public List<FoundVO> selectFoundList();
     public void FoundupdateDelete(@Param("foundNum") Long foundNum);
     public FoundVO SelectFoundById(@Param("foundNum") Long foundNum );
+    public FoundVO SelectDetailatcID(@Param("atcId") String atcId);
 }
