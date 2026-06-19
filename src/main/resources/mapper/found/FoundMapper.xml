@@ -83,6 +83,7 @@
         WHERE 
             is_deleted=0 
         ORDER BY fd_ymd DESC
+        limit 0, 2
 
     </select>
 <select id="SelectFoundById"

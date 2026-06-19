@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.human.found.domain.user.service.UserService;
+import com.human.found.domain.user.service.UserServiceImpl;
 import com.human.found.domain.user.vo.UserVO;
 
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final UserService userService;
+    private final UserServiceImpl userService;
 
     /**
      * 로그인 페이지 이동
@@ -24,9 +24,15 @@ public class AuthController {
      * Method : GET
      */
     @GetMapping("/login")
-    public String loginPage() {
+    public String loginPage( 
+        @RequestParam(name = "withdraw", required = false) String withdraw,
+        Model model) {
+            if(withdraw != null) {
+                model.addAttribute("message", "회원탈퇴가 완료되었습니다.");
+            }
+
         return "user/login";
-    }
+        }
 
     /**
      * 회원가입 페이지 이동

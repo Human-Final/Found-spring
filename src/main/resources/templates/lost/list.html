@@ -2,11 +2,10 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>게시판</title>
+  <title>습득 게시판</title>
 
   <link rel="stylesheet" th:href="@{/css/common/common.css}">
   <link rel="stylesheet" th:href="@{/css/board/list.css}">
-
 </head>
 
 <body>
@@ -15,14 +14,13 @@
 
 <main class="board-page">
 
-  <!-- 분실 게시판이면 lost, 습득 게시판이면 found로 변경 -->
   <section class="board-hero lost">
     <div>
       <h2>분실 게시판</h2>
-      <p>잃어버린 물건을 등록하고 도움을 요청하세요</p>
+      <p>분실한 물건을 등록하고 도움을 요청하세요</p>
     </div>
 
-    <a href="/write" class="write-btn">글쓰기</a>
+    <a th:href="@{/api/write}" class="write-btn">글쓰기</a>
   </section>
 
   <section class="filter-box">
@@ -32,9 +30,9 @@
     </div>
 
     <div class="filter-row">
-    <span class="filter-label">카테고리</span>
+      <span class="filter-label">카테고리</span>
 
-    <div id="categoryFilter" class="chip-group">
+      <div id="categoryFilter" class="chip-group">
         <button type="button" class="chip active" data-category="">전체</button>
         <button type="button" class="chip" data-category="가방">가방</button>
         <button type="button" class="chip" data-category="귀금속">귀금속</button>
@@ -42,79 +40,27 @@
         <button type="button" class="chip" data-category="의류">의류</button>
         <button type="button" class="chip" data-category="자동차">자동차</button>
         <button type="button" class="chip" data-category="전자기기">전자기기</button>
-        <button type="button" class="chip" data-category="핸드폰">핸드폰</button>
         <button type="button" class="chip" data-category="지갑">지갑</button>
         <button type="button" class="chip" data-category="카드">카드</button>
         <button type="button" class="chip" data-category="기타">기타</button>
-    </div>
+      </div>
 
-    <span class="filter-label" style="margin-left: 10px;">상태</span>
+      <span class="filter-label" style="margin-left: 10px;">상태</span>
 
-    <div id="statusFilter" class="chip-group">
+      <div id="statusFilter" class="chip-group">
         <button type="button" class="chip active" data-status="">전체</button>
         <button type="button" class="chip" data-status="진행중">진행중</button>
         <button type="button" class="chip" data-status="완료">완료</button>
-    </div>
+      </div>
 
-    <select class="sort-select" id="sortSelect">
+      <select class="sort-select" id="sortSelect">
         <option value="latest">최신순</option>
         <option value="oldest">오래된순</option>
-    </select>
+      </select>
     </div>
   </section>
 
   <section class="post-grid">
-
-    <article class="post-card">
-      <div class="post-top">
-        <div class="tag-group">
-          <span class="type-tag lost">분실</span>
-          <span class="category-tag">전자기기</span>
-        </div>
-        <span class="status-tag progress">진행중</span>
-      </div>
-
-      <a href="#" class="post-title">아이폰 15 Pro 분실</a>
-
-      <p class="post-desc">
-        어제 밤 홍대 클럽거리에서 아이폰 15 Pro를 분실했습니다. 뒷면에 고양이 스티커가 붙어 있습니다.
-      </p>
-
-      <div class="post-info">
-        <div class="info-item">
-          <strong>물품명</strong>
-          아이폰 15 Pro
-        </div>
-        <div class="info-item">
-          <strong>색상명</strong>
-          블랙 티타늄
-        </div>
-        <div class="info-item">
-          <strong>분실지역</strong>
-          서울 마포구
-        </div>
-        <div class="info-item">
-          <strong>분실일자</strong>
-          2026-06-15
-        </div>
-        <div class="info-item">
-          <strong>물품분류</strong>
-          전자기기
-        </div>
-        <div class="info-item">
-          <strong>작성자</strong>
-          관리자
-        </div>
-      </div>
-
-      <div class="post-bottom">
-        <span>1일 전</span>
-        <div class="post-counts">
-          <span>조회 89</span>
-          <span>댓글 0</span>
-        </div>
-      </div>
-    </article>
 
     <article class="post-card">
       <div class="post-top">
@@ -125,28 +71,28 @@
         <span class="status-tag progress">진행중</span>
       </div>
 
-      <a href="#" class="post-title">파란 카드홀더 분실</a>
+      <a href="#" class="post-title">검은색 지갑 습득</a>
 
       <p class="post-desc">
-        신촌역 2호선 부근에서 파란색 카드홀더를 잃어버렸습니다. 안에 교통카드와 명함이 들어있습니다.
+        강남역 2번 출구 근처에서 검은색 반지갑을 발견했습니다. 신분증이 들어있어 신원 확인 가능합니다.
       </p>
 
       <div class="post-info">
         <div class="info-item">
           <strong>물품명</strong>
-          카드홀더
+          검은색 지갑
         </div>
         <div class="info-item">
           <strong>색상명</strong>
-          파란색
+          검은색
         </div>
         <div class="info-item">
-          <strong>분실지역</strong>
-          서울 서대문구
+          <strong>습득지역</strong>
+          서울 강남구
         </div>
         <div class="info-item">
-          <strong>분실일자</strong>
-          2026-06-14
+          <strong>습득일자</strong>
+          2026-06-15
         </div>
         <div class="info-item">
           <strong>물품분류</strong>
@@ -159,9 +105,60 @@
       </div>
 
       <div class="post-bottom">
-        <span>4일 전</span>
+        <span>2일 전</span>
         <div class="post-counts">
-          <span>조회 19</span>
+          <span>조회 43</span>
+          <span>댓글 1</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="post-card">
+      <div class="post-top">
+        <div class="tag-group">
+          <span class="type-tag lost">분실</span>
+          <span class="category-tag">전자기기</span>
+        </div>
+        <span class="status-tag done">완료</span>
+      </div>
+
+      <a href="#" class="post-title">에어팟 프로 케이스 습득</a>
+
+      <p class="post-desc">
+        143번 버스 안에서 에어팟 프로 케이스를 발견했습니다. 현재 보관 중이니 연락 주세요.
+      </p>
+
+      <div class="post-info">
+        <div class="info-item">
+          <strong>물품명</strong>
+          에어팟 프로 케이스
+        </div>
+        <div class="info-item">
+          <strong>색상명</strong>
+          흰색
+        </div>
+        <div class="info-item">
+          <strong>습득지역</strong>
+          서울 시내버스
+        </div>
+        <div class="info-item">
+          <strong>습득일자</strong>
+          2026-06-14
+        </div>
+        <div class="info-item">
+          <strong>물품분류</strong>
+          전자기기
+        </div>
+        <div class="info-item">
+          <strong>작성자</strong>
+          관리자
+        </div>
+      </div>
+
+      <div class="post-bottom">
+        <span>3일 전</span>
+        <div class="post-counts">
+          <span>조회 33</span>
           <span>댓글 0</span>
         </div>
       </div>

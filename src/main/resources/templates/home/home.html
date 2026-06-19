@@ -31,24 +31,28 @@
         <button>검색</button>
       </div>
 
+      <div class="weekly-status">
+        <span>지난 7일 현황</span>
+      </div>
+
       <div class="stats">
         <div>
-          <strong>2</strong>
+          <strong th:text="${countWeeklyFound ?: 0}">0</strong>
           <span>습득물</span>
         </div>
         <div>
-          <strong>2</strong>
+          <strong th:text="${countWeeklyLost ?: 0}">0</strong>
           <span>분실물</span>
         </div>
         <div>
-          <strong>1</strong>
+          <strong th:text="${countWeeklyDone ?: 0}">0</strong>
           <span>해결 완료</span>
         </div>
       </div>
     </section>
 
     <section class="menu-cards">
-      <a href="test/api/found" class="card">
+      <a th:href="@{/api/found}" class="card">
         <div class="card-icon green">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="m21 16-9 5-9-5V8l9-5 9 5v8z"></path>
@@ -60,7 +64,7 @@
         <p>2개 게시글</p>
       </a>
 
-      <a href="test/api/lost" class="card">
+      <a th:href="@{/api/lost}" class="card">
         <div class="card-icon red">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"></circle>
@@ -72,7 +76,7 @@
         <p>2개 게시글</p>
       </a>
 
-      <a href="api/notices" class="card">
+      <a th:href="@{/api/notices}" class="card">
         <div class="card-icon blue">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7"></path>
@@ -83,7 +87,7 @@
         <p>1개 공지</p>
       </a>
 
-      <a href="api/write" class="card">
+      <a th:href="@{api/write}" class="card">
         <div class="card-icon purple">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 20h9"></path>
@@ -124,57 +128,56 @@
           </svg>
           최근 습득물
         </h3>
-        <a href="#" class="more">더보기 →</a>
+        <a th:href="@{/api/found}" class="more">더보기 →</a>
       </div>
 
       <div class="post-grid">
-        <a href="#" class="post-card">
-            <div class="post-top">
-            <div class="post-tags">
-              <span class="badge badge-found">습득</span>
-              <span class="category">지갑/가방</span>
-            </div>
-            <span class="status status-progress">○ 진행중</span>
-          </div>
+        <a 
+          th:each="foundVO : ${recentFoundList}"
+          th:href="@{/found/detail/{atcId}(atcId=${foundVO.atcId})}"
+          class="post-card">
 
-          <h4>검은색 지갑 습득 (강남역 2번 출구 벤치)</h4>
-          <p>강남역 2번 출구 근처 벤치에서 검은색 반지갑을 발견했습니다. 신분증이 들어있어 신원 확인 가능합니다.</p>
-
-          <div class="post-bottom">
-            <div class="post-meta">
-              <span>관리자</span>
-              <span>2일 전</span>
-            </div>
-            <div class="post-stats">
-              <span>👁 42</span>
-              <span>💬 1</span>
-            </div>
-          </div>
-        </a>
-
-        <a href="/found/detail/2" class="post-card">
           <div class="post-top">
             <div class="post-tags">
               <span class="badge badge-found">습득</span>
-              <span class="category">전자기기</span>
-            </div>
-            <span class="status status-done">✓ 완료</span>          
-        </div>
 
-          <h4>에어팟 프로 케이스 습득 (143번 버스)</h4>
-          <p>143번 버스 안에서 에어팟 프로 케이스를 발견했습니다. 현재 보관 중이니 연락 주세요.</p>
+              <span class="${foundVO.prdtClNm}">기타</span>
+            </div>
+
+              <span class="status"
+                th:classappend="${foundVO.done==1 ? 'status-done' : 'status-progress'}"
+                th:text="${foundVO.done == 1 ? '✓ 완료' : '○ 진행중'}">
+                  ○ 진행중
+              </span>
+          </div>
+          <h4 th:text="${foundVO.fdPrdtNm}">습득물 제목</h4>
+
+          <p th:text="${foundVO.fdSbjt}">습득물 내용</p>
 
           <div class="post-bottom">
             <div class="post-meta">
-              <span>관리자</span>
-              <span>3일 전</span>
-            </div>
-            <div class="post-stats">
-              <span>👁 33</span>
-              <span>💬 0</span>
+              <span th:text="${foundVO.id !=null 
+                and !#strings.isEmpty(#strings.trim(foundVO.id))
+                ? #strings.trim(foundVO.id) : foundVO.depPlace
+                }">
+                작성자
+              </span>
+
+              <span th:text="${foundVO.fdYmd !=null 
+                ? #temporals.format(foundVO.fdYmd, 'yyyy.MM.dd')
+                : '-'}">
+                작성날짜
+              </span>
             </div>
           </div>
         </a>
+
+        <p class="empty-text"
+          th:if="${recentFoundList == null
+            or #lists.isEmpty(recentFoundList)}">
+          등록된 습득물이 없습니다.
+        </p>
+
       </div>
     </section>
 
@@ -187,57 +190,56 @@
           </svg>
           최근 분실물
         </h3>
-        <a href="#" class="more">더보기 →</a>
+        <a th:href="@{/api/lost}" class="more">더보기 →</a>
       </div>
 
       <div class="post-grid">
-        <a href="/lost/detail/2" class="post-card">
+        <a 
+          th:each="lostVO : ${recentLostList}"
+          th:href="@{/lost/detail/{atcId}(atcId=${lostVO.atcId})}"
+          class="post-card">
+
           <div class="post-top">
             <div class="post-tags">
               <span class="badge badge-lost">분실</span>
-              <span class="category">전자기기</span>
-            </div>
-            <span class="status status-progress">○ 진행중</span>
-          </div>
 
-          <h4>아이폰 15 Pro 분실 (홍대 클럽거리)</h4>
-          <p>어제 밤 홍대 클럽거리에서 아이폰 15 Pro 딥퍼플을 잃어버렸습니다. 뒷면에 고양이 스티커가 붙어있습니다.</p>
+              <span class="${lostVO.prdtClNm}">기타</span>
+            </div>
+
+              <span class="status"
+                th:classappend="${lostVO.done==1 ? 'status-done' : 'status-progress'}"
+                th:text="${lostVO.done == 1 ? '✓ 완료' : '○ 진행중'}">
+                  ○ 진행중
+              </span>
+          </div>
+          <h4 th:text="${lostVO.lstPrdtNm}">습득물 제목</h4>
+
+          <p th:text="${lostVO.lstSbjt}">습득물 내용</p>
 
           <div class="post-bottom">
             <div class="post-meta">
-              <span>관리자</span>
-              <span>1일 전</span>
-            </div>
-            <div class="post-stats">
-              <span>👁 87</span>
-              <span>💬 0</span>
+              <span th:text="${lostVO.id !=null 
+                and !#strings.isEmpty(#strings.trim(lostVO.id))
+                ? #strings.trim(lostVO.id) : lostVO.lstPlace
+                }">
+                작성자
+              </span>
+
+              <span th:text="${lostVO.lstYmd !=null 
+                ? #temporals.format(lostVO.lstYmd, 'yyyy.MM.dd')
+                : '-'}">
+                작성날짜
+              </span>
             </div>
           </div>
         </a>
 
-        <a href="/lost/detail/1" class="post-card">
-          <div class="post-top">
-            <div class="post-tags">
-              <span class="badge badge-lost">분실</span>
-              <span class="category">지갑/가방</span>
-            </div>
-            <span class="status status-progress">○ 진행중</span>
-          </div>
+        <p class="empty-text"
+          th:if="${recentLostList == null
+            or #lists.isEmpty(recentLostList)}">
+          등록된 분실물이 없습니다.
+        </p>     
 
-          <h4>파란 카드홀더 분실 (신촌역 2호선)</h4>
-          <p>2호선 신촌역에서 파란색 카드홀더를 잃어버렸습니다. 안에 교통카드와 명함이 들어있습니다.</p>
-
-          <div class="post-bottom">
-            <div class="post-meta">
-              <span>관리자</span>
-              <span>4일 전</span>
-            </div>
-            <div class="post-stats">
-              <span>👁 19</span>
-              <span>💬 0</span>
-            </div>
-          </div>
-        </a>
       </div>
     </section>
   </main>

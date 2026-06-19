@@ -34,13 +34,15 @@
 
           <div class="board-selector">
             <label class="radio-card">
-              <input type="radio" name="boardType" value="FOUND" checked required>
+              <input type="radio" name="boardType" value="FOUND" 
+                th:checked="${writetype == null or writetype == 'found'}" required>
               <span class="radio-dot found" aria-hidden="true"></span>
               <span>습득물 등록</span>
             </label>
 
             <label class="radio-card lost-card">
-              <input type="radio" name="boardType" value="LOST" required>
+              <input type="radio" name="boardType" value="LOST" 
+                th:checked="${writetype == 'lost'}" required>
               <span class="radio-dot lost" aria-hidden="true"></span>
               <span>분실물 등록</span>
             </label>
@@ -94,11 +96,13 @@
 
         <div class="form-section">
           <label for="title" class="form-label">제목 
-            <span class="required-mark">*</span></label>
+            <span class="required-mark">*</span>
+          </label>
           <input
             type="text"
             id="title"
-            name="fdSbjt"
+            name="fdPrdtNm"
+            th:value="${writetype == 'lost' ? lostVO.lstPrdtNm : foundVO.fdPrdtNm}"
             class="form-control title-input"
             placeholder="제목을 입력하세요"
             required
@@ -111,19 +115,24 @@
           </label>
           <textarea
             id="content"
-            name="fdPrdtNm"
+            name="fdSbjt"
+            th:text="${writetype == 'lost' ? lostVO.lstSbjt : foundVO.fdSbjt}"
             class="form-control content-textarea"
             placeholder="분실/습득 장소, 시간, 물건 특징 등을 자세히 적어주세요"
-            required
-          ></textarea>
+            required>
+          </textarea>
         </div>
 
         <div class="form-section">
-            <label for="fdYmd" class="form-label">습득일자 <span class="required-mark">*</span></label>
+            <label for="occurredAt" class="form-label">
+              <span id="dateLabel">습득일자 </span>
+              <span class="required-mark">*</span>
+            </label>
             <input
                 type="datetime-local"
-                id="fdYmd"
+                id="occurredAt"
                 name="fdYmd"
+                th:value="${writetype == 'lost' ? lostVO.lstYmd : foundVO.fdYmd}"
                 class="form-control title-input"
                 required
             >
@@ -157,9 +166,14 @@
     <script>
     const postForm = document.querySelector("#postForm");
     const boardTypeInputs = document.querySelectorAll("input[name='boardType']");
+    const titleInput = document.querySelector("#title");
+    const contentInput = document.querySelector("#content");
+    const occurredAtInput = document.querySelector("#occurredAt");
+    const dateLabel = document.querySelector("#dateLabel");
     const uploadBox = document.querySelector("#uploadBox");
     const fileUpload = document.querySelector("#fileUpload");
     const fileName = document.querySelector("#fileName");
+
 
     function changeFormAction() {
         const checkedBoardType = document.querySelector("input[name='boardType']:checked");
@@ -168,9 +182,30 @@
         return;
         }
 
-        postForm.action = checkedBoardType.value === "LOST"
+        const isLost = checkedBoardType.value === "LOST";
+
+        // 전송 주소 변경
+        postForm.action = isLost
         ? postForm.dataset.lostAction
         : postForm.dataset.foundAction;
+
+        // VO 필드명 변경
+        titleInput.name = isLost
+        ? "lstPrdtNm"
+        : "fdPrdtNm";
+
+        contentInput.name = isLost
+        ? "lstSbjt"
+        : "fdSbjt";
+
+        occurredAtInput.name = isLost
+        ? "lstYmd"
+        : "fdYmd"
+
+        // 화면 문구 변경
+        dateLabel.textContent = isLost
+        ? "분실일자"
+        : "습득일자";
     }
 
     function updateFileName() {
@@ -210,6 +245,18 @@
         fileUpload.files = event.dataTransfer.files;
         updateFileName();
     });
+
+    function setMaxDateTime(){
+      const now = new Date();
+      const localNow = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 16);
+
+        occurredAtInput.max = localNow;
+    }
+
+    setMaxDateTime();
+
     </script>
 </body>
 </html>
