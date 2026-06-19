@@ -82,7 +82,6 @@ public class UserServiceImpl implements UserService {
             return "이미 사용중인 이메일입니다.";
         }
 
-        // 비밀번호 확인
         if (!user.getPw().equals(user.getPwCheck())) {
             return "비밀번호가 일치하지 않습니다.";
         }
@@ -228,7 +227,7 @@ public class UserServiceImpl implements UserService {
 
         // 입력한 비밀번호와 DB에 암호화된 비밀번호 비교
         if(!passwordEncoder.matches(password, dbUser.getPw())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다. 다시 입력하세요.");
         }
 
         // 회원탈퇴 처리

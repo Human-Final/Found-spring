@@ -194,7 +194,7 @@ public class UserController {
 
                 // 비밀번호 불일치 시 등 오류 발생 시 마이페이지로 복귀
                 redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-                return "redirect:/login?withdraw";
+                return "redirect:/mypage#memberWithdraw";
             }
 
         }
