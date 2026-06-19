@@ -18,5 +18,8 @@ public interface FoundService {
     //삭제
     public void deletefound(Long foundNum,String inputpw,String loginid);
 
+    //상세보기
+    public FoundVO foundgetdetail(String atcID);
+
 
 }

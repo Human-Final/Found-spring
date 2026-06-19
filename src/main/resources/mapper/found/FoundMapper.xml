@@ -83,7 +83,7 @@
         WHERE 
             is_deleted=0 
         ORDER BY fd_ymd DESC
-        limit 0, 2
+        LIMIT 10
 
     </select>
 <select id="SelectFoundById"
@@ -97,6 +97,50 @@ resultType="com.human.found.domain.found.vo.FoundVO">
     SET is_deleted=1
     WHERE num =#{foundNum}
 </update>
+
+    <select id="SelectDetailatcID" parameterType="string" resultType="com.human.found.domain.found.vo.FoundVO">
+        SELECT * FROM (
+            SELECT 
+                num, 
+                atc_id, 
+                id, 
+                dep_place, 
+                fd_prdt_nm, 
+                fd_sbjt, 
+                fd_ymd, 
+                prdt_cl_nm, 
+                clr_nm, 
+                created_at, 
+                updated_at, 
+                done, 
+                is_deleted, 
+                'user' AS dataSource <!--테이블라벨-->
+            FROM found
+            WHERE is_deleted = 0
+            
+            UNION ALL
+            
+            SELECT 
+                num, 
+                atc_id, 
+                id, 
+                dep_place, 
+                fd_prdt_nm, 
+                fd_sbjt, 
+                fd_ymd, 
+                prdt_cl_nm, 
+                clr_nm, 
+                created_at, 
+                updated_at, 
+                done, is_deleted, 
+                'police' AS dataSource <!--테이블라벨-->
+            FROM found_police
+            WHERE is_deleted = 0
+        ) combined_found
+        WHERE combined_found.atc_id = #{atcId}
+    </select>
+
+
 
 
 

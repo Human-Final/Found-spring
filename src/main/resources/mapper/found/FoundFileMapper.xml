@@ -7,13 +7,13 @@
         parameterType="com.human.found.domain.found.vo.FoundFileVO">
     INSERT INTO found_file(
         fd_filepath_img,
-        board_id,
+        atc_id,
         save_name,
         file_size,
         file_path
     )VALUES(
         #{fdFilepathImg},
-        #{boardId},
+        #{atcId},
         #{saveName},
         #{fileSize},
         #{filePath}
@@ -21,6 +21,10 @@
     )    
 
 </insert>
-
+<select id="findById"
+resultType="com.human.found.domain.found.vo.FoundFileVO">
+Select * FROM found_file
+WHERE atc_id = #{atcId}
+</select>
 
 </mapper>        
