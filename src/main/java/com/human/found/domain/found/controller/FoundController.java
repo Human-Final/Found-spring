@@ -60,6 +60,7 @@ public class FoundController {
     public String getFoundList(Model model) {
         List<FoundVO>getList = foundService.getFoundList();
         model.addAttribute("getList", getList);
+        // model.addAttribute("countTotalFound", countTotalFound);
 
         return "found/list";
     }
@@ -80,7 +81,7 @@ public class FoundController {
         @RequestParam("atcId")String atcId,@RequestParam("password")String inputpw,@PathVariable("foundNum")Long foundNum,
         Principal principal ,RedirectAttributes redirectAttributes) {
 
-            //로그인체크
+        //로그인체크
         if(principal==null){
             redirectAttributes.addFlashAttribute("errorMessage", "로그인이 필요합니다.");
             return "redirect:/api/found";

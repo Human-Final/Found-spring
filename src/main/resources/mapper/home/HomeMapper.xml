@@ -148,7 +148,43 @@
         where is_deleted=0
             and done=1
             and fd_ymd >= curdate() - interval 6 day
-            and fd_ymd &lt; curdate() + interval 1 day) as total
+            and fd_ymd &lt; curdate() + interval 1 day) as total_done
+
+</select>
+
+<!-- 이건 found/lost 로직으로 가야 함-->
+<select id="countTotalFound"
+        resultType="long">
+        
+    select sum(cnt)
+    from (
+        select count(*) cnt
+        from found 
+        
+        union all 
+        
+        select count(*) cnt
+        from found_police 
+        
+        union all
+        
+        select count(*) cnt
+        from found_portal) as total_found
+
+</select>
+
+<select id="countTotalLost"
+        resultType="long">
+
+    select sum(cnt)
+    from (
+        select count(*) cnt
+        from lost 
+        
+        union all 
+        
+        select count(*) cnt
+        from lost_police) as total_lost
 
 </select>
 

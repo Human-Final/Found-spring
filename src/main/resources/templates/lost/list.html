@@ -2,13 +2,13 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>습득 게시판</title>
+  <title>분실 게시판</title>
 
   <link rel="stylesheet" th:href="@{/css/common/common.css}">
   <link rel="stylesheet" th:href="@{/css/board/list.css}">
 </head>
 
-<body>
+<body class="lost-board">
 
 <div th:replace="layout/header :: headerFragment"></div>
 
@@ -30,177 +30,139 @@
     </div>
 
     <div class="filter-row">
-      <span class="filter-label">카테고리</span>
+      <div class="filter-section">
+        <span class="filter-label">카테고리</span>
 
-      <div id="categoryFilter" class="chip-group">
-        <button type="button" class="chip active" data-category="">전체</button>
-        <button type="button" class="chip" data-category="가방">가방</button>
-        <button type="button" class="chip" data-category="귀금속">귀금속</button>
-        <button type="button" class="chip" data-category="도서">도서</button>
-        <button type="button" class="chip" data-category="의류">의류</button>
-        <button type="button" class="chip" data-category="자동차">자동차</button>
-        <button type="button" class="chip" data-category="전자기기">전자기기</button>
-        <button type="button" class="chip" data-category="지갑">지갑</button>
-        <button type="button" class="chip" data-category="카드">카드</button>
-        <button type="button" class="chip" data-category="기타">기타</button>
+        <div id="categoryFilter" class="chip-group">
+          <button type="button" class="chip active" data-category="">전체</button>
+          <button type="button" class="chip" data-category="가방">가방</button>
+          <button type="button" class="chip" data-category="귀금속">귀금속</button>
+          <button type="button" class="chip" data-category="도서">도서</button>
+          <button type="button" class="chip" data-category="의류">의류</button>
+          <button type="button" class="chip" data-category="자동차">자동차</button>
+          <button type="button" class="chip" data-category="전자기기">전자기기</button>
+          <button type="button" class="chip" data-category="지갑">지갑</button>
+          <button type="button" class="chip" data-category="카드">카드</button>
+          <button type="button" class="chip" data-category="기타">기타</button>
+        </div>
       </div>
+      <div class="filter-section status-section">
+        <span class="filter-label">상태</span>
 
-      <span class="filter-label" style="margin-left: 10px;">상태</span>
-
-      <div id="statusFilter" class="chip-group">
-        <button type="button" class="chip active" data-status="">전체</button>
-        <button type="button" class="chip" data-status="진행중">진행중</button>
-        <button type="button" class="chip" data-status="완료">완료</button>
+        <div id="statusFilter" class="chip-group">
+          <button type="button" class="chip active" data-status="">전체</button>
+          <button type="button" class="chip" data-status="진행중">진행중</button>
+          <button type="button" class="chip" data-status="완료">완료</button>
+        </div>
       </div>
-
-      <select class="sort-select" id="sortSelect">
-        <option value="latest">최신순</option>
-        <option value="oldest">오래된순</option>
-      </select>
     </div>
   </section>
+  
+  <div class="count-sort">
+    <p class="total-count">총 2건</p>    
+    <select class="sort-select" id="sortSelect">
+      <option value="latest">최신순</option>
+      <option value="oldest">오래된순</option>
+    </select>
+  </div>
 
   <section class="post-grid">
+    <a 
+      th:each="lostVO : ${getList}"
+      th:href="@{/lostVO/detail/{atcId}(atcId=${lostVO.atcId})}"
+      class="post-card">
 
-    <article class="post-card">
       <div class="post-top">
         <div class="tag-group">
           <span class="type-tag lost">분실</span>
-          <span class="category-tag">지갑</span>
+          <span th:text="${lostVO.prdtClNm}" class="category-tag">카테고리</span>
         </div>
-        <span class="status-tag progress">진행중</span>
+        <span class="status-tag"
+          th:classappend="${lostVO.done==1 ? 'status-tag-done' : 'status-tag-progress'}"
+          th:text="${lostVO.done == 1 ? '✓ 완료' : '○ 진행중'}">
+          상태
+        </span>
       </div>
 
-      <a href="#" class="post-title">검은색 지갑 습득</a>
+      <h4 th:text="${lostVO.lstPrdtNm}" class="post-title">제목</h4>
+      <p th:text="${lostVO.lstSbjt}" 
+         th:title="${lostVO.lstSbjt}"
+         class="post-desc">글 내용</p>
 
-      <p class="post-desc">
-        강남역 2번 출구 근처에서 검은색 반지갑을 발견했습니다. 신분증이 들어있어 신원 확인 가능합니다.
-      </p>
+      <div class="post-divider"></div>
 
-      <div class="post-info">
+      <div class="post-info lost-info">
         <div class="info-item">
           <strong>물품명</strong>
-          검은색 지갑
+          <p th:text="${lostVO.lstPrdtNm}">물품명</p>
         </div>
         <div class="info-item">
-          <strong>색상명</strong>
-          검은색
+          <strong>분실지역</strong>
+          <p th:text="${lostVO.lstPlace}">분실지역</p>
         </div>
         <div class="info-item">
-          <strong>습득지역</strong>
-          서울 강남구
-        </div>
-        <div class="info-item">
-          <strong>습득일자</strong>
-          2026-06-15
+          <strong>분실일자</strong>
+          <p th:text="${lostVO.lstYmd}">분실일자</p>
         </div>
         <div class="info-item">
           <strong>물품분류</strong>
-          지갑
+          <p th:text="${lostVO.prdtClNm}">물품분류</p>
         </div>
-        <div class="info-item">
+        <div class="info-item author-item">
           <strong>작성자</strong>
-          관리자
-        </div>
+          <p th:text="${lostVO.id !=null ? lostVO.id : lostVO.lstPlace}">작성자</p>
+        </div>                
       </div>
-
       <div class="post-bottom">
-        <span>2일 전</span>
+        <span>작성날짜(몇일 전 로직으로 구현)</span>
         <div class="post-counts">
-          <span>조회 43</span>
-          <span>댓글 1</span>
+          <span>조회 수</span>
+          <span>댓글 수</span>
         </div>
       </div>
-    </article>
-
-    <article class="post-card">
-      <div class="post-top">
-        <div class="tag-group">
-          <span class="type-tag lost">분실</span>
-          <span class="category-tag">전자기기</span>
-        </div>
-        <span class="status-tag done">완료</span>
-      </div>
-
-      <a href="#" class="post-title">에어팟 프로 케이스 습득</a>
-
-      <p class="post-desc">
-        143번 버스 안에서 에어팟 프로 케이스를 발견했습니다. 현재 보관 중이니 연락 주세요.
-      </p>
-
-      <div class="post-info">
-        <div class="info-item">
-          <strong>물품명</strong>
-          에어팟 프로 케이스
-        </div>
-        <div class="info-item">
-          <strong>색상명</strong>
-          흰색
-        </div>
-        <div class="info-item">
-          <strong>습득지역</strong>
-          서울 시내버스
-        </div>
-        <div class="info-item">
-          <strong>습득일자</strong>
-          2026-06-14
-        </div>
-        <div class="info-item">
-          <strong>물품분류</strong>
-          전자기기
-        </div>
-        <div class="info-item">
-          <strong>작성자</strong>
-          관리자
-        </div>
-      </div>
-
-      <div class="post-bottom">
-        <span>3일 전</span>
-        <div class="post-counts">
-          <span>조회 33</span>
-          <span>댓글 0</span>
-        </div>
-      </div>
-    </article>
-
+    </a>
   </section>
 
-  <p class="total-count">총 2건</p>
 
 </main>
 
 <div th:replace="layout/footer :: footerFragment"></div>
 
 <script>
-  let selectedCategory = "";
-  let selectedStatus = "";
+  const currentParams = new URLSearchParams(window.location.search);
+  let selectedCategory = currentParams.get("category") || "";
+  let selectedStatus = currentParams.get("status") || "";
 
+  document.querySelector("#keywordInput").value = currentParams.get("keyword") || "";
+  document.querySelector("#sortSelect").value = currentParams.get("sort") || "latest";
+
+  // 카테고리 선택 조회 기능
   function bindCategoryFilter() {
     const buttons = document.querySelectorAll("#categoryFilter .chip");
 
     buttons.forEach(button => {
-      button.addEventListener("click", function () {
-        buttons.forEach(btn => btn.classList.remove("active"));
-        this.classList.add("active");
-
+      button.classList.toggle("active",
+        button.dataset.category === selectedCategory
+      );
+        
+      button.addEventListener("click", function(){
         selectedCategory = this.dataset.category;
-
         loadBoardList();
       });
     });
   }
 
+  // 상태 선택 조회 기능
   function bindStatusFilter() {
     const buttons = document.querySelectorAll("#statusFilter .chip");
 
     buttons.forEach(button => {
-      button.addEventListener("click", function () {
-        buttons.forEach(btn => btn.classList.remove("active"));
-        this.classList.add("active");
-
+      button.classList.toggle("active",
+        button.dataset.status === selectedStatus
+      );
+        
+      button.addEventListener("click", function(){
         selectedStatus = this.dataset.status;
-
         loadBoardList();
       });
     });
@@ -226,24 +188,20 @@
     const keyword = document.querySelector("#keywordInput").value.trim();
 
     if (keyword) {
-      params.append("keyword", keyword);
+      params.set("keyword", keyword);
     }
 
     if (selectedCategory) {
-      params.append("category", selectedCategory);
+      params.set("category", selectedCategory);
     }
 
     if (selectedStatus) {
-      params.append("status", selectedStatus);
+      params.set("status", selectedStatus);
     }
 
-    const sort = document.querySelector("#sortSelect").value;
-    params.append("sort", sort);
+    params.set("sort", document.querySelector("#sortSelect").value);
 
-    const response = await fetch("/api/lost?" + params.toString());
-    const data = await response.json();
-
-    console.log(data);
+    window.location.href = window.location.pathname + "?" + params.toString();
   }
 
   document.querySelector("#sortSelect").addEventListener("change", loadBoardList);

@@ -19,4 +19,8 @@ public interface HomeMapper {
     public long countWeeklyLost();
     public long countWeeklyDone();
 
+    // 습득/분실 총 갯수 카운트
+    public long countTotalFound();
+    public long countTotalLost();
+
 }

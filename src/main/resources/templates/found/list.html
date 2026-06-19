@@ -30,38 +30,40 @@
     </div>
 
     <div class="filter-row">
-      <span class="filter-label">카테고리</span>
+      <div class="filter-section">
+        <span class="filter-label">카테고리</span>
 
-      <div id="categoryFilter" class="chip-group">
-        <button type="button" class="chip active" data-category="">전체</button>
-        <button type="button" class="chip" data-category="가방">가방</button>
-        <button type="button" class="chip" data-category="귀금속">귀금속</button>
-        <button type="button" class="chip" data-category="도서">도서</button>
-        <button type="button" class="chip" data-category="의류">의류</button>
-        <button type="button" class="chip" data-category="자동차">자동차</button>
-        <button type="button" class="chip" data-category="전자기기">전자기기</button>
-        <button type="button" class="chip" data-category="지갑">지갑</button>
-        <button type="button" class="chip" data-category="카드">카드</button>
-        <button type="button" class="chip" data-category="기타">기타</button>
+        <div id="categoryFilter" class="chip-group">
+          <button type="button" class="chip active" data-category="">전체</button>
+          <button type="button" class="chip" data-category="가방">가방</button>
+          <button type="button" class="chip" data-category="귀금속">귀금속</button>
+          <button type="button" class="chip" data-category="도서">도서</button>
+          <button type="button" class="chip" data-category="의류">의류</button>
+          <button type="button" class="chip" data-category="자동차">자동차</button>
+          <button type="button" class="chip" data-category="전자기기">전자기기</button>
+          <button type="button" class="chip" data-category="지갑">지갑</button>
+          <button type="button" class="chip" data-category="카드">카드</button>
+          <button type="button" class="chip" data-category="기타">기타</button>
+        </div>
       </div>
+      <div class="filter-section status-section">
+        <span class="filter-label">상태</span>
 
-      <span class="filter-label" style="margin-left: 10px;">상태</span>
-
-      <div id="statusFilter" class="chip-group">
-        <button type="button" class="chip active" data-status="">전체</button>
-        <button type="button" class="chip" data-status="진행중">진행중</button>
-        <button type="button" class="chip" data-status="완료">완료</button>
+        <div id="statusFilter" class="chip-group">
+          <button type="button" class="chip active" data-status="">전체</button>
+          <button type="button" class="chip" data-status="진행중">진행중</button>
+          <button type="button" class="chip" data-status="완료">완료</button>
+        </div>
       </div>
-
-      <select class="sort-select" id="sortSelect">
-        <option value="latest">최신순</option>
-        <option value="oldest">오래된순</option>
-      </select>
     </div>
   </section>
   
-  <div>
+  <div class="count-sort">
     <p class="total-count">총 2건</p>    
+    <select class="sort-select" id="sortSelect">
+      <option value="latest">최신순</option>
+      <option value="oldest">오래된순</option>
+    </select>
   </div>
 
   <section class="post-grid">
@@ -75,11 +77,19 @@
           <span class="type-tag found">습득</span>
           <span th:text="${foundVO.prdtClNm}" class="category-tag">카테고리</span>
         </div>
-        <span class="status-tag done">상태</span>
+        <span class="status-tag"
+          th:classappend="${foundVO.done==1 ? 'status-tag-done' : 'status-tag-progress'}"
+          th:text="${foundVO.done == 1 ? '✓ 완료' : '○ 진행중'}">
+          상태
+        </span>
       </div>
 
       <h4 th:text="${foundVO.fdPrdtNm}" class="post-title">제목</h4>
-      <p th:text="${foundVO.fdSbjt}" class="post-desc">글 내용</p>
+      <p th:text="${foundVO.fdSbjt}" 
+         th:title="${foundVO.fdSbjt}"
+         class="post-desc">글 내용</p>
+
+      <div class="post-divider"></div>
 
       <div class="post-info">
         <div class="info-item">
@@ -123,34 +133,40 @@
 <div th:replace="layout/footer :: footerFragment"></div>
 
 <script>
-  let selectedCategory = "";
-  let selectedStatus = "";
+  const currentParams = new URLSearchParams(window.location.search);
+  let selectedCategory = currentParams.get("category") || "";
+  let selectedStatus = currentParams.get("status") || "";
 
+  document.querySelector("#keywordInput").value = currentParams.get("keyword") || "";
+  document.querySelector("#sortSelect").value = currentParams.get("sort") || "latest";
+
+  // 카테고리 선택 조회 기능
   function bindCategoryFilter() {
     const buttons = document.querySelectorAll("#categoryFilter .chip");
 
     buttons.forEach(button => {
-      button.addEventListener("click", function () {
-        buttons.forEach(btn => btn.classList.remove("active"));
-        this.classList.add("active");
-
+      button.classList.toggle("active",
+        button.dataset.category === selectedCategory
+      );
+        
+      button.addEventListener("click", function(){
         selectedCategory = this.dataset.category;
-
         loadBoardList();
       });
     });
   }
 
+  // 상태 선택 조회 기능
   function bindStatusFilter() {
     const buttons = document.querySelectorAll("#statusFilter .chip");
 
     buttons.forEach(button => {
-      button.addEventListener("click", function () {
-        buttons.forEach(btn => btn.classList.remove("active"));
-        this.classList.add("active");
-
+      button.classList.toggle("active",
+        button.dataset.status === selectedStatus
+      );
+        
+      button.addEventListener("click", function(){
         selectedStatus = this.dataset.status;
-
         loadBoardList();
       });
     });
@@ -176,24 +192,20 @@
     const keyword = document.querySelector("#keywordInput").value.trim();
 
     if (keyword) {
-      params.append("keyword", keyword);
+      params.set("keyword", keyword);
     }
 
     if (selectedCategory) {
-      params.append("category", selectedCategory);
+      params.set("category", selectedCategory);
     }
 
     if (selectedStatus) {
-      params.append("status", selectedStatus);
+      params.set("status", selectedStatus);
     }
 
-    const sort = document.querySelector("#sortSelect").value;
-    params.append("sort", sort);
+    params.set("sort", document.querySelector("#sortSelect").value);
 
-    const response = await fetch("/api/found?" + params.toString());
-    const data = await response.json();
-
-    console.log(data);
+    window.location.href = window.location.pathname + "?" + params.toString();
   }
 
   document.querySelector("#sortSelect").addEventListener("change", loadBoardList);
