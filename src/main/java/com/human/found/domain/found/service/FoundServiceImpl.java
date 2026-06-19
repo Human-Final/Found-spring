@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-import javax.management.RuntimeErrorException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +36,7 @@ public class FoundServiceImpl implements FoundService {
         }
 
         foundMapper.insertfound(foundVO);
-        Long foundid=foundVO.getNum();
+        String foundid=foundVO.getAtcId();
 
 
         //파일 상자가 존재하고 첨부파일이 1개 이상일떄
@@ -63,7 +62,7 @@ public class FoundServiceImpl implements FoundService {
                         FoundFileVO fileVo=new FoundFileVO();
 
                         fileVo.setFdFilepathImg(originalFileName);
-                        fileVo.setBoardId(foundid);
+                        fileVo.setAtcId((foundid));
                         fileVo.setSaveName(saveFileName);
                         fileVo.setFileSize(file.getSize());
                         fileVo.setFilePath("/upload/found/" + saveFileName);
@@ -107,6 +106,23 @@ public class FoundServiceImpl implements FoundService {
             throw new RuntimeException("비밀번호가 일치하지 않습니다");
         }
         foundMapper.FoundupdateDelete(foundNum);
+    }
+
+    //상세보기
+    @Override
+    public FoundVO foundgetdetail(String atcID) {
+        //atcid 만 넘겨서 union 조회    
+        FoundVO foundVo=foundMapper.SelectDetailatcID(atcID);
+        if(foundVo==null){
+            throw new RuntimeException("게시글이 존재하지 않습니다");
+        }
+        if("user".equals(foundVo.getDataSource())){
+            List<FoundFileVO>fileList=foundfilemapper.findById(foundVo.getAtcId());
+            foundVo.setFileList(fileList);
+        }
+
+        //정상조회시 반환
+        return foundVo;
     }
 
 }

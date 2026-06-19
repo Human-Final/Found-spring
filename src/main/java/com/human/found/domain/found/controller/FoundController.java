@@ -21,6 +21,8 @@ import com.human.found.domain.lost.vo.LostVO;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 
 
@@ -30,11 +32,10 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class FoundController {
     private final FoundService foundService;
-    private final LostService lostService;
 
     //습득물 등록
     @PostMapping("/api/found")
-    public String postRegister(@Valid @ModelAttribute FoundVO foundVO, 
+    public String postRegister(@Valid @ModelAttribute("foundVO") FoundVO foundVO, 
         BindingResult bindingResult, Model model,
         @RequestParam(value="files",required = false) MultipartFile[]files, Principal principal ) {
         
@@ -63,11 +64,10 @@ public class FoundController {
         return "found/list";
     }
     
-    @GetMapping("/api/write")
+    @GetMapping("/found/write")
     public String foundWriteForm(Model model) {
         // 화면에 습득물(found) 타입을 구분하기 위한 값 전달
         model.addAttribute("foundVO", new FoundVO());
-        model.addAttribute("lostVO", new LostVO());
         
         // 기본값 설정
         model.addAttribute("writetype", "found");
@@ -77,7 +77,7 @@ public class FoundController {
     //삭제
     @PostMapping("/api/found/{foundNum}")
     public String deletefound(
-        @RequestParam("password")String inputpw,@PathVariable("foundNum")Long foundNum,
+        @RequestParam("atcId")String atcId,@RequestParam("password")String inputpw,@PathVariable("foundNum")Long foundNum,
         Principal principal ,RedirectAttributes redirectAttributes) {
 
             //로그인체크
@@ -92,11 +92,20 @@ public class FoundController {
         } catch (Exception e) {
             // 검증 실패 시 에러 메시지를 들고 원래 상세 페이지로 리턴
             redirectAttributes.addFlashAttribute("errorMessage",e.getMessage());
-            return "redirect:/api/found/"+foundNum;
+            return "redirect:/api/found/detail/"+atcId;
         }
         return "redirect:/api/found";
         
     }
+    
+    //상세보기
+    @GetMapping("/api/found/detail/{atcId}")
+    public String foundgetdetail(@PathVariable("atcId")String atcId,Model model) {
+        FoundVO foundVO=foundService.foundgetdetail(atcId);
+        model.addAttribute("found",foundVO);
+        return "found/detail";
+    }
+    
     
     
 }

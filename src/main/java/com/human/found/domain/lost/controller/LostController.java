@@ -4,9 +4,11 @@ import java.security.Principal;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.human.found.domain.lost.service.LostService;
 import com.human.found.domain.lost.vo.LostVO;
@@ -20,6 +22,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 
 
@@ -34,9 +38,16 @@ public class LostController {
         @RequestParam(value="files",required = false) MultipartFile[]files, Principal principal) {
         
         // [입구 컷] 검증 에러가 있다면 정상 로직 수행 전에 리턴!    
+        System.out.println("컨트롤러 진입");
         if(bindingResult.hasErrors()){
+            
+            bindingResult.getFieldErrors()
+            .forEach(error -> System.out.println(
+                error.getField() + " = " + error.getDefaultMessage()));
+               
+
             model.addAttribute("writetype", "lost");
-            return "/found/write";
+            return "found/write";
         }
             
         if(principal != null){
@@ -44,7 +55,7 @@ public class LostController {
         }else{
             lostVO.setId("test_member");
         }
-
+        System.out.println("서비스 호출 직전");
         lostService.LostRegister(lostVO,files);
         
         return "redirect:/api/lost";
@@ -57,15 +68,41 @@ public class LostController {
         return "lost/list";
     }
 
-    // @GetMapping("/api/write")
-    // public String lostWriteForm(Model model) {
-    //     // 화면에 습득물(lost) 타입을 구분하기 위한 값 전달
-    //     model.addAttribute("lostVO",new LostVO());
-    //     model.addAttribute("writetype", "lost");
-    //     return "found/write";
-    // }
+    @GetMapping("/write")
+    public String lostWriteForm(Model model) {
+        // 화면에 습득물(lost) 타입을 구분하기 위한 값 전달
+        model.addAttribute("lostVO",new LostVO());
+        model.addAttribute("writetype", "lost");
+        return "found/write";
+    }
     
-    
-    
-    
+    @PostMapping("/api/lost/{lostNum}")
+    //비밀번호/게시글번호(lostnum)/사용자검증(principla)/
+    // 삭제가 성공하거나 실패했을 때, 리다이렉트 되는 페이지(목록이나 상세페이지)로 일회성 메시지 전달
+    public String DeletedLost(@RequestParam("password")String inputpw,
+    @PathVariable("lostNum")Long lostNum,Principal principal,RedirectAttributes redirectAttributes){
+        
+        //로그인체크
+        if(principal==null){
+            redirectAttributes.addFlashAttribute("errorMessage", "로그인이 필요합니다.");
+            return "redirect:/api/lost";
+        }
+        try {
+            //서비스단에 글 id 입력번호, 로그인한 유저 id 를 넘겨받아 검증 및 삭제
+            lostService.deletelost(inputpw,lostNum,principal.getName());
+            redirectAttributes.addFlashAttribute("Message", "삭제완료");
+        } catch (Exception e) {
+            // 검증 실패 시 에러 메시지를 들고 원래 상세 페이지로 리턴
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/api/lost"+lostNum;
+
+        }
+        return "redirect:/api/lost/";
+   }
+   
+        
 }
+    
+    
+    
+

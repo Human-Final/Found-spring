@@ -6,7 +6,7 @@ import lombok.Data;
 public class FoundFileVO {
     private String id;
     private String fdFilepathImg;
-    private Long boardId;
+    private String atcId;
     private String saveName;
     private Long fileSize;
     private String filePath; 
