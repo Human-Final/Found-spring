@@ -22,6 +22,9 @@ public class LostPoliceController {
     @Autowired
     private com.human.found.infrastructure.map.KakaoMapConfig kakaoMapConfig;
 
+    // 이 LostPoliceController컨트롤러는 확인용 테스트 목적,
+    // LostController에서 모든 기능 담당하면 된다.
+
     // 1. 목록 조회 화면
     @GetMapping("/list")
     public String list(Model model) {
@@ -30,7 +33,7 @@ public class LostPoliceController {
         return "lost/list";
     }
 
-    // 3. 상세페이지 (매핑 경로를 /lost/detail로 고쳤습니다)
+    // 2. 상세페이지 (매핑 경로를 /lost/detail로 고쳤습니다)
     @GetMapping("/detail")
     public String detail(@RequestParam("atcId") String atcId, Model model) {
         LostVO goods = lostService.getDetailByAtcId(atcId);

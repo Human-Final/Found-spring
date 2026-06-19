@@ -14,6 +14,32 @@
   
   <div th:replace="layout/header :: headerFragment"></div>
 
+  <div th:each="popup : ${popupList}" th:id="'popup-window-' + ${popup.num}" class="main-notice-popup" 
+       style="position:fixed; top:120px; left:50px; z-index:10000; width:350px; background:#fff; border:2px solid #333; box-shadow: 5px 5px 15px rgba(0,0,0,0.3); font-family: sans-serif;">
+      
+      <div class="popup-body" style="padding:20px; min-height:150px;">
+          <!-- 조건문 1: 이미지가 존재할 때 -> 이미지만 표시 -->
+          <div th:if="${popup.imagePath != null and popup.imagePath != ''}">
+              <img th:src="${popup.imagePath}" alt="공지 이미지" style="width:100%; height:auto; display:block;" />
+          </div>
+          
+          <!-- 조건문 2: 이미지가 존재하지 않을 때 -> 제목과 내용 구성 -->
+          <div th:if="${popup.imagePath == null or popup.imagePath == ''}">
+              <h4 style="margin-top:0; color:#0056b3; font-size: 16px; font-weight: bold;" th:text="${popup.title}">공지 제목</h4>
+              <hr style="border: 0; border-top: 1px solid #ddd; margin: 10px 0;">
+              <p style="white-space:pre-wrap; font-size:14px; color:#333; line-height: 1.5;" th:text="${popup.content}">공지 내용입니다.</p>
+          </div>
+      </div>
+      
+      <!-- 하단 제어 바 -->
+      <div class="popup-footer" style="background:#f4f4f4; padding:8px 12px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid #ddd; font-size:13px; color:#555;">
+          <label style="cursor:pointer; display: flex; align-items: center; gap: 5px;">
+              <input type="checkbox" th:id="'cookie-check-' + ${popup.num}"> 24시간 동안 그만보기
+          </label>
+          <button th:onclick="'closeNoticePopup(' + ${popup.num} + ')'" style="padding:4px 12px; background:#333; color:#fff; border:none; cursor:pointer; font-size:12px; border-radius:3px;">닫기</button>
+      </div>
+  </div>
+
   <main class="main-container">
     <section class="hero">
       <div class="hero-pin">
@@ -76,7 +102,7 @@
         <p>2개 게시글</p>
       </a>
 
-      <a th:href="@{/api/notices}" class="card">
+      <a th:href="@{/notice/list}" class="card">
         <div class="card-icon blue">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7"></path>
@@ -108,12 +134,14 @@
           </svg>
           공지사항
         </h3>
-        <a href="#" class="more">더보기 →</a>
+        <a href="/notice/list" class="more">더보기 →</a>
       </div>
 
       <div class="notice-line">
         <span class="notice-badge">공지</span>
-        <strong>분실물 게시판 이용 안내</strong>
+        <a href="/notice/list" style="color: inherit; text-decoration: none;">
+          <strong>분실물 게시판 이용 안내</strong>
+        </a>
         <time>2026. 6. 4.</time>
       </div>
     </section>
@@ -247,4 +275,46 @@
   <div th:replace="layout/footer :: footerFragment"></div>
 
 </body>
+<script>
+    // 1. 페이지가 로드되면 실행되는 함수
+    document.addEventListener("DOMContentLoaded", function() {
+        // 화면에 렌더링된 모든 팝업을 돌며 쿠키 확인
+        document.querySelectorAll('.main-notice-popup').forEach(function(popup) {
+            const num = popup.id.replace('popup-window-', '');
+            // 해당 공지사항 번호로 된 '그만보기' 쿠키가 있다면 화면에서 숨김
+            if (getNoticeCookie("done-popup-" + num) === "true") {
+                popup.style.display = "none";
+            }
+        });
+    });
+
+    // 2. 닫기 버튼 클릭 시 실행되는 함수
+    function closeNoticePopup(num) {
+        const isHideChecked = document.getElementById('cookie-check-' + num).checked;
+        if (isHideChecked) {
+            // 24시간(1일) 동안 보지 않기 쿠키 저장
+            setNoticeCookie("done-popup-" + num, "true", 1);
+        }
+        // 현재 팝업창 닫기
+        document.getElementById('popup-window-' + num).style.display = "none";
+    }
+
+    // 3. 쿠키 설정 함수 (만료 날짜 계산 포함)
+    function setNoticeCookie(name, value, days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        document.cookie = name + "=" + value + "; expires=" + date.toUTCString() + "; path=/";
+    }
+
+    // 4. 저장된 쿠키 읽어오는 함수
+    function getNoticeCookie(name) {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for(let i=0; i < ca.length; i++) {
+            let c = ca[i].trim();
+            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+</script>
 </html>

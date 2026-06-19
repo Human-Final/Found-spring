@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공지사항 상세보기 - 분실물 센터</title>
+  <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <style>
+    /* write.html과 레이아웃 및 너비(max-width) 통일 */
+    .detail-container { 
+      max-width: 800px; 
+      margin: 40px auto; 
+      padding: 0 20px; 
+      font-family: sans-serif; 
+    }
+    
+    /* write.html의 .write-title 스타일과 결 통일 */
+    .detail-title-area { 
+      font-size: 24px; 
+      font-weight: bold; 
+      margin-bottom: 25px; 
+      color: #333; 
+      border-bottom: 2px solid #333; 
+      padding-bottom: 10px; 
+    }
+
+    /* 폼 그룹 느낌을 살린 정갈한 메타 정보 레이아웃 */
+    .detail-meta-group {
+      display: flex;
+      gap: 25px;
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      border: 1px solid #e9ecef;
+      margin-bottom: 25px;
+      font-size: 14px;
+      color: #555;
+    }
+    .meta-item strong {
+      color: #333;
+    }
+    
+    /* 중요공지 전용 심플 마킹 */
+    .badge-important {
+      color: #ff4d4d;
+      font-weight: bold;
+      margin-right: 5px;
+    }
+    
+    /* 본문 텍스트 박스 스타일 */
+    .detail-body { 
+      min-height: 250px; 
+      padding: 15px; 
+      border: 1px solid #ccc; 
+      border-radius: 4px; 
+      font-size: 14px; 
+      box-sizing: border-box;
+      line-height: 1.6;
+      color: #333;
+      background-color: #fff;
+    }
+    .detail-content {
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    
+    /* 하단 액션 버튼 제어 (write.html 스타일 100% 동기화) */
+    .btn-area { 
+      margin-top: 30px; 
+      text-align: center; 
+      display: flex; 
+      justify-content: center; 
+      gap: 15px; 
+    }
+    .btn { 
+      padding: 12px 24px; 
+      border-radius: 4px; 
+      font-size: 15px; 
+      font-weight: bold; 
+      cursor: pointer; 
+      border: none; 
+      text-decoration: none; 
+      display: inline-block; 
+    }
+    
+    /* 목록으로 버튼 (write.html의 btn-cancel과 동일 톤) */
+    .btn-list { 
+      background-color: #6c757d; 
+      color: #fff; 
+    }
+    .btn-list:hover { 
+      background-color: #5a6268; 
+    }
+    
+    /* 수정 버튼 (write.html의 btn-submit과 동일 톤) */
+    .btn-edit { 
+      background-color: #007bff; 
+      color: #fff; 
+    }
+    .btn-edit:hover { 
+      background-color: #0056b3; 
+    }
+    
+    /* 삭제 버튼 (강렬한 레드 경고 톤) */
+    .btn-delete { 
+      background-color: #dc3545; 
+      color: #fff; 
+    }
+    .btn-delete:hover { 
+      background-color: #bd2130; 
+    }
+    /* 📌 1. 답답한 회색 배경을 지우고, 가로 폭을 정갈하게 줄인 모던 이미지 박스 */
+    .img-separation-box {
+      background: #ffffff !important;               /* 💡 촌스러운 회색 배경을 흰색으로 변경 */
+      border: 1px solid #e2e8f0 !important;         /* 💡 은은하고 얇은 테두리로 교체 */
+      border-radius: 8px !important;                /* 💡 라운딩 곡률을 살려 모던함 가미 */
+      padding: 30px !important;                     /* 💡 내부 여백을 쾌적하게 확보 */
+      margin-bottom: 20px;
+      text-align: center;
+      
+      /* 💡 핵심: 칸 전체를 채우지 않고 본문보다 살짝 작게 모아주는 정렬 효과 */
+      max-width: 500px;                             /* 💡 박스의 최대 가로 폭을 고양이 사진 크기에 맞게 제한 */
+      margin-left: auto;                            /* 💡 가운데 정렬 */
+      margin-right: auto;                           /* 💡 가운데 정렬 */
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);   /* 💡 은은한 고급 그림자 효과 추가 */
+    }
+
+    /* 📌 2. 박스 내부 이미지 전용 튜닝 */
+    .img-separation-box img {
+      max-width: 100% !important;
+      height: auto !important;
+      border: none !important;                      /* 💡 이미지 자체의 투박한 테두리 제거 */
+      border-radius: 6px !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);   /* 💡 이미지가 붕 떠 있는 듯한 세련된 음영 처리 */
+    }
+
+  </style>
+</head>
+<body>
+
+  <div th:replace="layout/header :: headerFragment"></div>
+
+  <div class="detail-container">
+    
+    <!-- 1. 상단 타이틀 영역 (중요 공지 여부에 따라 분기) -->
+    <div class="detail-title-area">
+      <span th:if="${notice.isImportant == 1}" class="badge-important">📌 [중요]</span>
+      <span th:text="${notice.title}">공지사항 제목 공간입니다.</span>
+    </div>
+
+    <!-- 2. 중앙 메타 정보 영역 (작성자, 등록일, 조회수) -->
+    <div class="detail-meta-group">
+      <div class="meta-item">👤 <strong>작성자:</strong> <span th:text="${notice.id}">관리자</span></div>
+      <div class="meta-item">📅 <strong>등록일:</strong> <span th:text="${#temporals.format(notice.createdAt, 'yyyy-MM-dd HH:mm') ?: notice.createdAt}">2026-06-19 15:00</span></div>
+      <div class="meta-item">👁️ <strong>조회수:</strong> <span th:text="${notice.viewCount}">0</span></div>
+    </div>
+
+    <!-- 3. 본문 내용 출력 영역 -->
+    <div class="detail-body" style="margin-bottom: 20px;">
+      <div class="detail-content" th:text="${notice.content}">
+        공지사항 본문 내용이 출력되는 공간입니다.
+      </div>
+    </div>
+
+    <!--이미지 출력 영역-->
+    <div class="img-separation-box" th:if="${notice.imagePath != null and notice.imagePath != ''}" 
+         style="background: #f8f9fa; padding: 20px; border-radius: 4px; border: 1px solid #e9ecef; text-align: center; margin-bottom: 20px;">
+        <img th:src="${notice.imagePath}" alt="공지사항 안내 이미지" 
+             style="max-width: 100%; height: auto; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);" />
+    </div>
+
+    <!-- 4. 하단 제어 버튼 영역 (시큐리티 권한 자동 식별 탑재) -->
+    <div class="btn-area">
+      <a th:href="@{/notice/list}" class="btn btn-list">목록으로</a>
+      
+      <!-- 스프링 시큐리티의 ADMIN 또는 MANAGER 권한 보유자에게만 수정/삭제 버튼 표출 -->
+      <th:block th:if="${#authentication.authorities != null and (#strings.contains(#authentication.authorities, 'ADMIN') or #strings.contains(#authentication.authorities, 'MANAGER'))}">
+        <a th:href="@{/notice/edit(num=${notice.num})}" class="btn btn-edit">수정하기</a>
+        <a th:href="@{/notice/delete(num=${notice.num})}" class="btn btn-delete" onclick="return confirmDelete()">삭제하기</a>
+      </th:block>
+    </div>
+  </div>
+
+  <div th:replace="layout/footer :: footerFragment"></div>
+
+  <script>
+    function confirmDelete() {
+        return confirm("정말로 이 공지사항을 삭제하시겠습니까?\n삭제된 데이터는 복구할 수 없습니다.");
+    }
+  </script>
+
+</body>
+</html>

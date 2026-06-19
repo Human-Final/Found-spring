@@ -232,9 +232,9 @@ public class LostPoliceServiceImpl implements LostPoliceService{
         }
     }
 
-
+    //경찰청 분실물 정보 전체 갖고오기
     public List<LostVO> getLostGoodsFromDB() {
-        return lostPoliceMapper.selectLostGoodsList();
+        return lostPoliceMapper.selectLostPoliceList();
     }
 
     public LostVO getDetailByAtcId(String atcId) {
