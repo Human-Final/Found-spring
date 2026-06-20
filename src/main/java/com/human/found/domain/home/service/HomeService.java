@@ -15,5 +15,9 @@ public interface HomeService {
     public long countWeeklyFound();
     public long countWeeklyLost();
     public long countWeeklyDone();
+
+    // 총 갯수 카운팅
+    public long countTotalFound();
+    public long countTotalLost();
     
 }

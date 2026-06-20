@@ -1,3 +1,7 @@
+    body.lost-board{
+      background-color: #faefef;
+    }
+
     .board-page {
       max-width: 1150px;
       margin: 0 auto;
@@ -15,11 +19,11 @@
     }
 
     .board-hero.lost {
-      background: #fff1f2;
+      background: #f7dbdb;
     }
 
     .board-hero.found {
-      background: #ecfdf3;
+      background: #d8fde9;
     }
 
     .board-hero h2 {
@@ -88,14 +92,26 @@
     .filter-row {
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
+      gap: 20px;
       flex-wrap: wrap;
+    }
+
+    .filter-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
 
     .filter-label {
       color: #94a3b8;
       font-size: 13px;
       font-weight: 700;
+    }
+
+    .status-section {
+      margin-left: auto;
+      flex-shrink: 0;
     }
 
     .chip {
@@ -122,6 +138,19 @@
       color: #ffffff;
     }
 
+    .count-sort{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 18px 0;
+    }
+
+    .total-count {
+      margin: 0;
+      color: #64748b;
+      font-size: 13px;
+    }
+
     .sort-select {
       height: 28px;
       border: 1px solid #dbe3ee;
@@ -136,10 +165,12 @@
     .post-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
+      gap: 16px 24px;
     }
 
     .post-card {
+      display: flex;
+      flex-direction: column; 
       background: #ffffff;
       border: 1px solid #dbe3ee;
       border-radius: 12px;
@@ -152,6 +183,28 @@
       align-items: center;
       justify-content: space-between;
       margin-bottom: 9px;
+    }
+
+    .post-bottom {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    .post-card:hover {
+    transform: translateY(-4px);
+    border-color: #93c5fd;
+    box-shadow: 0 14px 30px rgba(37, 99, 235, 0.14);
+    }
+
+    .post-divider{
+      width: 100%;
+      height: 1px;
+      margin: 0 0 14px;
+      background: #c4c6c9;
     }
 
     .tag-group {
@@ -173,7 +226,7 @@
     }
 
     .type-tag.lost {
-      background: #fee2e2;
+      background: #f7d5d5;
       color: #dc2626;
     }
 
@@ -187,12 +240,12 @@
       color: #2563eb;
     }
 
-    .status-tag.progress {
+    .status-tag-progress {
       background: #fef3c7;
       color: #a16207;
     }
 
-    .status-tag.done {
+    .status-tag-done {
       background: #dcfce7;
       color: #16a34a;
     }
@@ -200,36 +253,57 @@
     .post-title {
       display: block;
       font-size: 15px;
-      font-weight: 800;
       color: #0f172a;
-      margin-bottom: 8px;
-    }
+      margin-bottom: 3px;
+      min-width: 0;
 
-    .post-title:hover {
-      color: #2563eb;
+      /* 제목 한 줄 제한 */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .post-desc {
       color: #334155;
       font-size: 13px;
       line-height: 1.55;
-      margin-bottom: 14px;
+      margin-bottom: 5px;
+
+      /* 두 줄 높이 고정 및 초과 내용 생략 */
+      height: 3.1em;
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
     }
 
-    .post-info {
+   .post-info {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
+
+      /* 정보칸 모든 행 높이 통일 */
+      grid-auto-rows: 64px;
+
       gap: 7px;
       margin-bottom: 14px;
     }
 
+    .post-counts {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
     .info-item {
-      min-height: 30px;
+      min-width: 0;
+      height: 64px;
       padding: 7px 9px;
       border-radius: 8px;
       background: #f8fafc;
       color: #64748b;
       font-size: 12px;
+      overflow: hidden;
     }
 
     .info-item strong {
@@ -239,25 +313,20 @@
       font-size: 11px;
     }
 
-    .post-bottom {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      color: #64748b;
-      font-size: 12px;
+    .info-item p {
+      display: -webkit-box;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.4;
+      max-height: 2.8em;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
     }
 
-    .post-counts {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .total-count {
-      margin-top: 18px;
-      text-align: center;
-      color: #64748b;
-      font-size: 13px;
+    .lost-info .author-item {
+      grid-column: 3;
+      grid-row: 2;
     }
 
     @media (max-width: 768px) {

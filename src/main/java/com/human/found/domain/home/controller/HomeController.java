@@ -1,8 +1,5 @@
 package com.human.found.domain.home.controller;
 
-import com.human.found.domain.home.service.HomeServiceImpl;
-import java.util.List;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

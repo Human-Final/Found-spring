@@ -45,5 +45,15 @@ public class HomeServiceImpl implements HomeService{
         return homeMapper.countWeeklyDone();
     }
 
+    @Override
+    public long countTotalFound() {
+       return homeMapper.countTotalFound();
+    }
+
+    @Override
+    public long countTotalLost() {
+       return homeMapper.countTotalLost();
+    }
+
 
 }
