@@ -9,14 +9,17 @@ import com.human.found.domain.lost.vo.LostVO;
 
 @Mapper
 public interface LostPoliceMapper {
-    // 벌크 인서트 배치 쿼리
+    
+    // 경찰청 분실물 정보 DB삽입
     int insertLostPolice(List<LostVO> lostList);
     
-    // DB 백업본 스캔 쿼리
-    List<LostVO> selectLostGoodsList();
+    // 경찰청 분실물 정보 불러오기
+    List<LostVO> selectLostPoliceList();
 
+    // 경찰청 분실물 정보 자세히보기
     LostVO selectLostDetail(@Param("atcId") String atcId);
 
+    // 경찰청 분실물 정보 전체 삭제
     void lostPoliceDelete();
 
     
