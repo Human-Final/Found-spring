@@ -16,10 +16,10 @@ public interface FoundService {
     public List<FoundVO> getFoundList();
 
     //삭제
-    public void deletefound(Long foundNum,String inputpw,String loginid);
+    public String deletefound(Long foundNum,String inputpw,String loginid);
 
     //상세보기
-    public FoundVO foundgetdetail(String atcID);
+    public FoundVO foundgetdetail(String atcId);
 
 
 }

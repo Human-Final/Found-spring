@@ -12,6 +12,7 @@ public interface FoundMapper {
     public void insertfound(FoundVO foundVO);
     public List<FoundVO> selectFoundList();
     public void FoundupdateDelete(@Param("foundNum") Long foundNum);
+    //글 확인용
     public FoundVO SelectFoundById(@Param("foundNum") Long foundNum );
     public FoundVO SelectDetailatcID(@Param("atcId") String atcId);
 }

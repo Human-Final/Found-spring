@@ -1,6 +1,7 @@
 package com.human.found.domain.lost.vo;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -22,5 +23,7 @@ public class LostVO {
     private LocalDateTime updatedAt;
     private Integer done = 0;
     private Integer isDeleted = 0;
+    private List<LostFileVO> filelist;
+    private String dataSource;
 
 }

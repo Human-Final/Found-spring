@@ -12,7 +12,13 @@ import com.human.found.domain.lost.vo.LostVO;
 
 public interface LostMapper {
     public void insertLost(LostVO lostVO);
+    
     public List<LostVO> selectLostList();
+    
     public LostVO selectlostbyId(@Param("lostNum")Long lostNum);
+    
     public void lostupdateDelte(@Param("lostNum")Long lostNum);
+
+    public LostVO SelectDetailatcID(@Param("atcId")String atcId);
+
 }
