@@ -56,7 +56,7 @@
         WHERE atc_id = #{atcId}
     </select>
 
-    <select id="selectLostGoodsList" resultType="com.human.found.domain.lost.vo.LostVO">
+    <select id="selectLostPoliceList" resultType="com.human.found.domain.lost.vo.LostVO">
         SELECT 
             num, 
             atc_id AS atcId, 

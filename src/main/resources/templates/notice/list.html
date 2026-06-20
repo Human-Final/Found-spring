@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공지사항 - 분실물 센터</title>
+  <!-- 기존에 사용하시던 공통 스타일시트 연동 -->
+  <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <style>
+    /* 공지사항 전용 간단 가독성 스타일 */
+    .notice-container { max-width: 1000px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; }
+    .notice-title { font-size: 28px; font-weight: bold; margin-bottom: 20px; color: #333; }
+    .notice-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .notice-table th { background-color: #f4f6f9; color: #333; font-weight: 600; padding: 14px; border-bottom: 2px solid #ddd; text-align: center; }
+    .notice-table td { padding: 14px; border-bottom: 1px solid #eee; text-align: center; color: #555; }
+    .notice-table tr:hover { background-color: #fcfcfc; }
+    
+    /* 중요공지 강조 행 스타일 */
+    .row-important { background-color: #fff9f9; }
+    .row-important:hover { background-color: #ffeaea; }
+    
+    /* 뱃지 스타일 */
+    .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-block; }
+    .badge-important { background-color: #ff4d4d; color: #fff; }
+    .badge-normal { background-color: #e2e6ea; color: #495057; }
+    
+    /* 유틸리티 스타일 */
+    .text-left { text-align: left !important; padding-left: 20px !important; }
+    .notice-link { color: #333; text-decoration: none; font-weight: 500; }
+    .notice-link:hover { text-decoration: underline; color: #0056b3; }
+    .btn-write { display: inline-block; background-color: #007bff; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; float: right; margin-top: 20px; }
+    .btn-write:hover { background-color: #0056b3; }
+    .clear { clear: both; }
+    .empty-row { padding: 40px 0 !important; color: #999; font-size: 15px; }
+  </style>
+</head>
+<body>
+
+  <!-- 기존 사용하시던 헤더 레이아웃 탑재 -->
+  <div th:replace="layout/header :: headerFragment"></div>
+
+  <div class="notice-container">
+    <div class="notice-title">공지사항</div>
+
+    <table class="notice-table">
+      <thead>
+        <tr>
+          <th style="width: 10%;">번호</th>
+          <th style="width: 50%;">제목</th>
+          <th style="width: 15%;">작성자</th>
+          <th style="width: 15%;">작성일</th>
+          <th style="width: 10%;">조회수</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- 공지사항 목록 반목문 수행 (컨트롤러에서 넘겨준 "list" 활용) -->
+        <tr th:each="notice : ${list}" th:classappend="${notice.isImportant == 1} ? 'row-important'">
+          
+          <!-- 번호 영역: 중요 공지일 때는 뱃지 노출, 일반 공지일 때는 번호 노출 -->
+          <td>
+            <span th:if="${notice.isImportant == 1}" class="badge badge-important">중요</span>
+            <span th:unless="${notice.isImportant == 1}" th:text="${notice.num}">1</span>
+          </td>
+          
+          <!-- 제목 영역: 클릭 시 해당 번호(num)를 가지고 상세보기로 이동 -->
+          <td class="text-left">
+            <a th:href="@{/notice/detail(num=${notice.num})}" class="notice-link" th:text="${notice.title}">
+              공지사항 제목 공간입니다.
+            </a>
+            <!-- 이미지 아이콘 표시 (이미지가 첨부된 글일 때 소소한 클립 아이콘 노출) -->
+            <span th:if="${notice.imagePath != null and notice.imagePath != ''}" style="margin-left: 5px; color: #28a745; font-size: 12px;">📁</span>
+          </td>
+          
+          <!-- 작성자 관리자 ID -->
+          <td th:text="${notice.id}">admin</td>
+          
+          <!-- 작성일시 포맷팅 (년.월.일 형식 출력) -->
+          <td th:text="${#temporals.format(notice.createdAt, 'yyyy.MM.dd')}">2026.06.19</td>
+          
+          <!-- 조회수 -->
+          <td th:text="${notice.viewCount}">0</td>
+        </tr>
+        
+        <!-- 게시글이 단 하나도 없을 때 보여줄 예외 처리 -->
+        <tr th:if="${list == null or #lists.isEmpty(list)}">
+          <td colspan="5" class="empty-row">등록된 공지사항이 존재하지 않습니다.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 📌 권한 분리 핵심: 세션의 userRole이 MANAGER이거나 ADMIN일 때만 [글쓰기] 버튼을 노출시킴 -->
+    <div th:if="${#authorization.expression('hasAnyAuthority(''ROLE_ADMIN'', ''ROLE_MANAGER'')')}">
+        <a th:href="@{/notice/write}" class="btn-write">공지 등록</a>
+    </div>
+    <div class="clear"></div>
+  </div>
+
+  <!-- 기존 사용하시던 푸터 레이아웃 탑재 -->
+  <div th:replace="layout/footer :: footerFragment"></div>
+
+</body>
+</html>

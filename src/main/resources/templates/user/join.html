@@ -93,12 +93,21 @@
                 <div class="form-group">
                     <label>이메일</label>
 
-                    <input type="email"
-                           name="email"
-                           required
-                           placeholder="example@email.com">
-                </div>
+                    <div class="id-row">
+                        <input type="email"
+                            id="email"
+                            name="email"
+                            required
+                            placeholder="example@email.com"
+                            oninput="resetEmailCheck()">
 
+                        <button type="button"
+                                class="id-check-btn"
+                                onclick="checkEmail()">중복확인</button>
+                    </div>
+
+                    <p id="emailCheckResult" class="check-text"></p>
+                </div>
                 <div class="form-group">
                     <label>전화번호</label>
 
@@ -123,6 +132,9 @@
 <script>
     let isIdChecked = false;
     let isIdAvailable = false;
+
+    let isEmailChecked = false;
+    let isEmailAvailable = false;
 
     function checkId() {
         const id = document.getElementById("id").value;
@@ -232,9 +244,58 @@
             alert("비밀번호가 일치하지 않습니다.");
             return false;
         }
+        
+        if (!isEmailChecked) {
+            alert("이메일 중복확인을 해주세요.");
+            return false;
+        }
+
+        if (!isEmailAvailable) {
+            alert("이미 사용 중인 이메일입니다.");
+            return false;
+        }        
 
         return true;
     }
+
+    function checkEmail() {
+        const email = document.getElementById("email").value;
+        const result = document.getElementById("emailCheckResult");
+
+        if (email.trim() === "") {
+            alert("이메일을 입력하세요.");
+            isEmailChecked = false;
+            isEmailAvailable = false;
+            result.innerText = "이메일을 입력하세요.";
+            result.style.color = "red";
+            return;
+        }
+
+        fetch("/check-email?email=" + encodeURIComponent(email))
+            .then(response => response.text())
+            .then(data => {
+                isEmailChecked = true;
+
+                if (data === "duplicated") {
+                    isEmailAvailable = false;
+                    result.innerText = "이미 사용 중인 이메일입니다.";
+                    result.style.color = "red";
+                } else {
+                    isEmailAvailable = true;
+                    result.innerText = "사용 가능한 이메일입니다.";
+                    result.style.color = "green";
+                }
+            });
+    }
+
+    function resetEmailCheck() {
+        isEmailChecked = false;
+        isEmailAvailable = false;
+
+        const result = document.getElementById("emailCheckResult");
+        result.innerText = "이메일 중복확인을 해주세요.";
+        result.style.color = "gray";
+    }    
 </script>
 
 </body>

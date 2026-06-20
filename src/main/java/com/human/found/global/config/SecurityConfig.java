@@ -45,9 +45,9 @@ public class SecurityConfig {
 
                 // 공지사항 작성/수정/삭제는 관리자 + 담당자만
                 .requestMatchers(
-                    "/notices/write",
-                    "/notices/*/edit",
-                    "/notices/*/delete"
+                    "/notice/write",
+                    "/notice/edit",
+                    "/notice/delete"
                 ).hasAnyRole("MANAGER", "ADMIN")
 
                 // 게시글 작성/수정/삭제/마이페이지는 로그인 사용자만
@@ -75,7 +75,8 @@ public class SecurityConfig {
                     "/css/**",
                     "/js/**",
                     "/images/**",
-                    "/notices/**",
+                    "/notice/list",
+                    "/notice/detail",
                     "/lost/**",
                     "/found/**",
                     "/check-email"

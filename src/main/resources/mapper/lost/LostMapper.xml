@@ -51,10 +51,10 @@ prdt_cl_nm,
 created_at,
 updated_at,
 done,
-is_deleted
+is_deleted,
+'user' AS dataSource
 FROM lost
-WHERE 
-        is_deleted=0
+WHERE is_deleted=0
 UNION ALL   
 
 SELECT 
@@ -69,7 +69,8 @@ prdt_cl_nm,
 created_at,
 updated_at,
 done,
-is_deleted
+is_deleted,
+'police' AS dataSource
 FROM lost_police
 WHERE 
         is_deleted=0
@@ -108,4 +109,46 @@ resultType="com.human.found.domain.lost.vo.LostVO">
         SET is_deleted=1
         WHERE num=#{lostNum}
 </update>
+
+<select id="SelectDetailatcID"
+parameterType="string"
+resultType="com.human.found.domain.lost.vo.LostVO">
+        SELECT * FROM(
+        SELECT 
+                num,
+                atc_id,
+                id,
+                lst_place,
+                lst_prdt_nm,
+                lst_sbjt,
+                lst_ymd,
+                prdt_cl_nm,
+                created_at,
+                updated_at,
+                done,
+                is_deleted,
+                'user' AS dataSource <!--테이블라벨-->
+        FROM lost
+        WHERE is_deleted=0
+
+        UNION ALL
+
+        SELECT
+                num,
+                atc_id,
+                id,
+                lst_place,
+                lst_prdt_nm,
+                lst_sbjt,
+                lst_ymd,
+                prdt_cl_nm,
+                created_at,
+                done,
+                is_deleted,
+                'police' AS dataSource <!--테이블라벨-->
+        FROM lost_police
+        WHERE is_deleted=0       
+        ) combined_lost
+        WHERE combined_lost.atc_id = #{atcId}
+</select>
 </mapper>       

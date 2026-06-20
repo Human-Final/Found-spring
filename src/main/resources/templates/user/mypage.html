@@ -840,6 +840,10 @@
                             placeholder="비밀번호 입력"
                             required>
                     </label>
+                    <p th:if="${errorMessage}"
+                      th:text="${errorMessage}"
+                      style="margin: 4px 0 10px; color: #dc2626; font-size: 13px; font-weight: 800;">
+                    </p>                    
                     <button type="submit" class="danger-button">회원탈퇴 진행</button>
                   </form>
               </div>
