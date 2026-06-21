@@ -6,11 +6,22 @@
       padding: 0;
     }
 
+    html, body{
+      min-height: 100%;
+    }
+
     body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
       font-family: "Pretendard", "Noto Sans KR", sans-serif;
       background: #eef3f9;
       color: #0f172a;
       font-size: 14px;
+    }
+
+    main{
+      flex: 1;
     }
 
     a {
@@ -128,7 +139,7 @@
 
     /* 푸터 */
     footer {
-      margin-top: 36px;
+      margin-top: auto;
       padding: 24px 0;
       text-align: center;
       color: #64748b;

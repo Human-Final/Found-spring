@@ -16,6 +16,7 @@ import com.human.found.domain.found.vo.FoundFileVO;
 import com.human.found.domain.found.vo.FoundVO;
 import com.human.found.domain.user.mapper.UserMapper;
 import com.human.found.domain.user.vo.UserVO;
+import com.human.found.global.common.paging.PagingVO;
 
 import lombok.AllArgsConstructor;
 
@@ -82,8 +83,10 @@ public class FoundServiceImpl implements FoundService {
     }
     //조회
     @Override
-    public List<FoundVO> getFoundList() {
-        return foundMapper.selectFoundList();
+    public List<FoundVO> getFoundList(PagingVO pagingVO) {
+        long totalCount = foundMapper.countFoundList();
+        pagingVO.pageInfo((int) totalCount);
+        return foundMapper.selectFoundList(pagingVO);
     }
     //삭제
     @Transactional

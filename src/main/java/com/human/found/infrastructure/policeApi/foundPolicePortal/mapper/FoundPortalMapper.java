@@ -1,4 +1,4 @@
-package com.human.found.domain.found.mapper;
+package com.human.found.infrastructure.policeApi.foundPolicePortal.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
 
@@ -8,4 +8,5 @@ import com.human.found.domain.found.vo.FoundVO;
 public interface FoundPortalMapper {
     int existsByAtcId(String atcId);
     int insertFoundPortal(FoundVO foundVO);
+    int deleteAllFoundPortal();
 }

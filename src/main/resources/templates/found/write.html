@@ -110,6 +110,36 @@
         </div>
 
         <div class="form-section">
+            <label for="occurredAt" class="form-label">
+              <span id="dateLabel">습득일자 </span>
+              <span class="required-mark">*</span>
+            </label>
+            <input
+                type="datetime-local"
+                id="occurredAt"
+                name="fdYmd"
+                th:value="${writetype == 'lost' ? lostVO.lstYmd : foundVO.fdYmd}"
+                class="form-control title-input"
+                required>
+        </div>
+
+        <div class="form-section">
+          <label for="depPlace" class="form-label">
+            <span id="placeLabel">습득지역 </span>
+            <span class="required-mark">*</span>
+          </label>
+
+          <input
+            type="text"
+            id="depPlace"
+            name="depPlace"
+            th:value="${foundVO != null ? foundVO.depPlace : ''}"
+            class="form-control title-input"
+            required
+            placeholder="장소명이나 건물명으로 입력 가능">
+        </div>
+
+        <div class="form-section">
           <label for="content" class="form-label">내용 
             <span class="required-mark">*</span>
           </label>
@@ -121,21 +151,6 @@
             placeholder="분실/습득 장소, 시간, 물건 특징 등을 자세히 적어주세요"
             required>
           </textarea>
-        </div>
-
-        <div class="form-section">
-            <label for="occurredAt" class="form-label">
-              <span id="dateLabel">습득일자 </span>
-              <span class="required-mark">*</span>
-            </label>
-            <input
-                type="datetime-local"
-                id="occurredAt"
-                name="fdYmd"
-                th:value="${writetype == 'lost' ? lostVO.lstYmd : foundVO.fdYmd}"
-                class="form-control title-input"
-                required
-            >
         </div>
 
         <div class="form-section">

@@ -7,31 +7,219 @@
   <!-- 기존에 사용하시던 공통 스타일시트 연동 -->
   <link rel="stylesheet" th:href="@{/css/common/common.css}">
   <style>
-    /* 공지사항 전용 간단 가독성 스타일 */
-    .notice-container { max-width: 1000px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; }
-    .notice-title { font-size: 28px; font-weight: bold; margin-bottom: 20px; color: #333; }
-    .notice-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    .notice-table th { background-color: #f4f6f9; color: #333; font-weight: 600; padding: 14px; border-bottom: 2px solid #ddd; text-align: center; }
-    .notice-table td { padding: 14px; border-bottom: 1px solid #eee; text-align: center; color: #555; }
-    .notice-table tr:hover { background-color: #fcfcfc; }
     
-    /* 중요공지 강조 행 스타일 */
-    .row-important { background-color: #fff9f9; }
-    .row-important:hover { background-color: #ffeaea; }
-    
-    /* 뱃지 스타일 */
-    .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-block; }
-    .badge-important { background-color: #ff4d4d; color: #fff; }
-    .badge-normal { background-color: #e2e6ea; color: #495057; }
-    
-    /* 유틸리티 스타일 */
-    .text-left { text-align: left !important; padding-left: 20px !important; }
-    .notice-link { color: #333; text-decoration: none; font-weight: 500; }
-    .notice-link:hover { text-decoration: underline; color: #0056b3; }
-    .btn-write { display: inline-block; background-color: #007bff; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold; float: right; margin-top: 20px; }
-    .btn-write:hover { background-color: #0056b3; }
-    .clear { clear: both; }
-    .empty-row { padding: 40px 0 !important; color: #999; font-size: 15px; }
+  /* 공지사항 목록 전체 */
+  .notice-container {
+    width: 100%;
+    max-width: 1150px;
+    margin: 28px auto 0;
+    padding: 0 24px;
+  }
+
+  /* 상단 타이틀 영역 */
+  .notice-title {
+    height: 92px;
+    padding: 0 22px;
+    margin-bottom: 16px;
+    border-radius: 12px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 20px;
+    font-weight: 800;
+
+    display: flex;
+    align-items: center;
+  }
+
+  /* 공지 테이블 */
+  .notice-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #ffffff;
+    border: 1px solid #dbe3ee;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    table-layout: fixed;
+  }
+
+  /* 테이블 헤더 */
+  .notice-table thead th {
+    height: 44px;
+    padding: 0 14px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 800;
+    text-align: center;
+  }
+
+  /* 테이블 행 */
+  .notice-table tbody tr {
+    height: 56px;
+    transition: background 0.15s ease;
+  }
+
+  .notice-table tbody tr:hover {
+    background: #f8fafc;
+  }
+
+  /* 테이블 셀 */
+  .notice-table tbody td {
+    padding: 0 14px;
+    border-bottom: 1px solid #eef2f7;
+    color: #334155;
+    font-size: 13px;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .notice-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* 제목 칸 */
+  .notice-table .text-left {
+    text-align: left;
+  }
+
+  /* 공지 제목 링크 */
+  .notice-link {
+    display: inline-block;
+    max-width: calc(100% - 34px);
+    color: #0f172a;
+    font-size: 14px;
+    font-weight: 700;
+    vertical-align: middle;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .notice-link:hover {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+
+  /* 중요 공지 행 */
+  .row-important {
+    background: #fff7ed;
+  }
+
+  .row-important:hover {
+    background: #ffedd5;
+  }
+
+  /* 뱃지 공통 */
+  .badge {
+    height: 24px;
+    padding: 0 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 중요 뱃지 */
+  .badge-important {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  /* 빈 목록 */
+  .empty-row {
+    height: 120px;
+    color: #94a3b8 !important;
+    font-size: 14px !important;
+    text-align: center !important;
+  }
+
+  /* 공지 등록 버튼 영역 */
+  .btn-write {
+    float: right;
+    height: 36px;
+    margin-top: 18px;
+    padding: 0 16px;
+    border-radius: 9px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 800;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+  }
+
+  .btn-write:hover {
+    background: #1d4ed8;
+  }
+
+  /* float 해제 */
+  .clear {
+    clear: both;
+  }
+
+  /* 반응형 */
+  @media (max-width: 768px) {
+    .notice-container {
+      padding: 20px 14px 0;
+    }
+
+    .notice-title {
+      height: auto;
+      min-height: 76px;
+      padding: 18px;
+    }
+
+    .notice-table {
+      table-layout: auto;
+    }
+
+    .notice-table thead {
+      display: none;
+    }
+
+    .notice-table,
+    .notice-table tbody,
+    .notice-table tr,
+    .notice-table td {
+      display: block;
+      width: 100%;
+    }
+
+    .notice-table tbody tr {
+      height: auto;
+      padding: 14px 16px;
+      border-bottom: 1px solid #eef2f7;
+    }
+
+    .notice-table tbody td {
+      height: auto;
+      padding: 4px 0;
+      border-bottom: none;
+      text-align: left;
+    }
+
+    .notice-table tbody td:first-child {
+      margin-bottom: 4px;
+    }
+
+    .notice-link {
+      max-width: 100%;
+    }
+
+    .btn-write {
+      width: 100%;
+      float: none;
+    }
+  }
   </style>
 </head>
 <body>
