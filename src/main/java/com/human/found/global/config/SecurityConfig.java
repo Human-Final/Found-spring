@@ -52,10 +52,9 @@ public class SecurityConfig {
 
                 // 게시글 작성/수정/삭제/마이페이지는 로그인 사용자만
                 .requestMatchers(
-                    "/lost/write",
                     "/lost/*/edit",
                     "/lost/*/delete",
-                    "/found/write",
+                    "/api/write",
                     "/found/*/edit",
                     "/found/*/delete",
                     "/mypage/**"

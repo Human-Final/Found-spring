@@ -3,7 +3,6 @@ package com.human.found.domain.found.controller;
 import java.security.Principal;
 import java.util.List;
 
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -17,11 +16,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.human.found.domain.found.service.FoundService;
 import com.human.found.domain.found.vo.FoundVO;
-
+import com.human.found.global.common.paging.PagingVO;
+import com.human.found.infrastructure.map.KakaoMapConfig;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.RequestBody;
 
 
 
@@ -32,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @AllArgsConstructor
 public class FoundController {
     private final FoundService foundService;
+    private final KakaoMapConfig kakaoMapConfig;
     
 
     //=====습득물 등록====
@@ -59,8 +59,17 @@ public class FoundController {
     }
     //=======조회======
     @GetMapping("/api/found")
-    public String getFoundList(Model model) {
-        List<FoundVO>getList = foundService.getFoundList();
+    public String getFoundList(
+        Model model, 
+        @RequestParam(name="page", defaultValue = "1") int page) {
+
+        PagingVO pagingVO = new PagingVO();
+        pagingVO.setPage(page);
+        pagingVO.setSize(10);
+        pagingVO.setPageBlock((10));
+
+        List<FoundVO>getList = foundService.getFoundList(pagingVO);
+        model.addAttribute("paging", pagingVO);
         model.addAttribute("getList", getList);
         // model.addAttribute("countTotalFound", countTotalFound);
 
@@ -114,6 +123,7 @@ public class FoundController {
     public String foundgetdetail(@PathVariable("atcId")String atcId,Model model) {
         FoundVO foundVO=foundService.foundgetdetail(atcId);
         model.addAttribute("foundVO",foundVO);
+        model.addAttribute("kakaoMapJsKey", kakaoMapConfig.getJsKey());
         return "found/detail";
     }
     

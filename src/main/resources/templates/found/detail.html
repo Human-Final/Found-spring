@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>습득 게시글 상세조회 | 분실물 센터</title>
+
+  <link rel="stylesheet" th:href="@{/css/common/common.css}">
+
+  <style>
+    html {
+      overflow-y: auto;
+      scrollbar-gutter: stable;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    .detail-page {
+      width: 100%;
+      max-width: 1150px;
+      margin: 0 auto;
+      padding: 28px 24px 0;
+    }
+
+    .detail-hero {
+      height: 92px;
+      border-radius: 12px;
+      padding: 0 22px;
+      margin-bottom: 18px;
+      background: #d8fde9;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .detail-hero h2 {
+      margin: 0 0 7px;
+      color: #15803d;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .detail-hero p {
+      margin: 0;
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #64748b;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .detail-card {
+      background: #ffffff;
+      border: 1px solid #dbe3ee;
+      border-radius: 14px;
+      padding: 26px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .detail-top {
+      display: flex;
+      gap: 30px;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .detail-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .tag-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .type-tag,
+    .category-tag,
+    .status-tag {
+      height: 28px;
+      padding: 0 13px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .type-tag.found {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    .category-tag {
+      background: #eff6ff;
+      color: #2563eb;
+    }
+
+    .status-tag.progress {
+      background: #fef3c7;
+      color: #a16207;
+    }
+
+    .status-tag.done {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    .detail-title {
+      margin: 0 0 10px;
+      color: #0f172a;
+      font-size: 22px;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .detail-summary {
+      margin: 0 0 20px;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .info-box {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0 28px;
+
+      border: 1px solid #dbe3ee;
+      border-radius: 12px;
+      padding: 16px 18px;
+      background: #ffffff;
+    }
+
+    .info-column {
+      min-width: 0;
+    }
+
+    .info-column + .info-column {
+      border-left: 1px solid #eef2f7;
+      padding-left: 28px;
+    }
+
+    .info-row {
+      min-height: 38px;
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      align-items: center;
+      border-bottom: 1px solid #eef2f7;
+      gap: 14px;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: #2563eb;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .info-value {
+      min-width: 0;
+      color: #334155;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.45;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+
+    .owner-note {
+      margin: 12px 0 0;
+      color: #64748b;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .detail-image-area {
+      width: 360px;
+      flex-shrink: 0;
+      margin-top: 110px;
+    }
+
+    .image-box {
+      width: 100%;
+      height: 240px;
+      border: 1px solid #dbe3ee;
+      border-radius: 12px;
+      background: #f8fafc;
+      overflow: hidden;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .image-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .no-image {
+      color: #94a3b8;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .image-caption {
+      margin: 10px 0 0;
+      color: #94a3b8;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .map-section {
+      margin-top: 26px;
+    }
+
+    .section-title {
+      margin: 0 0 10px;
+      color: #0f172a;
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .map-box {
+      position: relative;
+      width: 100%;
+      height: 260px;
+      border: 1px solid #dbe3ee;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+
+    #kakaoMap {
+      width: 100%;
+      height: 100%;
+    }
+
+    .map-message {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 800;
+    text-align: center;
+    }
+
+    .map-address {
+      margin: 8px 0 0;
+      color: #64748b;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .detail-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .detail-btn {
+      height: 42px;
+      min-width: 112px;
+      padding: 0 18px;
+      border-radius: 9px;
+      border: 1px solid transparent;
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+
+    .list-btn {
+      background: #ffffff;
+      color: #334155;
+      border-color: #dbe3ee;
+    }
+
+    .list-btn:hover {
+      background: #f8fafc;
+    }
+
+    .edit-btn {
+      background: #2563eb;
+      color: #ffffff;
+    }
+
+    .edit-btn:hover {
+      background: #1d4ed8;
+    }
+
+    .delete-btn {
+      background: #ffffff;
+      color: #dc2626;
+      border-color: #fca5a5;
+    }
+
+    .delete-btn:hover {
+      background: #fef2f2;
+    }
+
+    .delete-form {
+      display: inline-flex;
+    }
+
+    @media (max-width: 768px) {
+      .detail-page {
+        padding: 20px 14px 0;
+      }
+
+      .detail-hero {
+        height: auto;
+        padding: 18px;
+        align-items: flex-start;
+        gap: 14px;
+        flex-direction: column;
+      }
+
+      .detail-card {
+        padding: 20px;
+      }
+
+      .detail-top {
+        flex-direction: column;
+      }
+
+      .detail-image-area {
+        width: 100%;
+      }
+
+      .image-box {
+        height: 220px;
+      }
+
+      .info-box {
+        grid-template-columns: 1fr;
+      }
+
+      .info-column + .info-column {
+        border-left: none;
+        padding-left: 0;
+      }
+
+      .detail-actions {
+        flex-direction: column;
+      }
+
+      .detail-btn,
+      .delete-form {
+        width: 100%;
+      }
+
+      .delete-form .detail-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div th:replace="~{layout/header :: headerFragment}"></div>
+
+<main class="detail-page">
+
+  <section class="detail-hero">
+    <div>
+      <h2>습득 게시판 상세조회</h2>
+      <p>습득한 물건의 상세 정보를 확인하세요</p>
+    </div>
+
+    <div class="breadcrumb">
+      <span>홈</span>
+      <span>›</span>
+      <span>습득 게시판</span>
+      <span>›</span>
+      <span>상세조회</span>
+    </div>
+  </section>
+
+  <section class="detail-card">
+
+    <div class="detail-top">
+
+      <div class="detail-main">
+
+        <div class="tag-group">
+          <span class="type-tag found">습득</span>
+          <span class="category-tag" th:text="${foundVO.prdtClNm}">지갑</span>
+
+          <span th:if="${foundVO.done == 0}" class="status-tag progress">진행중</span>
+          <span th:if="${foundVO.done == 1}" class="status-tag done">완료</span>
+        </div>
+
+        <h1 class="detail-title"
+            th:text="${foundVO.fdSbjt}">
+          검정색 반지갑을 보관 중입니다
+        </h1>
+
+        <p class="detail-summary"
+           th:text="${foundVO.fdPrdtNm}">
+          습득물 정보를 확인한 뒤 보관장소를 참고해 주세요.
+        </p>
+
+        <div class="info-box">
+
+          <div class="info-column">
+            <div class="info-row">
+              <span class="info-label">물품명</span>
+              <span class="info-value" th:text="${foundVO.fdPrdtNm}">반지갑</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">색상명</span>
+              <span class="info-value" th:text="${foundVO.clrNm}">검정색</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">습득지역</span>
+              <span class="info-value" th:text="${foundVO.depPlace}">서울특별시 강남구 역삼동</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">습득일자</span>
+              <span class="info-value"
+                    th:text="${#temporals.format(foundVO.fdYmd, 'yyyy-MM-dd HH:mm')}">
+                2026-06-21 14:30
+              </span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">보관장소</span>
+              <span class="info-value" th:text="${foundVO.depPlace}">보관장소</span>
+            </div>
+          </div>
+
+          <div class="info-column">
+            <div class="info-row">
+              <span class="info-label">작성자</span>
+              <span class="info-value"
+                    th:text="${foundVO.id != null ? foundVO.id : '기관/API'}">
+                홍길동
+              </span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">처리상태</span>
+              <span class="info-value">
+                <span th:if="${foundVO.done == 0}" class="status-tag progress">진행중</span>
+                <span th:if="${foundVO.done == 1}" class="status-tag done">완료</span>
+              </span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">조회수</span>
+              <span class="info-value">0</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">물품분류</span>
+              <span class="info-value" th:text="${foundVO.prdtClNm}">지갑</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">데이터출처</span>
+              <span class="info-value"
+                    th:text="${foundVO.dataSource == 'user' ? '사용자 등록글' : (foundVO.dataSource == 'police' ? '경찰청 API' : '포털기관 API')}">
+                사용자 등록글
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <aside class="detail-image-area">
+        <div class="image-box">
+          <img th:if="${foundVO.fdFilepathImg != null and foundVO.fdFilepathImg != ''}"
+               th:src="${foundVO.fdFilepathImg}"
+               alt="습득물 이미지">
+
+          <span th:if="${foundVO.fdFilepathImg == null or foundVO.fdFilepathImg == ''}"
+                class="no-image">
+            등록된 이미지가 없습니다
+          </span>
+        </div>
+
+        <p class="image-caption">등록된 이미지</p>
+      </aside>
+
+    </div>
+
+    <section class="map-section">
+      <h3 class="section-title">위치 정보</h3>
+
+      <div class="map-box">
+        <div id="kakaoMap"></div>
+        <div id="mapMessage" class="map-message">
+            위치 정보를 표시할 수 없습니다.
+        </div>
+      </div>
+
+      <p class="map-address"
+         th:text="|지도 기준 위치: ${foundVO.depPlace}|">
+        지도 기준 위치: 보관장소
+      </p>
+    </section>
+
+    <div class="detail-actions">
+
+      <a th:href="@{/api/found}" class="detail-btn list-btn">
+        ← 목록으로
+      </a>
+
+      <!-- 
+        수정/삭제 버튼 표시 조건:
+        1. 로그인 상태
+        2. 사용자 등록글(dataSource == 'user')
+        3. 현재 로그인한 id == 글 작성자 id
+      -->
+      <th:block th:if="${#authorization.expression('isAuthenticated()') 
+                        and foundVO.dataSource == 'user' 
+                        and foundVO.id == #authentication.name}">
+
+        <!-- 수정은 별도 수정 페이지가 있다면 href만 그쪽으로 바꾸면 됨 -->
+        <a th:href="@{/api/found/detail/{atcId}/edit(atcId=${foundVO.atcId})}"
+           class="detail-btn edit-btn">
+          ✎ 수정하기
+        </a>
+
+        <!-- 현재 네 삭제 컨트롤러가 POST /api/found/{foundNum} 이라서 POST 기준 -->
+        <form class="delete-form"
+              th:action="@{/api/found/{foundNum}(foundNum=${foundVO.num})}"
+              method="post"
+              onsubmit="return setDeletePassword(this);">
+
+          <input type="hidden" name="password" class="delete-password-input">
+
+          <button type="submit" class="detail-btn delete-btn">
+            🗑 삭제하기
+          </button>
+        </form>
+
+      </th:block>
+
+    </div>
+
+  </section>
+
+</main>
+
+<div th:replace="~{layout/footer :: footerFragment}"></div>
+
+<!-- 카카오맵 SDK -->
+<script
+  type="text/javascript"
+  th:src="|//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoMapJsKey}&libraries=services&autoload=false|">
+</script>
+
+<script th:inline="javascript">
+  function setDeletePassword(form) {
+    const password = prompt("게시글 삭제를 위해 비밀번호를 입력해 주세요.");
+
+    if (password === null) {
+      return false;
+    }
+
+    if (password.trim() === "") {
+      alert("비밀번호를 입력해 주세요.");
+      return false;
+    }
+
+    if (!confirm("정말 삭제하시겠습니까?")) {
+      return false;
+    }
+
+    form.querySelector(".delete-password-input").value = password;
+    return true;
+  }
+
+  /*
+    Kakao Map
+    - foundVO.depPlace 값을 기준으로 지도 표시
+    - 1차: 주소 검색
+    - 2차: 키워드 검색
+    - 실패 시: "위치 정보를 표시할 수 없습니다."
+  */
+  document.addEventListener("DOMContentLoaded", function () {
+    const mapAddress = String(/*[[${foundVO.depPlace}]]*/ "").trim();
+
+    const mapContainer = document.getElementById("kakaoMap");
+    const mapMessage = document.getElementById("mapMessage");
+
+    function showMapMessage(message) {
+      if (mapContainer) {
+        mapContainer.style.display = "none";
+      }
+
+      if (mapMessage) {
+        mapMessage.textContent = message;
+        mapMessage.style.display = "flex";
+      }
+    }
+
+    function hideMapMessage() {
+      if (mapContainer) {
+        mapContainer.style.display = "block";
+      }
+
+      if (mapMessage) {
+        mapMessage.style.display = "none";
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    if (!mapContainer || !mapMessage) {
+      console.error("카카오맵 영역 또는 메시지 영역을 찾을 수 없습니다.");
+      return;
+    }
+
+    if (!mapAddress) {
+      showMapMessage("위치 정보를 표시할 수 없습니다.");
+      return;
+    }
+
+    if (!window.kakao || !kakao.maps) {
+      showMapMessage("카카오맵을 불러올 수 없습니다.");
+      console.error("kakao.maps 객체가 없습니다. SDK 로드 여부를 확인하세요.");
+      return;
+    }
+
+    kakao.maps.load(function () {
+      const geocoder = new kakao.maps.services.Geocoder();
+      const places = new kakao.maps.services.Places();
+
+      // 1차: 주소 검색
+      geocoder.addressSearch(mapAddress, function (result, status) {
+        if (status === kakao.maps.services.Status.OK && result.length > 0) {
+          drawMap(result[0].y, result[0].x, "습득 위치", mapAddress);
+          return;
+        }
+
+        // 2차: 키워드 검색
+        places.keywordSearch(mapAddress, function (data, status) {
+          if (status !== kakao.maps.services.Status.OK || data.length === 0) {
+            showMapMessage("위치 정보를 표시할 수 없습니다.");
+            return;
+          }
+
+          const place = findBestPlace(data, mapAddress);
+
+          drawMap(
+            place.y,
+            place.x,
+            place.place_name || "습득 위치",
+            place.road_address_name || place.address_name || mapAddress
+          );
+        });
+      });
+
+      function findBestPlace(data, keyword) {
+        const normalizedKeyword = keyword.replace(/\s/g, "");
+
+        return data.find(function (place) {
+          const placeName = String(place.place_name || "").replace(/\s/g, "");
+          return placeName.includes(normalizedKeyword);
+        }) || data[0];
+      }
+
+      function drawMap(lat, lng, title, address) {
+        hideMapMessage();
+
+        const coords = new kakao.maps.LatLng(Number(lat), Number(lng));
+
+        const map = new kakao.maps.Map(mapContainer, {
+          center: coords,
+          level: 4
+        });
+
+        const marker = new kakao.maps.Marker({
+          map: map,
+          position: coords
+        });
+
+        const infowindow = new kakao.maps.InfoWindow({
+          content:
+            '<div style="min-width:180px;text-align:center;padding:8px 10px;font-size:12px;line-height:1.4;">' +
+              '<strong style="display:block;color:#0f172a;">' + escapeHtml(title) + '</strong>' +
+              '<span style="display:block;margin-top:3px;color:#64748b;font-weight:700;">' + escapeHtml(address) + '</span>' +
+            '</div>'
+        });
+
+        infowindow.open(map, marker);
+
+        map.setCenter(coords);
+
+        setTimeout(function () {
+          map.relayout();
+          map.setCenter(coords);
+        }, 100);
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

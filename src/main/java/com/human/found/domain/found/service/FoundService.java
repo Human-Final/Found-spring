@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.human.found.domain.found.vo.FoundVO;
+import com.human.found.global.common.paging.PagingVO;
 
 
 public interface FoundService {
@@ -13,13 +14,12 @@ public interface FoundService {
     public void Register(FoundVO foundVO,MultipartFile[]files);
     
     //조회
-    public List<FoundVO> getFoundList();
+    public List<FoundVO> getFoundList(PagingVO pagingVO);
 
     //삭제
     public String deletefound(Long foundNum,String inputpw,String loginid);
 
     //상세보기
     public FoundVO foundgetdetail(String atcId);
-
 
 }

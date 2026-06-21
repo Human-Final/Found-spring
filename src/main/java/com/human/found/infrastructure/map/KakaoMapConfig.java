@@ -1,4 +1,4 @@
-package com.human.found.infrastructure.map; // 본인의 패키지명으로 바꾸십시오.
+package com.human.found.infrastructure.map;
 
 import lombok.Getter;
 import lombok.Setter;

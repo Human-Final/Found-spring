@@ -7,25 +7,243 @@
   <title>공지사항 등록 - 분실물 센터</title>
   <link rel="stylesheet" th:href="@{/css/common/common.css}">
   <style>
-    .write-container { max-width: 800px; margin: 40px auto; padding: 0 20px; font-family: sans-serif; }
-    .write-title { font-size: 24px; font-weight: bold; margin-bottom: 25px; color: #333; border-bottom: 2px solid #333; padding-bottom: 10px; }
-    
-    .form-group { margin-bottom: 20px; }
-    .form-group label { display: block; font-weight: bold; margin-bottom: 8px; color: #444; font-size: 15px; }
-    
-    .form-control { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
-    .form-control:focus { border-color: #007bff; outline: none; box-shadow: 0 0 5px rgba(0,123,255,0.2); }
-    
-    .checkbox-group { display: flex; gap: 30px; margin: 25px 0; background: #f8f9fa; padding: 15px; border-radius: 4px; border: 1px solid #e9ecef; }
-    .checkbox-label { display: flex; align-items: center; gap: 8px; font-weight: bold; color: #444; cursor:pointer; font-size: 14px; }
-    .checkbox-label input { width: 18px; height: 18px; cursor: pointer; }
-    
-    .btn-area { margin-top: 30px; text-align: center; display: flex; justify-content: center; gap: 15px; }
-    .btn { padding: 12px 24px; border-radius: 4px; font-size: 15px; font-weight: bold; cursor: pointer; border: none; text-decoration: none; display: inline-block; }
-    .btn-submit { background-color: #007bff; color: #fff; }
-    .btn-submit:hover { background-color: #0056b3; }
-    .btn-cancel { background-color: #6c757d; color: #fff; }
-    .btn-cancel:hover { background-color: #5a6268; }
+  /* 공지사항 등록 페이지 */
+
+  .write-container {
+    width: 100%;
+    max-width: 860px;
+    margin: 32px auto 48px;
+    padding: 0 24px;
+  }
+
+  /* 상단 타이틀 */
+  .write-title {
+    height: 92px;
+    padding: 0 24px;
+    margin-bottom: 18px;
+    border-radius: 12px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 20px;
+    font-weight: 800;
+
+    display: flex;
+    align-items: center;
+  }
+
+  /* 폼 박스 */
+  .write-container form {
+    background: #ffffff;
+    border: 1px solid #dbe3ee;
+    border-radius: 12px;
+    padding: 26px;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.045);
+  }
+
+  /* 입력 그룹 */
+  .form-group {
+    margin-bottom: 22px;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 9px;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  /* input / textarea / file 공통 */
+  .form-control {
+    width: 100%;
+    border: 1px solid #d8e2ef;
+    border-radius: 9px;
+    background: #f8fafc;
+    color: #0f172a;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  }
+
+  input.form-control {
+    height: 44px;
+    padding: 0 14px;
+  }
+
+  textarea.form-control {
+    min-height: 190px;
+    padding: 14px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  .form-control::placeholder {
+    color: #94a3b8;
+  }
+
+  .form-control:focus {
+    border-color: #2563eb;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  }
+
+  /* 파일 업로드 input */
+  input[type="file"].form-control {
+    height: auto;
+    padding: 10px 12px;
+    cursor: pointer;
+  }
+
+  input[type="file"].form-control::file-selector-button {
+    height: 32px;
+    margin-right: 12px;
+    padding: 0 12px;
+    border: none;
+    border-radius: 7px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  input[type="file"].form-control::file-selector-button:hover {
+    background: #1d4ed8;
+  }
+
+  /* 파일 안내 문구 */
+  .form-group p {
+    margin-top: 7px !important;
+    color: #64748b !important;
+    font-size: 12px !important;
+    line-height: 1.5;
+  }
+
+  /* 체크박스 옵션 영역 */
+  .checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 4px 0 22px;
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+  }
+
+  /* 체크박스 라벨 */
+  .checkbox-label {
+    min-height: 42px;
+    padding: 0 12px;
+    border: 1px solid #dbe3ee;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  }
+
+  .checkbox-label:hover {
+    border-color: #93c5fd;
+    background: #eff6ff;
+  }
+
+  .checkbox-label input {
+    width: 16px;
+    height: 16px;
+    accent-color: #2563eb;
+    cursor: pointer;
+  }
+
+  /* 체크된 옵션 강조 */
+  .checkbox-label:has(input:checked) {
+    border-color: #2563eb;
+    background: #eff6ff;
+    color: #1d4ed8;
+  }
+
+  /* 버튼 영역 */
+  .btn-area {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid #eef2f7;
+  }
+
+  /* 버튼 공통 */
+  .btn {
+    height: 44px;
+    padding: 0 18px;
+    border-radius: 9px;
+    border: 1px solid transparent;
+    font-size: 14px;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+
+  /* 등록 버튼 */
+  .btn-submit {
+    background: #2563eb;
+    color: #ffffff;
+  }
+
+  .btn-submit:hover {
+    background: #1d4ed8;
+  }
+
+  /* 취소 버튼 */
+  .btn-cancel {
+    background: #eef2f7;
+    color: #334155;
+    border-color: #d8e2ef;
+  }
+
+  .btn-cancel:hover {
+    background: #e2e8f0;
+  }
+
+  /* 반응형 */
+  @media (max-width: 768px) {
+    .write-container {
+      margin: 24px auto 40px;
+      padding: 0 14px;
+    }
+
+    .write-title {
+      height: auto;
+      min-height: 76px;
+      padding: 18px;
+    }
+
+    .write-container form {
+      padding: 20px;
+    }
+
+    .checkbox-group,
+    .btn-area {
+      grid-template-columns: 1fr;
+    }
+  }
   </style>
 </head>
 <body>
@@ -53,12 +271,12 @@
       <div class="checkbox-group">
         <label class="checkbox-label">
           <input type="checkbox" name="isImportant" value="1">
-          📌 중요 공지로 지정 (최상단 고정)
+          중요 공지로 지정 (최상단 고정)
         </label>
         
         <label class="checkbox-label">
           <input type="checkbox" name="isPlanned" value="1">
-          🔔 홈 화면 팝업 띄우기 (3분 제한 작동)
+          홈 화면 팝업 띄우기 (3분 제한 작동)
         </label>
       </div>
 

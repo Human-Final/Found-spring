@@ -59,7 +59,7 @@
   </section>
   
   <div class="count-sort">
-    <p class="total-count">총 2건</p>    
+    <p th:text="|총 ${paging.totalCount}건|" class="total-count">총 2건</p>    
     <select class="sort-select" id="sortSelect">
       <option value="latest">최신순</option>
       <option value="oldest">오래된순</option>
@@ -69,7 +69,7 @@
   <section class="post-grid">
     <a 
       th:each="foundVO : ${getList}"
-      th:href="@{/found/detail/{atcId}(atcId=${foundVO.atcId})}"
+      th:href="@{/api/found/detail/{atcId}(atcId=${foundVO.atcId})}"
       class="post-card">
 
       <div class="post-top">
@@ -126,7 +126,31 @@
       </div>
     </a>
   </section>
+  
+  <div class="pagination" th:if="${paging.totalCount > 0}">
+    <a 
+      th:if="${paging.prev}"
+      th:href="@{/api/found(page=${paging.startPage -1})}"
+      class="page-btn">
+      이전
+    </a>
 
+    <a
+      th:each="pageNum : ${#numbers.sequence(paging.startPage, paging.endPage)}"
+      th:href="@{/api/found(page=${pageNum})}"
+      th:text="${pageNum}"
+      th:classappend="${pageNum==paging.page} ? 'active' : ''"
+      class="page-btn">
+      1
+    </a>
+
+    <a th:if="${paging.next}"
+      th:href="@{/api/found(page=${paging.endPage + 1})}"
+      class="page-btn">
+      다음
+    </a>
+
+  </div>
 
 </main>
 

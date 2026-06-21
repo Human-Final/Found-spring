@@ -65,7 +65,7 @@
         
         UNION ALL   
         
-                SELECT 
+        SELECT 
             num,
             atc_id,
             id,
@@ -84,8 +84,31 @@
         FROM found_police
         WHERE 
             is_deleted=0 
+
+        UNION ALL   
+        
+        SELECT 
+            num,
+            atc_id,
+            id,
+            clr_nm,
+            dep_place,
+            fd_filepath_img,
+            fd_prdt_nm,
+            fd_sbjt,
+            fd_ymd,
+            prdt_cl_nm,
+            created_at,
+            updated_at,
+            done,
+            is_deleted,
+            'portal' AS dataSource
+        FROM found_portal
+        WHERE 
+            is_deleted=0 
         ORDER BY fd_ymd DESC
-        LIMIT 10
+        LIMIT #{size}
+        OFFSET #{offset}
 
     </select>
     
@@ -109,6 +132,7 @@ resultType="com.human.found.domain.found.vo.FoundVO">
                 atc_id, 
                 id, 
                 dep_place, 
+                fd_filepath_img,
                 fd_prdt_nm, 
                 fd_sbjt, 
                 fd_ymd, 
@@ -129,6 +153,7 @@ resultType="com.human.found.domain.found.vo.FoundVO">
                 atc_id, 
                 id, 
                 dep_place, 
+                fd_filepath_img,
                 fd_prdt_nm, 
                 fd_sbjt, 
                 fd_ymd, 
@@ -140,11 +165,52 @@ resultType="com.human.found.domain.found.vo.FoundVO">
                 'police' AS dataSource <!--테이블라벨-->
             FROM found_police
             WHERE is_deleted = 0
+            
+            UNION ALL
+            
+            SELECT 
+                num, 
+                atc_id, 
+                id, 
+                dep_place, 
+                fd_filepath_img,
+                fd_prdt_nm, 
+                fd_sbjt, 
+                fd_ymd, 
+                prdt_cl_nm, 
+                clr_nm, 
+                created_at, 
+                updated_at, 
+                done, is_deleted, 
+                'portal' AS dataSource <!--테이블라벨-->
+            FROM found_portal
+            WHERE is_deleted = 0            
         ) combined_found
         WHERE combined_found.atc_id = #{atcId}
     </select>
 
+<select id="countFoundList"
+            resultType="long">
+    select sum(cnt)
+    from (
+        select count(*) cnt
+        from found
+        where is_deleted = 0
 
+        union all
+
+        select count(*) cnt
+        from found_police
+        where is_deleted = 0
+
+        union all
+
+        select count(*) cnt
+        from found_portal
+        where is_deleted = 0
+    ) as total_found
+
+</select>
 
 
 

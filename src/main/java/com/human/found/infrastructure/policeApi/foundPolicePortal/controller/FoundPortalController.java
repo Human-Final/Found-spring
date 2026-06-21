@@ -1,10 +1,10 @@
-package com.human.found.domain.found.controller;
+package com.human.found.infrastructure.policeApi.foundPolicePortal.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.human.found.domain.found.service.FoundPortalService;
+import com.human.found.infrastructure.policeApi.foundPolicePortal.service.FoundPortalServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FoundPortalController {
     
-    private final FoundPortalService foundPortalService;
+    private final FoundPortalServiceImpl foundPortalService;
 
     @PostMapping("/admin/found-portal/import")
     public String importFoundPortalPost() throws Exception {
