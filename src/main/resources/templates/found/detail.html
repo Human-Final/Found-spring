@@ -236,41 +236,44 @@
 
         <a th:href="@{/api/found/detail/{atcId}/edit(atcId=${foundVO.atcId})}"
            class="detail-btn edit-btn">
-          ✎ 수정하기
+          수정하기
         </a>
       </th:block>
 
-        <form class="delete-form"
-              sec:authorize="hasRole('ADMIN')"
-              th:action="@{/api/found/{foundNum}(foundNum=${foundVO.num})}"
-              method="post"
-              data-admin="true"
-              onsubmit="return setDeletePassword(this);">
+      <form class="delete-form"
+            th:if="${#authorization.expression('hasRole(''ADMIN'')') 
+                  or (#authorization.expression('isAuthenticated()')
+                      and foundVO.dataSource == 'user'
+                      and foundVO.id == #authentication.name)}"
+            th:action="@{/api/found/{foundNum}(foundNum=${foundVO.num})}"
+            method="post"
+            th:data-admin="${#authorization.expression('hasRole(''ADMIN'')')}"
+            onsubmit="return validatePostDelete(this);">
+          
+        <div class="post-delete-password-area"
+             th:classappend="${errorMessage == null ? ' is-hidden' : ''}">
+            
+          <label for="postDeletePasswordInput">비밀번호 확인</label>
+          <input type="password"
+                 id="postDeletePasswordInput"
+                 name="inputpw"
+                 class="post-delete-password-input"
+                 placeholder="비밀번호 입력"
+                 autocomplete="current-password">
 
-          <input type="hidden" name="password" class="delete-password-input">
+          <p class="post-delete-error"
+             th:if="${errorMessage != null}"
+             th:text="${errorMessage}">
+            비밀번호가 일치하지 않습니다.</p>
+        </div>
 
-          <button type="submit" class="detail-btn delete-btn">
-            삭제하기
-          </button>
-        </form>
-
-        <form class="delete-form"
-              sec:authorize="!hasRole('ADMIN')"
-              th:if="${loginId != null and loginId == foundVO.id}"
-              th:action="@{/api/found/{foundNum}(foundNum=${foundVO.num})}"
-              method="post"
-              data-admin="false"
-              onsubmit="return setDeletePassword(this);">
-
-          <input type="hidden" name="password" class="delete-password-input">
-
-          <button type="submit" class="detail-btn delete-btn">
-            삭제하기
-          </button>
-        </form>
-
+        <button type="submit" 
+                class="detail-btn delete-btn post-delete-btn"
+                th:text="${errorMessage !=null ? '비밀번호 확인 후 삭제' : '삭제하기'}">
+          삭제하기
+        </button>
+      </form>
     </div>
-
   </section>
 
 </main>
@@ -284,33 +287,42 @@
 </script>
 
 <script th:inline="javascript">
-  function setDeletePassword(form) {
-    const password = prompt("게시글 삭제를 위해 비밀번호를 입력해 주세요.");
+  function validatePostDelete(form){
+    const passwordArea = form.querySelector(".post-delete-password-area");
+    const passwordInput = form.querySelector(".post-delete-password-input");
+    const deleteBtn = form.querySelector(".post-delete-btn");
+    const isAdmin = form.dataset.admin === "true";
 
-    if (password === null) {
+    // 관리자 : 비밀번호 없이 confirm만
+    if(isAdmin){
+      return confirm("정말 게시글을 삭제하시겠습니까?");
+    }
+
+    // 일반 작성자 1차 클릭 : 비밀번호 입력창 표시
+    if(passwordArea.classList.contains("is-hidden")){
+      passwordArea.classList.remove("is-hidden")
+      passwordInput.focus();
+      deleteBtn.textContent = "비밀번호 확인 후 삭제";
       return false;
     }
 
-    if (password.trim() === "") {
-      alert("비밀번호를 입력해 주세요.");
+    // 일반 작성자 2차 클릭 : 비밀번호 입력 확인
+    const password = passwordInput.value.trim();
+    
+    if(password === ""){
+      alert("비밀번호를 입력해 주세요.")
+      passwordInput.focus();
       return false;
     }
 
-    if (!confirm("정말 삭제하시겠습니까?")) {
-      return false;
-    }
-
-    form.querySelector(".delete-password-input").value = password;
-    return true;
+    return confirm("게시글을 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.")
   }
 
-  /*
-    Kakao Map
+  /* Kakao Map
     - foundVO.depPlace 값을 기준으로 지도 표시
     - 1차: 주소 검색
     - 2차: 키워드 검색
-    - 실패 시: "위치 정보를 표시할 수 없습니다."
-  */
+    - 실패 시: "위치 정보를 표시할 수 없습니다." */
   document.addEventListener("DOMContentLoaded", function () {
     const mapAddress = String(/*[[${foundVO.depPlace}]]*/ "").trim();
 

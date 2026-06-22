@@ -1,4 +1,4 @@
-package com.human.found.infrastructure.policeApi.foundPolicePortal.service;
+package com.human.found.infrastructure.police.policeApi.foundPolicePortal.service;
 
 public interface FoundPortalService {
  
