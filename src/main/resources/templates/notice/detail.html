@@ -171,12 +171,12 @@
 
     <!-- 4. 하단 제어 버튼 영역 (시큐리티 권한 자동 식별 탑재) -->
     <div class="btn-area">
-      <a th:href="@{/notice/list}" class="btn btn-list">목록으로</a>
+      <a th:href="@{/api/notices/list}" class="btn btn-list">목록으로</a>
       
       <!-- 스프링 시큐리티의 ADMIN 또는 MANAGER 권한 보유자에게만 수정/삭제 버튼 표출 -->
       <th:block th:if="${#authentication.authorities != null and (#strings.contains(#authentication.authorities, 'ADMIN') or #strings.contains(#authentication.authorities, 'MANAGER'))}">
-        <a th:href="@{/notice/edit(num=${notice.num})}" class="btn btn-edit">수정하기</a>
-        <a th:href="@{/notice/delete(num=${notice.num})}" class="btn btn-delete" onclick="return confirmDelete()">삭제하기</a>
+        <a th:href="@{/api/notices/edit(num=${notice.num})}" class="btn btn-edit">수정하기</a>
+        <a th:href="@{/api/notices/delete(num=${notice.num})}" class="btn btn-delete" onclick="return confirmDelete()">삭제하기</a>
       </th:block>
     </div>
   </div>

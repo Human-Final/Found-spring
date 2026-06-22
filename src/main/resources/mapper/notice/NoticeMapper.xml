@@ -53,15 +53,15 @@
 
 
     <!-- 수정 -->
-    <update id="updateNotice">
-        UPDATE notice 
-        SET title = #{title},
+    <update id="updateNotice" parameterType="com.human.found.domain.notice.vo.NoticeVO">
+        UPDATE notice
+        SET 
+            title = #{title},
             content = #{content},
             is_planned = #{isPlanned},
             is_important = #{isImportant},
-            image_path = #{imagePath},
             updated_at = NOW()
-        WHERE num = #{num}
+        WHERE num = #{num} AND is_deleted = 0
     </update>
 
     <!-- 삭제 (소프트 딜리트) -->
@@ -86,8 +86,16 @@
         )
     </insert>
 
+    <!-- 공지사항 번호로 기존 첨부파일 정보만 정확하게 매핑하여 가져오기 -->
+    <select id="selectNoticeFileByNum" parameterType="long" resultType="com.human.found.domain.notice.vo.NoticeFileVO">
+        SELECT id, fd_filepath_img, num, save_name, file_size, file_path AS filePath
+        FROM notice_file
+        WHERE num = #{num}
+    </select>
+
+
     <!-- 공지사항 이미지 삭제 혹은 수정하기 -->
-    <delete id="deleteNoticeFile">
+    <delete id="deleteNoticeFile" parameterType="long">
         DELETE FROM notice_file 
         WHERE num = #{num}
     </delete>

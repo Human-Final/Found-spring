@@ -1,4 +1,4 @@
-package com.human.found.infrastructure.policeApi.foundPolicePortal.service;
+package com.human.found.infrastructure.police.foundPolicePortal.service;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -12,8 +12,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.human.found.infrastructure.policeApi.foundPolicePortal.vo.FoundPortalApiItemVO;
-import com.human.found.infrastructure.policeApi.foundPolicePortal.vo.FoundPortalApiResponseVO;
+import com.human.found.infrastructure.police.foundPolicePortal.vo.FoundPortalApiItemVO;
+import com.human.found.infrastructure.police.foundPolicePortal.vo.FoundPortalApiResponseVO;
 
 import lombok.RequiredArgsConstructor;
 

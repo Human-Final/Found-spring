@@ -151,57 +151,75 @@
       </p>
     </section>
 
+    <div class="post-delete-box">
+        <p class="post-delete-warning">
+            본인확인을 위해 비밀번호를 입력해주세요
+        </p>
+        <div id="postDeletePasswordArea" class="post-delete-password-area is hidden">
+            <label for="postDeletePasswordInput">비밀번호 확인</label>
+
+            <input type="password" 
+                   id="postDeletePasswordInput"
+                   class="post-delete-password-input"
+                   placeholder="비밀번호 입력"
+                   autocomplete="current-password"
+            >
+        </div>
+        <button type="button"
+                id="postDeleteBtn"
+                class="post-delete-btn"
+                th:data-delete-url="@{/api/lost/{lostNum}(lostNum=${lostVO.num})}"
+        >
+        삭제하기
+        </button>
+    </div>
+
     <div class="detail-actions">
-
-      <a th:href="@{/api/lost}" class="detail-btn list-btn">
-        ← 목록으로
-      </a>
-
-      <!-- 
-        수정/삭제 버튼 표시 조건:
-        1. 로그인 상태
-        2. 사용자 등록글(dataSource == 'user')
-        3. 현재 로그인한 id == 글 작성자 id
-      -->
-    <th:block th:if="${#authorization.expression('isAuthenticated()') 
-                    and lostVO.dataSource == 'user' 
-                    and lostVO.id == #authentication.name}">
-
-        <!-- 수정은 별도 수정 페이지가 있다면 href만 그쪽으로 바꾸면 됨 -->
-        <a th:href="@{/api/lost/detail/{atcId}/edit(atcId=${lostVO.atcId})}"
-           class="detail-btn edit-btn">
-          ✎ 수정하기
+    
+        <a th:href="@{/api/lost}" class="detail-btn list-btn">
+            ← 목록으로
         </a>
-    </th:block>
 
-        <!-- 현재 삭제 컨트롤러가 POST /api/found/{foundNum} 이라서 POST 기준 -->
+        <th:block th:if="${#authorization.expression('isAuthenticated()') 
+                        and lostVO.dataSource == 'user' 
+                        and lostVO.id == #authentication.name}">
+
+            <!-- 수정 url 추후 수정 필요 -->
+            <a th:href="@{/api/lost/detail/{atcId}/edit(atcId=${lostVO.atcId})}"
+            class="detail-btn edit-btn">
+            수정하기
+            </a>
+        </th:block>
+
+        
+        <!-- 삭제 method POST. 추후 delete로 변경 필요 -->
         <form class="delete-form"
-              sec:authorize="hasRole('ADMIN')"
-              th:action="@{/api/lost/{lostNum}(lostNum=${lostVO.num})}"
-              method="post"
-              data-admin="true"
-              onsubmit="return setDeletePassword(this);">
+            sec:authorize="hasRole('ADMIN')"
+            th:action="@{/api/lost/{lostNum}(lostNum=${lostVO.num})}"
+            method="post"
+            data-admin="true"
+            onsubmit="return setDeletePassword(this);">
 
-          <input type="hidden" name="password" class="delete-password-input">
+            <input type="hidden" name="password" class="delete-password-input">
 
-          <button type="submit" class="detail-btn delete-btn">
-            삭제하기
-          </button>
+            <button type="submit" class="detail-btn delete-btn">
+                삭제하기
+            </button>
         </form>
 
         <form class="delete-form"
-              sec:authorize="!hasRole('ADMIN')"
-              th:if="${loginId != null and loginId == lostVO.id}"
-              th:action="@{/api/lost/{lostNum}(lostNum=${lostVO.num})}"
-              method="post"
-              data-admin="false"
-              onsubmit="return setDeletePassword(this);">
+            sec:authorize="!hasRole('ADMIN')"
+            th:if="${loginId != null and loginId == lostVO.id}"
+            th:action="@{/api/lost/{lostNum}(lostNum=${lostVO.num})}"
+            method="post"
+            data-admin="false"
+            onsubmit="return setDeletePassword(this);">
 
-          <input type="hidden" name="password" class="delete-password-input">
+            <input type="hidden" name="password" class="delete-password-input">
 
-          <button type="submit" class="detail-btn delete-btn">
-            삭제하기
-          </button>
+            <button type="submit" class="detail-btn delete-btn">
+                삭제하기
+            </button>
         </form>
 
     </div>
