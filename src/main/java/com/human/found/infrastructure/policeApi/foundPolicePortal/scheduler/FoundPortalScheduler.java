@@ -15,7 +15,7 @@ public class FoundPortalScheduler {
 
     // initialDelay = 5000
     // cron = "0 0 3 * * *", zone = "Asia/Seoul"
-    @Scheduled(initialDelay = 5000)
+    @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
     public void runFoundPortalApiScheduler() {
         try {
             System.out.println("포털기관 습득물 API 스케줄러 시작");

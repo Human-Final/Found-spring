@@ -112,20 +112,20 @@
 
     </select>
     
-<select id="SelectFoundById"
+<select id="selectFoundById"
 resultType="com.human.found.domain.found.vo.FoundVO">
     SELECT * 
     FROM found
-    WHERE num =#{foundNum}
+    WHERE atc_id =#{atcId}
 </select>
 
 <update id="FoundupdateDelete">
     UPDATE found
     SET is_deleted=1
-    WHERE num =#{foundNum}
+    WHERE atc_id =#{atcId}
 </update>
 
-    <select id="SelectDetailatcID" parameterType="string" resultType="com.human.found.domain.found.vo.FoundVO">
+    <select id="selectDetailatcId" parameterType="string" resultType="com.human.found.domain.found.vo.FoundVO">
         SELECT * FROM (
             SELECT 
                 num, 
@@ -211,6 +211,22 @@ resultType="com.human.found.domain.found.vo.FoundVO">
     ) as total_found
 
 </select>
+
+<!-- 경찰청 삭제-->
+ <delete id="PoliceDelete">
+    DELETE 
+    FROM found_police
+    WHERE atc_id=#{atcId}
+ </delete>
+
+ <!-- 포털 삭제 -->
+  <delete id="PortalDelete">
+    DELETE
+    FROM found_portal
+    WHERE atc_id=#{atcId}
+  </delete>
+
+
 
 
 
