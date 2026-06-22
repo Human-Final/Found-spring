@@ -1,9 +1,9 @@
-package com.human.found.infrastructure.police.policeApi.foundPolicePortal.scheduler;
+package com.human.found.infrastructure.police.foundPolicePortal.scheduler;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.human.found.infrastructure.police.policeApi.foundPolicePortal.service.FoundPortalService;
+import com.human.found.infrastructure.police.foundPolicePortal.service.FoundPortalService;
 
 import lombok.RequiredArgsConstructor;
 

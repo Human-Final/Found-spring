@@ -1,4 +1,4 @@
-package com.human.found.infrastructure.police.policeApi.foundPolicePortal.vo;
+package com.human.found.infrastructure.police.foundPolicePortal.vo;
 
 import java.util.List;
 

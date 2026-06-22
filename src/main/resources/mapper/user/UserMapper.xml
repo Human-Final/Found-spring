@@ -32,6 +32,92 @@
 
     </select>
 
+    <select id="selectMyPageCounts" parameterType="string" resultType="map">
+        SELECT 
+            <!-- 1. 내가 쓴 총 글 수 -->
+            (SELECT COUNT(*) FROM lost WHERE id = #{userId} AND is_deleted = 0) + 
+            (SELECT COUNT(*) FROM found WHERE id = #{userId} AND is_deleted = 0) AS total_count,
+            
+            <!-- 2. 진행 중인 글 수 (예: done이 0인 상태) -->
+            (SELECT COUNT(*) FROM lost WHERE id = #{userId} AND done = 0 AND is_deleted = 0) + 
+            (SELECT COUNT(*) FROM found WHERE id = #{userId} AND done = 0 AND is_deleted = 0) AS progress_count,
+            
+            <!-- 3. 완료된 글 수 (예: done이 1인 상태) -->
+            (SELECT COUNT(*) FROM lost WHERE id = #{userId} AND done = 1 AND is_deleted = 0) + 
+            (SELECT COUNT(*) FROM found WHERE id = #{userId} AND done = 1 AND is_deleted = 0) AS complete_count
+    </select>
+
+    <!-- 마이페이지용 최근 작성글 2개 조회 (게시글 등록일자 created_at 정렬 방식) -->
+    <select id="selectMyRecentPostList" parameterType="string" resultType="com.human.found.domain.user.vo.MyPagePostVO">
+        SELECT 
+            total_recent.board_type AS boardType,
+            total_recent.num,
+            total_recent.title,
+            total_recent.category,
+            total_recent.done,
+            total_recent.created_at AS createdAt
+        FROM (
+            SELECT 
+                '습득' AS board_type,
+                num, 
+                fd_prdt_nm AS title,       
+                prdt_cl_nm AS category,    
+                done, 
+                created_at
+            FROM found 
+            WHERE id = #{userId} AND is_deleted = 0
+            
+            UNION ALL
+            
+            SELECT 
+                '분실' AS board_type,
+                num, 
+                lst_prdt_nm AS title,      
+                prdt_cl_nm AS category,    
+                done, 
+                created_at
+            FROM lost 
+            WHERE id = #{userId} AND is_deleted = 0
+        ) AS total_recent
+        ORDER BY total_recent.created_at DESC 
+        LIMIT 2
+    </select>
+
+    <!--마이페이지에서 본인이 작성한 글 모두를 불러오는 쿼리문-->
+    <select id="selectMyAllPostList" parameterType="string" resultType="com.human.found.domain.user.vo.MyPagePostVO">
+        SELECT 
+            total_recent.board_type AS boardType,
+            total_recent.num,
+            total_recent.title,
+            total_recent.category,
+            total_recent.done,
+            total_recent.created_at AS createdAt
+        FROM (
+            SELECT 
+                '습득' AS board_type,
+                num, 
+                fd_prdt_nm AS title,       
+                prdt_cl_nm AS category,    
+                done, 
+                created_at
+            FROM found 
+            WHERE id = #{userId} AND is_deleted = 0
+            
+            UNION ALL
+            
+            SELECT 
+                '분실' AS board_type,
+                num, 
+                lst_prdt_nm AS title,      
+                prdt_cl_nm AS category,    
+                done, 
+                created_at
+            FROM lost 
+            WHERE id = #{userId} AND is_deleted = 0
+        ) AS total_recent
+        ORDER BY total_recent.created_at DESC 
+    </select>
+
     <insert id = "insertUser" 
             parameterType = "com.human.found.domain.user.vo.UserVO">
         INSERT INTO user (
