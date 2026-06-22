@@ -7,7 +7,7 @@ import com.human.found.domain.comment.vo.FoundCommentVO;
 public interface FoundCommentService {
     
     // 특정 습득 게시글 댓글 목록 조회
-    List<FoundCommentVO> getCommentsByNum(Long num);
+    List<FoundCommentVO> getCommentsByNum(Long num, String dataSource);
 
     // 댓글 등록
     int insertComment(FoundCommentVO comentVO);

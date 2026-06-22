@@ -657,13 +657,21 @@
             th:action="@{/api/found/{num}/comments(num=${foundVO.num})}"
             method="post"
             class="comment-form">
+          
+          <input type="hidden" 
+                 name="atcId" 
+                 th:value="${foundVO.atcId}">
 
-        <textarea name="content"
-                  placeholder="댓글을 입력하세요."
-                  maxlength="500"
-                  required></textarea>
+          <input type="hidden"
+                name="dataSource"
+                th:value="${foundVO.dataSource}">
 
-        <button type="submit">등록</button>
+          <textarea name="content"
+                    placeholder="댓글을 입력하세요."
+                    maxlength="500"
+                    required></textarea>
+
+          <button type="submit">등록</button>
       </form>
 
       <p th:if="${!#authorization.expression('isAuthenticated()')}"
@@ -695,13 +703,15 @@
           </p>
 
           <div th:if="${#authorization.expression('isAuthenticated()') 
-                       and comment.id == #authentication.name}"
-               class="comment-actions">
+                      and (comment.id == #authentication.name 
+                            or #authorization.expression('hasAnyRole(''ADMIN'', ''MANAGER'')'))}"
+              class="comment-actions">
 
             <form th:action="@{/api/found/comments/{commentNum}/delete(commentNum=${comment.commentNum})}"
                   method="post"
                   onsubmit="return confirm('댓글을 삭제하시겠습니까?');">
-
+                  
+              <input type="hidden" name="atcId" th:value="${foundVO.atcId}">
               <button type="submit">삭제</button>
             </form>
 

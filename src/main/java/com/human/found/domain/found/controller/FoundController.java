@@ -128,7 +128,10 @@ public class FoundController {
         FoundVO foundVO = foundService.foundgetdetail(atcId);
 
         List<FoundCommentVO> commentList =
-                foundCommentService.getCommentsByNum(foundVO.getNum());
+                foundCommentService.getCommentsByNum(
+                        foundVO.getNum(),
+                        foundVO.getDataSource()
+                );
 
         model.addAttribute("foundVO", foundVO);
         model.addAttribute("commentList", commentList);
