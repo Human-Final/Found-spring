@@ -13,6 +13,8 @@ public class FoundPortalScheduler {
 
     private final FoundPortalService foundPortalService;
 
+    // initialDelay = 5000
+    // cron = "0 0 3 * * *", zone = "Asia/Seoul"
     @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
     public void runFoundPortalApiScheduler() {
         try {

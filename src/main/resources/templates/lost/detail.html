@@ -1,69 +1,376 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <meta charset="UTF-8">
-    <title>분실물 상세 정보</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script type="text/javascript" th:src="@{'//dapi.kakao.com/v2/maps/sdk.js?appkey=' + ${kakaoJsKey} + '&libraries=services'}"></script>
-</head>
-<body class="bg-gray-50 p-8">
-    <div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-xl" th:object="${goods}">
-        <h1 class="text-3xl font-bold mb-6 text-gray-900 border-b pb-4" th:text="*{lstSbjt}">제목이 표시되는 곳</h1>
-        
-        <div class="space-y-4 mb-8 text-gray-700 bg-gray-50 p-6 rounded-xl border">
-            <div>
-                <strong class="text-gray-900 block mb-1">상세 정보 (제품번호):</strong>
-                <p class="text-gray-600" th:text="*{lstPrdtNum}"></p>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <p><strong class="text-gray-900">분실장소:</strong> <span th:text="*{lstPlace}"></span></p>
-                <p><strong class="text-gray-900">날짜:</strong> <span th:text="*{lstYmd}"></span></p>
-                <p><strong class="text-gray-900">제품 분류:</strong> <span th:text="*{prdtClNum}"></span></p>
-                <p><strong class="text-gray-900">처리상태:</strong> 
-                    <span th:text="*{done == 0 ? '미완료' : '완료'}" 
-                          th:classappend="*{done == 0 ? 'text-red-500' : 'text-green-500'}" class="font-bold"></span>
-                </p>
-            </div>
-        </div>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>분실 게시글 상세조회 | 분실물 센터</title>
 
-        <h2 class="text-xl font-bold mb-4 text-gray-800">🔍 분실물 위치</h2>
-        <div id="map" style="width:100%; height:300px;" class="rounded-xl mb-6 shadow-md border"></div>
-        <div id="mapMessage" class="hidden text-red-500 font-bold p-4 bg-red-50 rounded-lg mb-6 border border-red-200 text-center">
-            위치를 찾을 수 없습니다.
-        </div>
-        
-        <div class="mt-8">
-            <a href="/lost/list" class="bg-indigo-600 text-white py-3 px-6 rounded-lg font-bold hover:bg-indigo-700">목록으로</a>
-        </div>
+  <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <link rel="stylesheet" th:href="@{/css/board/detail.css}">
+
+</head>
+
+<body class="lost-board">
+
+<div th:replace="~{layout/header :: headerFragment}"></div>
+
+<main class="detail-page">
+
+  <section class="detail-hero">
+    <div>
+      <h2>분실 게시판 상세조회</h2>
+      <p>분실한 물건의 상세 정보를 확인하세요</p>
     </div>
 
-    <script th:inline="javascript">
-        var address = /*[[${goods.lstPlace}]]*/ '';
-        function initMap() {
-            var mapContainer = document.getElementById('map');
-            var mapMessage = document.getElementById('mapMessage');
-            var mapOption = { center: new kakao.maps.LatLng(37.5665, 126.9780), level: 3 };
-            var map = new kakao.maps.Map(mapContainer, mapOption);
-            var ps = new kakao.maps.services.Places();
+    <div class="breadcrumb">
+      <span>홈</span>
+      <span>›</span>
+      <span>분실 게시판</span>
+      <span>›</span>
+      <span>상세조회</span>
+    </div>
+  </section>
 
-            if (!address) {
-                mapContainer.style.display = 'none';
-                mapMessage.classList.remove('hidden');
-                return;
-            }
+  <section class="detail-card">
 
-            ps.keywordSearch(address, function(result, status) {
-                if (status === kakao.maps.services.Status.OK) {
-                    var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-                    new kakao.maps.Marker({ map: map, position: coords });
-                    map.setCenter(coords);
-                } else {
-                    mapContainer.style.display = 'none';
-                    mapMessage.classList.remove('hidden');
-                }
-            });
+    <div class="detail-top">
+
+      <div class="detail-main">
+
+        <div class="tag-group">
+          <span class="type-tag lost">분실</span>
+          <span class="category-tag" th:text="${lostVO.prdtClNm}">지갑</span>
+
+          <span th:if="${lostVO.done == 0}" class="status-tag progress">진행중</span>
+          <span th:if="${lostVO.done == 1}" class="status-tag done">완료</span>
+        </div>
+
+        <h1 class="detail-title"
+            th:text="${lostVO.lstSbjt}">
+          검정색 반지갑을 보관 중입니다
+        </h1>
+
+        <p class="detail-summary"
+           th:text="${lostVO.lstPrdtNm}">
+          분실물 정보를 확인한 뒤 보관장소를 참고해 주세요.
+        </p>
+
+        <div class="info-box">
+
+          <div class="info-column">
+            <div class="info-row">
+              <span class="info-label">물품명</span>
+              <span class="info-value" th:text="${lostVO.lstPrdtNm}"></span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">분실지역</span>
+              <span class="info-value" th:text="${lostVO.lstPlace}"></span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">분실일자</span>
+              <span class="info-value"
+                    th:text="${#temporals.format(lostVO.lstYmd, 'yyyy-MM-dd HH:mm')}">
+              </span>
+            </div>
+
+          </div>
+
+          <div class="info-column">
+            <div class="info-row">
+              <span class="info-label">작성자</span>
+              <span class="info-value"
+                    th:text="${lostVO.id != null ? lostVO.id : '기관/API'}">
+                홍길동
+              </span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">처리상태</span>
+              <span class="info-value">
+                <span th:if="${lostVO.done == 0}" class="status-tag progress">진행중</span>
+                <span th:if="${lostVO.done == 1}" class="status-tag done">완료</span>
+              </span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">조회수</span>
+              <span class="info-value">0</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">물품분류</span>
+              <span class="info-value" th:text="${lostVO.prdtClNm}">지갑</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">데이터출처</span>
+              <span class="info-value"
+                    th:text="${lostVO.dataSource == 'user' ? '사용자 등록글' : (lostVO.dataSource == 'police' ? '경찰청 API' : '포털기관 API')}">
+                사용자 등록글
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <aside class="detail-image-area">
+        <div class="image-box">
+          <img th:if="${lostVO.fdFilepathImg != null and lostVO.fdFilepathImg != ''}"
+               th:src="${lostVO.fdFilepathImg}"
+               alt="분실물 이미지">
+
+          <span th:if="${lostVO.fdFilepathImg == null or lostVO.fdFilepathImg == ''}"
+                class="no-image">
+            등록된 이미지가 없습니다
+          </span>
+        </div>
+
+        <p class="image-caption">등록된 이미지</p>
+      </aside>
+
+    </div>
+
+    <section class="map-section">
+      <h3 class="section-title">위치 정보</h3>
+
+      <div class="map-box">
+        <div id="kakaoMap"></div>
+        <div id="mapMessage" class="map-message">
+            위치 정보를 표시할 수 없습니다.
+        </div>
+      </div>
+
+      <p class="map-address"
+         th:text="|지도 기준 위치: ${lostVO.lstPlace}|">
+        지도 기준 위치: 보관장소
+      </p>
+    </section>
+
+    <div class="detail-actions">
+
+      <a th:href="@{/api/lost}" class="detail-btn list-btn">
+        ← 목록으로
+      </a>
+
+      <!-- 
+        수정/삭제 버튼 표시 조건:
+        1. 로그인 상태
+        2. 사용자 등록글(dataSource == 'user')
+        3. 현재 로그인한 id == 글 작성자 id
+      -->
+    <th:block th:if="${#authorization.expression('isAuthenticated()') 
+                    and lostVO.dataSource == 'user' 
+                    and lostVO.id == #authentication.name}">
+
+        <!-- 수정은 별도 수정 페이지가 있다면 href만 그쪽으로 바꾸면 됨 -->
+        <a th:href="@{/api/lost/detail/{atcId}/edit(atcId=${lostVO.atcId})}"
+           class="detail-btn edit-btn">
+          ✎ 수정하기
+        </a>
+    </th:block>
+
+        <!-- 현재 삭제 컨트롤러가 POST /api/found/{foundNum} 이라서 POST 기준 -->
+        <form class="delete-form"
+              sec:authorize="hasRole('ADMIN')"
+              th:action="@{/api/lost/{lostNum}(lostNum=${lostVO.num})}"
+              method="post"
+              data-admin="true"
+              onsubmit="return setDeletePassword(this);">
+
+          <input type="hidden" name="password" class="delete-password-input">
+
+          <button type="submit" class="detail-btn delete-btn">
+            삭제하기
+          </button>
+        </form>
+
+        <form class="delete-form"
+              sec:authorize="!hasRole('ADMIN')"
+              th:if="${loginId != null and loginId == lostVO.id}"
+              th:action="@{/api/lost/{lostNum}(lostNum=${lostVO.num})}"
+              method="post"
+              data-admin="false"
+              onsubmit="return setDeletePassword(this);">
+
+          <input type="hidden" name="password" class="delete-password-input">
+
+          <button type="submit" class="detail-btn delete-btn">
+            삭제하기
+          </button>
+        </form>
+
+    </div>
+
+  </section>
+
+</main>
+
+<div th:replace="~{layout/footer :: footerFragment}"></div>
+
+<!-- 카카오맵 SDK -->
+<script
+  type="text/javascript"
+  th:src="|//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoMapJsKey}&libraries=services&autoload=false|">
+</script>
+
+<script th:inline="javascript">
+  function setDeletePassword(form) {
+    const password = prompt("게시글 삭제를 위해 비밀번호를 입력해 주세요.");
+
+    if (password === null) {
+      return false;
+    }
+
+    if (password.trim() === "") {
+      alert("비밀번호를 입력해 주세요.");
+      return false;
+    }
+
+    if (!confirm("정말 삭제하시겠습니까?")) {
+      return false;
+    }
+
+    form.querySelector(".delete-password-input").value = password;
+    return true;
+  }
+
+  /*
+    Kakao Map
+    - lostVO.depPlace 값을 기준으로 지도 표시
+    - 1차: 주소 검색
+    - 2차: 키워드 검색
+    - 실패 시: "위치 정보를 표시할 수 없습니다."
+  */
+  document.addEventListener("DOMContentLoaded", function () {
+    const mapAddress = String(/*[[${lostVO.lstPlace}]]*/ "").trim();
+
+    const mapContainer = document.getElementById("kakaoMap");
+    const mapMessage = document.getElementById("mapMessage");
+
+    function showMapMessage(message) {
+      if (mapContainer) {
+        mapContainer.style.display = "none";
+      }
+
+      if (mapMessage) {
+        mapMessage.textContent = message;
+        mapMessage.style.display = "flex";
+      }
+    }
+
+    function hideMapMessage() {
+      if (mapContainer) {
+        mapContainer.style.display = "block";
+      }
+
+      if (mapMessage) {
+        mapMessage.style.display = "none";
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    if (!mapContainer || !mapMessage) {
+      console.error("카카오맵 영역 또는 메시지 영역을 찾을 수 없습니다.");
+      return;
+    }
+
+    if (!mapAddress) {
+      showMapMessage("위치 정보를 표시할 수 없습니다.");
+      return;
+    }
+
+    if (!window.kakao || !kakao.maps) {
+      showMapMessage("카카오맵을 불러올 수 없습니다.");
+      console.error("kakao.maps 객체가 없습니다. SDK 로드 여부를 확인하세요.");
+      return;
+    }
+
+    kakao.maps.load(function () {
+      const geocoder = new kakao.maps.services.Geocoder();
+      const places = new kakao.maps.services.Places();
+
+      // 1차: 주소 검색
+      geocoder.addressSearch(mapAddress, function (result, status) {
+        if (status === kakao.maps.services.Status.OK && result.length > 0) {
+          drawMap(result[0].y, result[0].x, "분실 위치", mapAddress);
+          return;
         }
-        if (typeof kakao !== 'undefined') { kakao.maps.load(initMap); }
-    </script>
+
+        // 2차: 키워드 검색
+        places.keywordSearch(mapAddress, function (data, status) {
+          if (status !== kakao.maps.services.Status.OK || data.length === 0) {
+            showMapMessage("위치 정보를 표시할 수 없습니다.");
+            return;
+          }
+
+          const place = findBestPlace(data, mapAddress);
+
+          drawMap(
+            place.y,
+            place.x,
+            place.place_name || "분실 위치",
+            place.road_address_name || place.address_name || mapAddress
+          );
+        });
+      });
+
+      function findBestPlace(data, keyword) {
+        const normalizedKeyword = keyword.replace(/\s/g, "");
+
+        return data.find(function (place) {
+          const placeName = String(place.place_name || "").replace(/\s/g, "");
+          return placeName.includes(normalizedKeyword);
+        }) || data[0];
+      }
+
+      function drawMap(lat, lng, title, address) {
+        hideMapMessage();
+
+        const coords = new kakao.maps.LatLng(Number(lat), Number(lng));
+
+        const map = new kakao.maps.Map(mapContainer, {
+          center: coords,
+          level: 4
+        });
+
+        const marker = new kakao.maps.Marker({
+          map: map,
+          position: coords
+        });
+
+        const infowindow = new kakao.maps.InfoWindow({
+          content:
+            '<div style="min-width:180px;text-align:center;padding:8px 10px;font-size:12px;line-height:1.4;">' +
+              '<strong style="display:block;color:#0f172a;">' + escapeHtml(title) + '</strong>' +
+              '<span style="display:block;margin-top:3px;color:#64748b;font-weight:700;">' + escapeHtml(address) + '</span>' +
+            '</div>'
+        });
+
+        infowindow.open(map, marker);
+
+        map.setCenter(coords);
+
+        setTimeout(function () {
+          map.relayout();
+          map.setCenter(coords);
+        }, 100);
+      }
+    });
+  });
+</script>
+
 </body>
 </html>
