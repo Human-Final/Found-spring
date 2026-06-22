@@ -1,5 +1,8 @@
 package com.human.found.domain.user.service;
 
+import java.util.List;
+
+import com.human.found.domain.user.vo.MyPagePostVO;
 import com.human.found.domain.user.vo.UserVO;
 
 /**
@@ -61,6 +64,16 @@ public interface UserService {
      * 마이페이지 뷰를 띄울 때 회원 정보를 안전하게 꺼내오기 위한 메서드
      */
     UserVO getUserInfo(String id);
+
+    // 사용자가 작성한 글의 갯수 갖고오기 메서드
+    java.util.Map<String, Object> getMyPageCounts(String userId);
+
+    // 사용자 작성 게시글 모두 갖고오기 메서드
+    List<MyPagePostVO> getMyAllPostList(String userId);
+
+    // 사용자 최신 게시글 2개만 갖고오기 메서드
+    List<MyPagePostVO> getMyRecentPostList(String userId);
+
 
     /**
      * 회원탈퇴

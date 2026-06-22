@@ -1,8 +1,11 @@
 package com.human.found.domain.user.mapper;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.human.found.domain.user.vo.MyPagePostVO;
 import com.human.found.domain.user.vo.UserVO;
 
 @Mapper
@@ -27,4 +30,13 @@ public interface UserMapper {
 
     // 회원탈퇴 처리 (실제 삭제는 아니고 is_deleted, deleted_at변경)
     int withdrawUser(String id);
+
+    // 유저의 게시글 갯수 갖고오기
+    java.util.Map<String, Object> selectMyPageCounts(String userId);
+
+    // 유저의 작성된 게시글 모두 갖고오기
+    List<MyPagePostVO> selectMyAllPostList(String userId);
+
+    // 유저의 작성된 최신 게시글 2개만 갖고오기
+    List<MyPagePostVO> selectMyRecentPostList(String userId);
 }

@@ -61,6 +61,13 @@ public class NoticeServiceImpl implements NoticeService {
         
         // 2. 관리자가 수정 폼에서 새로운 이미지 파일을 업로드한 경우에만 교체 작업 진행
         if (notice.getUploadFile() != null && !notice.getUploadFile().isEmpty()) {
+            NoticeFileVO oldNoticeFile = noticeMapper.selectNoticeFileByNum(notice.getNum());
+        
+            if (oldNoticeFile != null && oldNoticeFile.getFilePath() != null) {
+                // 💡 [추가] 실제 폴더(디스크)에서 구 첨부파일을 영구 삭제합니다.
+                deleteRealFile(oldNoticeFile.getFilePath());
+            }
+
             // 1:1 유지를 위해 기존 첨부파일 데이터를 자식 테이블에서 완전히 삭제
             noticeMapper.deleteNoticeFile(notice.getNum());
             
@@ -116,5 +123,62 @@ public class NoticeServiceImpl implements NoticeService {
                 e.printStackTrace();
             }
         }
-    }       
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public NoticeVO getNoticeForEdit(Long num) {
+        return noticeMapper.selectNoticeDetail(num);
+    }  
+    
+    //실제 저장 경로에서 파일을 물리적으로 삭제하는 메서드
+    private void deleteRealFile(String imagePath) {
+    try {
+        // 1. 역슬래시 구조로 완벽하게 마감된 기본 네트워크 폴더 루트
+        String uploadDir = "\\\\192.168.0.53\\260126\\0608\\배민선, 박상화, 김태연, 신민철\\file\\notice\\";
+        
+        if (imagePath == null || imagePath.trim().isEmpty()) {
+            System.out.println("❌ [삭제 건너뜀] 기존 이미지 파일 경로 데이터가 null이거나 비어있습니다.");
+            return;
+        }
+
+        // 2. 에러 로그 분석 결과: imagePath 내부에 "images/notice/"가 포함되어 있으므로 순수 파일명만 추출
+        // 예: "images/notice/uuid_억울이.jpg" -> "uuid_억울이.jpg"만 쏙 뽑아냅니다.
+        if (imagePath.contains("/") || imagePath.contains("\\")) {
+            imagePath = imagePath.substring(Math.max(imagePath.lastIndexOf("/"), imagePath.lastIndexOf("\\")) + 1);
+        }
+        
+        // 3. ⚠️ [핵심]: URI 객체를 쓰지 않고, 윈도우가 해석할 수 있는 백슬래시 절대 경로 문자열로 강제 결합
+        // 이렇게 하면 한글, 공백, 쉼표가 섞여 있어도 자바가 에러를 내지 않고 그대로 파일 시스템에 접근합니다.
+        String totalFullPath = uploadDir + imagePath;
+        
+        // 4. 자바 전통의 물리 파일 객체 생성
+        java.io.File file = new java.io.File(totalFullPath);
+        
+        System.out.println("=========================================");
+        System.out.println("🚨 [강제 물리 삭제 시도 최종 경로]: " + totalFullPath);
+        
+        // 5. 물리 삭제 프로세스 작동
+        if (file.exists()) {
+            // 메모리 점유 방지를 위한 가비지 컬렉터 가동 후 삭제
+            System.gc(); 
+            
+            if (file.delete()) {
+                System.out.println("⭕ [삭제 성공] 공유 폴더에서 '억울이' 이미지 파일이 성공적으로 영구 제거되었습니다!");
+            } else {
+                System.out.println("❌ [삭제 실패] 파일은 존재하나 서버 권한 부족 또는 타 프로세스 점유로 삭제가 거부되었습니다.");
+            }
+        } else {
+            System.out.println("❌ [삭제 실패] 지정한 네트워크 경로에 파일이 존재하지 않습니다. (경로 조립 오차)");
+        }
+        System.out.println("=========================================");
+        
+    } catch (Exception e) {
+        System.err.println("💥 [시스템 에러] 물리 파일 삭제 프로세스 중 예외 발생: " + e.getMessage());
+        e.printStackTrace();
+    }
+
 }
+
+}
+

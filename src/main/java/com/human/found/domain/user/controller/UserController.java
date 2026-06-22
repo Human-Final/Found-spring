@@ -1,6 +1,7 @@
 package com.human.found.domain.user.controller;
 
 import java.security.Principal;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.human.found.domain.user.service.UserServiceImpl;
+import com.human.found.domain.user.vo.MyPagePostVO;
 import com.human.found.domain.user.vo.UserVO;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,10 +43,22 @@ public class UserController {
         // 2. DB에서 유저 정보(UserVO)를 가져옵니다.
         UserVO user = userService.getUserInfo(loginUserId);
 
-        // 3. 중요: 화면(Thymeleaf)으로 데이터를 던져줍니다.
-        model.addAttribute("user", user);
+        // 3. 로그인하는 유저가 작성한 글 통계 데이터 갖고오기
+        java.util.Map<String, Object> counts = userService.getMyPageCounts(loginUserId);
 
-        // 4. 마이페이지 파일 경로를 리턴합니다.
+        // 4. 유저가 작성한 최신 글들의 정보 2개를 리스트화하여 DB에서 조회함
+        List<MyPagePostVO> recentPosts = userService.getMyRecentPostList(loginUserId);
+
+        // 5. 유저가 작성한 모든 글들의 정보를 리스트화해서 DB에서 조회하기
+        List<MyPagePostVO> allPosts = userService.getMyAllPostList(loginUserId);
+
+        // 5. 중요: 화면(Thymeleaf)으로 데이터를 던져줍니다.
+        model.addAttribute("user", user);
+        model.addAttribute("counts", counts);
+        model.addAttribute("recentPosts", recentPosts);
+        model.addAttribute("allPosts", allPosts);
+
+        // 6. 마이페이지 파일 경로를 리턴합니다.
         return "user/mypage";
     }
 
