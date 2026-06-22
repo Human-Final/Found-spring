@@ -260,19 +260,19 @@
     }
 
     .map-message {
-    position: absolute;
-    inset: 0;
-    z-index: 5;
+      position: absolute;
+      inset: 0;
+      z-index: 5;
 
-    display: none;
-    align-items: center;
-    justify-content: center;
+      display: none;
+      align-items: center;
+      justify-content: center;
 
-    background: #f8fafc;
-    color: #64748b;
-    font-size: 14px;
-    font-weight: 800;
-    text-align: center;
+      background: #f8fafc;
+      color: #64748b;
+      font-size: 14px;
+      font-weight: 800;
+      text-align: center;
     }
 
     .map-address {
@@ -280,6 +280,102 @@
       color: #64748b;
       font-size: 12px;
       font-weight: 700;
+    }
+
+    .comment-section {
+      margin-top: 26px;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 24px;
+    }
+
+    .comment-form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .comment-form textarea {
+      flex: 1;
+      min-height: 74px;
+      padding: 12px;
+      border: 1px solid #dbe3ee;
+      border-radius: 10px;
+      resize: vertical;
+      font-size: 13px;
+    }
+
+    .comment-form button {
+      width: 82px;
+      border: none;
+      border-radius: 10px;
+      background: #2563eb;
+      color: #ffffff;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .comment-login-message,
+    .no-comment {
+      margin: 0 0 14px;
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .comment-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .comment-item {
+      padding: 14px 16px;
+      border: 1px solid #dbe3ee;
+      border-radius: 10px;
+      background: #ffffff;
+    }
+
+    .comment-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+
+    .comment-head strong {
+      color: #0f172a;
+    }
+
+    .comment-head span {
+      color: #94a3b8;
+      font-weight: 700;
+    }
+
+    .comment-content {
+      margin: 0;
+      color: #334155;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .comment-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    .comment-actions button {
+      border: 1px solid #fca5a5;
+      background: #ffffff;
+      color: #dc2626;
+      border-radius: 7px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
     }
 
     .detail-actions {
@@ -376,6 +472,15 @@
       .info-column + .info-column {
         border-left: none;
         padding-left: 0;
+      }
+
+      .comment-form {
+        flex-direction: column;
+      }
+
+      .comment-form button {
+        width: 100%;
+        height: 40px;
       }
 
       .detail-actions {
@@ -544,6 +649,68 @@
       </p>
     </section>
 
+    <!-- 댓글 영역 -->
+    <section class="comment-section">
+      <h3 class="section-title">댓글</h3>
+
+      <form th:if="${#authorization.expression('isAuthenticated()')}"
+            th:action="@{/api/found/{num}/comments(num=${foundVO.num})}"
+            method="post"
+            class="comment-form">
+
+        <textarea name="content"
+                  placeholder="댓글을 입력하세요."
+                  maxlength="500"
+                  required></textarea>
+
+        <button type="submit">등록</button>
+      </form>
+
+      <p th:if="${!#authorization.expression('isAuthenticated()')}"
+         class="comment-login-message">
+        댓글을 작성하려면 로그인이 필요합니다.
+      </p>
+
+      <div class="comment-list">
+
+        <p th:if="${commentList == null or #lists.isEmpty(commentList)}"
+           class="no-comment">
+          등록된 댓글이 없습니다.
+        </p>
+
+        <div th:each="comment : ${commentList}"
+             class="comment-item">
+
+          <div class="comment-head">
+            <strong th:text="${comment.id}">작성자</strong>
+
+            <span th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}">
+              2026-06-22 10:30
+            </span>
+          </div>
+
+          <p class="comment-content"
+             th:text="${comment.content}">
+            댓글 내용입니다.
+          </p>
+
+          <div th:if="${#authorization.expression('isAuthenticated()') 
+                       and comment.id == #authentication.name}"
+               class="comment-actions">
+
+            <form th:action="@{/api/found/comments/{commentNum}/delete(commentNum=${comment.commentNum})}"
+                  method="post"
+                  onsubmit="return confirm('댓글을 삭제하시겠습니까?');">
+
+              <button type="submit">삭제</button>
+            </form>
+
+          </div>
+
+        </div>
+      </div>
+    </section>
+
     <div class="detail-actions">
 
       <a th:href="@{/api/found}" class="detail-btn list-btn">
@@ -560,13 +727,11 @@
                         and foundVO.dataSource == 'user' 
                         and foundVO.id == #authentication.name}">
 
-        <!-- 수정은 별도 수정 페이지가 있다면 href만 그쪽으로 바꾸면 됨 -->
         <a th:href="@{/api/found/detail/{atcId}/edit(atcId=${foundVO.atcId})}"
            class="detail-btn edit-btn">
           ✎ 수정하기
         </a>
 
-        <!-- 현재 네 삭제 컨트롤러가 POST /api/found/{foundNum} 이라서 POST 기준 -->
         <form class="delete-form"
               th:action="@{/api/found/{foundNum}(foundNum=${foundVO.num})}"
               method="post"
@@ -679,14 +844,12 @@
       const geocoder = new kakao.maps.services.Geocoder();
       const places = new kakao.maps.services.Places();
 
-      // 1차: 주소 검색
       geocoder.addressSearch(mapAddress, function (result, status) {
         if (status === kakao.maps.services.Status.OK && result.length > 0) {
           drawMap(result[0].y, result[0].x, "습득 위치", mapAddress);
           return;
         }
 
-        // 2차: 키워드 검색
         places.keywordSearch(mapAddress, function (data, status) {
           if (status !== kakao.maps.services.Status.OK || data.length === 0) {
             showMapMessage("위치 정보를 표시할 수 없습니다.");
