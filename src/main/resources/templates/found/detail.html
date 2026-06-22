@@ -138,11 +138,6 @@
                 class="no-image">
             등록된 이미지가 없습니다
           </span>
-
-          <p style="color:red;"
-            th:text="|이미지 경로 확인: ${foundVO.fdFilepathImg}|">
-            이미지 경로 확인
-          </p>
                   
         </div>
 
@@ -255,11 +250,14 @@
             method="post"
             th:data-admin="${#authorization.expression('hasRole(''ADMIN'')')}"
             onsubmit="return validatePostDelete(this);">
-          
-        <div class="post-delete-password-area"
-             th:classappend="${errorMessage == null ? ' is-hidden' : ''}">
+        
+          <input type="hidden" name="_method" value="delete">  
+        
+          <div class="post-delete-password-area"
+               th:classappend="${errorMessage == null ? ' is-hidden' : ''}">
             
           <label for="postDeletePasswordInput">비밀번호 확인</label>
+          
           <input type="password"
                  id="postDeletePasswordInput"
                  name="password"
@@ -270,7 +268,8 @@
           <p class="post-delete-error"
              th:if="${errorMessage != null}"
              th:text="${errorMessage}">
-            비밀번호가 일치하지 않습니다.</p>
+            비밀번호가 일치하지 않습니다.
+          </p>
         </div>
 
         <button type="submit" 
