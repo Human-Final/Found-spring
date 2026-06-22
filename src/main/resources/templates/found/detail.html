@@ -138,6 +138,12 @@
                 class="no-image">
             등록된 이미지가 없습니다
           </span>
+
+          <p style="color:red;"
+            th:text="|이미지 경로 확인: ${foundVO.fdFilepathImg}|">
+            이미지 경로 확인
+          </p>
+                  
         </div>
 
         <p class="image-caption">등록된 이미지</p>
@@ -245,7 +251,7 @@
                   or (#authorization.expression('isAuthenticated()')
                       and foundVO.dataSource == 'user'
                       and foundVO.id == #authentication.name)}"
-            th:action="@{/api/found/{foundNum}(foundNum=${foundVO.num})}"
+            th:action="@{/api/found/{atcId}(atcId=${foundVO.atcId})}"
             method="post"
             th:data-admin="${#authorization.expression('hasRole(''ADMIN'')')}"
             onsubmit="return validatePostDelete(this);">
@@ -256,7 +262,7 @@
           <label for="postDeletePasswordInput">비밀번호 확인</label>
           <input type="password"
                  id="postDeletePasswordInput"
-                 name="inputpw"
+                 name="password"
                  class="post-delete-password-input"
                  placeholder="비밀번호 입력"
                  autocomplete="current-password">
