@@ -8,7 +8,7 @@
   <link rel="stylesheet" th:href="@{/css/board/list.css}">
 </head>
 
-<body>
+<body class="found-board">
 
 <div th:replace="layout/header :: headerFragment"></div>
 
@@ -106,7 +106,7 @@
         </div>
         <div class="info-item">
           <strong>습득일자</strong>
-          <p th:text="${foundVO.fdYmd}">습득일자</p>
+          <p th:text="${#temporals.format(foundVO.fdYmd, 'yyyy-MM-dd')}">습득일자</p>
         </div>
         <div class="info-item">
           <strong>물품분류</strong>
@@ -175,6 +175,10 @@
         
       button.addEventListener("click", function(){
         selectedCategory = this.dataset.category;
+
+        buttons.forEach(btn => btn.classList.remove("active"));
+        this.classList.add("active");
+        
         loadBoardList();
       });
     });
