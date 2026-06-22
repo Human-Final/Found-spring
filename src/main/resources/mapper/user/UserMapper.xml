@@ -52,6 +52,7 @@
         SELECT 
             total_recent.board_type AS boardType,
             total_recent.num,
+            total_recent.atcId,
             total_recent.title,
             total_recent.category,
             total_recent.done,
@@ -60,6 +61,7 @@
             SELECT 
                 '습득' AS board_type,
                 num, 
+                atc_id AS atcId,
                 fd_prdt_nm AS title,       
                 prdt_cl_nm AS category,    
                 done, 
@@ -72,6 +74,7 @@
             SELECT 
                 '분실' AS board_type,
                 num, 
+                atc_id AS atcId,
                 lst_prdt_nm AS title,      
                 prdt_cl_nm AS category,    
                 done, 
@@ -88,6 +91,7 @@
         SELECT 
             total_recent.board_type AS boardType,
             total_recent.num,
+            total_recent.atcId,
             total_recent.title,
             total_recent.category,
             total_recent.done,
@@ -95,7 +99,8 @@
         FROM (
             SELECT 
                 '습득' AS board_type,
-                num, 
+                num,
+                atc_id AS atcId,
                 fd_prdt_nm AS title,       
                 prdt_cl_nm AS category,    
                 done, 
@@ -107,7 +112,8 @@
             
             SELECT 
                 '분실' AS board_type,
-                num, 
+                num,
+                atc_id AS atcId, 
                 lst_prdt_nm AS title,      
                 prdt_cl_nm AS category,    
                 done, 
@@ -192,4 +198,23 @@
         FROM user 
         WHERE email = #{email}
     </select>
+
+    <!-- 마이페이지 전용 습득물 삭제 (is_deleted 업데이트) -->
+    <update id="deleteFoundPostByAtcId" parameterType="string">
+        UPDATE found 
+        SET 
+            is_deleted = 1, 
+            updated_at = NOW() 
+        WHERE atc_id = #{atcId}
+    </update>
+
+    <!-- 마이페이지 전용 분실물 삭제 (is_deleted 업데이트) -->
+    <update id="deleteLostPostByAtcId" parameterType="string">
+        UPDATE lost 
+        SET 
+            is_deleted = 1, 
+            updated_at = NOW() 
+        WHERE atc_id = #{atcId}
+    </update>
+
 </mapper>

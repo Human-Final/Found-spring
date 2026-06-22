@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -52,13 +53,13 @@ public class UserController {
         // 5. 유저가 작성한 모든 글들의 정보를 리스트화해서 DB에서 조회하기
         List<MyPagePostVO> allPosts = userService.getMyAllPostList(loginUserId);
 
-        // 5. 중요: 화면(Thymeleaf)으로 데이터를 던져줍니다.
+        // 6. 중요: 화면(Thymeleaf)으로 데이터를 던져줍니다.
         model.addAttribute("user", user);
         model.addAttribute("counts", counts);
         model.addAttribute("recentPosts", recentPosts);
         model.addAttribute("allPosts", allPosts);
 
-        // 6. 마이페이지 파일 경로를 리턴합니다.
+        // 7. 마이페이지 파일 경로를 리턴합니다.
         return "user/mypage";
     }
 
@@ -173,6 +174,31 @@ public class UserController {
 
         return "available"; // 사용 가능
     }
+
+    /**
+     * 🗑️ 마이페이지 전용 습득물 삭제 처리 (GET)
+     */
+    @GetMapping("/api/found/delete/{atcId}")
+    public String deleteFound(@PathVariable("atcId") String atcId, Principal principal) {
+        if (principal != null) {
+            // 💡 각각 분리해서 만든 습득물 전용 삭제 서비스 호출
+            userService.removeFoundPost(atcId); 
+        }
+        return "redirect:/mypage"; 
+    }
+
+    /**
+     * 🗑️ 마이페이지 전용 분실물 삭제 처리 (GET)
+     */
+    @GetMapping("/api/lost/delete/{atcId}")
+    public String deleteLost(@PathVariable("atcId") String atcId, Principal principal) {
+        if (principal != null) {
+            // 💡 각각 분리해서 만든 분실물 전용 삭제 서비스 호출
+            userService.removeLostPost(atcId);
+        }
+        return "redirect:/mypage"; 
+    }
+
 
     @PostMapping("/withdraw")
     public String withdrawUser(

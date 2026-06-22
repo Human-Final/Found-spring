@@ -74,6 +74,10 @@ public interface UserService {
     // 사용자 최신 게시글 2개만 갖고오기 메서드
     List<MyPagePostVO> getMyRecentPostList(String userId);
 
+    // 사용자 게시글 삭제 메서드
+    void removeFoundPost(String atcId);
+    void removeLostPost(String atcId);
+
 
     /**
      * 회원탈퇴
