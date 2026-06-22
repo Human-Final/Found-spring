@@ -9,7 +9,6 @@ textarea {
   font: inherit;
 }
 
-/* 게시판 리스트와 배경 톤 맞춤 */
 body.lost-board {
   background-color: #faefef;
 }
@@ -25,7 +24,6 @@ body.found-board {
   padding: 28px 24px 0;
 }
 
-/* 기본값은 습득 게시판 톤 */
 .detail-hero {
   height: 92px;
   border-radius: 12px;
@@ -191,7 +189,7 @@ body.lost-board .detail-hero h2 {
   min-width: 0;
 }
 
-.info-column + .info-column {
+.info-column+.info-column {
   border-left: 1px solid #eef2f7;
   padding-left: 28px;
 }
@@ -357,6 +355,103 @@ body.lost-board .detail-hero h2 {
   background: #f8fafc;
 }
 
+.comment-section {
+  margin-top: 26px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 24px;
+}
+
+.comment-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.comment-form textarea {
+  flex: 1;
+  min-height: 74px;
+  padding: 12px;
+  border: 1px solid #dbe3ee;
+  border-radius: 10px;
+  resize: vertical;
+  font-size: 13px;
+}
+
+.comment-form button {
+  width: 82px;
+  border: none;
+  border-radius: 10px;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.comment-login-message,
+.no-comment {
+  margin: 0 0 14px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.comment-item {
+  padding: 14px 16px;
+  border: 1px solid #dbe3ee;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.comment-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.comment-head strong {
+  color: #0f172a;
+}
+
+.comment-head span {
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.comment-content {
+  margin: 0;
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.comment-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.comment-actions button {
+  border: 1px solid #fca5a5;
+  background: #ffffff;
+  color: #dc2626;
+  border-radius: 7px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+
 .edit-btn {
   background: #2563eb;
   color: #ffffff;
@@ -414,9 +509,14 @@ body.lost-board .detail-hero h2 {
     grid-template-columns: 1fr;
   }
 
-  .info-column + .info-column {
+  .info-column+.info-column {
     border-left: none;
     padding-left: 0;
+  }
+
+  .comment-form button {
+    width: 100%;
+    height: 40px;
   }
 
   .detail-actions {

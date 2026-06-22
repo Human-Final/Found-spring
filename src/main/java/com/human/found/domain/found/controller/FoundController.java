@@ -24,11 +24,6 @@ import com.human.found.infrastructure.map.KakaoMapConfig;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
-
-
-
-
-
 @Controller
 @AllArgsConstructor
 public class FoundController {
