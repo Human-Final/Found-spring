@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.human.found.domain.comment.service.FoundCommentService;
+import com.human.found.domain.comment.vo.FoundCommentVO;
 import com.human.found.domain.found.service.FoundService;
 import com.human.found.domain.found.vo.FoundVO;
 import com.human.found.global.common.paging.PagingVO;
@@ -32,6 +34,7 @@ import lombok.AllArgsConstructor;
 public class FoundController {
     private final FoundService foundService;
     private final KakaoMapConfig kakaoMapConfig;
+    private final FoundCommentService foundCommentService;
     
 
     //=====습득물 등록====
@@ -120,13 +123,20 @@ public class FoundController {
     
     //====상세보기=====
     @GetMapping("/api/found/detail/{atcId}")
-    public String foundgetdetail(@PathVariable("atcId")String atcId,Model model) {
-        FoundVO foundVO=foundService.foundgetdetail(atcId);
-        model.addAttribute("foundVO",foundVO);
+    public String foundgetdetail(@PathVariable("atcId") String atcId, Model model) {
+
+        FoundVO foundVO = foundService.foundgetdetail(atcId);
+
+        List<FoundCommentVO> commentList =
+                foundCommentService.getCommentsByNum(foundVO.getNum());
+
+        model.addAttribute("foundVO", foundVO);
+        model.addAttribute("commentList", commentList);
         model.addAttribute("kakaoMapJsKey", kakaoMapConfig.getJsKey());
+
         return "found/detail";
     }
-    
+
     
     
 }

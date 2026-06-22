@@ -212,6 +212,29 @@ resultType="com.human.found.domain.found.vo.FoundVO">
 
 </select>
 
+<!-- 댓글-->
+<select id="getFoundByNum"
+        parameterType="long"
+        resultType="com.human.found.domain.found.vo.FoundVO">
+    SELECT
+        num,
+        atc_id AS atcId,
+        id,
+        clr_nm AS clrNm,
+        dep_place AS depPlace,
+        fd_filepath_img AS fdFilepathImg,
+        fd_prdt_nm AS fdPrdtNm,
+        fd_sbjt AS fdSbjt,
+        fd_ymd AS fdYmd,
+        prdt_cl_nm AS prdtClNm,
+        created_at AS createdAt,
+        updated_at AS updatedAt,
+        done,
+        is_deleted AS isDeleted
+    FROM found
+    WHERE num = #{num}
+      AND is_deleted = 0
+</select>
 
 
 

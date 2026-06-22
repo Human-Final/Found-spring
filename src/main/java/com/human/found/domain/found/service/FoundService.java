@@ -21,5 +21,8 @@ public interface FoundService {
 
     //상세보기
     public FoundVO foundgetdetail(String atcId);
+    
+    // 게시글 번호로 상세조회
+    public FoundVO getFoundByNum(Long num);
 
 }
