@@ -3,27 +3,23 @@ package com.human.found.domain.lost.controller;
 import java.security.Principal;
 import java.util.List;
 
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import com.human.found.domain.lost.service.LostService;
-import com.human.found.domain.lost.vo.LostFileVO;
-import com.human.found.domain.lost.vo.LostVO;
-
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.human.found.domain.lost.service.LostService;
+import com.human.found.domain.lost.vo.LostVO;
+import com.human.found.infrastructure.map.KakaoMapConfig;
+
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 
 
 
@@ -33,6 +29,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 @AllArgsConstructor
 public class LostController {
     private final LostService lostService;
+    private final KakaoMapConfig kakaoMapConfig;
+
     @PostMapping("/api/lost")
     public String LostRegister(@Valid @ModelAttribute LostVO lostVO,
         BindingResult bindingResult,Model model,
@@ -114,6 +112,7 @@ public class LostController {
     public String lostDetaile(@PathVariable("atcId")String atcId,Model model) {
         LostVO lostVO=lostService.lostdetail(atcId);
         model.addAttribute("lostVO", lostVO);
+        model.addAttribute("kakaoMapJsKey", kakaoMapConfig.getJsKey());
         return "lost/detail";
     }
     

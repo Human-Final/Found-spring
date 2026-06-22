@@ -162,7 +162,7 @@
       <div class="post-grid">
         <a 
           th:each="foundVO : ${recentFoundList}"
-          th:href="@{/found/detail/{atcId}(atcId=${foundVO.atcId})}"
+          th:href="@{/api/found/detail/{atcId}(atcId=${foundVO.atcId})}"
           class="post-card">
 
           <div class="post-top">
@@ -224,7 +224,7 @@
       <div class="post-grid">
         <a 
           th:each="lostVO : ${recentLostList}"
-          th:href="@{/lost/detail/{atcId}(atcId=${lostVO.atcId})}"
+          th:href="@{/api/lost/detail/{atcId}(atcId=${lostVO.atcId})}"
           class="post-card">
 
           <div class="post-top">

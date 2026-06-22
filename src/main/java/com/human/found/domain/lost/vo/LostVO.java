@@ -26,4 +26,7 @@ public class LostVO {
     private List<LostFileVO> filelist;
     private String dataSource;
 
+    private String fdFilepathImg;
+    
+
 }

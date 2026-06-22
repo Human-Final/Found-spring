@@ -20,7 +20,8 @@ lst_sbjt,
 lst_ymd,
 prdt_cl_nm,
 done,
-is_deleted
+is_deleted,
+lst_filepath_img
 
 )VALUES(
 #{atcId},
@@ -31,7 +32,8 @@ is_deleted
 #{lstYmd},
 #{prdtClNm},
 #{done},
-#{isDeleted}   
+#{isDeleted},
+#{fd_filepath_img}
 )         
 
 </insert>
@@ -52,6 +54,7 @@ created_at,
 updated_at,
 done,
 is_deleted,
+lst_filepath_img,
 'user' AS dataSource
 FROM lost
 WHERE is_deleted=0
@@ -70,6 +73,7 @@ created_at,
 updated_at,
 done,
 is_deleted,
+lst_filepath_img,
 'police' AS dataSource
 FROM lost_police
 WHERE 
@@ -127,6 +131,7 @@ resultType="com.human.found.domain.lost.vo.LostVO">
                 updated_at,
                 done,
                 is_deleted,
+                lst_filepath_img,
                 'user' AS dataSource <!--테이블라벨-->
         FROM lost
         WHERE is_deleted=0
@@ -143,8 +148,10 @@ resultType="com.human.found.domain.lost.vo.LostVO">
                 lst_ymd,
                 prdt_cl_nm,
                 created_at,
+                updated_at,
                 done,
                 is_deleted,
+                lst_filepath_img,
                 'police' AS dataSource <!--테이블라벨-->
         FROM lost_police
         WHERE is_deleted=0       

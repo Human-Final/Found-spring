@@ -17,4 +17,7 @@ public interface FoundMapper {
     public FoundVO SelectFoundById(@Param("foundNum") Long foundNum );
     public FoundVO SelectDetailatcID(@Param("atcId") String atcId);
     public long countFoundList();
+
+    // 댓글
+    FoundVO getFoundByNum(Long num);
 }
