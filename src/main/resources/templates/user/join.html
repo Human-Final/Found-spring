@@ -42,13 +42,16 @@
                 <div class="form-group">
                     <label>아이디</label>
 
-                    <div class="id-row">
-                        <input type="text"
-                               id="id"
-                               name="id"
-                               required
-                               placeholder="아이디 입력"
-                               oninput="resetIdCheck()">
+                    <input type="text"
+                        id="id"
+                        name="id"
+                        required
+                        maxlength="20"
+                        minlength="4"
+                        pattern="^[a-zA-Z0-9]{4,20}$"
+                        title="아이디는 영문과 숫자만 사용 가능하며 4~20자로 입력해주세요."
+                        placeholder="영문, 숫자 4~20자"
+                        oninput="resetIdCheck(); validateIdFormat();">
 
                         <button type="button"
                                 class="id-check-btn"
@@ -83,23 +86,25 @@
 
                     <p id="pwMatchResult" class="check-text"></p>
                 </div>
+
                 <div class="form-group">
                     <label>이름</label>
                     <input type="text"
-                        name="name" 
-                        required
-                        placeholder="이름 입력">
-                </div>                
+                           name="name"
+                           required
+                           placeholder="이름 입력">
+                </div>
+
                 <div class="form-group">
                     <label>이메일</label>
 
                     <div class="id-row">
                         <input type="email"
-                            id="email"
-                            name="email"
-                            required
-                            placeholder="example@email.com"
-                            oninput="resetEmailCheck()">
+                               id="email"
+                               name="email"
+                               required
+                               placeholder="example@email.com"
+                               oninput="resetEmailCheck()">
 
                         <button type="button"
                                 class="id-check-btn"
@@ -108,6 +113,7 @@
 
                     <p id="emailCheckResult" class="check-text"></p>
                 </div>
+
                 <div class="form-group">
                     <label>전화번호</label>
 
@@ -136,15 +142,46 @@
     let isEmailChecked = false;
     let isEmailAvailable = false;
 
+    function validateIdFormat() {
+        const id = document.getElementById("id").value;
+        const result = document.getElementById("idCheckResult");
+        const idRegex = /^[a-zA-Z0-9]{4,20}$/;
+
+        if (id === "") {
+            result.innerText = "";
+            return false;
+        }
+
+        if (!idRegex.test(id)) {
+            result.innerText = "아이디는 영문, 숫자, _(언더바)만 사용할 수 있습니다.";
+            result.style.color = "red";
+            return false;
+        }
+
+        result.innerText = "아이디 중복확인을 해주세요.";
+        result.style.color = "gray";
+        return true;
+    }
+
     function checkId() {
         const id = document.getElementById("id").value;
         const result = document.getElementById("idCheckResult");
+        const idRegex = /^[a-zA-Z0-9_]+$/;
 
         if (id.trim() === "") {
             alert("아이디를 입력하세요.");
             isIdChecked = false;
             isIdAvailable = false;
             result.innerText = "아이디를 입력하세요.";
+            result.style.color = "red";
+            return;
+        }
+
+        if (!idRegex.test(id)) {
+            alert("아이디는 영문, 숫자, _(언더바)만 사용할 수 있습니다.");
+            isIdChecked = false;
+            isIdAvailable = false;
+            result.innerText = "아이디는 영문, 숫자, _(언더바)만 사용할 수 있습니다.";
             result.style.color = "red";
             return;
         }
@@ -169,10 +206,6 @@
     function resetIdCheck() {
         isIdChecked = false;
         isIdAvailable = false;
-
-        const result = document.getElementById("idCheckResult");
-        result.innerText = "아이디 중복확인을 해주세요.";
-        result.style.color = "gray";
     }
 
     function validatePassword() {
@@ -225,6 +258,14 @@
     }
 
     function validateJoinForm() {
+        const id = document.getElementById("id").value;
+        const idRegex = /^[a-zA-Z0-9_]+$/;
+
+        if (!idRegex.test(id)) {
+            alert("아이디는 영문, 숫자, _(언더바)만 사용할 수 있습니다.");
+            return false;
+        }
+
         if (!isIdChecked) {
             alert("아이디 중복확인을 해주세요.");
             return false;
@@ -244,7 +285,7 @@
             alert("비밀번호가 일치하지 않습니다.");
             return false;
         }
-        
+
         if (!isEmailChecked) {
             alert("이메일 중복확인을 해주세요.");
             return false;
@@ -253,7 +294,7 @@
         if (!isEmailAvailable) {
             alert("이미 사용 중인 이메일입니다.");
             return false;
-        }        
+        }
 
         return true;
     }
@@ -295,7 +336,7 @@
         const result = document.getElementById("emailCheckResult");
         result.innerText = "이메일 중복확인을 해주세요.";
         result.style.color = "gray";
-    }    
+    }
 </script>
 
 </body>

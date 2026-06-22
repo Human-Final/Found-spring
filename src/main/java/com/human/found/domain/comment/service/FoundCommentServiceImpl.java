@@ -17,8 +17,8 @@ public class FoundCommentServiceImpl implements FoundCommentService{
 
     // 특정 습득 게시글 댓글 목록 조회
     @Override
-    public List<FoundCommentVO> getCommentsByNum(Long num) {
-        return foundCommentMapper.selectCommentsByNum(num);
+    public List<FoundCommentVO> getCommentsByNum(Long num, String dataSource) {
+        return foundCommentMapper.selectCommentsByNum(num, dataSource);
     }
     
     // 댓글 등록

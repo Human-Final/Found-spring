@@ -7,12 +7,12 @@
 
     <!-- 특정 습득 게시글 댓글 목록 조회-->
     <select id="selectCommentsByNum"
-            parameterType="long"
             resultType="com.human.found.domain.comment.vo.FoundCommentVO">
         SELECT
             comment_num AS commentNum,
             id,
             num,
+            data_source,
             content,
             created_at AS createdAt,
             updated_at AS updatedAT,
@@ -20,6 +20,7 @@
             deleted_at AS deletedAt
         FROM found_comment
         WHERE num = #{num}
+            AND data_source = #{dataSource}
             AND is_deleted = 0
         ORDER BY comment_num ASC
         </select>
@@ -30,17 +31,18 @@
         INSERT INTO found_comment (
             id,
             num,
+            data_source,
             content
         ) VALUES (
             #{id},
             #{num},
+            #{dataSource},
             #{content}
         )
     </insert>
 
         <!-- 댓글 단건 조회 -->
     <select id="selectCommentByCommentNum"
-            parameterType="long"
             resultType="com.human.found.domain.comment.vo.FoundCommentVO">
         SELECT
             comment_num AS commentNum,
