@@ -1,10 +1,14 @@
 package com.human.found.domain.user.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.human.found.domain.user.mapper.UserMapper;
+import com.human.found.domain.user.vo.MyPagePostVO;
 import com.human.found.domain.user.vo.UserVO;
 
 import lombok.RequiredArgsConstructor;
@@ -114,6 +118,11 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
+    @Override
+    public java.util.Map<String, Object> getMyPageCounts(String userId) {
+        return userMapper.selectMyPageCounts(userId);
+    }
+    
     /**
      * 현재 비밀번호 본인 인증 판정 로직
      */
@@ -149,7 +158,37 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 새 비밀번호 유효성 검사 및 변경 처리
+     * 마이페이지 메인 화면용 최근 작성글 2개 조회 구현부
+     */
+    @Override
+    @Transactional(readOnly = true) // 단순 조회용 트랜잭션 최적화 보장
+    public List<MyPagePostVO> getMyRecentPostList(String userId) {
+        
+        // 유저 아이디 검증 (null 혹은 공백 방어벽 세우기)
+        if (userId == null || userId.trim().isEmpty()) {
+            return new java.util.ArrayList<>(); // 안전하게 빈 리스트 반환하여 500에러 차단
+        }
+        
+        // 매퍼 인터페이스를 호출하여 마리아DB 연산 데이터(UNION ALL 결과) 반환
+        return userMapper.selectMyRecentPostList(userId);
+    }
+
+    /**
+     * 마이페이지 메인 화면용 작성글 모두 조회하기 구현부
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<MyPagePostVO> getMyAllPostList(String userId) {
+        if (userId == null || userId.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+        return userMapper.selectMyAllPostList(userId);
+    }
+
+
+
+    /**
+     * 🔑 2. 새 비밀번호 유효성 검사 및 변경 처리
      */
     @Override
     @Transactional

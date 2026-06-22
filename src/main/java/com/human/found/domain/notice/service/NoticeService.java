@@ -11,5 +11,7 @@ public interface NoticeService {
     void modifyNotice(NoticeVO notice);
     void removeNotice(Long num);
 
+    NoticeVO getNoticeForEdit(Long num);    //오로지 내용 수정만을 위한 메서드
+
     
 }

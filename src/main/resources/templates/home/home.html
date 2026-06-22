@@ -102,7 +102,7 @@
         <p>잃어버린 물건은 여기!</p>
       </a>
 
-      <a th:href="@{/notice/list}" class="card">
+      <a th:href="@{/api/notices/list}" class="card">
         <div class="card-icon blue">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7"></path>
@@ -162,7 +162,7 @@
       <div class="post-grid">
         <a 
           th:each="foundVO : ${recentFoundList}"
-          th:href="@{/found/detail/{atcId}(atcId=${foundVO.atcId})}"
+          th:href="@{/api/found/detail/{atcId}(atcId=${foundVO.atcId})}"
           class="post-card">
 
           <div class="post-top">
@@ -224,7 +224,7 @@
       <div class="post-grid">
         <a 
           th:each="lostVO : ${recentLostList}"
-          th:href="@{/lost/detail/{atcId}(atcId=${lostVO.atcId})}"
+          th:href="@{/api/lost/detail/{atcId}(atcId=${lostVO.atcId})}"
           class="post-card">
 
           <div class="post-top">

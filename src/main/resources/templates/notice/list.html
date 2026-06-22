@@ -252,7 +252,7 @@
           
           <!-- 제목 영역: 클릭 시 해당 번호(num)를 가지고 상세보기로 이동 -->
           <td class="text-left">
-            <a th:href="@{/notice/detail(num=${notice.num})}" class="notice-link" th:text="${notice.title}">
+            <a th:href="@{/api/notices/detail(num=${notice.num})}" class="notice-link" th:text="${notice.title}">
               공지사항 제목 공간입니다.
             </a>
             <!-- 이미지 아이콘 표시 (이미지가 첨부된 글일 때 소소한 클립 아이콘 노출) -->
@@ -278,7 +278,7 @@
 
     <!-- 📌 권한 분리 핵심: 세션의 userRole이 MANAGER이거나 ADMIN일 때만 [글쓰기] 버튼을 노출시킴 -->
     <div th:if="${#authorization.expression('hasAnyAuthority(''ROLE_ADMIN'', ''ROLE_MANAGER'')')}">
-        <a th:href="@{/notice/write}" class="btn-write">공지 등록</a>
+        <a th:href="@{/api/notices/write}" class="btn-write">공지 등록</a>
     </div>
     <div class="clear"></div>
   </div>

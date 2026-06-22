@@ -7,13 +7,13 @@
 <insert id="insertFile"
         parameterType="com.human.found.domain.lost.vo.LostFileVO">
     INSERT INTO lost_file(
-        fd_filepath_img,
+        lst_filepath_img,
         atc_id,
         save_name,
         file_size,
         file_path
     )VALUES(
-        #{fdFilepathImg},
+        #{lstFilepathImg},
         #{atcId},
         #{saveName},
         #{fileSize},

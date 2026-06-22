@@ -126,7 +126,7 @@ public class LostServiceImpl implements LostService {
     //상세조회
     @Override
     public LostVO lostdetail(String atcId) {
-        LostVO lostVO=lostMapper.SelectDetailatcID(atcId);
+        LostVO lostVO=lostMapper.selectDetailatcId(atcId);
         if(lostVO==null){
             throw new RuntimeException("게시글이 존재하지 않습니다");
         }
