@@ -40,22 +40,24 @@
                        th:value="${_csrf.token}">
 
                 <div class="form-group">
-                    <label>아이디</label>
-
-                    <input type="text"
-                        id="id"
-                        name="id"
-                        required
-                        maxlength="20"
-                        minlength="4"
-                        pattern="^[a-zA-Z0-9]{4,20}$"
-                        title="아이디는 영문과 숫자만 사용 가능하며 4~20자로 입력해주세요."
-                        placeholder="영문, 숫자 4~20자"
-                        oninput="resetIdCheck(); validateIdFormat();">
+                    <label for="id">아이디</label>
+                    <div class="id-row">
+                        <input type="text"
+                            id="id"
+                            name="id"
+                            required
+                            maxlength="20"
+                            minlength="4"
+                            pattern="^[a-zA-Z0-9_]{4,20}$"
+                            title="아이디는 영문과 숫자, _(언더바)만 사용 가능하며 4~20자로 입력해주세요."
+                            placeholder="영문, 숫자 4~20자"
+                            oninput="resetIdCheck(); validateIdFormat();">
 
                         <button type="button"
                                 class="id-check-btn"
-                                onclick="checkId()">중복확인</button>
+                                onclick="checkId()">
+                            중복확인
+                        </button>
                     </div>
 
                     <p id="idCheckResult" class="check-text"></p>
@@ -145,7 +147,7 @@
     function validateIdFormat() {
         const id = document.getElementById("id").value;
         const result = document.getElementById("idCheckResult");
-        const idRegex = /^[a-zA-Z0-9]{4,20}$/;
+        const idRegex = /^[a-zA-Z0-9_]{4,20}$/;
 
         if (id === "") {
             result.innerText = "";
@@ -259,7 +261,7 @@
 
     function validateJoinForm() {
         const id = document.getElementById("id").value;
-        const idRegex = /^[a-zA-Z0-9_]+$/;
+        const idRegex = /^[a-zA-Z0-9]+$/;
 
         if (!idRegex.test(id)) {
             alert("아이디는 영문, 숫자, _(언더바)만 사용할 수 있습니다.");
