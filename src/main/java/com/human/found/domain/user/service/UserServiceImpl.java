@@ -76,6 +76,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public String validateJoin(UserVO user) {
 
+        // 아이디 형식 검사
+        // 영문과 숫자만 허용, 4~20자
+        if (user.getId() == null || !user.getId().matches("^[a-zA-Z0-9]{4,20}$")) {
+            return "아이디는 영문과 숫자만 사용 가능하며 4~20자로 입력해주세요.";
+        }
+
         // 아이디 중복
         if (isDuplicatedId(user.getId())) {
             return "이미 사용중인 아이디입니다.";
@@ -118,34 +124,37 @@ public class UserServiceImpl implements UserService {
     }
     
     /**
-     * 🔒 [최종 보정 완료] 현재 비밀번호 본인 인증 판정 로직
+     * 현재 비밀번호 본인 인증 판정 로직
      */
+    @Override
     public boolean checkPassword(String id, String pwCheck) {
+
         // 1. DB에서 아이디로 해당 회원 정보를 단건 조회합니다.
-        UserVO user = userMapper.findById(id); 
+        UserVO user = userMapper.findById(id);
+
         if (user == null || user.getPw() == null) {
-            System.out.println("❌ [인증 실패] 존재하지 않는 유저이거나 DB 비밀번호가 null입니다.");
+            System.out.println("[인증 실패] 존재하지 않는 유저이거나 DB 비밀번호가 null입니다.");
             return false;
         }
-        
-        // 2. 📌 [가장 중요] 브라우저와 DB 통신 과정에서 생길 수 있는 미세 공백(\n, 스페이스)을 완벽히 제거합니다.
+
+        // 2. 브라우저와 DB 통신 과정에서 생길 수 있는 공백을 제거합니다.
         String cleanPwCheck = (pwCheck != null) ? pwCheck.trim() : "";
         String cleanDbPassword = user.getPw().trim();
-        
-        // 3. 스프링 시큐리티 인코더 객체를 사용하여 정확하게 1:1 대조를 수행합니다.
+
+        // 3. 스프링 시큐리티 인코더 객체를 사용하여 비밀번호를 대조합니다.
         // matches(평문, 암호문) 순서 엄격 준수
         boolean isMatch = passwordEncoder.matches(cleanPwCheck, cleanDbPassword);
-        
+
         // 콘솔 디버깅을 통해 데이터 무결성을 검증합니다.
         System.out.println("=========================================");
-        System.out.println("📊 [마이페이지 본인 인증 디버깅 데이터]");
-        System.out.println("👤 조회 대상 아이디 : " + id);
-        System.out.println("⌨️ 전달된 입력 평문 : [" + cleanPwCheck + "] (길이: " + cleanPwCheck.length() + ")");
-        System.out.println("🔒 가져온 DB 암호문: [" + cleanDbPassword + "]");
-        System.out.println("📊 최종 매칭 일치여부: " + isMatch);
+        System.out.println("[마이페이지 본인 인증 디버깅 데이터]");
+        System.out.println("조회 대상 아이디 : " + id);
+        System.out.println("전달된 입력 평문 : [" + cleanPwCheck + "] (길이: " + cleanPwCheck.length() + ")");
+        System.out.println("가져온 DB 암호문 : [" + cleanDbPassword + "]");
+        System.out.println("최종 매칭 일치 여부 : " + isMatch);
         System.out.println("=========================================");
 
-        return isMatch; 
+        return isMatch;
     }
 
     /**
@@ -181,25 +190,25 @@ public class UserServiceImpl implements UserService {
     /**
      * 🔑 2. 새 비밀번호 유효성 검사 및 변경 처리
      */
+    @Override
+    @Transactional
     public void updateUserPassword(String id, String newPw) {
-        // 📌 [디버깅 추가] 서비스단 진입 확인용
-        System.out.println("⚙️ [서비스단] updateUserPassword 비즈니스 로직 가동 시작");
-        System.out.println("⚙️ [서비스단] 입력 파라미터 글자수: " + (newPw != null ? newPw.length() : "null"));
 
-        // 📌 [재사용] 기존 비밀번호 조합 검사 로직 적용 (길이, 대소문자 특수문자 3형태 만족 확인)
-        // 기존 validateJoin은 회원가입용 객체를 받으므로, 여기선 임시 객체를 만들어 검증 규칙만 통과시킵니다.
-        UserVO dummyUser = new UserVO();
-        dummyUser.setPw(newPw);
-        dummyUser.setPwCheck(newPw); // 일치 여부는 프론트에서 검증했으므로 동일하게 세팅
+        // 서비스단 진입 확인용
+        System.out.println("[서비스단] updateUserPassword 비즈니스 로직 가동 시작");
+        System.out.println("[서비스단] 입력 파라미터 글자수: " + (newPw != null ? newPw.length() : "null"));
 
-        // 글자 수 및 패턴 검사 진행
-        // 📌 테스트를 위해 임시 주석 처리 진행
-        /* 
+        // 기존 비밀번호 조합 검사 로직 적용
+        if (newPw == null || newPw.trim().isEmpty()) {
+            throw new IllegalArgumentException("새 비밀번호를 입력해주세요.");
+        }
+
         if (newPw.length() < 8) {
             throw new IllegalArgumentException("비밀번호는 8자 이상이어야 합니다.");
         }
 
         int count = 0;
+
         if (newPw.matches(".*[A-Z].*")) count++;
         if (newPw.matches(".*[a-z].*")) count++;
         if (newPw.matches(".*[0-9].*")) count++;
@@ -208,20 +217,26 @@ public class UserServiceImpl implements UserService {
         if (count < 3) {
             throw new IllegalArgumentException("대문자, 소문자, 숫자, 특수문자 중 3가지 이상 포함해야 합니다.");
         }
-        */
 
-        // 📌 검증 통과 시 암호화하여 DB 업데이트 진행
+        // 검증 통과 시 암호화하여 DB 업데이트 진행
         String encryptedPw = passwordEncoder.encode(newPw);
-        userMapper.updatePasswordOnly(id, encryptedPw); // 매퍼 호출
+        userMapper.updatePasswordOnly(id, encryptedPw);
     }
-  
+
+    /**
+     * 회원 정보 수정
+     * - 현재 비밀번호 확인
+     * - 새 비밀번호 입력 시 암호화
+     * - 새 비밀번호 미입력 시 기존 비밀번호 유지
+     */
     @Override
     @Transactional
     public void updateUserInfo(UserVO userVO) {
+
         // 1. DB에서 현재 로그인한 유저의 원본 암호 정보 가져오기
         UserVO dbUser = userMapper.findById(userVO.getId());
-        
-        // 2. 입력한 현재 비밀번호(pwCheck)와 DB에 암호화되어 저장된 비밀번호(pw)가 일치하는지 검증
+
+        // 2. 입력한 현재 비밀번호와 DB에 암호화되어 저장된 비밀번호가 일치하는지 검증
         // passwordEncoder.matches(평문비밀번호, 암호화된비밀번호)
         if (!passwordEncoder.matches(userVO.getPwCheck(), dbUser.getPw())) {
             throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
@@ -232,7 +247,7 @@ public class UserServiceImpl implements UserService {
             String encodedNewPw = passwordEncoder.encode(userVO.getPw());
             userVO.setPw(encodedNewPw);
         } else {
-            userVO.setPw(dbUser.getPw()); // 새 비밀번호 입력 안 했으면 기존 암호 그대로 바구니에 담기
+            userVO.setPw(dbUser.getPw());
         }
 
         // 4. DB 업데이트 실행
@@ -260,17 +275,16 @@ public class UserServiceImpl implements UserService {
         UserVO dbUser = userMapper.findById(id);
 
         // 회원 정보가 없으면 예외 처리
-        if(dbUser == null) {
+        if (dbUser == null) {
             throw new IllegalArgumentException("회원 정보를 찾을 수 없습니다.");
         }
 
         // 입력한 비밀번호와 DB에 암호화된 비밀번호 비교
-        if(!passwordEncoder.matches(password, dbUser.getPw())) {
+        if (!passwordEncoder.matches(password, dbUser.getPw())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다. 다시 입력하세요.");
         }
 
         // 회원탈퇴 처리
         userMapper.withdrawUser(id);
-    }    
-
+    }
 }

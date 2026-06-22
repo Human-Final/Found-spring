@@ -3,9 +3,11 @@ package com.human.found.domain.found.controller;
 import java.security.Principal;
 import java.util.List;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -85,21 +87,25 @@ public class FoundController {
     }
     
     //========삭제========
-    @PostMapping("/api/found/{foundNum}")
+    @DeleteMapping("/api/found/{atcId}")
     public String deletefound(
-        @RequestParam("password")String inputpw,@PathVariable("foundNum")Long foundNum,
-        Principal principal ,RedirectAttributes redirectAttributes) {
-
+        @RequestParam(value = "password", required = false)String inputpw,
+        @PathVariable("atcId")String atcId,
+        Authentication authentication ,RedirectAttributes redirectAttributes) {
+        
+            
         //로그인체크
-        if(principal==null){
+        if(authentication==null){
             redirectAttributes.addFlashAttribute("errorMessage", "로그인이 필요합니다.");
             return "redirect:/api/found";
-        } 
-        //트라이 블록 밖에서 주소를 조립하기 위해 변수 선언
-        String targetAtcId=null;
+        }
+        String loginid =authentication.getName(); 
+        //로그인한 유저의 권한 목록 중 관리자 권한 (ADMIN) 이 있는지 확인
+        boolean isAdmin=authentication.getAuthorities().stream()
+        .anyMatch(auth->auth.getAuthority().equals("ROLE_ADMIN")||auth.getAuthority().equals("ADMIN"));
         try {
             //서비스단에 글 id 입력번호, 로그인한 유저 id 를 넘겨받아 검증 및 삭제
-            targetAtcId=foundService.deletefound(foundNum,inputpw,principal.getName());
+            foundService.deletefound(atcId,inputpw,loginid,isAdmin);
             redirectAttributes.addFlashAttribute("Message", "삭제완료");
             
             return "redirect:/api/found";
@@ -108,11 +114,7 @@ public class FoundController {
             // 검증 실패 시 에러 메시지를 들고 원래 상세 페이지로 리턴
             redirectAttributes.addFlashAttribute("errorMessage",e.getMessage());
 
-            if(targetAtcId!=null){
-                return "redirect:/api/found/detail/"+targetAtcId;
-            }else{
-                return "redirect:/api/found";
-            }            
+                return "redirect:/api/found/detail/"+atcId;           
         }                
     }
     
@@ -123,7 +125,10 @@ public class FoundController {
         FoundVO foundVO = foundService.foundgetdetail(atcId);
 
         List<FoundCommentVO> commentList =
-                foundCommentService.getCommentsByNum(foundVO.getNum());
+                foundCommentService.getCommentsByNum(
+                        foundVO.getNum(),
+                        foundVO.getDataSource()
+                );
 
         model.addAttribute("foundVO", foundVO);
         model.addAttribute("commentList", commentList);
