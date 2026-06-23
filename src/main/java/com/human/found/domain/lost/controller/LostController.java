@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.human.found.domain.comment.service.LostCommentService;
 import com.human.found.domain.lost.service.LostService;
 import com.human.found.domain.lost.vo.LostVO;
 import com.human.found.infrastructure.map.KakaoMapConfig;
@@ -29,6 +30,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class LostController {
     private final LostService lostService;
+    private final LostCommentService lostCommentService;
     private final KakaoMapConfig kakaoMapConfig;
 
     @PostMapping("/api/lost")
@@ -112,6 +114,10 @@ public class LostController {
     public String lostDetaile(@PathVariable("atcId")String atcId,Model model) {
         LostVO lostVO=lostService.lostdetail(atcId);
         model.addAttribute("lostVO", lostVO);
+        model.addAttribute("comments", lostCommentService.getComments(
+            lostVO.getNum(), lostVO.getDataSource()
+        )
+    );
         model.addAttribute("kakaoMapJsKey", kakaoMapConfig.getJsKey());
         return "lost/detail";
     }

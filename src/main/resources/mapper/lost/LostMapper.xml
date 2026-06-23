@@ -158,4 +158,14 @@ resultType="com.human.found.domain.lost.vo.LostVO">
         ) combined_lost
         WHERE combined_lost.atc_id = #{atcId}
 </select>
+
+<select id="findByNum"
+        resultType="com.human.found.domain.lost.vo.LostVO">
+
+    SELECT *
+    FROM lost
+    WHERE num = #{num}
+
+</select>
+
 </mapper>       
