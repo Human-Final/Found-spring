@@ -241,13 +241,16 @@
         </tr>
       </thead>
       <tbody>
-        <!-- 공지사항 목록 반목문 수행 (컨트롤러에서 넘겨준 "list" 활용) -->
-        <tr th:each="notice : ${list}" th:classappend="${notice.isImportant == 1} ? 'row-important'">
+        <!-- 💡 변경 핵심: 뒤에 ', stat'을 추가하여 현재 반복 순서(index)를 계산에 쓸 수 있게 만듭니다 -->
+        <tr th:each="notice, stat : ${list}" th:classappend="${notice.isImportant == 1} ? 'row-important'">
           
-          <!-- 번호 영역: 중요 공지일 때는 뱃지 노출, 일반 공지일 때는 번호 노출 -->
+          <!-- 번호 영역: 중요 공지일 때는 뱃지 노출, 일반 공지일 때는 빈틈없는 가상 역순 번호 노출 -->
           <td>
             <span th:if="${notice.isImportant == 1}" class="badge badge-important">중요</span>
-            <span th:unless="${notice.isImportant == 1}" th:text="${notice.num}">1</span>
+            
+            <!-- 💡 가상 번호 공식 적용: totalCount가 0일 때 예외처리 방지용 삼항연산자 추가 안전장치 -->
+            <span th:unless="${notice.isImportant == 1}" 
+                  th:text="${paging != null ? (paging.totalCount - ((paging.page - 1) * paging.size) - stat.index) : notice.num}">1</span>
           </td>
           
           <!-- 제목 영역: 클릭 시 해당 번호(num)를 가지고 상세보기로 이동 -->
@@ -274,6 +277,7 @@
           <td colspan="5" class="empty-row">등록된 공지사항이 존재하지 않습니다.</td>
         </tr>
       </tbody>
+
     </table>
 
     <!-- 📄 [추가] 페이징 네비게이션 영역 (중앙 정렬 배정) -->
