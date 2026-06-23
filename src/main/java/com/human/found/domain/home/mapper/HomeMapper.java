@@ -15,8 +15,8 @@ public interface HomeMapper {
     public List<FoundVO> selectRecentFoundList();
     public List<LostVO> selectRecentLostList();
 
-    // 메인 화면에 최신 공지사항 1개 출력
-    public NoticeVO selectRecentNotice();
+    // 메인 화면에 최신 공지사항 여러개 출력
+    public List<NoticeVO> selectRecentNotices();
 
     // 메인 화면에 습득/분실/완료 카운트
     public long countWeeklyFound();

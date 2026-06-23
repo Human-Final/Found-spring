@@ -15,12 +15,15 @@ public interface LostMapper {
     
     public List<LostVO> selectLostList();
     
-    public LostVO selectlostbyId(@Param("lostNum")Long lostNum);
+    public LostVO selectlostbyId(@Param("atcId")String atcId);
     
-    public void lostupdateDelte(@Param("lostNum")Long lostNum);
+    public void lostupdateDelte(@Param("atcId")String atcId);
 
     public LostVO selectDetailAtcId(@Param("atcId")String atcId);
 
+    //외부 api 삭제
+    public void PoliceDelete(@Param("atcId")String atcId);
+    
     LostVO findByNum(Long num);
 
 }

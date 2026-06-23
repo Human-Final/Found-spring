@@ -251,6 +251,24 @@ resultType="com.human.found.domain.found.vo.FoundVO">
       AND is_deleted = 0
 </select>
 
+<update id="updateFound"
+parameterType="com.human.found.domain.found.vo.FoundVO">
+UPDATE found
+SET
+    clr_nm = #{clrNm},
+    dep_place =#{depPlace},
+    fd_filepath_img = #{fdFilepathImg},
+    fd_prdt_nm      = #{fdPrdtNm},
+    fd_sbjt         = #{fdSbjt},
+    fd_ymd          = #{fdYmd},
+    prdt_cl_nm      = #{prdtClNm},
+    done            = #{done},
+    is_deleted      = #{isDeleted}
+    WHERE
+        atc_id=#{atcId}
+
+</update>
+
 
 
 </mapper>        

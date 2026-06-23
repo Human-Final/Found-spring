@@ -32,4 +32,11 @@ WHERE atc_id = #{atcId}
     DELETE FROM found_file
     WHERE atc_id =#{atcId}
 </delete>
+
+
+<!-- 수정 게시판 파일 삭제 -->
+<delete id="deleteBySaveName">
+    DELETE FROM found_file 
+    WHERE save_name=#{saveName}
+</delete>
 </mapper>        

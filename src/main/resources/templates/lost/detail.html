@@ -115,11 +115,11 @@
 
       <aside class="detail-image-area">
         <div class="image-box">
-          <img th:if="${lostVO.fdFilepathImg != null and lostVO.fdFilepathImg != ''}"
-               th:src="${lostVO.fdFilepathImg}"
+          <img th:if="${lostVO.lstFilepathImg != null and lostVO.lstFilepathImg != ''}"
+               th:src="${lostVO.lstFilepathImg}"
                alt="분실물 이미지">
 
-          <span th:if="${lostVO.fdFilepathImg == null or lostVO.fdFilepathImg == ''}"
+          <span th:if="${lostVO.lstFilepathImg == null or lostVO.lstFilepathImg == ''}"
                 class="no-image">
             등록된 이미지가 없습니다
           </span>
@@ -208,7 +208,7 @@
                   class="comment-textarea"
                   rows="4"
                   maxlength="500"
-                  placeholder="댓글을 입력하세요."
+                  placeholder="댓글은 500자까지 입력 가능합니다."
                   required></textarea>
 
         <button type="submit" class="comment-submit-btn">등록</button>
@@ -272,7 +272,8 @@
             </button>
 
             <form th:action="@{/api/lost/comments/{commentNum}/delete(commentNum=${comment.commentNum})}"
-                  method="post">
+                  method="post"
+                  onsubmit="return confirm('댓글을 삭제하시겠습니까?')">
 
               <input type="hidden" name="atcId" th:value="${lostVO.atcId}">
 

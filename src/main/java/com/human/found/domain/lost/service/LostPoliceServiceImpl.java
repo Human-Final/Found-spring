@@ -95,7 +95,7 @@ public class LostPoliceServiceImpl implements LostPoliceService{
         System.out.println("⏰ [스케줄러 시작] 기존 데이터를 삭제하고 경찰청의 모든 유실물 데이터를 처음부터 끝까지 수집합니다.");
         
         // 1. 먼저 기존 테이블 데이터를 깨끗하게 비웁니다.
-        lostPoliceMapper.lostPoliceDelete();        
+        lostPoliceMapper.lostPoliceDelete();
         
         int pageNo = 1;
         int numOfRows = 10000; // API가 허용하는 안전한 최대 한도치로 설정
@@ -132,7 +132,7 @@ public class LostPoliceServiceImpl implements LostPoliceService{
         
         System.out.println("✅ [스케줄러 완료] 모든 페이지의 유실물 데이터 수집이 끝났습니다!");
     }
-
+    
     public void savePoliceLost(int pageNo, int numOfRows) {
         List<LostVO> list = new ArrayList<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");

@@ -180,7 +180,7 @@
                 th:value="${foundVO.dataSource}">
 
           <textarea name="content"
-                    placeholder="댓글을 입력하세요."
+                    placeholder="댓글은 500자까지 입력 가능합니다."
                     maxlength="500"
                     required></textarea>
 
@@ -215,17 +215,46 @@
             댓글 내용입니다.
           </p>
 
-          <div th:if="${#authorization.expression('isAuthenticated()') 
-                      and (comment.id == #authentication.name 
-                            or #authorization.expression('hasAnyRole(''ADMIN'', ''MANAGER'')'))}"
-              class="comment-actions">
+          <form th:if="${#authentication.name == comment.id}"
+                th:action="@{/api/found/comments/{commentNum}/update(commentNum=${comment.commentNum})}"
+                method="post"
+                class="comment-update-form is-hidden">
+
+            <input type="hidden" name="atcId" th:value="${foundVO.atcId}">
+
+            <textarea name="content"
+                      class="comment-update-textarea"
+                      rows="3"
+                      maxlength="500"
+                      th:text="${comment.content}"
+                      required>
+              </textarea>
+
+            <button type="submit" class="comment-update-btn">
+              수정완료
+            </button>
+          </form>
+
+          <div class="comment-actions"
+               th:if="${#authentication.name == comment.id
+                     or #authorization.expression('hasRole(''ADMIN'')')
+                     or #authorization.expression('hasRole(''MANAGER'')')}">
+
+            <button type="button"
+                    class="comment-edit-toggle-btn"
+                    th:if="${#authentication.name == comment.id}">
+              수정
+            </button>
 
             <form th:action="@{/api/found/comments/{commentNum}/delete(commentNum=${comment.commentNum})}"
                   method="post"
-                  onsubmit="return confirm('댓글을 삭제하시겠습니까?');">
-                  
+                  onsubmit="return confirm('댓글을 삭제하시겠습니까?')">
+
               <input type="hidden" name="atcId" th:value="${foundVO.atcId}">
-              <button type="submit">삭제</button>
+
+              <button type="submit" class="comment-delete-btn">
+                삭제
+              </button>
             </form>
 
           </div>
@@ -295,6 +324,61 @@
 
 <div th:replace="~{layout/footer :: footerFragment}"></div>
 
+<script th:inline="javascript">
+  function validatePostDelete(form){
+    const passwordArea = form.querySelector(".post-delete-password-area");
+    const passwordInput = form.querySelector(".post-delete-password-input");
+    const deleteBtn = form.querySelector(".post-delete-btn");
+    const isAdmin = form.dataset.admin === "true";
+
+    if(isAdmin){
+      return confirm("정말 게시글을 삭제하시겠습니까?");
+    }
+
+    if(passwordArea.classList.contains("is-hidden")){
+      passwordArea.classList.remove("is-hidden")
+      passwordInput.focus();
+      deleteBtn.textContent = "비밀번호 확인 후 삭제";
+      return false;
+    }
+
+    const password = passwordInput.value.trim();
+
+    if(password === ""){
+      alert("비밀번호를 입력해 주세요.")
+      passwordInput.focus();
+      return false;
+    }
+
+    return confirm("게시글을 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.")
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const editButtons = document.querySelectorAll(".comment-edit-toggle-btn");
+
+    editButtons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        const commentItem = button.closest(".comment-item");
+        const updateForm = commentItem.querySelector(".comment-update-form");
+
+        if (!updateForm) {
+          return;
+        }
+
+        updateForm.classList.toggle("is-hidden");
+
+        if (updateForm.classList.contains("is-hidden")) {
+          button.textContent = "수정";
+        } else {
+          button.textContent = "취소";
+        }
+      });
+    });
+  });
+
+  /* Kakao Map ... */
+</script>
+
 <!-- 카카오맵 SDK -->
 <script
   type="text/javascript"
@@ -332,6 +416,8 @@
 
     return confirm("게시글을 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.")
   }
+
+  
 
   /* Kakao Map
     - foundVO.depPlace 값을 기준으로 지도 표시
@@ -460,6 +546,7 @@
       }
     });
   });
+
 </script>
 
 </body>
