@@ -137,5 +137,10 @@ public class LostServiceImpl implements LostService {
         return lostVO;
     }
     
+    // 분실물 게시글 댓글
+    @Override
+    public LostVO getLostByNum(Long num) {
+        return lostMapper.findByNum(num);
+    }
 
 }
