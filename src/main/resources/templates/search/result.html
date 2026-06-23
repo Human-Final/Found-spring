@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>통합 검색 | 분실물 센터</title>
+
+  <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <link rel="stylesheet" th:href="@{/css/board/search.css}">
+
+</head>
+
+<body class="search-board">
+
+<div th:replace="layout/header :: headerFragment"></div>
+
+<main class="search-page">
+
+  <section class="search-hero">
+    <div>
+      <h2>통합 검색</h2>
+      <p>분실물과 습득물을 한 번에 검색하고 결과를 확인해보세요</p>
+    </div>
+
+  </section>
+
+  <section class="search-filter-box">
+    <div class="search-input-row">
+      <div class="search-input-wrap">
+        <span class="search-icon">⌕</span>
+        <input
+          type="text"
+          id="keywordInput"
+          th:value="${keyword}"
+          placeholder="검색어를 입력하세요...">
+      </div>
+      <button type="button" id="searchBtn" class="search-submit-btn">
+        검색
+      </button>
+    </div>
+
+    <div class="search-filter-row">
+      <div class="filter-section">
+        <span class="filter-label">검색 범위</span>
+
+        <div id="boardTypeFilter" class="chip-group">
+          <button type="button" class="chip active" data-board-type="">전체</button>
+          <button type="button" class="chip" data-board-type="lost">분실물</button>
+          <button type="button" class="chip" data-board-type="found">습득물</button>
+        </div>
+      </div>
+
+      <div class="filter-section status-section">
+        <span class="filter-label">상태</span>
+
+        <div id="statusFilter" class="chip-group">
+          <button type="button" class="chip active" data-status="">전체</button>
+          <button type="button" class="chip" data-status="progress">진행중</button>
+          <button type="button" class="chip" data-status="done">완료</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="search-count-sort">
+    <p th:text="|총 ${paging.totalCount}건|" class="total-count">총 0건</p>
+
+    <select class="sort-select" id="sortSelect">
+      <option value="latest">최신순</option>
+      <option value="oldest">오래된순</option>
+    </select>
+  </div>
+
+  <section id="searchResultList" class="search-result-list">
+
+    <div th:if="${searchList == null or #lists.isEmpty(searchList)}"
+        class="search-empty">
+      검색 결과가 없습니다.
+    </div>
+
+    <a th:each="item : ${searchList}"
+       class="search-result-card"
+       th:href="${item.boardType == 'lost'} 
+          ? @{/api/lost/detail/{atcId}(atcId=${item.atcId})}
+          : @{/api/found/detail/{atcId}(atcId=${item.atcId})}">
+
+      <div class="result-image-area">
+        <img th:if="${item.imagePath != null and item.imagePath != ''}"
+            th:src="${item.imagePath}"
+            th:alt="${item.title}">
+
+        <div th:if="${item.imagePath == null or item.imagePath == ''}"
+            class="no-image">
+          등록된 이미지가 없습니다
+        </div>
+      </div>
+
+      <div class="result-content">
+
+        <div class="result-top">
+          <div class="tag-group">
+            <span class="type-tag"
+                  th:classappend="${item.boardType == 'lost'} ? ' lost' : ' found'"
+                  th:text="${item.boardType == 'lost'} ? '분실' : '습득'">
+              습득
+            </span>
+
+            <span class="category-tag"
+                  th:text="${item.category != null ? item.category : '기타'}">
+              지갑
+            </span>
+
+            <span class="source-tag"
+                  th:text="${item.dataSource == 'user'} ? '사용자' : (${item.dataSource == 'police'} ? '경찰청' : '포털기관')">
+              사용자
+            </span>
+          </div>
+
+          <span class="status-tag"
+                th:classappend="${item.done == 1} ? ' status-tag-done' : ' status-tag-progress'"
+                th:text="${item.done == 1} ? '✓ 완료' : '○ 진행중'">
+            진행중
+          </span>
+        </div>
+
+        <h3 class="result-title"
+            th:text="${item.title != null ? item.title : '제목 없음'}">
+          제목
+        </h3>
+
+        <p class="result-desc"
+          th:text="${item.content != null ? item.content : '등록된 설명이 없습니다.'}">
+          설명
+        </p>
+
+        <div class="result-info-grid">
+
+          <div class="result-info-item">
+            <strong>분류</strong>
+            <p th:text="${item.category != null ? item.category : '기타'}">지갑</p>
+          </div>
+
+          <div class="result-info-item">
+            <strong th:text="${item.boardType == 'lost'} ? '분실 일자' : '습득 일자'">
+              일자
+            </strong>
+            <p th:text="${item.eventDate != null ? item.eventDate : '-'}">2026-06-23</p>
+          </div>
+
+          <div class="result-info-item">
+            <strong>작성자</strong>
+            <p th:text="${item.id != null ? item.id : (item.dataSource == 'user' ? '사용자' : '기관/API')}">
+              작성자
+            </p>
+          </div>
+
+          <div class="result-info-item">
+            <strong th:text="${item.boardType == 'lost'} ? '분실 장소' : '습득 장소'">
+              장소
+            </strong>
+            <p th:text="${item.place != null ? item.place : '-'}">장소</p>
+          </div>
+
+          <div class="result-info-item">
+            <strong>데이터 출처</strong>
+            <p th:text="${item.dataSource == 'user'} ? '사용자' : (${item.dataSource == 'police'} ? '경찰청' : '포털기관')">
+              사용자
+            </p>
+          </div>
+        </div>
+      </div>
+    </a>
+
+  </section>
+
+  <div class="pagination" th:if="${paging.totalCount > 0}">
+
+    <a
+      th:if="${paging.prev}"
+      th:href="@{/search(
+        keyword=${keyword},
+        boardType=${boardType},
+        status=${status},
+        page=${paging.startPage - 1}
+      )}"
+      class="page-btn">
+      이전
+    </a>
+
+    <a
+      th:each="pageNum : ${#numbers.sequence(paging.startPage, paging.endPage)}"
+      th:href="@{/search(
+        keyword=${keyword},
+        boardType=${boardType},
+        status=${status},
+        page=${pageNum}
+      )}"
+      th:text="${pageNum}"
+      th:classappend="${pageNum == paging.page} ? ' active' : ''"
+      class="page-btn">
+      1
+    </a>
+
+    <a
+      th:if="${paging.next}"
+      th:href="@{/search(
+        keyword=${keyword},
+        boardType=${boardType},
+        status=${status},
+        page=${paging.endPage + 1}
+      )}"
+      class="page-btn">
+      다음
+    </a>
+
+  </div>
+
+</main>
+
+<div th:replace="layout/footer :: footerFragment"></div>
+
+<script>
+  const currentParams = new URLSearchParams(window.location.search);
+  const searchBtn = document.querySelector("#searchBtn");
+  const keywordInput = document.querySelector("#keywordInput");
+
+  let selectedBoardType = currentParams.get("boardType") || "";
+  let selectedStatus = currentParams.get("status") || "";
+
+  keywordInput.value = currentParams.get("keyword") || keywordInput.value || "";
+
+  function bindBoardTypeFilter() {
+    const buttons = document.querySelectorAll("#boardTypeFilter .chip");
+
+    buttons.forEach(button => {
+      button.classList.toggle("active", button.dataset.boardType === selectedBoardType);
+
+      button.addEventListener("click", function () {
+        selectedBoardType = this.dataset.boardType;
+        moveSearchPage(1);
+      });
+    });
+  }
+
+  function bindStatusFilter() {
+    const buttons = document.querySelectorAll("#statusFilter .chip");
+
+    buttons.forEach(button => {
+      button.classList.toggle("active", button.dataset.status === selectedStatus);
+
+      button.addEventListener("click", function () {
+        selectedStatus = this.dataset.status;
+        moveSearchPage(1);
+      });
+    });
+  }
+
+  function moveSearchPage(page) {
+    const params = new URLSearchParams();
+    const keyword = keywordInput.value.trim();
+
+    if (keyword) {
+      params.set("keyword", keyword);
+    }
+
+    if (selectedBoardType) {
+      params.set("boardType", selectedBoardType);
+    }
+
+    if (selectedStatus) {
+      params.set("status", selectedStatus);
+    }
+
+    params.set("page", page);
+
+    window.location.href = "/search?" + params.toString();
+  }
+
+  keywordInput.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      moveSearchPage(1);
+    }
+  });
+
+  if (searchBtn) {
+    searchBtn.addEventListener("click", function () {
+      moveSearchPage(1);
+    });
+  }
+  
+
+  bindBoardTypeFilter();
+  bindStatusFilter();
+</script>
+
+</body>
+</html>

@@ -15,21 +15,23 @@
     }
 
     .board-hero {
-      height: 92px;
+      height: 112px;
       border-radius: 12px;
-      padding: 0 22px;
+      padding: 0 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
 
     .board-hero.lost {
       background: #f7dbdb;
+      border: 1px solid #efbcbc;
     }
 
     .board-hero.found {
       background: #d8fde9;
+      border: 1px solid #a7e8c2;
     }
 
     .board-hero h2 {

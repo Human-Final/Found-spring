@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.human.found.domain.found.vo.FoundVO;
 import com.human.found.domain.home.mapper.HomeMapper;
 import com.human.found.domain.lost.vo.LostVO;
+import com.human.found.domain.notice.vo.NoticeVO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -14,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class HomeServiceImpl implements HomeService{
     private final HomeMapper homeMapper;
-
+    
     // 습득물 최신 2개
     @Override
     public List<FoundVO> recentFoundList() {
@@ -25,6 +26,12 @@ public class HomeServiceImpl implements HomeService{
     @Override
     public List<LostVO> recentLostList() {
         return homeMapper.selectRecentLostList();
+    }
+
+    // 공지사항 최신 1개
+    @Override
+    public NoticeVO recentNotice(){
+        return homeMapper.selectRecentNotice();
     }
 
     // 습득물 카운트(일주일)

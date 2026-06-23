@@ -21,4 +21,6 @@ public interface LostMapper {
 
     public LostVO selectDetailAtcId(@Param("atcId")String atcId);
 
+    LostVO findByNum(Long num);
+
 }
