@@ -39,4 +39,8 @@ public interface UserMapper {
 
     // 유저의 작성된 최신 게시글 2개만 갖고오기
     List<MyPagePostVO> selectMyRecentPostList(String userId);
+
+    // 유저의 게시글 삭제하기
+    int deleteFoundPostByAtcId(String atcId);
+    int deleteLostPostByAtcId(String atcId);
 }

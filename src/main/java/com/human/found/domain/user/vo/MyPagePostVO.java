@@ -11,4 +11,5 @@ public class MyPagePostVO {
     private String category;    // 카테고리 (prdt_cl_nm)
     private Integer done;       // 진행 상태 (0 또는 1)
     private LocalDateTime createdAt; // 게시글 실제 등록 일자
+    private String atcId;
 }

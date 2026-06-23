@@ -19,6 +19,6 @@ public interface LostMapper {
     
     public void lostupdateDelte(@Param("lostNum")Long lostNum);
 
-    public LostVO selectDetailatcId(@Param("atcId")String atcId);
+    public LostVO selectDetailAtcId(@Param("atcId")String atcId);
 
 }

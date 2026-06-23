@@ -262,6 +262,22 @@ public class UserServiceImpl implements UserService {
         return userMapper.findById(id);
     }
 
+    @Override
+    @Transactional
+    public void removeFoundPost(String atcId) {
+        if (atcId != null && !atcId.trim().isEmpty()) {
+            userMapper.deleteFoundPostByAtcId(atcId.trim());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void removeLostPost(String atcId) {
+        if (atcId != null && !atcId.trim().isEmpty()) {
+            userMapper.deleteLostPostByAtcId(atcId.trim());
+        }
+    }
+
     /**
      * 회원탈퇴
      * - 입력한 비밀번호와 DB 비밀번호 비교
