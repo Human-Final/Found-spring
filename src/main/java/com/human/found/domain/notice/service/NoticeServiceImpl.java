@@ -26,7 +26,7 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     public List<NoticeVO> getActivePopups() { 
-        return noticeMapper.selectActivePopupList(); 
+        return noticeMapper.selectPopupNotices(); 
     }
 
     @Override

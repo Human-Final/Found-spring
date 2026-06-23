@@ -4,9 +4,10 @@ import java.util.List;
 
 import com.human.found.domain.found.vo.FoundVO;
 import com.human.found.domain.lost.vo.LostVO;
+import com.human.found.domain.notice.vo.NoticeVO;
 
 public interface HomeService {
-    
+
     // 메인화면 분실/습득 게시글 최신글 2개 출력
     public List<FoundVO> recentFoundList();
     public List<LostVO> recentLostList();

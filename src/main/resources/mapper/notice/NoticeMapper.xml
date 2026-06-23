@@ -4,6 +4,8 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.human.found.domain.notice.mapper.NoticeMapper">
 
+
+
     <!-- 목록 조회: 삭제되지 않은 공지 중 중요공지(1)가 먼저 나오고, 그 후 최신순 정렬 -->
     <select id="selectNoticeList" resultType="com.human.found.domain.notice.vo.NoticeVO">
         SELECT * FROM notice 
@@ -11,12 +13,29 @@
         ORDER BY is_important DESC, created_at DESC
     </select>
 
-    <!-- 팝업 조회: 삭제되지 않고 팝업여부(1)가 체크된 공지 목록 -->
-    <select id="selectActivePopupList" resultType="com.human.found.domain.notice.vo.NoticeVO">
-        SELECT * FROM notice 
-        WHERE is_deleted = 0 AND is_planned = 1
-        ORDER BY created_at DESC
+    <!-- 팝업 조회: notice와 notice_file을 정확한 외래키(num)로 JOIN하여 이미지 경로 조회 -->
+    <select id="selectPopupNotices" resultType="com.human.found.domain.notice.vo.NoticeVO">
+        SELECT 
+            n.num, 
+            n.id, 
+            n.title, 
+            n.content, 
+            n.view_count as viewCount, 
+            n.is_planned as isPlanned, 
+            n.is_important as isImportant, 
+            n.created_at as createdAt, 
+            n.updated_at as updatedAt, 
+            n.is_deleted as isDeleted,
+            f.file_path as imagePath <!-- 🌟 f.file_path 스네이크 케이스가 NoticeVO의 imagePath 카멜케이스 필드로 자동 바인딩됩니다 -->
+        FROM notice n
+        LEFT JOIN notice_file f ON n.num = f.num <!-- 🌟 외래키 컬럼명을 f.num으로 완벽히 일치시켰습니다 -->
+        WHERE n.is_deleted = 0 
+        AND n.is_planned = 1
+        ORDER BY n.created_at DESC
+        Limit 4
     </select>
+
+
 
     <!-- 상세보기 -->
     <select id="selectNoticeDetail" resultType="com.human.found.domain.notice.vo.NoticeVO">

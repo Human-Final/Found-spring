@@ -1,19 +1,12 @@
 package com.human.found.domain.home.controller;
 
-import java.io.IOException;
-
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.human.found.domain.home.service.HomeService;
+import com.human.found.domain.notice.service.NoticeService;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 
@@ -22,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 public class HomeController {
 
     private final HomeService homeService;
+    private final NoticeService noticeService;
     
     @GetMapping("/")
     public String homeView(Model model) {
@@ -36,7 +30,8 @@ public class HomeController {
             "countWeeklyLost", homeService.countWeeklyLost());
         model.addAttribute(
             "countWeeklyDone", homeService.countWeeklyDone());
-
+        model.addAttribute("popupNoticeList", noticeService.getActivePopups());
+        
         return "home/home";
     }
 

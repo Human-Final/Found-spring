@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class HomeServiceImpl implements HomeService{
     private final HomeMapper homeMapper;
-
+    
     // 습득물 최신 2개
     @Override
     public List<FoundVO> recentFoundList() {
