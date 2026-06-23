@@ -25,7 +25,7 @@ public class HomeController {
         model.addAttribute(
             "recentLostList", homeService.recentLostList());
         model.addAttribute(
-            "recentNotice", homeService.recentNotice());
+            "recentNotices", homeService.recentNotices());
         model.addAttribute(
             "countWeeklyFound", homeService.countWeeklyFound());
         model.addAttribute(

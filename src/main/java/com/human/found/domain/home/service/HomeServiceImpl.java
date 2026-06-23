@@ -28,10 +28,10 @@ public class HomeServiceImpl implements HomeService{
         return homeMapper.selectRecentLostList();
     }
 
-    // 공지사항 최신 1개
+    // 공지사항 최신 여러개
     @Override
-    public NoticeVO recentNotice(){
-        return homeMapper.selectRecentNotice();
+    public List<NoticeVO> recentNotices(){
+        return homeMapper.selectRecentNotices();
     }
 
     // 습득물 카운트(일주일)
