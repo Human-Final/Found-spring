@@ -26,6 +26,8 @@ import com.human.found.infrastructure.map.KakaoMapConfig;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
+
+
 @Controller
 @AllArgsConstructor
 public class FoundController {
@@ -135,6 +137,51 @@ public class FoundController {
         model.addAttribute("kakaoMapJsKey", kakaoMapConfig.getJsKey());
 
         return "found/detail";
+    }
+    
+    //======수정화면==
+    @GetMapping("/api/found/detail/edit/{atcId}")
+    public String FoundEditForm(@PathVariable("atcId")String atcId,Model model,Authentication authentication,RedirectAttributes redirectAttributes) {
+        if(authentication==null){
+            redirectAttributes.addFlashAttribute("errorMessage", "로그인이 필요합니다");
+            return "redirect:api/found";
+        }
+        FoundVO foundVO = foundService.foundgetdetail(atcId);
+
+        //작성자 본인 확인 방어코드
+        String loginid=authentication.getName();
+        boolean isAdmin=authentication.getAuthorities().stream()
+            .anyMatch(auth->auth.getAuthority().equals("ROLE_ADMIN")||
+            auth.getAuthority().equals("ADMIN"));
+        if(!isAdmin && (foundVO.getId()==null||!foundVO.getId().equals(loginid))){
+            redirectAttributes.addFlashAttribute("errorMessage", "본인이 작성한 글만 수정할 수 있습니다");
+            return "redirect:api/found/detail/"+atcId;    
+        }    
+        model.addAttribute("foundVO", foundVO);
+        model.addAttribute("writetype", "found");
+        model.addAttribute("isEdit", true);
+        
+        return "found/write";
+    }
+    
+
+
+
+    // 실제 데이터 수정처리
+    @PostMapping("api/found/update")
+    public String FoundUpdate(@Valid @ModelAttribute("foundVO")FoundVO foundVO,
+    BindingResult bindingResult,Model model,@RequestParam(value = "files",required = false)MultipartFile files[],
+    @RequestParam(value = "deleteFiles",required = false )List<String>deleteFiles) {
+    
+    //[입력값 유지 및 임시저장 기능] 검증 에러 발생 시 작성하던 내용 그대로 다시 폼으로 백! 
+    if(bindingResult.hasErrors()){
+        model.addAttribute("writetype", "found");
+        model.addAttribute("isEdit", true);
+        // 이미 매핑된 foundVO가 model에 담겨 있으므로 입력했던 값들이 폼에 그대로 유지
+        return "found/write";
+    }   
+        foundService.UpdateFound(foundVO,files,deleteFiles);
+        return "redirect:api/found/detail/"+foundVO.getAtcId();
     }
 
     

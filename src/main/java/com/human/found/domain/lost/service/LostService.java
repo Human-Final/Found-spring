@@ -11,7 +11,7 @@ public interface LostService {
     public void LostRegister(LostVO lostVO,MultipartFile[]files);
     public List<LostVO> getLostlist();
     //삭제
-    public String deletelost(String inputpw , Long lostNum ,String loginid);
+    public void deletelost(String inputpw , String atcId ,String loginid,boolean isAdmin);
     
     public LostVO lostdetail(String atcId);
 }

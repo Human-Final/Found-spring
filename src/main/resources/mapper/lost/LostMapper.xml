@@ -33,7 +33,7 @@ lst_filepath_img
 #{prdtClNm},
 #{done},
 #{isDeleted},
-#{fd_filepath_img}
+#{lstFilepathImg}
 )         
 
 </insert>
@@ -105,13 +105,13 @@ LIMIT 10
 resultType="com.human.found.domain.lost.vo.LostVO">
         SELECT *
         FROM lost
-        WHERE num=#{lostNum}
+        WHERE atc_id=#{atcId}
 </select>
 
 <update id="lostupdateDelte">
         UPDATE lost
         SET is_deleted=1
-        WHERE num=#{lostNum}
+        WHERE atc_id=#{atcId}
 </update>
 
 <select id="selectDetailAtcId"
@@ -158,4 +158,13 @@ resultType="com.human.found.domain.lost.vo.LostVO">
         ) combined_lost
         WHERE combined_lost.atc_id = #{atcId}
 </select>
+
+<!-- 경찰청 삭제 -->
+ <delete id="PoliceDelete">
+        DELETE 
+        FROM lost_police
+        WHERE atc_id=#{atcId}
+ </delete>
+
+
 </mapper>       
