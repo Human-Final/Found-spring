@@ -58,6 +58,7 @@
 
 <select id="selectRecentNotice" resultType="NoticeVO">
     select * from notice
+    where is_deleted=0
     order by num desc
     limit 1
 </select>
