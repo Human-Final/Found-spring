@@ -10,7 +10,11 @@ import lombok.Setter;
 public class SearchConditionDTO extends PagingVO {
     private String keyword;
 
-    private String boardType;
-    private String status;
+    private String boardType;   // lost, found
+    private String status;      // prograss, done
+    private String category;    
+    private String color;       
+    private String place;
+    private String dateText;   
 
 }
