@@ -116,9 +116,8 @@ public class LostController {
         LostVO lostVO=lostService.lostdetail(atcId);
         model.addAttribute("lostVO", lostVO);
         model.addAttribute("comments", lostCommentService.getComments(
-            lostVO.getNum(), lostVO.getDataSource()
-        )
-    );
+            lostVO.getNum(), lostVO.getDataSource())
+        );
         model.addAttribute("kakaoMapJsKey", kakaoMapConfig.getJsKey());
         return "lost/detail";
     }

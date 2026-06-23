@@ -140,11 +140,11 @@ public class FoundController {
     }
     
     //======수정화면==
-    @GetMapping("/api/found/detail/edit/{atcId}")
+    @GetMapping("/api/found/detail/{atcId}/edit")
     public String FoundEditForm(@PathVariable("atcId")String atcId,Model model,Authentication authentication,RedirectAttributes redirectAttributes) {
         if(authentication==null){
             redirectAttributes.addFlashAttribute("errorMessage", "로그인이 필요합니다");
-            return "redirect:api/found";
+            return "redirect:/api/found";
         }
         FoundVO foundVO = foundService.foundgetdetail(atcId);
 
@@ -155,7 +155,7 @@ public class FoundController {
             auth.getAuthority().equals("ADMIN"));
         if(!isAdmin && (foundVO.getId()==null||!foundVO.getId().equals(loginid))){
             redirectAttributes.addFlashAttribute("errorMessage", "본인이 작성한 글만 수정할 수 있습니다");
-            return "redirect:api/found/detail/"+atcId;    
+            return "redirect:/api/found/detail/"+atcId;    
         }    
         model.addAttribute("foundVO", foundVO);
         model.addAttribute("writetype", "found");
@@ -168,7 +168,7 @@ public class FoundController {
 
 
     // 실제 데이터 수정처리
-    @PostMapping("api/found/update")
+    @PostMapping("/api/found/update")
     public String FoundUpdate(@Valid @ModelAttribute("foundVO")FoundVO foundVO,
     BindingResult bindingResult,Model model,@RequestParam(value = "files",required = false)MultipartFile files[],
     @RequestParam(value = "deleteFiles",required = false )List<String>deleteFiles) {
@@ -181,7 +181,7 @@ public class FoundController {
         return "found/write";
     }   
         foundService.UpdateFound(foundVO,files,deleteFiles);
-        return "redirect:api/found/detail/"+foundVO.getAtcId();
+        return "redirect:/api/found/detail/"+foundVO.getAtcId();
     }
 
     
