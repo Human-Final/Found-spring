@@ -68,7 +68,7 @@ public class NoticeController {
     public String editForm(@RequestParam("num") Long num, Model model, HttpSession session) {
         model.addAttribute("isEdit", true); 
         // 수정할 타겟 데이터를 조회해서 모델에 적재 (조회수 증가 없는 별도 메서드나 상세 조회 활용)
-        model.addAttribute("notice", noticeService.getNoticeForEdit(num));
+        model.addAttribute("notice", noticeService.getNoticeForEditandDelete(num));
         return "notice/write"; 
     }
 
@@ -90,7 +90,8 @@ public class NoticeController {
     // 5. 삭제 처리 (관리자 전용)
     @GetMapping("/delete")
     public String delete(@RequestParam("num") Long num, HttpSession session) {
-        noticeService.removeNotice(num);
+        String image_path=noticeService.getNoticeForEditandDelete(num).getImagePath();
+        noticeService.removeNotice(num, image_path);
         return "redirect:/api/notices/list";
     }
 

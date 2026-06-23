@@ -12,6 +12,9 @@ public interface HomeService {
     public List<FoundVO> recentFoundList();
     public List<LostVO> recentLostList();
 
+    // 메인화면 공지사항 게시글 최신글 1개 출력
+    public NoticeVO recentNotice();
+
     // 메인화면 분실/습득 카운팅
     public long countWeeklyFound();
     public long countWeeklyLost();

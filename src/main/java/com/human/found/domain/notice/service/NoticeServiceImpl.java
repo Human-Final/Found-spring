@@ -82,7 +82,16 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
     @Override
-    public void removeNotice(Long num) { 
+    public void removeNotice(Long num, String image_path) {
+        if (!image_path.isEmpty()){
+            NoticeFileVO oldNoticeFile = noticeMapper.selectNoticeFileByNum(num);
+            
+            if (oldNoticeFile != null && oldNoticeFile.getFilePath() != null) {
+                // 💡 [추가] 실제 폴더(디스크)에서 구 첨부파일을 영구 삭제합니다.
+                deleteRealFile(oldNoticeFile.getFilePath());
+            }
+            noticeMapper.deleteNoticeFile(num);
+        }
         noticeMapper.deleteNotice(num); 
     }
 
@@ -132,7 +141,7 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     @Transactional(readOnly = true)
-    public NoticeVO getNoticeForEdit(Long num) {
+    public NoticeVO getNoticeForEditandDelete(Long num) {
         return noticeMapper.selectNoticeDetail(num);
     }  
     

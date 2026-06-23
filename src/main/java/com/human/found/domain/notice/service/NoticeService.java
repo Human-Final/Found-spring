@@ -11,9 +11,9 @@ public interface NoticeService {
     NoticeVO getNoticeDetail(Long num); // 조회수 증가 포함
     void registerNotice(NoticeVO notice);
     void modifyNotice(NoticeVO notice);
-    void removeNotice(Long num);
+    void removeNotice(Long num, String image_path);
 
-    NoticeVO getNoticeForEdit(Long num);    //오로지 내용 수정만을 위한 메서드
+    NoticeVO getNoticeForEditandDelete(Long num);    //오로지 내용 수정, 삭제만을 위한 메서드
 
     
 }
