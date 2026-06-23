@@ -14,4 +14,7 @@ public interface LostService {
     public void deletelost(String inputpw , String atcId ,String loginid,boolean isAdmin);
     
     public LostVO lostdetail(String atcId);
+
+    // 게시글 번호로 분실물 조회
+    LostVO getLostByNum(Long num);
 }

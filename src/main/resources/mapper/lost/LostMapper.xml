@@ -166,5 +166,13 @@ resultType="com.human.found.domain.lost.vo.LostVO">
         WHERE atc_id=#{atcId}
  </delete>
 
+<select id="findByNum"
+        resultType="com.human.found.domain.lost.vo.LostVO">
+
+    SELECT *
+    FROM lost
+    WHERE num = #{num}
+
+</select>
 
 </mapper>       

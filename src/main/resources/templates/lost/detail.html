@@ -8,7 +8,6 @@
 
   <link rel="stylesheet" th:href="@{/css/common/common.css}">
   <link rel="stylesheet" th:href="@{/css/board/detail.css}">
-
 </head>
 
 <body class="lost-board">
@@ -46,13 +45,11 @@
           <span th:if="${lostVO.done == 1}" class="status-tag done">완료</span>
         </div>
 
-        <h1 class="detail-title"
-            th:text="${lostVO.lstSbjt}">
+        <h1 class="detail-title" th:text="${lostVO.lstSbjt}">
           검정색 반지갑을 보관 중입니다
         </h1>
 
-        <p class="detail-summary"
-           th:text="${lostVO.lstPrdtNm}">
+        <p class="detail-summary" th:text="${lostVO.lstPrdtNm}">
           분실물 정보를 확인한 뒤 보관장소를 참고해 주세요.
         </p>
 
@@ -75,7 +72,6 @@
                     th:text="${#temporals.format(lostVO.lstYmd, 'yyyy-MM-dd HH:mm')}">
               </span>
             </div>
-
           </div>
 
           <div class="info-column">
@@ -115,7 +111,6 @@
           </div>
 
         </div>
-
       </div>
 
       <aside class="detail-image-area">
@@ -141,73 +136,45 @@
       <div class="map-box">
         <div id="kakaoMap"></div>
         <div id="mapMessage" class="map-message">
-            위치 정보를 표시할 수 없습니다.
+          위치 정보를 표시할 수 없습니다.
         </div>
       </div>
 
-      <p class="map-address"
-         th:text="|지도 기준 위치: ${lostVO.lstPlace}|">
+      <p class="map-address" th:text="|지도 기준 위치: ${lostVO.lstPlace}|">
         지도 기준 위치: 보관장소
       </p>
     </section>
 
-    <div class="post-delete-box">
-        <p class="post-delete-warning">
-            본인확인을 위해 비밀번호를 입력해주세요
-        </p>
-        <div id="postDeletePasswordArea" class="post-delete-password-area is hidden">
-            <label for="postDeletePasswordInput">비밀번호 확인</label>
-
-            <input type="password" 
-                   id="postDeletePasswordInput"
-                   class="post-delete-password-input"
-                   placeholder="비밀번호 입력"
-                   autocomplete="current-password"
-            >
-        </div>
-        <button type="button"
-                id="postDeleteBtn"
-                class="post-delete-btn"
-                th:data-delete-url="@{/api/lost/{lostNum}(lostNum=${lostVO.num})}"
-        >
-        삭제하기
-        </button>
-    </div>
-
     <div class="detail-actions">
-    
-        <a th:href="@{/api/lost}" class="detail-btn list-btn">
-            ← 목록으로
+
+      <a th:href="@{/api/lost}" class="detail-btn list-btn">
+        ← 목록으로
+      </a>
+
+      <th:block th:if="${#authorization.expression('isAuthenticated()') 
+                      and lostVO.dataSource == 'user' 
+                      and lostVO.id == #authentication.name}">
+        <a th:href="@{/api/lost/detail/{atcId}/edit(atcId=${lostVO.atcId})}"
+           class="detail-btn edit-btn">
+          수정하기
         </a>
+      </th:block>
 
-        <th:block th:if="${#authorization.expression('isAuthenticated()') 
-                        and lostVO.dataSource == 'user' 
-                        and lostVO.id == #authentication.name}">
-
-            <!-- 수정 url 추후 수정 필요 -->
-            <a th:href="@{/api/lost/detail/{atcId}/edit(atcId=${lostVO.atcId})}"
-            class="detail-btn edit-btn">
-            수정하기
-            </a>
-        </th:block>
-
-        
-        <!-- 삭제 method POST. 추후 delete로 변경 필요 -->
-        <form class="delete-form"
+      <form class="delete-form"
             sec:authorize="hasRole('ADMIN')"
             th:action="@{/api/lost/{lostNum}(lostNum=${lostVO.num})}"
             method="post"
             data-admin="true"
             onsubmit="return setDeletePassword(this);">
 
-            <input type="hidden" name="password" class="delete-password-input">
+        <input type="hidden" name="password" class="delete-password-input">
 
-            <button type="submit" class="detail-btn delete-btn">
-                삭제하기
-            </button>
-        </form>
+        <button type="submit" class="detail-btn delete-btn">
+          삭제하기
+        </button>
+      </form>
 
-        <form class="delete-form"
+      <form class="delete-form"
             sec:authorize="!hasRole('ADMIN')"
             th:if="${loginId != null and loginId == lostVO.id}"
             th:action="@{/api/lost/{lostNum}(lostNum=${lostVO.num})}"
@@ -215,14 +182,111 @@
             data-admin="false"
             onsubmit="return setDeletePassword(this);">
 
-            <input type="hidden" name="password" class="delete-password-input">
+        <input type="hidden" name="password" class="delete-password-input">
 
-            <button type="submit" class="detail-btn delete-btn">
-                삭제하기
-            </button>
-        </form>
+        <button type="submit" class="detail-btn delete-btn">
+          삭제하기
+        </button>
+      </form>
 
     </div>
+
+    <!-- 댓글 영역 -->
+    <section class="comment-section">
+
+      <h3 class="section-title">댓글</h3>
+
+      <form th:action="@{/api/lost/{num}/comments(num=${lostVO.num})}"
+            method="post"
+            class="comment-form"
+            sec:authorize="isAuthenticated()">
+
+        <input type="hidden" name="atcId" th:value="${lostVO.atcId}">
+        <input type="hidden" name="dataSource" th:value="${lostVO.dataSource}">
+
+        <textarea name="content"
+                  class="comment-textarea"
+                  rows="4"
+                  maxlength="500"
+                  placeholder="댓글을 입력하세요."
+                  required></textarea>
+
+        <button type="submit" class="comment-submit-btn">등록</button>
+      </form>
+
+      <p class="comment-login-message" sec:authorize="!isAuthenticated()">
+        댓글을 작성하려면 로그인이 필요합니다.
+      </p>
+
+      <div class="comment-list">
+
+        <p th:if="${#lists.isEmpty(comments)}" class="comment-empty">
+          등록된 댓글이 없습니다.
+        </p>
+
+        <div class="comment-item" th:each="comment : ${comments}">
+
+          <div class="comment-top">
+            <strong class="comment-writer" th:text="${comment.id}">
+              작성자
+            </strong>
+
+            <span class="comment-date"
+                  th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}">
+              작성시간
+            </span>
+          </div>
+
+          <p class="comment-content" th:text="${comment.content}">
+            댓글 내용
+          </p>
+
+          <form th:if="${#authentication.name == comment.id}"
+                th:action="@{/api/lost/comments/{commentNum}/update(commentNum=${comment.commentNum})}"
+                method="post"
+                class="comment-update-form is-hidden">
+
+            <input type="hidden" name="atcId" th:value="${lostVO.atcId}">
+
+            <textarea name="content"
+                      class="comment-update-textarea"
+                      rows="3"
+                      maxlength="500"
+                      th:text="${comment.content}"
+                      required></textarea>
+
+            <button type="submit" class="comment-update-btn">
+              수정완료
+            </button>
+          </form>
+
+          <div class="comment-actions"
+               th:if="${#authentication.name == comment.id
+                     or #authorization.expression('hasRole(''ADMIN'')')
+                     or #authorization.expression('hasRole(''MANAGER'')')}">
+
+            <button type="button"
+                    class="comment-edit-toggle-btn"
+                    th:if="${#authentication.name == comment.id}">
+              수정
+            </button>
+
+            <form th:action="@{/api/lost/comments/{commentNum}/delete(commentNum=${comment.commentNum})}"
+                  method="post">
+
+              <input type="hidden" name="atcId" th:value="${lostVO.atcId}">
+
+              <button type="submit" class="comment-delete-btn">
+                삭제
+              </button>
+            </form>
+
+          </div>
+
+        </div>
+      </div>
+
+    </section>
 
   </section>
 
@@ -230,7 +294,6 @@
 
 <div th:replace="~{layout/footer :: footerFragment}"></div>
 
-<!-- 카카오맵 SDK -->
 <script
   type="text/javascript"
   th:src="|//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoMapJsKey}&libraries=services&autoload=false|">
@@ -257,13 +320,29 @@
     return true;
   }
 
-  /*
-    Kakao Map
-    - lostVO.depPlace 값을 기준으로 지도 표시
-    - 1차: 주소 검색
-    - 2차: 키워드 검색
-    - 실패 시: "위치 정보를 표시할 수 없습니다."
-  */
+  document.addEventListener("DOMContentLoaded", function () {
+    const editButtons = document.querySelectorAll(".comment-edit-toggle-btn");
+
+    editButtons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        const commentItem = button.closest(".comment-item");
+        const updateForm = commentItem.querySelector(".comment-update-form");
+
+        if (!updateForm) {
+          return;
+        }
+
+        updateForm.classList.toggle("is-hidden");
+
+        if (updateForm.classList.contains("is-hidden")) {
+          button.textContent = "수정";
+        } else {
+          button.textContent = "취소";
+        }
+      });
+    });
+  });
+
   document.addEventListener("DOMContentLoaded", function () {
     const mapAddress = String(/*[[${lostVO.lstPlace}]]*/ "").trim();
 
@@ -320,14 +399,12 @@
       const geocoder = new kakao.maps.services.Geocoder();
       const places = new kakao.maps.services.Places();
 
-      // 1차: 주소 검색
       geocoder.addressSearch(mapAddress, function (result, status) {
         if (status === kakao.maps.services.Status.OK && result.length > 0) {
           drawMap(result[0].y, result[0].x, "분실 위치", mapAddress);
           return;
         }
 
-        // 2차: 키워드 검색
         places.keywordSearch(mapAddress, function (data, status) {
           if (status !== kakao.maps.services.Status.OK || data.length === 0) {
             showMapMessage("위치 정보를 표시할 수 없습니다.");
@@ -378,7 +455,6 @@
         });
 
         infowindow.open(map, marker);
-
         map.setCenter(coords);
 
         setTimeout(function () {

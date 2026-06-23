@@ -1,13 +1,15 @@
 package com.human.found.domain.notice.service;
 
+import java.io.File;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.human.found.domain.notice.mapper.NoticeMapper;
 import com.human.found.domain.notice.vo.NoticeFileVO;
 import com.human.found.domain.notice.vo.NoticeVO;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.io.File;
-import java.util.List;
-import java.util.UUID;
+import com.human.found.global.common.paging.PagingVO;
 
 @Service
 public class NoticeServiceImpl implements NoticeService {
@@ -20,13 +22,16 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
     @Override
-    public List<NoticeVO> getNoticeList() { 
-        return noticeMapper.selectNoticeList(); 
+    public List<NoticeVO> getNoticeList(PagingVO pagingVO) {
+        int totalCount = noticeMapper.selectNoticeCount(pagingVO);
+        pagingVO.pageInfo(totalCount);
+
+        return noticeMapper.selectNoticeList(pagingVO); 
     }
 
     @Override
     public List<NoticeVO> getActivePopups() { 
-        return noticeMapper.selectActivePopupList(); 
+        return noticeMapper.selectPopupNotices(); 
     }
 
     @Override
@@ -77,7 +82,16 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
     @Override
-    public void removeNotice(Long num) { 
+    public void removeNotice(Long num, String image_path) {
+        if (!image_path.isEmpty()){
+            NoticeFileVO oldNoticeFile = noticeMapper.selectNoticeFileByNum(num);
+            
+            if (oldNoticeFile != null && oldNoticeFile.getFilePath() != null) {
+                // 💡 [추가] 실제 폴더(디스크)에서 구 첨부파일을 영구 삭제합니다.
+                deleteRealFile(oldNoticeFile.getFilePath());
+            }
+            noticeMapper.deleteNoticeFile(num);
+        }
         noticeMapper.deleteNotice(num); 
     }
 
@@ -127,7 +141,7 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     @Transactional(readOnly = true)
-    public NoticeVO getNoticeForEdit(Long num) {
+    public NoticeVO getNoticeForEditandDelete(Long num) {
         return noticeMapper.selectNoticeDetail(num);
     }  
     

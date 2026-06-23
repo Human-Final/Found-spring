@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.human.found.domain.comment.mapper.LostCommentMapper">
+
+    <select id="findComments"
+            resultType="com.human.found.domain.comment.vo.LostCommentVO">
+        SELECT
+            comment_num AS commentNum,
+            id,
+            num,
+            data_source AS dataSource,
+            content,
+            created_at AS createdAt,
+            updated_at AS updatedAt,
+            is_deleted AS isDeleted,
+            deleted_at AS deletedAt
+        FROM lost_comment
+        WHERE num = #{num}
+          AND data_source = #{dataSource}
+          AND is_deleted = 0
+        ORDER BY comment_num ASC
+    </select>
+
+    <select id="findByCommentNum"
+            resultType="com.human.found.domain.comment.vo.LostCommentVO">
+        SELECT
+            comment_num AS commentNum,
+            id,
+            num,
+            data_source AS dataSource,
+            content,
+            created_at AS createdAt,
+            updated_at AS updatedAt,
+            is_deleted AS isDeleted,
+            deleted_at AS deletedAt
+        FROM lost_comment
+        WHERE comment_num = #{commentNum}
+          AND is_deleted = 0
+    </select>
+
+    <insert id="insertComment"
+            parameterType="com.human.found.domain.comment.vo.LostCommentVO">
+        INSERT INTO lost_comment (
+            id,
+            num,
+            data_source,
+            content
+        ) VALUES (
+            #{id},
+            #{num},
+            #{dataSource},
+            #{content}
+        )
+    </insert>
+
+    <update id="updateComment"
+            parameterType="com.human.found.domain.comment.vo.LostCommentVO">
+        UPDATE lost_comment
+        SET content = #{content},
+            updated_at = NOW()
+        WHERE comment_num = #{commentNum}
+          AND id = #{id}
+          AND is_deleted = 0
+    </update>
+
+    <update id="deleteComment">
+        UPDATE lost_comment
+        SET is_deleted = 1,
+            deleted_at = NOW()
+        WHERE comment_num = #{commentNum}
+    </update>
+
+</mapper>

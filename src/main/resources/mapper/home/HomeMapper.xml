@@ -56,6 +56,14 @@
     
 </select>
 
+<select id="selectRecentNotices" resultType="NoticeVO">
+    select * from notice
+    where is_deleted=0
+    and is_important=1
+    order by num desc
+    limit 3
+</select>
+
 <select id="countWeeklyFound"
         resultType="long">
 

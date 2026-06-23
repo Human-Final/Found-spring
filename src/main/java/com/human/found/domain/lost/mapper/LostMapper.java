@@ -23,5 +23,7 @@ public interface LostMapper {
 
     //외부 api 삭제
     public void PoliceDelete(@Param("atcId")String atcId);
+    
+    LostVO findByNum(Long num);
 
 }
