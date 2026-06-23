@@ -114,7 +114,7 @@ resultType="com.human.found.domain.lost.vo.LostVO">
         WHERE num=#{lostNum}
 </update>
 
-<select id="SelectDetailatcID"
+<select id="selectDetailAtcId"
 parameterType="string"
 resultType="com.human.found.domain.lost.vo.LostVO">
         SELECT * FROM(
