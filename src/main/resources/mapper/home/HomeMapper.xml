@@ -56,11 +56,12 @@
     
 </select>
 
-<select id="selectRecentNotice" resultType="NoticeVO">
+<select id="selectRecentNotices" resultType="NoticeVO">
     select * from notice
     where is_deleted=0
+    and is_important=1
     order by num desc
-    limit 1
+    limit 3
 </select>
 
 <select id="countWeeklyFound"
