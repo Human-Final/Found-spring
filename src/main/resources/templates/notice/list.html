@@ -276,6 +276,49 @@
       </tbody>
     </table>
 
+    <!-- 📄 [추가] 페이징 네비게이션 영역 (중앙 정렬 배정) -->
+    <div th:if="${paging != null and paging.totalCount > 0}" style="margin: 30px 0 10px 0; display: flex; justify-content: center; font-family: sans-serif;">
+      <ul style="display: flex; list-style: none; padding: 0; margin: 0; gap: 6px; align-items: center;">
+        
+        <!-- [처음으로] 버튼 -->
+        <li th:if="${paging.page > 1}">
+          <a th:href="@{/api/notices/list(page=1)}" style="display: block; padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 4px; text-decoration: none; color: #64748b; font-size: 13px;">&lt;&lt;</a>
+        </li>
+
+        <!-- [이전] 버튼 블록 -->
+        <li th:if="${paging.prev}">
+          <a th:href="@{/api/notices/list(page=${paging.startPage - 1})}" style="display: block; padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 4px; text-decoration: none; color: #64748b; font-size: 13px;">이전</a>
+        </li>
+
+        <!-- [숫자 페이지 번호] 루프 -->
+        <li th:each="p : ${#numbers.sequence(paging.startPage, paging.endPage)}">
+          <!-- 현재 페이지 활성화 스타일 -->
+          <span th:if="${p == paging.page}" 
+                th:text="${p}" 
+                style="display: block; padding: 6px 12px; background: #2563eb; color: #ffffff; border: 1px solid #2563eb; border-radius: 4px; font-weight: bold; font-size: 13px;">1</span>
+          
+          <!-- 일반 페이지 마우스 호버 효과 링크 -->
+          <a th:unless="${p == paging.page}" 
+             th:href="@{/api/notices/list(page=${p})}" 
+             th:text="${p}" 
+             style="display: block; padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 4px; text-decoration: none; color: #334155; font-size: 13px; transition: background 0.2s;"
+             onmouseover="this.style.background='#f1f5f9'" 
+             onmouseout="this.style.background='transparent'">2</a>
+        </li>
+
+        <!-- [다음] 버튼 블록 -->
+        <li th:if="${paging.next}">
+          <a th:href="@{/api/notices/list(page=${paging.endPage + 1})}" style="display: block; padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 4px; text-decoration: none; color: #64748b; font-size: 13px;">다음</a>
+        </li>
+
+        <!-- [맨끝으로] 버튼 -->
+        <li th:if="${paging.page < paging.totalPage}">
+          <a th:href="@{/api/notices/list(page=${paging.totalPage})}" style="display: block; padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 4px; text-decoration: none; color: #64748b; font-size: 13px;">&gt;&gt;</a>
+        </li>
+        
+      </ul>
+    </div>
+
     <!-- 📌 권한 분리 핵심: 세션의 userRole이 MANAGER이거나 ADMIN일 때만 [글쓰기] 버튼을 노출시킴 -->
     <div th:if="${#authorization.expression('hasAnyAuthority(''ROLE_ADMIN'', ''ROLE_MANAGER'')')}">
         <a th:href="@{/api/notices/write}" class="btn-write">공지 등록</a>
@@ -287,4 +330,5 @@
   <div th:replace="layout/footer :: footerFragment"></div>
 
 </body>
+
 </html>
