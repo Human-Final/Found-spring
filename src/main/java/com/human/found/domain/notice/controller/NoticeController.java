@@ -1,11 +1,17 @@
 package com.human.found.domain.notice.controller;
 
-import com.human.found.domain.notice.service.NoticeService;
-import com.human.found.domain.notice.vo.NoticeVO;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.human.found.domain.notice.service.NoticeService;
+import com.human.found.domain.notice.vo.NoticeVO;
+import com.human.found.global.common.paging.PagingVO;
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("api/notices")
@@ -19,8 +25,9 @@ public class NoticeController {
 
     // 1. 공지사항 전체 목록 (방문자, 로그인 유저 누구나 가능)
     @GetMapping("/list")
-    public String list(Model model) {
-        model.addAttribute("list", noticeService.getNoticeList());
+    public String list(PagingVO pagingVO, Model model) {
+        model.addAttribute("list", noticeService.getNoticeList(pagingVO));
+        model.addAttribute("paging", pagingVO);
         return "notice/list";
     }
 

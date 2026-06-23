@@ -1,13 +1,15 @@
 package com.human.found.domain.notice.service;
 
+import java.io.File;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.human.found.domain.notice.mapper.NoticeMapper;
 import com.human.found.domain.notice.vo.NoticeFileVO;
 import com.human.found.domain.notice.vo.NoticeVO;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.io.File;
-import java.util.List;
-import java.util.UUID;
+import com.human.found.global.common.paging.PagingVO;
 
 @Service
 public class NoticeServiceImpl implements NoticeService {
@@ -20,8 +22,11 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
     @Override
-    public List<NoticeVO> getNoticeList() { 
-        return noticeMapper.selectNoticeList(); 
+    public List<NoticeVO> getNoticeList(PagingVO pagingVO) {
+        int totalCount = noticeMapper.selectNoticeCount(pagingVO);
+        pagingVO.pageInfo(totalCount);
+
+        return noticeMapper.selectNoticeList(pagingVO); 
     }
 
     @Override
