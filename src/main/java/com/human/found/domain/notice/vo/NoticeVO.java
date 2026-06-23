@@ -12,7 +12,7 @@ public class NoticeVO {
     private String content;         // 내용
     private Long viewCount;         // 조회수
     private Integer isPlanned;      // 팝업 여부 (0: 일반, 1: 팝업)
-    private Integer isImportant;    // 주요 공지 여부 (0: 일반, 1: 상단고정)
+    private Integer isImportant;    // 중요 공지 여부 (0: 일반, 1: 상단고정)
     private LocalDateTime createdAt;// 등록일시
     private LocalDateTime updatedAt;// 수정일시
     private Integer isDeleted;      // 삭제여부 (0: 유지, 1: 삭제)

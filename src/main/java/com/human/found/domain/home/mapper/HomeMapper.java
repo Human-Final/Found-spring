@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 import com.human.found.domain.found.vo.FoundVO;
 import com.human.found.domain.lost.vo.LostVO;
+import com.human.found.domain.notice.vo.NoticeVO;
 
 @Mapper
 public interface HomeMapper {
@@ -13,6 +14,9 @@ public interface HomeMapper {
     // 메인 화면에 최신 습득/분실물 2개씩 출력
     public List<FoundVO> selectRecentFoundList();
     public List<LostVO> selectRecentLostList();
+
+    // 메인 화면에 최신 공지사항 1개 출력
+    public NoticeVO selectRecentNotice();
 
     // 메인 화면에 습득/분실/완료 카운트
     public long countWeeklyFound();

@@ -14,31 +14,65 @@
   
   <div th:replace="layout/header :: headerFragment"></div>
 
-  <div th:each="popup : ${popupList}" th:id="'popup-window-' + ${popup.num}" class="main-notice-popup" 
-       style="position:fixed; top:120px; left:50px; z-index:10000; width:350px; background:#fff; border:2px solid #333; box-shadow: 5px 5px 15px rgba(0,0,0,0.3); font-family: sans-serif;">
-      
-      <div class="popup-body" style="padding:20px; min-height:150px;">
-          <!-- 조건문 1: 이미지가 존재할 때 -> 이미지만 표시 -->
-          <div th:if="${popup.imagePath != null and popup.imagePath != ''}">
-              <img th:src="${popup.imagePath}" alt="공지 이미지" style="width:100%; height:auto; display:block;" />
-          </div>
-          
-          <!-- 조건문 2: 이미지가 존재하지 않을 때 -> 제목과 내용 구성 -->
-          <div th:if="${popup.imagePath == null or popup.imagePath == ''}">
-              <h4 style="margin-top:0; color:#0056b3; font-size: 16px; font-weight: bold;" th:text="${popup.title}">공지 제목</h4>
-              <hr style="border: 0; border-top: 1px solid #ddd; margin: 10px 0;">
-              <p style="white-space:pre-wrap; font-size:14px; color:#333; line-height: 1.5;" th:text="${popup.content}">공지 내용입니다.</p>
-          </div>
-      </div>
-      
-      <!-- 하단 제어 바 -->
-      <div class="popup-footer" style="background:#f4f4f4; padding:8px 12px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid #ddd; font-size:13px; color:#555;">
-          <label style="cursor:pointer; display: flex; align-items: center; gap: 5px;">
-              <input type="checkbox" th:id="'cookie-check-' + ${popup.num}"> 24시간 동안 그만보기
-          </label>
-          <button th:onclick="'closeNoticePopup(' + ${popup.num} + ')'" style="padding:4px 12px; background:#333; color:#fff; border:none; cursor:pointer; font-size:12px; border-radius:3px;">닫기</button>
-      </div>
-  </div>
+  <!-- 팝업들을 감싸는 보이지 않는 가로 정렬 컨테이너 (여기가 안 겹치게 쫘르르 나열해 주는 핵심입니다) -->
+  <div style="position: fixed; top: 100px; left: 50px; z-index: 9999; display: flex; flex-direction: row; flex-wrap: wrap; gap: 24px; pointer-events: none; max-width: calc(100vw - 100px);">
+    
+    <!-- 실제 팝업 루프 (컨트롤러에서 넘긴 popupNoticeList 사용) -->
+    <div th:each="popupNotice : ${popupNoticeList}" 
+          th:if="${popupNotice.isPlanned == 1}" 
+          class="main-notice-popup" 
+          th:id="'popup-window-' + ${popupNotice.num}"
+          style="background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); border-radius: 12px; width: max-content; max-width: 450px; overflow: hidden; font-family: sans-serif; pointer-events: auto;">
+        
+        <!-- 팝업 본문 영역 (✨기존 padding: 24px; 을 제거하고 세부 조절합니다) -->
+        <div class="popup-body" style="text-align: center; background: #ffffff;">
+            
+            <!-- [CASE 1] 이미지가 있는 경우: 여백을 최소화하여 이미지 크기에 딱 맞춤 -->
+            <div th:if="${popupNotice.imagePath != null and !#strings.isEmpty(popupNotice.imagePath)}" 
+                class="popup-image-content" 
+                style="padding: 16px 16px 4px 16px;"> <!-- 윗여백과 옆여백만 살짝 주고, 아래 버튼과의 간격은 줄임 -->
+                <a th:href="@{/api/notices/detail(num=${popupNotice.num})}" style="display: block;">
+                    <img th:src="${popupNotice.imagePath}" alt="공지사항 팝업 이미지" 
+                        style="width: 100%; height: auto; display: block; border-radius: 8px; max-height: 450px; object-fit: contain;">
+                </a>
+            </div>
+            
+            <!-- [CASE 2] 이미지가 없는 경우: 기존의 세련된 텍스트 느낌 그대로 패딩 유지 -->
+            <div th:unless="${popupNotice.imagePath != null and !#strings.isEmpty(popupNotice.imagePath)}" 
+                class="popup-text-content" 
+                style="text-align: left; padding: 24px;"> <!-- 텍스트 전용 패딩 적용 -->
+                <!-- 🌟 전체 영역을 상세페이지 링크로 감싸고, 마우스 커서를 포인터로 변경 및 미세한 클릭 효과 부여 -->
+                <a th:href="@{/api/notices/detail(num=${popupNotice.num})}" 
+                  style="text-decoration: none; display: block; color: inherit; transition: opacity 0.2s ease;"
+                  onmouseover="this.style.opacity='0.85'" 
+                  onmouseout="this.style.opacity='1.0'">
+                    
+                    <div style="display: inline-block; background: #eff6ff; color: #1d4ed8; font-size: 11px; font-weight: bold; padding: 4px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: -0.3px;">NOTICE</div>
+                    
+                    <!-- 제목 -->
+                    <h3 th:text="${popupNotice.title}" style="font-size: 18px; margin: 0 0 14px 0; color: #1e293b; font-weight: 700; line-height: 1.4; border-bottom: 2px solid #eff6ff; padding-bottom: 12px;">공지 제목</h3>
+                    
+                    <!-- 내용 -->
+                    <p th:text="${popupNotice.content}" style="font-size: 14px; color: #475569; line-height: 1.6; white-space: pre-wrap; max-height: 250px; overflow-y: auto; margin: 0;"></p>
+                
+                </a>
+            </div>
+            
+        </div>
+
+        
+        
+        <div class="popup-footer" style="background: #f8fafc; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9;">
+            <label style="cursor: pointer; color: #64748b; font-size: 13px; display: flex; align-items: center; user-select: none;">
+                <input type="checkbox" th:id="'cookie-check-' + ${popupNotice.num}" style="margin-right: 6px; width: 15px; height: 15px; accent-color: #2563eb; cursor: pointer;"> 오늘 하루 보지 않기
+            </label>
+            <button type="button" th:onclick="'closeNoticePopup(' + ${popupNotice.num} + ')'" 
+                    style="background: #2563eb; color: #ffffff; border: none; padding: 7px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">닫기</button>
+        </div>
+        
+    </div>
+</div>
+
 
   <main class="main-container">
     <section class="hero">
@@ -138,15 +172,23 @@
           </svg>
           공지사항
         </h3>
-        <a href="/notice/list" class="more">더보기 →</a>
+        <a href="/api/notices/list" class="more">더보기 →</a>
       </div>
 
       <div class="notice-line">
         <span class="notice-badge">공지</span>
-        <a href="/notice/list" style="color: inherit; text-decoration: none;">
-          <strong>분실물 게시판 이용 안내</strong>
+        
+        <!-- th:each 선언 (recentNotice 리스트에서 noticeVO 객체를 순회) -->
+        <a th:each="noticeVO : ${recentNotice}"
+          th:href="@{/api/notices/detail(num=${noticeVO.num})}" 
+          style="color: inherit; text-decoration: none;">
+          
+          <!-- DB에서 가져온 실제 제목 바인딩 -->
+          <strong th:text="${noticeVO.title}">공지사항 제목 위치</strong>
+          
+          <!-- LocalDateTime 포맷팅 처리 (2026. 6. 4. 형태로 출력) -->
+          <time th:text="${#temporals.format(noticeVO.createdAt, 'yyyy. M. d.')}">2026. 6. 4.</time>
         </a>
-        <time>2026. 6. 4.</time>
       </div>
     </section>
 
@@ -280,9 +322,8 @@
 
 </body>
 <script>
-    // 1. 페이지가 로드되면 실행되는 함수
+    // 1. 페이지가 로드되면 실행되는 함수 (쿠키 확인 후 팝업 숨김)
     document.addEventListener("DOMContentLoaded", function() {
-        // 화면에 렌더링된 모든 팝업을 돌며 쿠키 확인
         document.querySelectorAll('.main-notice-popup').forEach(function(popup) {
             const num = popup.id.replace('popup-window-', '');
             // 해당 공지사항 번호로 된 '그만보기' 쿠키가 있다면 화면에서 숨김
@@ -292,15 +333,18 @@
         });
     });
 
-    // 2. 닫기 버튼 클릭 시 실행되는 함수
+    // 2. 닫기 버튼 클릭 시 실행되는 함수 (쿠키 저장 및 창 숨기기)
     function closeNoticePopup(num) {
-        const isHideChecked = document.getElementById('cookie-check-' + num).checked;
-        if (isHideChecked) {
-            // 24시간(1일) 동안 보지 않기 쿠키 저장
+        const checkElement = document.getElementById('cookie-check-' + num);
+        if (checkElement && checkElement.checked) {
             setNoticeCookie("done-popup-" + num, "true", 1);
         }
-        // 현재 팝업창 닫기
-        document.getElementById('popup-window-' + num).style.display = "none";
+        
+        const popupElement = document.getElementById('popup-window-' + num);
+        if (popupElement) {
+            // 🌟 display: none 대신 투명하게 숨겨서 자리를 유지시킵니다.
+            popupElement.style.visibility = "hidden"; 
+        }
     }
 
     // 3. 쿠키 설정 함수 (만료 날짜 계산 포함)
@@ -314,11 +358,12 @@
     function getNoticeCookie(name) {
         const nameEQ = name + "=";
         const ca = document.cookie.split(';');
-        for(let i=0; i < ca.length; i++) {
+        for(let i = 0; i < ca.length; i++) {
             let c = ca[i].trim();
             if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
         }
         return null;
     }
 </script>
+
 </html>
