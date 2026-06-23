@@ -3,9 +3,11 @@ package com.human.found.domain.lost.controller;
 import java.security.Principal;
 import java.util.List;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -79,34 +81,33 @@ public class LostController {
         model.addAttribute("writetype", "lost");
         return "found/write";
     }
-    
-    @PostMapping("/api/lost/{lostNum}")
+    //삭제
+    @DeleteMapping("/api/lost/{atcId}")
     //비밀번호/게시글번호(lostnum)/사용자검증(principla)/
     // 삭제가 성공하거나 실패했을 때, 리다이렉트 되는 페이지(목록이나 상세페이지)로 일회성 메시지 전달
     public String DeletedLost(
-        @RequestParam("password")String inputpw,@PathVariable("lostNum")Long lostNum,Principal principal,
+        @RequestParam("password")String inputpw,@PathVariable("atcId") String atcId,Authentication authentication,
         RedirectAttributes redirectAttributes){
         
         //로그인체크
-        if(principal==null){
+        if(authentication==null){
             redirectAttributes.addFlashAttribute("errorMessage", "로그인이 필요합니다.");
             return "redirect:/api/lost/";
         }
-        String targetAtcId=null;
+        String loginid=authentication.getName();
+        //로그인한 유저의 권한 목록 중 관리자 권한 (ADMIN) 이 있는지 확인
+        boolean isAdmin=authentication.getAuthorities().stream()
+        .anyMatch(auth->auth.getAuthority().equals("ROLE_ADMIN")||auth.getAuthority().equals("ADMIN"));
+
         try {
             //서비스단에 글 id 입력번호, 로그인한 유저 id 를 넘겨받아 검증 및 삭제
-            targetAtcId=lostService.deletelost(inputpw,lostNum,principal.getName());
+            lostService.deletelost(inputpw,atcId,loginid,isAdmin);
             redirectAttributes.addFlashAttribute("Message", "삭제완료");
-            return "redirect:/api/lost";
+            return "redirect:/api/lost/";
         } catch (Exception e) {
             // 검증 실패 시 에러 메시지를 들고 원래 상세 페이지로 리턴
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-
-            if(targetAtcId!=null){
-                return "redirect:/api/lost/detail/"+targetAtcId;
-            }else{
-                return "redirect:/api/lost/";
-            }
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());           
+                return "redirect:/api/lost/detail/"+atcId;           
         }        
     }
     //==상세보기==

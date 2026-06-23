@@ -17,12 +17,15 @@ public interface FoundService {
     public List<FoundVO> getFoundList(PagingVO pagingVO);
 
     //삭제
-    public String deletefound(String atcId,String inputpw,String loginid,boolean isAdmin);
+    public void deletefound(String atcId,String inputpw,String loginid,boolean isAdmin);
 
     //상세보기
     public FoundVO foundgetdetail(String atcId);
     
     // 게시글 번호로 상세조회
     public FoundVO getFoundByNum(Long num);
+
+    //게시글 수정
+    public void UpdateFound(FoundVO foundVO,MultipartFile files[],List<String>deleteFiles);
 
 }
