@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.human.found.domain.comment.vo.CommentVO;
 import com.human.found.domain.user.mapper.UserMapper;
 import com.human.found.domain.user.vo.MyPagePostVO;
 import com.human.found.domain.user.vo.UserVO;
@@ -276,6 +277,14 @@ public class UserServiceImpl implements UserService {
         if (atcId != null && !atcId.trim().isEmpty()) {
             userMapper.deleteLostPostByAtcId(atcId.trim());
         }
+    }
+
+    @Override
+    public List<CommentVO> findAllCommentsByUserId(String userId){
+        if (userId!=null && !userId.trim().isEmpty()){
+            return userMapper.findAllCommentsByUserId(userId.trim());
+        }
+        return null;
     }
 
     /**

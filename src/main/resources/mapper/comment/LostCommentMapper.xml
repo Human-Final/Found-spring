@@ -6,7 +6,7 @@
 <mapper namespace="com.human.found.domain.comment.mapper.LostCommentMapper">
 
     <select id="findComments"
-            resultType="com.human.found.domain.comment.vo.LostCommentVO">
+            resultType="com.human.found.domain.comment.vo.CommentVO">
         SELECT
             comment_num AS commentNum,
             id,
@@ -25,7 +25,7 @@
     </select>
 
     <select id="findByCommentNum"
-            resultType="com.human.found.domain.comment.vo.LostCommentVO">
+            resultType="com.human.found.domain.comment.vo.CommentVO">
         SELECT
             comment_num AS commentNum,
             id,
@@ -42,7 +42,7 @@
     </select>
 
     <insert id="insertComment"
-            parameterType="com.human.found.domain.comment.vo.LostCommentVO">
+            parameterType="com.human.found.domain.comment.vo.CommentVO">
         INSERT INTO lost_comment (
             id,
             num,
@@ -57,7 +57,7 @@
     </insert>
 
     <update id="updateComment"
-            parameterType="com.human.found.domain.comment.vo.LostCommentVO">
+            parameterType="com.human.found.domain.comment.vo.CommentVO">
         UPDATE lost_comment
         SET content = #{content},
             updated_at = NOW()

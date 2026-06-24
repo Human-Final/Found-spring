@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.human.found.domain.comment.mapper.LostCommentMapper;
-import com.human.found.domain.comment.vo.LostCommentVO;
+import com.human.found.domain.comment.vo.CommentVO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,25 +20,25 @@ public class LostCommentServiceImpl implements LostCommentService{
     // 댓글 목록 조회
     @Override
     @Transactional(readOnly = true)
-    public List<LostCommentVO> getComments(Long num, String dataSource) {
+    public List<CommentVO> getComments(Long num, String dataSource) {
         return lostCommentMapper.findComments(num, dataSource);
     }
 
     // 댓글 등록
     @Override
-    public void addComment(LostCommentVO comment) {
+    public void addComment(CommentVO comment) {
         lostCommentMapper.insertComment(comment);
     }
 
     // 댓글 단건 조회
     @Override
-    public LostCommentVO getComment(Long commentNum) {
+    public CommentVO getComment(Long commentNum) {
         return lostCommentMapper.findByCommentNum(commentNum);
     }
 
     // 댓글 수정
     @Override
-    public void updateComment(LostCommentVO comment) {
+    public void updateComment(CommentVO comment) {
         lostCommentMapper.updateComment(comment);
     }
 

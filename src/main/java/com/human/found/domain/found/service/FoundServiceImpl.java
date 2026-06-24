@@ -208,7 +208,7 @@ public class FoundServiceImpl implements FoundService {
     public void UpdateFound(FoundVO foundVO, MultipartFile[] newFiles, List<String> deleteFiles) {
 
         // 글 정보 수정
-        foundMapper.UpdateFound(foundVO);
+        foundMapper.updateFound(foundVO);
 
         // 기존 파일 삭제(DELETE) ->체크 한거 있을때만 동작
         if(deleteFiles != null&& !deleteFiles.isEmpty()){
