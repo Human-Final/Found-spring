@@ -25,9 +25,7 @@ public interface FoundCommentMapper {
     // 댓글 수정
     int updateComment(CommentVO commentVO);
 
-    // 댓글 소프트 삭제
-    int deleteComment(
-        @Param("commentNum") Long commentNum
-    );
+    // 습득물 댓글 1개 삭제
+    int deleteComment(@Param("commentNum") Long commentNum);
     
 }

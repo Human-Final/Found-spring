@@ -22,7 +22,6 @@ public interface LostCommentMapper {
     // 댓글 수정
     void updateComment(CommentVO comment);
 
-    // 댓글 삭제 처리
-    void deleteComment(@Param("commentNum") Long commentNum,
-                        @Param("id") String id);
+    // 분실물 댓글 1개삭제
+    void deleteComment(@Param("commentNum") Long commentNum);
 }

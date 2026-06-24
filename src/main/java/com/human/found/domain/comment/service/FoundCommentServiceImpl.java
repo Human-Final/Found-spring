@@ -42,7 +42,7 @@ public class FoundCommentServiceImpl implements FoundCommentService{
 
     // 댓글 삭제
     @Override
-    public int deleteComment(Long commentNum) {
-        return foundCommentMapper.deleteComment(commentNum);
+    public void deleteComment(Long commentNum) {
+        foundCommentMapper.deleteComment(commentNum);
     } 
 }

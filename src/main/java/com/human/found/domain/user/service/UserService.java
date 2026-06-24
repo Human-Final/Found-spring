@@ -82,6 +82,8 @@ public interface UserService {
     // 사용자 작성 댓글 모두 갖고오기 메서드
     List<CommentVO> findAllCommentsByUserId(String userId);
 
+    // 사용자 작성 댓글 모두 삭제하기 메서드
+    void deleteAllCommentsByUserId(String UserId);
 
     /**
      * 회원탈퇴

@@ -97,7 +97,7 @@ public class FoundCommentController {
             rttr.addFlashAttribute("error", "존재하지 않는 댓글입니다.");
             return "redirect:/api/found";
         }
-
+        
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 

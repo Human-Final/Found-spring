@@ -58,7 +58,7 @@ public class LostCommentController {
         }
 
         CommentVO savedComment =
-                lostCommentService.getComment(commentNum);
+                lostCommentService.getCommentByCommentNum(commentNum);
 
         if (savedComment == null) {
             rttr.addFlashAttribute("error", "존재하지 않는 댓글입니다.");
@@ -91,7 +91,7 @@ public class LostCommentController {
         }
 
         CommentVO savedComment =
-                lostCommentService.getComment(commentNum);
+                lostCommentService.getCommentByCommentNum(commentNum);
 
         if (savedComment == null) {
             rttr.addFlashAttribute("error", "존재하지 않는 댓글입니다.");
@@ -115,7 +115,7 @@ public class LostCommentController {
             return "redirect:/api/lost/detail/" + atcId;
         }
 
-        lostCommentService.deleteComment(commentNum, principal.getName());
+        lostCommentService.deleteComment(commentNum);
 
         return "redirect:/api/lost/detail/" + atcId;
     }

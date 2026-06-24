@@ -66,7 +66,8 @@
           AND is_deleted = 0
     </update>
 
-    <update id="deleteComment">
+    <update id="deleteComment"
+            parameterType="long">
         UPDATE lost_comment
         SET is_deleted = 1,
             deleted_at = NOW()

@@ -23,4 +23,7 @@ public class CommentVO {
     private String boardType; 
     //추가 : 글 제목 postTitle로 저장
     private String postTitle;
+    //추가 : 댓글의 주소 게시글의 atcId를 저장
+    private String atcId;
+
 }

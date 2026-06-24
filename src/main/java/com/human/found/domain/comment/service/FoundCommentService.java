@@ -19,5 +19,5 @@ public interface FoundCommentService {
     int updateComment(CommentVO commentVO);
     
     // 댓글 삭제
-    int deleteComment(Long commentNum);
+    void deleteComment(Long commentNum);
 }
