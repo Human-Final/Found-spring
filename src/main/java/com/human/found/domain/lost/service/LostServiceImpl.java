@@ -38,57 +38,41 @@ public class LostServiceImpl implements LostService {
         //게시글저장
         lostMapper.insertLost(lostVO);
         
+        // 게시글 번호 가져오기
         String atcid = lostVO.getAtcId();
 
+        // 복잡했던 파일 업로드 & 물리 저장을 유틸 호출 한 줄로 대체
         List<Map<String,Object>> uploadedMaps=fileUtil.uploadFiles(files, atcid, "lost");
 
-        for(Map<String,Object> info:uploadedMaps){
+        if(uploadedMaps!=null&& !uploadedMaps.isEmpty()){
+            // 업로드된 파일 리스트 중 "0번째(첫 번째) 파일 이름"을 꺼냅니다
+            String saveFileName=(String)uploadedMaps.get(0).get("saveFileName");
+
+            // 파일 경로를 foundVO의 대표이미지 공간에 세팅
+            lostVO.setLstFilepathImg("/images/lost/"+saveFileName);
+
+            System.out.println("atcId = " + lostVO.getAtcId());
+            System.out.println("대표이미지 = " + lostVO.getLstFilepathImg());
+
+            lostMapper.updateThumbnail(lostVO);
+
+            for(Map<String,Object> info:uploadedMaps){
             LostFileVO fileVO=new LostFileVO();
-            fileVO.setFdFilepathImg((String)info.get("originalname"));//Object강제 형변환(String)
-            fileVO.setAtcId((String)info.get("atcId"));
-            fileVO.setSaveName((String)info.get("saveFileName"));
-            fileVO.setFileSize((Long)info.get("fileSize"));
-            fileVO.setFilePath((String)info.get("filePath"));
             
+                fileVO.setFdFilepathImg((String)info.get("originalname"));//Object강제 형변환(String)
+                fileVO.setAtcId((String)info.get("atcId"));
+                fileVO.setSaveName((String)info.get("saveFileName"));
+                fileVO.setFilePath((String)info.get("filePath"));
+                
+                //용량체크
+                if(info.get("fileSize")!=null){
+                    fileVO.setFileSize(Long.parseLong(String.valueOf(info.get("fileSize"))));
+                }
+
             //db저장
-            lostFileMapper.insertFile(fileVO);
+                lostFileMapper.insertFile(fileVO);
+            }
         }
-
-        // if (files != null && files.length > 0) {
-
-        //     String uploadPath = "//192.168.0.53/260126/0608/found/file/lost/";// 파일위치
-        //     File folder = new File(uploadPath);
-        //     if (!folder.exists()) {
-        //         folder.mkdirs();// 폴더가 없으면 생성
-        //     }
-
-        //     for (MultipartFile file : files) {
-        //         if (!file.isEmpty()) {
-        //             String originalFilename = file.getOriginalFilename();
-        //             String uuid = UUID.randomUUID().toString();
-        //             String saveFileName = uuid + "_" + originalFilename;
-        //             try {
-        //                 File saveFile = new File(uploadPath, saveFileName);
-
-        //                 file.transferTo(saveFile);
-
-        //                 LostFileVO fileVo = new LostFileVO();
-        //                 fileVo.setFdFilepathImg(originalFilename);
-        //                 fileVo.setAtcId(atcid);
-        //                 fileVo.setSaveName(saveFileName);
-        //                 fileVo.setFileSize(file.getSize());
-        //                 fileVo.setFilePath("//192.168.0.53/260126/0608/found/file/lost/" + saveFileName);
-        //                 lostFileMapper.insertFile(fileVo);
-
-        //             } catch (Exception e) {
-        //                 e.printStackTrace();
-        //                 throw new RuntimeException("파일 저장 중 오류가 발생하여 글 등록이 취소되었습니다.");
-        //             }
-        //         }
-
-        //     }
-
-        //}
     }
 
     @Override
@@ -136,42 +120,23 @@ public class LostServiceImpl implements LostService {
         // 폴더 사진 삭제
         if("user".equals(lost.getDataSource())){
             List<LostFileVO> fileList=lostFileMapper.findById(atcId);
+            lostMapper.lostupdateDelte(atcId);
+            lostFileMapper.deleteByAtcId(atcId);
             if(fileList != null && !fileList.isEmpty()){
                 for(LostFileVO fileVO:fileList){
                     fileUtil.deletePhysicalFile(fileVO.getSaveName(),"lost");
                 }
             }
             //게시글 삭제
-            lostMapper.lostupdateDelte(atcId);
+            // lostMapper.lostupdateDelte(atcId);
             //사진 db삭제
-            lostFileMapper.deleteByAtcId(atcId);
+            // lostFileMapper.deleteByAtcId(atcId);
         }else if("police".equals(lost.getDataSource())){
             //경찰청 삭제
             lostMapper.PoliceDelete(atcId);
         }else{
             throw new RuntimeException("알수없는 DataSource:"+lost.getDataSource());
         }
-
-
-        // if ("user".equals(lost.getDataSource())) {
-        //     List<LostFileVO> fileList = lostFileMapper.findById(atcId);
-        //     if (fileList != null && !fileList.isEmpty()) {
-        //         String uploadPath = "//192.168.0.53/260126/0608/found/file/lost/";
-        //         for (LostFileVO fileVO : fileList) {
-        //             File file = new File(uploadPath, fileVO.getSaveName());
-        //             if (file.exists()) {
-        //                 file.delete();
-        //             }
-        //         }
-        //     }
-        //     // 게시글 삭제
-        //     lostMapper.lostupdateDelte(atcId);
-        //     // 사진 db삭제
-        //     lostFileMapper.deleteByAtcId(atcId);
-        // } else if ("police".equals(lost.getDataSource())) {
-        //     // 경찰청 삭제
-        //     lostMapper.PoliceDelete(atcId);
-        // }
     }
 
     // 상세조회
@@ -192,6 +157,49 @@ public class LostServiceImpl implements LostService {
     @Override
     public LostVO getLostByNum(Long num) {
         return lostMapper.findByNum(num);
+    }
+
+    @Override
+    public void UpdateLost(LostVO lostVO, MultipartFile[] newFiles, List<String> deletefiles) {
+        // 글 정보 수정
+        lostMapper.UpdateLost(lostVO);
+
+        // 기존 파일 삭제 -체크한거 있을떄만
+        if(deletefiles !=null && !deletefiles.isEmpty()){
+            for(String saveName : deletefiles){
+                lostFileMapper.deleteBySaveName(saveName);
+                fileUtil.deletePhysicalFile(saveName, "lost");
+            }
+        }
+
+        // 새로 첨부한 사진이 있으면 추가로 저장
+        if (newFiles != null && newFiles.length > 0 && !newFiles[0].isEmpty()){
+            List<Map<String, Object>> uploadMaps = fileUtil.uploadFiles(newFiles, lostVO.getAtcId(), "lost");
+            
+            if (uploadMaps != null && !uploadMaps.isEmpty()){
+                //새 파일 중 0번째 파일 이름을 가져와서 대표 이미지로 세팅합니다
+                String saveFileName = (String) uploadMaps.get(0).get("saveFileName");
+                lostVO.setLstFilepathImg("/images/lost/"+saveFileName);
+
+                lostMapper.updateThumbnail(lostVO);
+
+                for(Map<String, Object> info : uploadMaps){
+                    LostFileVO fileVO=new LostFileVO();
+                    fileVO.setAtcId(lostVO.getAtcId());
+                    fileVO.setFdFilepathImg((String)info.get("originalname"));
+                    fileVO.setSaveName((String)info.get("saveFileName"));
+                    fileVO.setFilePath((String)info.get("filePath"));
+
+                    //파일 정보누락 확인
+                    if(info.get("fileSize")!=null){
+                        fileVO.setFileSize(Long.parseLong(String.valueOf(info.get("fileSize"))));
+                    }
+                    lostFileMapper.insertFile(fileVO);
+                }
+            }
+
+        }
+        
     }
 
 }

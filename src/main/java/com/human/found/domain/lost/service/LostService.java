@@ -17,4 +17,6 @@ public interface LostService {
 
     // 게시글 번호로 분실물 조회
     LostVO getLostByNum(Long num);
+
+    public void UpdateLost(LostVO lostVO,MultipartFile[] files,List<String>deletefiles);
 }
