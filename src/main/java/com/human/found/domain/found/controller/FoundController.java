@@ -73,6 +73,7 @@ public class FoundController {
         List<FoundVO>getList = foundService.getFoundList(pagingVO);
         model.addAttribute("paging", pagingVO);
         model.addAttribute("getList", getList);
+        model.addAttribute("isEdit", false);
         // model.addAttribute("countTotalFound", countTotalFound);
 
         return "found/list";

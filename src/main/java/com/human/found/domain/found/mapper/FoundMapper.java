@@ -27,7 +27,7 @@ public interface FoundMapper {
     FoundVO getFoundByNum(Long num);
 
     //게시글 수정
-    void UpdateFound(FoundVO foundVO);
+    void updateFound(FoundVO foundVO);
 
     
 }

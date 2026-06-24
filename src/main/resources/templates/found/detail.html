@@ -47,12 +47,12 @@
         </div>
 
         <h1 class="detail-title"
-            th:text="${foundVO.fdSbjt}">
+            th:text="${foundVO.fdPrdtNm}">
           검정색 반지갑을 보관 중입니다
         </h1>
 
         <p class="detail-summary"
-           th:text="${foundVO.fdPrdtNm}">
+           th:text="${foundVO.fdSbjt}">
           습득물 정보를 확인한 뒤 보관장소를 참고해 주세요.
         </p>
 
@@ -77,7 +77,7 @@
             <div class="info-row">
               <span class="info-label">습득일자</span>
               <span class="info-value"
-                    th:text="${#temporals.format(foundVO.fdYmd, 'yyyy-MM-dd HH:mm')}">
+                    th:text="${#temporals.format(foundVO.fdYmd, 'yyyy-MM-dd')}">
                 2026-06-21 14:30
               </span>
             </div>
@@ -205,7 +205,7 @@
           <div class="comment-head">
             <strong th:text="${comment.id}">작성자</strong>
 
-            <span th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}">
+            <span th:text="${#temporals.format(comment.updatedAt, 'yyyy-MM-dd HH:mm')}">
               2026-06-22 10:30
             </span>
           </div>
@@ -242,7 +242,9 @@
 
             <button type="button"
                     class="comment-edit-toggle-btn"
-                    th:if="${#authentication.name == comment.id}">
+                    th:if="${#authentication.name == comment.id}"
+                    th:action="@{/api/found/detail/{atcId}/edit(atcId=${foundVO.atcId})}"
+                    >
               수정
             </button>
 
