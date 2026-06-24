@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.human.found.domain.comment.service.LostCommentService;
-import com.human.found.domain.comment.vo.LostCommentVO;
+import com.human.found.domain.comment.vo.CommentVO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,7 +27,7 @@ public class LostCommentController {
             @PathVariable("num") Long num,
             @RequestParam("atcId") String atcId,
             @RequestParam("dataSource") String dataSource,
-            LostCommentVO commentVO,
+            CommentVO commentVO,
             Principal principal,
             RedirectAttributes rttr
     ) {
@@ -49,7 +49,7 @@ public class LostCommentController {
     public String updateComment(
             @PathVariable("commentNum") Long commentNum,
             @RequestParam("atcId") String atcId,
-            LostCommentVO commentVO,
+            CommentVO commentVO,
             Principal principal,
             RedirectAttributes rttr
     ) {
@@ -57,7 +57,7 @@ public class LostCommentController {
             return "redirect:/login";
         }
 
-        LostCommentVO savedComment =
+        CommentVO savedComment =
                 lostCommentService.getComment(commentNum);
 
         if (savedComment == null) {
@@ -90,7 +90,7 @@ public class LostCommentController {
             return "redirect:/login";
         }
 
-        LostCommentVO savedComment =
+        CommentVO savedComment =
                 lostCommentService.getComment(commentNum);
 
         if (savedComment == null) {

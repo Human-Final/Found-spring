@@ -176,7 +176,7 @@ public class UserController {
     }
 
     /**
-     * 🗑️ 마이페이지 전용 습득물 삭제 처리 (GET)
+     * 마이페이지 전용 습득물 삭제 처리 (GET)
      */
     @GetMapping("/api/found/delete/{atcId}")
     public String deleteFound(@PathVariable("atcId") String atcId, Principal principal) {
@@ -188,7 +188,7 @@ public class UserController {
     }
 
     /**
-     * 🗑️ 마이페이지 전용 분실물 삭제 처리 (GET)
+     * 마이페이지 전용 분실물 삭제 처리 (GET)
      */
     @GetMapping("/api/lost/delete/{atcId}")
     public String deleteLost(@PathVariable("atcId") String atcId, Principal principal) {

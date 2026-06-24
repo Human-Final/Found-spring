@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.human.found.domain.comment.service.FoundCommentService;
-import com.human.found.domain.comment.vo.FoundCommentVO;
+import com.human.found.domain.comment.vo.CommentVO;
 import com.human.found.domain.found.service.FoundService;
 import com.human.found.domain.found.vo.FoundVO;
 
@@ -30,7 +30,7 @@ public class FoundCommentController {
         @PathVariable("num") Long num,
         @RequestParam("atcId") String atcId,
         @RequestParam("dataSource") String dataSource,
-        FoundCommentVO commentVO,
+        CommentVO commentVO,
         Principal principal,
         RedirectAttributes rttr
     ) {
@@ -51,7 +51,7 @@ public class FoundCommentController {
     @PostMapping("/api/found/comments/{commentNum}/update")
     public String updateComment(
         @PathVariable("commentNum") Long commentNum,
-        FoundCommentVO commentVO,
+        CommentVO commentVO,
         Principal principal,
         RedirectAttributes rttr
     ) {
@@ -59,7 +59,7 @@ public class FoundCommentController {
             return "redirect:/login";
         }
 
-        FoundCommentVO savedComment = foundCommentService.getCommentByCommentNum(commentNum);
+        CommentVO savedComment = foundCommentService.getCommentByCommentNum(commentNum);
 
         if(savedComment == null) {
             rttr.addFlashAttribute("error", "존재하지 않는 댓글입니다.");
@@ -90,7 +90,7 @@ public class FoundCommentController {
             return "redirect:/login";
         }
 
-        FoundCommentVO savedComment = foundCommentService.getCommentByCommentNum(commentNum);
+        CommentVO savedComment = foundCommentService.getCommentByCommentNum(commentNum);
 
         if (savedComment == null) {
             rttr.addFlashAttribute("error", "존재하지 않는 댓글입니다.");

@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.human.found.domain.comment.mapper.FoundCommentMapper;
-import com.human.found.domain.comment.vo.FoundCommentVO;
+import com.human.found.domain.comment.vo.CommentVO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,26 +17,26 @@ public class FoundCommentServiceImpl implements FoundCommentService{
 
     // 특정 습득 게시글 댓글 목록 조회
     @Override
-    public List<FoundCommentVO> getCommentsByNum(Long num, String dataSource) {
+    public List<CommentVO> getCommentsByNum(Long num, String dataSource) {
         return foundCommentMapper.selectCommentsByNum(num, dataSource);
     }
     
     // 댓글 등록
     @Override
-    public int insertComment(FoundCommentVO commentVO) {
+    public int insertComment(CommentVO commentVO) {
         return foundCommentMapper.insertComment(commentVO);
     }
 
 
     // 댓글 단건 조회
     @Override
-    public FoundCommentVO getCommentByCommentNum(Long commentNum) {
+    public CommentVO getCommentByCommentNum(Long commentNum) {
         return foundCommentMapper.selectCommentByCommentNum(commentNum);
     }
 
     // 댓글 수정
     @Override
-    public int updateComment(FoundCommentVO commentVO) {
+    public int updateComment(CommentVO commentVO) {
         return foundCommentMapper.updateComment(commentVO);
     }
 
