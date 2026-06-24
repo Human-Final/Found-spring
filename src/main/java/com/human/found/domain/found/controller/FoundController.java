@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.human.found.domain.comment.service.FoundCommentService;
-import com.human.found.domain.comment.vo.FoundCommentVO;
+import com.human.found.domain.comment.vo.CommentVO;
 import com.human.found.domain.found.service.FoundService;
 import com.human.found.domain.found.vo.FoundVO;
 import com.human.found.global.common.paging.PagingVO;
@@ -127,7 +127,7 @@ public class FoundController {
 
         FoundVO foundVO = foundService.foundgetdetail(atcId);
 
-        List<FoundCommentVO> commentList =
+        List<CommentVO> commentList =
                 foundCommentService.getCommentsByNum(
                         foundVO.getNum(),
                         foundVO.getDataSource()
