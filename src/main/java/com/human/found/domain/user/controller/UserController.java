@@ -11,17 +11,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.human.found.domain.comment.vo.CommentVO;
 import com.human.found.domain.user.service.UserServiceImpl;
 import com.human.found.domain.user.vo.MyPagePostVO;
 import com.human.found.domain.user.vo.UserVO;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 
 @Controller
@@ -53,13 +52,17 @@ public class UserController {
         // 5. 유저가 작성한 모든 글들의 정보를 리스트화해서 DB에서 조회하기
         List<MyPagePostVO> allPosts = userService.getMyAllPostList(loginUserId);
 
-        // 6. 중요: 화면(Thymeleaf)으로 데이터를 던져줍니다.
+        // 6. 유저가 작성한 모든 글들의 정보를 리스트화해서 DB에서 조회하기
+        List<CommentVO> allComments = userService.findAllCommentsByUserId(loginUserId);
+
+        // 7. 중요: 화면(Thymeleaf)으로 데이터를 던져줍니다.
         model.addAttribute("user", user);
         model.addAttribute("counts", counts);
         model.addAttribute("recentPosts", recentPosts);
         model.addAttribute("allPosts", allPosts);
+        model.addAttribute("allComments", allComments);
 
-        // 7. 마이페이지 파일 경로를 리턴합니다.
+        // 8. 마이페이지 파일 경로를 리턴합니다.
         return "user/mypage";
     }
 

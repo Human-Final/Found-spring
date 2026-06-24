@@ -182,7 +182,7 @@
         WHERE id = #{id}
     </update>
 
-    
+
 
     <!-- 회원탈퇴 , 5년 보존 때문에 소프트 삭제-->
     <update id="withdrawUser"
@@ -218,5 +218,48 @@
             updated_at = NOW() 
         WHERE atc_id = #{atcId}
     </update>
+
+
+    <select id="findAllCommentsByUserId" parameterType="string" resultType="com.human.found.domain.comment.vo.CommentVO">
+    SELECT 
+        fc.comment_num AS commentNum,
+        fc.id,
+        fc.num,
+        fc.data_source AS dataSource,
+        fc.content AS content, 
+        fc.created_at AS createdAt,
+        fc.updated_at AS updatedAt,
+        fc.is_deleted AS isDeleted,
+        f.fd_prdt_nm AS postTitle, 
+        '습득' AS boardType
+    FROM found_comment fc
+    LEFT JOIN found f ON fc.num = f.num 
+    WHERE fc.id = #{userId} AND fc.is_deleted = 0
+
+    UNION ALL
+
+    SELECT 
+        lc.comment_num AS commentNum,
+        lc.id,
+        lc.num,
+        lc.data_source AS dataSource,
+        lc.content AS content, 
+        lc.created_at AS createdAt,
+        lc.updated_at AS updatedAt,
+        lc.is_deleted AS isDeleted,
+        l.lst_prdt_nm AS postTitle, 
+        '분실' AS boardType
+    FROM lost_comment lc
+    LEFT JOIN lost l ON lc.num = l.num
+    WHERE lc.id = #{userId} AND lc.is_deleted = 0
+
+    ORDER BY updatedAt DESC
+    </select>
+
+
+
+
+
+
 
 </mapper>

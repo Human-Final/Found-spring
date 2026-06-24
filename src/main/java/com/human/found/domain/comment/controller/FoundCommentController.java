@@ -79,6 +79,7 @@ public class FoundCommentController {
         return "redirect:/api/found/detail/" + foundVO.getAtcId();
     }
 
+    // 습득물 게시글의 댓글 삭제
     @PostMapping("/api/found/comments/{commentNum}/delete")
     public String deleteComment(
         @PathVariable("commentNum") Long commentNum,

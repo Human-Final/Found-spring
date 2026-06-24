@@ -78,7 +78,7 @@ public class LostCommentController {
         return "redirect:/api/lost/detail/" + atcId;
     }
 
-    // 댓글 삭제
+    // 분실물 게시글의 댓글 삭제
     @PostMapping("/api/lost/comments/{commentNum}/delete")
     public String deleteComment(
             @PathVariable("commentNum") Long commentNum,

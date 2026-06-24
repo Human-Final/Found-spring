@@ -548,7 +548,7 @@
             <div class="summary-grid">
             <article class="summary-card">
                 <span class="summary-icon blue">글</span>
-                <span class="summary-label">내가 쓴 글</span>
+                <span class="summary-label">내가 쓴 게시글</span>
                 <!-- 🌟 변수명 뒤에 ?를 붙여주면 데이터가 없어도 에러 없이 우측의 기본값(6)이 정상 출력됩니다. -->
                 <strong class="summary-value" 
                         th:text="${counts != null} ? (${counts.total_count} ?: (${counts.TOTAL_COUNT} ?: 0)) : 0">6</strong>
@@ -729,7 +729,7 @@
             <section class="mypage-panel">
               <div class="panel-head">
                 <div>
-                  <h2 class="panel-title">내가 쓴 글 관리</h2>
+                  <h2 class="panel-title">내가 쓴 게시글 관리</h2>
                   <p class="panel-sub">등록한 습득/분실 게시글을 관리합니다.</p>
                 </div>
                 <a href="/api/write" class="primary-button">+ 글쓰기</a>
@@ -779,14 +779,146 @@
                 <p class="empty-text" th:if="${allPosts == null or #lists.isEmpty(allPosts)}" style="text-align: center; padding: 40px 0; color: #868e96; font-size: 14px; width: 100%;">아직 작성한 게시글이 없습니다.</p>
                 
               </div>
-
-
-
-
-
-
             </section>
           </section>
+
+
+          <!-- 1. 내가 쓴 게시글 관리 섹션 (에러 원천 차단) -->
+          <!-- ========================================== -->
+          <section class="mypage-view" id="myPosts">
+            <section class="mypage-panel">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">내가 쓴 글 관리</h2>
+                  <p class="panel-sub">등록한 습득/분실 게시글을 관리합니다.</p>
+                </div>
+                <a href="/api/write" class="primary-button">+ 글쓰기</a>
+              </div>
+
+              <div class="post-list">
+                
+                <!-- th:data 속성을 활용하여 가독성과 파싱 안정성 확보 -->
+                <article class="post-item" th:each="post : ${allPosts}"
+                         th:data-board-type="${post.boardType}"
+                         th:data-atc-id="${post.atcId}"
+                         th:onclick="location.href = (this.getAttribute('data-board-type') == '습득' ? '/api/found/detail/' : '/api/lost/detail/') + this.getAttribute('data-atc-id');"
+                         style="cursor: pointer;">
+                  
+                  <span class="badge"
+                        th:classappend="${post.boardType == '습득'} ? ' badge-found' : ' badge-lost'"
+                        th:text="${post.boardType}">습득</span>
+                  <div>
+                    <h3 class="item-title" th:text="${post.title}">검은색 지갑 습득</h3>
+                    <p class="item-meta">
+                      <span th:text="${post.category}">가방</span>
+                      <span> · </span>
+                      <span th:text="${post.createdAt != null ? #temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm') : ''}">2026-06-22 14:00</span>
+                    </p>
+                  </div>
+                  <div class="post-actions" style="display: flex; align-items: center; gap: 8px;">
+                    <span class="badge"
+                          th:classappend="${post.done == 1} ? ' badge-done' : ' badge-progress'"
+                          th:text="${post.done == 1 ? '완료' : '진행중'}">진행중</span>
+                    
+                    <a th:href="@{''}" 
+                       th:onclick="event.stopPropagation(); alert('수정 기능은 현재 준비 중입니다.'); return false;" 
+                       class="line-button">수정</a>
+                       
+                    <!-- 삭제 버튼: 가상 form 생성을 통한 안전한 POST 방식 유도 -->
+                    <button type="button" 
+                            th:data-board-type="${post.boardType}"
+                            th:data-atc-id="${post.atcId}"
+                            th:onclick="
+                                event.stopPropagation(); 
+                                if(confirm('정말 이 게시글을 삭제하시겠습니까?')) {
+                                    const form = document.createElement('form');
+                                    form.method = 'POST';
+                                    form.action = (this.getAttribute('data-board-type') == '습득' ? '/mypage/api/found/delete/' : '/mypage/api/lost/delete/') + this.getAttribute('data-atc-id');
+                                    document.body.appendChild(form);
+                                    form.submit();
+                                }
+                            " 
+                            class="line-button" 
+                            style="color: #dc3545; border-color: #f5c6cb; background-color: #fdf3f4; cursor: pointer;">삭제</button>
+                  </div>
+                </article>
+
+                <p class="empty-text" th:if="${allPosts == null or #lists.isEmpty(allPosts)}" style="text-align: center; padding: 40px 0; color: #868e96; font-size: 14px; width: 100%;">아직 작성한 게시글이 없습니다.</p>
+                
+              </div>
+            </section>
+          </section>
+
+
+          <!-- ========================================== -->
+          <!-- 2. 내가 쓴 댓글 관리 섹션 (CommentVO 연동 최종완성본) -->
+          <!-- ========================================== -->
+          <section class="mypage-view" id="myComments">
+            <section class="mypage-panel">
+              <div class="panel-head">
+                <div>
+                  <h2 class="panel-title">내가 쓴 댓글 관리</h2>
+                  <p class="panel-sub">등록한 습득/분실 게시글의 댓글을 관리합니다.</p>
+                </div>
+                <button type="button" 
+                        th:onclick="if(confirm('정말 작성한 모든 댓글을 삭제하시겠습니까? 데이터는 복구할 수 없습니다.')) deleteAllComments();"
+                        class="primary-button" 
+                        style="background-color: #dc3545; color: #ffffff; cursor: pointer;">
+                  작성댓글 모두 삭제
+                </button>
+              </div>
+
+              <div class="post-list">
+                
+                <!-- [수정 포인트]: data-datasource를 data-board-type으로 변경하고 주소 분기점도 수정했습니다 -->
+                <article class="post-item" th:each="comment : ${allComments}"
+                         th:data-board-type="${comment.boardType}"
+                         th:data-num="${comment.num}"
+                         th:onclick="location.href = (this.getAttribute('data-board-type') == '습득' ? '/api/found/detail/' : '/api/lost/detail/') + this.getAttribute('data-num');"
+                         style="cursor: pointer;">
+                  
+                  <!-- 새로 추가된 boardType을 직접 비교하여 배지 스타일 및 텍스트 적용 -->
+                  <span class="badge"
+                        th:classappend="${comment.boardType == '습득'} ? ' badge-found' : ' badge-lost'"
+                        th:text="${comment.boardType}">습득</span>
+
+                  <div style="flex-grow: 1; min-width: 0;">
+                    <!-- 1. 맨 위 큰 글씨: 내가 작성한 실제 댓글 내용 -->
+                    <h3 class="item-title" 
+                        th:text="${comment.content}" 
+                        style="font-size: 15px; color: #212529; font-weight: 500; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        내가 작성한 실제 댓글 내용이 출력됩니다.
+                    </h3>
+                    
+                    <!-- 2. 아래쪽 메타 정보: 실제 게시글 제목(물품명) 매핑 -->
+                    <p class="item-meta" style="font-size: 13px; color: #868e96; margin: 0;">
+                      <!-- 이제 자바 VO 필드와 매핑이 완벽하게 매칭되어 정상 출력됩니다 -->
+                      <span th:text="${comment.postTitle != null ? '게시글 제목: ' + comment.postTitle : '[원문 없음]'}">[원문: 게시글 제목]</span>
+                      <span> · </span>
+                      <span th:text="${comment.createdAt != null ? #temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm') : ''}">2026-06-24 10:30</span>
+                    </p>
+                  </div>
+
+                  
+                  <div class="post-actions" style="display: flex; align-items: center; gap: 8px;">
+                    <button type="button" 
+                            th:data-comment-num="${comment.commentNum}"
+                            th:onclick="event.stopPropagation(); if(confirm('정말 이 댓글을 삭제하시겠습니까?')) deleteComment(this.getAttribute('data-comment-num'), this);" 
+                            class="line-button" 
+                            style="color: #dc3545; border-color: #f5c6cb; background-color: #fdf3f4; cursor: pointer;">삭제</button>
+                  </div>
+                </article>
+
+                <p class="empty-text" th:if="${allComments == null or #lists.isEmpty(allComments)}" style="text-align: center; padding: 40px 0; color: #868e96; font-size: 14px; width: 100%;">아직 작성한 댓글이 없습니다.</p>
+                
+              </div>
+            </section>
+          </section>
+
+
+
+
+
 
           <section class="mypage-view" id="myChats">
             <section class="mypage-panel">
@@ -1181,6 +1313,34 @@
       // 4. 서버 컨트롤러를 향해 POST 데이터 일제 격발 전송
       form.submit();
     }
+
+    // 단일 댓글 삭제 함수
+    function deleteComment(replyId, buttonEl) {
+        fetch('/mypage/api/comments/delete/' + replyId, { method: 'POST' })
+            .then(response => {
+                if(response.ok) {
+                    alert('댓글이 삭제되었습니다.');
+                    // 새로고침 대신 해당 행만 화면에서 지우기
+                    buttonEl.closest('.post-item').remove(); 
+                } else {
+                    alert('댓글 삭제에 실패했습니다.');
+                }
+            });
+    }
+
+    // 전체 댓글 삭제 함수
+    function deleteAllComments() {
+        fetch('/mypage/api/comments/delete-all', { method: 'POST' })
+            .then(response => {
+                if(response.ok) {
+                    alert('모든 댓글이 삭제되었습니다.');
+                    location.reload(); // 화면 갱신
+                } else {
+                    alert('댓글 전체 삭제에 실패했습니다.');
+                }
+            });
+    }
+
 </script>
 </body>
 </html>

@@ -2,6 +2,7 @@ package com.human.found.domain.user.service;
 
 import java.util.List;
 
+import com.human.found.domain.comment.vo.CommentVO;
 import com.human.found.domain.user.vo.MyPagePostVO;
 import com.human.found.domain.user.vo.UserVO;
 
@@ -77,6 +78,9 @@ public interface UserService {
     // 사용자 게시글 삭제 메서드
     void removeFoundPost(String atcId);
     void removeLostPost(String atcId);
+
+    // 사용자 작성 댓글 모두 갖고오기 메서드
+    List<CommentVO> findAllCommentsByUserId(String userId);
 
 
     /**

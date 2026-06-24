@@ -18,4 +18,9 @@ public class CommentVO {
 
     private Integer isDeleted;
     private LocalDateTime deletedAt;
+
+    //추가할 속성: 습득물/분실물 구분용 필드
+    private String boardType; 
+    //추가 : 글 제목 postTitle로 저장
+    private String postTitle;
 }
