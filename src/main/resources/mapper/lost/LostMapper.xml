@@ -4,6 +4,36 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.human.found.domain.lost.mapper.LostMapper" >
 
+<resultMap id="LostDetailResultMap" type="com.human.found.domain.lost.vo.LostVO">
+        <id property="atcId" column="atc_id"/>
+        <result property="num" column="num"/>
+        <result property="id" column="id"/>
+        <result property="lstPlace" column="lst_place"/>
+        <result property="lstPrdtNm" column="lst_prdt_nm"/>
+        <result property="lstSbjt" column="lst_sbjt"/>
+        <result property="lstYmd" column="lst_ymd"/>
+        <result property="prdtClNm" column="prdt_cl_nm"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="done" column="done"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="lstFilepathImg" column="lst_filepath_img"/>
+        <result property="viewConut" column="view_conut"/>
+
+        <collection property="filelist" javaType="ArrayList" ofType="com.human.found.domain.lost.vo.LostFileVO">
+                <id property="id" column="file_id"/>
+                <result property="fdFilepathImg" column="fd_filepath_img"/>
+                <result property="atcId" column="atc_id"/>
+                <result property="saveName" column="save_name"/>
+                <result property="fileSize" column="file_size"/>
+                <result property="filePath" column="file_path"/>
+
+        </collection>
+        
+
+
+
+</resultMap>
 
 
 <insert id="insertLost"
@@ -116,9 +146,17 @@ resultType="com.human.found.domain.lost.vo.LostVO">
 
 <select id="selectDetailAtcId"
 parameterType="string"
-resultType="com.human.found.domain.lost.vo.LostVO">
-        SELECT * FROM(
-        SELECT 
+resultMap="LostDetailResultMap">
+        SELECT combined_lost.*,
+        combined_lost.dataSource,
+        f.id AS file_id,
+        f.atc_id AS file_atc_id,
+        f.fd_filepath_img,
+        f.save_name,
+        f.file_size,
+        f.file_path
+        FROM(
+        SELECT
                 num,
                 atc_id,
                 id,
@@ -134,7 +172,7 @@ resultType="com.human.found.domain.lost.vo.LostVO">
                 lst_filepath_img,
                 'user' AS dataSource <!--테이블라벨-->
         FROM lost
-        WHERE is_deleted=0
+        WHERE is_deleted=0 And atc_id = #{atcId}
 
         UNION ALL
 
@@ -154,9 +192,9 @@ resultType="com.human.found.domain.lost.vo.LostVO">
                 lst_filepath_img,
                 'police' AS dataSource <!--테이블라벨-->
         FROM lost_police
-        WHERE is_deleted=0       
-        ) combined_lost
-        WHERE combined_lost.atc_id = #{atcId}
+        WHERE is_deleted=0 And atc_id = #{atcId}
+        ) combined_lost LEFT JOIN lost_file f on combined_lost.atc_id=f.atc_id
+        ORDER BY f.id ASC
 </select>
 
 <!-- 경찰청 삭제 -->
@@ -174,5 +212,33 @@ resultType="com.human.found.domain.lost.vo.LostVO">
     WHERE num = #{num}
 
 </select>
+
+<update id="updateThumbnail"
+parameterType="com.human.found.domain.lost.vo.LostVO">
+UPDATE lost
+SET
+lst_filepath_img=#{lstFilepathImg}
+WHERE atc_id = #{atcId}
+
+
+</update>
+
+<update id="UpdateLost"
+parameterType="com.human.found.domain.lost.vo.LostVO">
+UPDATE lost
+SET
+
+lst_place =#{lstPlace},
+lst_filepath_img = #{lstFilepathImg},
+lst_prdt_nm      = #{lstPrdtNm},
+lst_sbjt         = #{lstSbjt},
+lst_ymd          = #{lstYmd},
+prdt_cl_nm      = #{prdtClNm},
+done            = #{done},
+is_deleted      = #{isDeleted}
+WHERE
+atc_id=#{atcId}
+
+</update>
 
 </mapper>       

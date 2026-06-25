@@ -13,5 +13,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // 강의실 공유 폴더 네트워크 주소(\\192.168.0.53\...\notice\) 내부를 뒤져서 파일을 배달해 줍니다.
         registry.addResourceHandler("/images/notice/**")
                 .addResourceLocations("file:////192.168.0.53/260126/0608/배민선, 박상화, 김태연, 신민철/file/notice/");
+
+        //습득물
+        registry.addResourceHandler("/images/found/**")
+                .addResourceLocations("file:////192.168.0.53/260126/0608/found/file/found/");
+        
+        //분실물
+        registry.addResourceHandler("/images/lost/**")
+                .addResourceLocations("file:////192.168.0.53/260126/0608/found/file/lost/");        
     }
 }

@@ -4,6 +4,39 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.human.found.domain.found.mapper.FoundMapper">
 
+<resultMap id="FoundDetailResultMap" type="com.human.found.domain.found.vo.FoundVO">
+    <id property="atcId" column="atc_id"/>
+
+    <result property="fdFilepathImg" column="fd_filepath_img"/>
+    <result property="num" column="num"/>
+    <result property="id" column="id"/>
+    <result property="clrNm" column="clr_nm"/>
+    <result property="depPlace" column="dep_place"/>
+    <result property="fdPrdtNm" column="fd_prdt_nm"/>
+    <result property="fdSbjt" column="fd_sbjt"/>
+    <result property="fdYmd" column="fd_ymd"/>
+    <result property="prdtClNm" column="prdt_cl_nm"/>
+    <result property="createdAt" column="created_at"/>
+    <result property="updatedAt"  column="updated_at"/>
+    <result property="done" column="done"/>
+    <result property="isDeleted" column="is_deleted"/>
+    <result property="viewCount" column="view_count"/>
+    <result property="dataSource" column="dataSource"/>
+
+    <collection property="fileList"  javaType="ArrayList" ofType="com.human.found.domain.found.vo.FoundFileVO">
+        <id property="id" column="file_id"/>
+        <result property="fdFilepathImg" column="file_filepath_img"/>
+        <result property="atcId" column="atc_id"/>
+        <result property="saveName" column="save_name"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="filePath" column="file_path"/>
+    </collection>
+        
+
+
+</resultMap>    
+
+
 
 <insert id="insertfound"
         parameterType="com.human.found.domain.found.vo.FoundVO"
@@ -125,8 +158,15 @@ resultType="com.human.found.domain.found.vo.FoundVO">
     WHERE atc_id =#{atcId}
 </update>
 
-    <select id="selectDetailatcId" parameterType="string" resultType="com.human.found.domain.found.vo.FoundVO">
-        SELECT * FROM (
+    <select id="selectDetailatcId" parameterType="string" resultMap="FoundDetailResultMap">
+        SELECT combined_found.*, 
+        combined_found.dataSource,
+        f.id AS file_id,
+        f.atc_id AS file_atc_id, 
+        f.fd_filepath_img AS file_filepath_img,
+        f.save_name, 
+        f.file_size,
+        f.file_path FROM (
             SELECT 
                 num, 
                 atc_id, 
@@ -144,7 +184,7 @@ resultType="com.human.found.domain.found.vo.FoundVO">
                 is_deleted, 
                 'user' AS dataSource <!--테이블라벨-->
             FROM found
-            WHERE is_deleted = 0
+            WHERE is_deleted = 0 And atc_id = #{atcId}
             
             UNION ALL
             
@@ -164,7 +204,7 @@ resultType="com.human.found.domain.found.vo.FoundVO">
                 done, is_deleted, 
                 'police' AS dataSource <!--테이블라벨-->
             FROM found_police
-            WHERE is_deleted = 0
+            WHERE is_deleted = 0 And atc_id = #{atcId}
             
             UNION ALL
             
@@ -184,9 +224,9 @@ resultType="com.human.found.domain.found.vo.FoundVO">
                 done, is_deleted, 
                 'portal' AS dataSource <!--테이블라벨-->
             FROM found_portal
-            WHERE is_deleted = 0            
-        ) combined_found
-        WHERE combined_found.atc_id = #{atcId}
+            WHERE is_deleted = 0 And atc_id = #{atcId}            
+        ) combined_found LEFT JOIN found_file f on combined_found.atc_id=f.atc_id
+        ORDER BY f.id ASC
     </select>
 
 <select id="countFoundList"
@@ -251,7 +291,7 @@ resultType="com.human.found.domain.found.vo.FoundVO">
       AND is_deleted = 0
 </select>
 
-<update id="updateFound"
+<update id="UpdateFound"
 parameterType="com.human.found.domain.found.vo.FoundVO">
 UPDATE found
 SET
@@ -269,6 +309,15 @@ SET
 
 </update>
 
+<update id="updateThumbnail"
+parameterType="com.human.found.domain.found.vo.FoundVO">
+UPDATE found
+SET
+fd_filepath_img = #{fdFilepathImg}
+WHERE atc_id = #{atcId}    
+
+</update>
 
 
-</mapper>        
+
+</mapper>

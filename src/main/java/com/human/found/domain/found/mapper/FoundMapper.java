@@ -29,5 +29,8 @@ public interface FoundMapper {
     //게시글 수정
     void updateFound(FoundVO foundVO);
 
+    //test
+    
+    void updateThumbnail(FoundVO foundVO);
     
 }

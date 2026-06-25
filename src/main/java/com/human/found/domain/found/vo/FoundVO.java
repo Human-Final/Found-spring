@@ -27,6 +27,6 @@ public class FoundVO {
     private LocalDateTime updatedAt;
     private Integer done = 0;
     private Integer isDeleted = 0;
-    private List<FoundFileVO>FileList;
+    private List<FoundFileVO>fileList;
     private String dataSource;
 }
