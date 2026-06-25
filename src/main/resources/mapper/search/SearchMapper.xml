@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.human.found.domain.search.mapper.SearchMapper">
 
-<select id="totalSearch"
+<select id="totalLikeSearch"
         parameterType="com.human.found.domain.search.dto.SearchConditionDTO"
         resultType="com.human.found.domain.search.vo.SearchResultVO">
     SELECT * 
@@ -114,17 +114,48 @@
             )
         </if>
 
-        <if test="boardType != null and boardType != ''">
+        <if test="boardType != null and boardType != '' and boardType!= 'all'">
             AND boardType = #{boardType}
         </if>
 
-        <if test="status != null and status == 'done'">
-            AND done = 1
+        <if test="status != null and status != '' and status != 'all'">
+          <choose>
+            <when test = "status == 'done'">
+                AND done = 1
+            </when>
+            <when test = "status == 'progress'">
+                AND done = 0
+            </when>
+          </choose>
         </if>
 
-        <if test="status != null and status == 'progress'">
-            AND done = 0
+        <if test="category != null and category != '' and category != 'all'">
+            AND category LIKE CONCAT('%', #{category}, '%')
         </if>
+
+        <if test="color != null and color != ''">
+            AND color LIKE CONCAT('%', #{color}, '%')
+        </if>
+
+        <if test="place != null and place != ''">
+            AND place LIKE CONCAT ('%', #{place}, '%')
+        </if>
+
+        <if test="eventDate != null and eventDate != ''">
+            <!--날짜는 범위검색이기 때문에 like를 쓰지 않음-->
+            AND eventDate = #{eventDate}
+        </if>
+
+        <!-- 이 날짜부터-->
+        <if test="startDate != null and startDate != ''">
+            AND eventDate &gt;= #{startDate}
+        </if>
+
+        <!-- 이 날짜까지-->
+        <if test="endDate != null and endDate != ''">
+            AND eventDate &lt;= #{endDate}
+        </if>
+
    </where>
 
    ORDER BY eventDate DESC    
@@ -243,19 +274,208 @@
             )
         </if>
 
-        <if test="boardType != null and boardType != ''">
+        <if test="boardType != null and boardType != '' and boardType != 'all'">
             AND boardType = #{boardType}
         </if>
 
-        <if test="status != null and status == 'done'">
-            AND done = 1
+        <if test="status != null and status != '' and status != 'all'">
+            <choose>
+                <when test="status == 'done'">
+                    AND done = 1
+                </when>
+                <when test="status == 'progress'">
+                    AND done = 0
+                </when>
+            </choose>
         </if>
 
-        <if test="status != null and status == 'progress'">
-            AND done = 0
+        <if test="category != null and category != '' and category != 'all'">
+            AND category LIKE CONCAT('%', #{category}, '%')
+        </if>
+
+        <if test="color != null and color != ''">
+            AND color LIKE CONCAT('%', #{color}, '%')
+        </if>
+
+        <if test="place != null and place != ''">
+            AND place LIKE CONCAT('%', #{place}, '%')
+        </if>
+
+        <if test="eventDate != null and eventDate != ''">
+            AND eventDate = #{eventDate}
+        </if>
+
+        <if test="startDate != null and startDate != ''">
+            AND eventDate &gt;= #{startDate}
+        </if>
+
+        <if test="endDate != null and endDate != ''">
+            AND eventDate &lt;= #{endDate}
         </if>
    </where>
 
 
 </select>
+
+<select id="llmSearch"
+        parameterType="com.human.found.domain.search.dto.SearchConditionDTO"
+        resultType="com.human.found.domain.search.vo.SearchResultVO">
+    SELECT * 
+    FROM (
+        SELECT 
+            atc_id AS atcId,
+            id,
+            clr_nm AS color,
+            dep_place AS place,
+            fd_filepath_img AS imagePath,
+            fd_prdt_nm AS title,
+            fd_sbjt AS content,
+            DATE(fd_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'user' AS dataSource,
+            'found' AS boardType,
+            CONCAT('found_user_', atc_id) AS searchKey
+        FROM found
+        WHERE is_deleted = 0
+
+        UNION ALL
+
+        SELECT 
+            atc_id AS atcId,
+            id,
+            clr_nm AS color,
+            dep_place AS place,
+            fd_filepath_img AS imagePath,
+            fd_prdt_nm AS title,
+            fd_sbjt AS content,
+            DATE(fd_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'police' AS dataSource,
+            'found' AS boardType,
+            CONCAT('found_police_', atc_id) AS searchKey
+        FROM found_police
+        WHERE is_deleted = 0
+
+        UNION ALL
+
+        SELECT 
+            atc_id AS atcId,
+            id,
+            clr_nm AS color,
+            dep_place AS place,
+            fd_filepath_img AS imagePath,
+            fd_prdt_nm AS title,
+            fd_sbjt AS content,
+            DATE(fd_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'portal' AS dataSource,
+            'found' AS boardType,
+            CONCAT('found_portal_', atc_id) AS searchKey
+        FROM found_portal
+        WHERE is_deleted = 0    
+
+        UNION ALL
+
+        SELECT 
+            atc_id AS atcId,
+            id,
+            null AS color,
+            lst_place AS place,
+            lst_filepath_img AS imagePath,
+            lst_prdt_nm AS title,
+            lst_sbjt AS content,
+            DATE(lst_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'user' AS dataSource,
+            'lost' AS boardType,
+            CONCAT('lost_user_', atc_id) AS searchKey
+        FROM lost
+        WHERE is_deleted = 0    
+
+        UNION ALL
+
+        SELECT 
+            atc_id AS atcId,
+            id,
+            null AS color,
+            lst_place AS place,
+            lst_filepath_img AS imagePath,
+            lst_prdt_nm AS title,
+            lst_sbjt AS content,
+            DATE(lst_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'police' AS dataSource,
+            'lost' AS boardType,
+            CONCAT('lost_police_', atc_id) AS searchKey
+        FROM lost_police
+        WHERE is_deleted = 0    
+    ) AS total_board
+   
+   <where>
+   
+        <if test="boardType != null and boardType != '' and boardType!= 'all'">
+            AND boardType = #{boardType}
+        </if>
+
+        <if test="status != null and status != '' and status != 'all'">
+          <choose>
+            <when test = "status == 'done'">
+                AND done = 1
+            </when>
+            <when test = "status == 'progress'">
+                AND done = 0
+            </when>
+          </choose>
+        </if>
+
+        <if test="category != null and category != '' and category != 'all'">
+            AND (
+                category LIKE CONCAT('%', #{category}, '%')
+                OR title LIKE CONCAT('%', #{category}, '%')
+                OR content LIKE CONCAT('%', #{category}, '%')
+            )
+        </if>
+
+        <if test="color != null and color != ''">
+            AND (
+                color LIKE CONCAT('%', #{color}, '%')
+                OR title LIKE CONCAT('%', #{color}, '%')
+                OR content LIKE CONCAT('%', #{color}, '%')
+            )
+        </if>
+
+        <if test="place != null and place != ''">
+            AND (
+                place LIKE CONCAT ('%', #{place}, '%')
+                OR title LIKE CONCAT('%', #{place}, '%')
+                OR content LIKE CONCAT('%', #{place}, '%')            
+            )
+        </if>
+
+        <if test="eventDate != null and eventDate != ''">
+            <!--날짜는 범위검색이기 때문에 like를 쓰지 않음-->
+            AND eventDate = #{eventDate}
+        </if>
+
+        <!-- 이 날짜부터-->
+        <if test="startDate != null and startDate != ''">
+            AND eventDate &gt;= #{startDate}
+        </if>
+
+        <!-- 이 날짜까지-->
+        <if test="endDate != null and endDate != ''">
+            AND eventDate &lt;= #{endDate}
+        </if>
+
+   </where>
+
+   ORDER BY eventDate DESC 
+
+</select>
+
 </mapper>

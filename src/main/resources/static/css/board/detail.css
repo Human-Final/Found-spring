@@ -239,7 +239,7 @@ body.lost-board .detail-hero h2 {
 
 .image-box {
   width: 100%;
-  height: 240px;
+  max-height: 520px;
   border: 1px solid #dbe3ee;
   border-radius: 12px;
   background: #f8fafc;
@@ -252,8 +252,8 @@ body.lost-board .detail-hero h2 {
 
 .image-box img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  max-height: 520px;
+  object-fit: contain;
   display: block;
 }
 

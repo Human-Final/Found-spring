@@ -194,8 +194,6 @@ public class FoundServiceImpl implements FoundService {
         return foundVo;
     }
     
-    
-
     // 댓글
     @Override
     public FoundVO getFoundByNum(Long num) {
