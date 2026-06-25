@@ -7,5 +7,7 @@ import com.human.found.domain.search.vo.SearchResultVO;
 
 public interface SearchService {
     
-    List<SearchResultVO> totalSearch(SearchConditionDTO searchConditionDTO);
+    List<SearchResultVO> totalLikeSearch(SearchConditionDTO conditionDTO);
+    List<SearchResultVO> hybridSearch(SearchConditionDTO conditionDTO);
+
 }

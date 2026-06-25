@@ -7,7 +7,7 @@
 
     <!-- 특정 습득 게시글 댓글 목록 조회-->
     <select id="selectCommentsByNum"
-            resultType="com.human.found.domain.comment.vo.FoundCommentVO">
+            resultType="com.human.found.domain.comment.vo.CommentVO">
         SELECT
             comment_num AS commentNum,
             id,
@@ -27,7 +27,7 @@
 
     <!-- 댓글 등록 -->
     <insert id="insertComment"
-            parameterType="com.human.found.domain.comment.vo.FoundCommentVO">
+            parameterType="com.human.found.domain.comment.vo.CommentVO">
         INSERT INTO found_comment (
             id,
             num,
@@ -43,7 +43,7 @@
 
         <!-- 댓글 단건 조회 -->
     <select id="selectCommentByCommentNum"
-            resultType="com.human.found.domain.comment.vo.FoundCommentVO">
+            resultType="com.human.found.domain.comment.vo.CommentVO">
         SELECT
             comment_num AS commentNum,
             id,
@@ -60,7 +60,7 @@
 
         <!-- 댓글 수정 -->
     <update id="updateComment"
-            parameterType="com.human.found.domain.comment.vo.FoundCommentVO">
+            parameterType="com.human.found.domain.comment.vo.CommentVO">
         UPDATE found_comment
         SET
             content = #{content},

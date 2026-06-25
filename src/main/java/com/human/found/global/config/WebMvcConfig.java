@@ -6,10 +6,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
-
+    
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        
         // 브라우저가 /images/notice/파일명 으로 이미지를 달라고 요청하면
         // 강의실 공유 폴더 네트워크 주소(\\192.168.0.53\...\notice\) 내부를 뒤져서 파일을 배달해 줍니다.
         registry.addResourceHandler("/images/notice/**")

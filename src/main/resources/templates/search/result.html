@@ -5,7 +5,7 @@
   <title>통합 검색 | 분실물 센터</title>
 
   <link rel="stylesheet" th:href="@{/css/common/common.css}">
-  <link rel="stylesheet" th:href="@{/css/board/search.css}">
+  <link rel="stylesheet" th:href="@{/css/search/search.css}">
   
 </head>
 
@@ -177,9 +177,9 @@
     <a
       th:if="${paging.prev}"
       th:href="@{/search(
-        keyword=${keyword},
-        boardType=${boardType},
-        status=${status},
+        keyword=${conditionDTO.keyword},
+        boardType=${conditionDTO.boardType},
+        status=${conditionDTO.status},
         page=${paging.startPage - 1}
       )}"
       class="page-btn">
@@ -189,9 +189,9 @@
     <a
       th:each="pageNum : ${#numbers.sequence(paging.startPage, paging.endPage)}"
       th:href="@{/search(
-        keyword=${keyword},
-        boardType=${boardType},
-        status=${status},
+        keyword=${conditionDTO.keyword},
+        boardType=${conditionDTO.boardType},
+        status=${conditionDTO.status},
         page=${pageNum}
       )}"
       th:text="${pageNum}"
@@ -203,9 +203,9 @@
     <a
       th:if="${paging.next}"
       th:href="@{/search(
-        keyword=${keyword},
-        boardType=${boardType},
-        status=${status},
+        keyword=${conditionDTO.keyword},
+        boardType=${conditionDTO.boardType},
+        status=${conditionDTO.status},
         page=${paging.endPage + 1}
       )}"
       class="page-btn">

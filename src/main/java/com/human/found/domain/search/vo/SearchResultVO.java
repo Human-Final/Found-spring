@@ -25,5 +25,9 @@ public class SearchResultVO {
     private String dataSource;
     private String boardType;
 
-    private String keyword;
+    private String searchKey;
+
+    private String matchType;   // LIKE, LLM, BOTH
+    private int matchScore;     // 우선정렬 목적 BOTH > LLM / LIKE
+
 }

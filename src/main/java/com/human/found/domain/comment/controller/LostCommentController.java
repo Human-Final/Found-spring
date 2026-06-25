@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.human.found.domain.comment.service.LostCommentService;
-import com.human.found.domain.comment.vo.LostCommentVO;
+import com.human.found.domain.comment.vo.CommentVO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,7 +27,7 @@ public class LostCommentController {
             @PathVariable("num") Long num,
             @RequestParam("atcId") String atcId,
             @RequestParam("dataSource") String dataSource,
-            LostCommentVO commentVO,
+            CommentVO commentVO,
             Principal principal,
             RedirectAttributes rttr
     ) {
@@ -49,7 +49,7 @@ public class LostCommentController {
     public String updateComment(
             @PathVariable("commentNum") Long commentNum,
             @RequestParam("atcId") String atcId,
-            LostCommentVO commentVO,
+            CommentVO commentVO,
             Principal principal,
             RedirectAttributes rttr
     ) {
@@ -57,8 +57,8 @@ public class LostCommentController {
             return "redirect:/login";
         }
 
-        LostCommentVO savedComment =
-                lostCommentService.getComment(commentNum);
+        CommentVO savedComment =
+                lostCommentService.getCommentByCommentNum(commentNum);
 
         if (savedComment == null) {
             rttr.addFlashAttribute("error", "존재하지 않는 댓글입니다.");
@@ -78,7 +78,7 @@ public class LostCommentController {
         return "redirect:/api/lost/detail/" + atcId;
     }
 
-    // 댓글 삭제
+    // 분실물 게시글의 댓글 삭제
     @PostMapping("/api/lost/comments/{commentNum}/delete")
     public String deleteComment(
             @PathVariable("commentNum") Long commentNum,
@@ -90,8 +90,8 @@ public class LostCommentController {
             return "redirect:/login";
         }
 
-        LostCommentVO savedComment =
-                lostCommentService.getComment(commentNum);
+        CommentVO savedComment =
+                lostCommentService.getCommentByCommentNum(commentNum);
 
         if (savedComment == null) {
             rttr.addFlashAttribute("error", "존재하지 않는 댓글입니다.");
@@ -115,7 +115,7 @@ public class LostCommentController {
             return "redirect:/api/lost/detail/" + atcId;
         }
 
-        lostCommentService.deleteComment(commentNum, principal.getName());
+        lostCommentService.deleteComment(commentNum);
 
         return "redirect:/api/lost/detail/" + atcId;
     }

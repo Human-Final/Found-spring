@@ -535,7 +535,8 @@
           <nav class="side-menu" aria-label="마이페이지 메뉴">
             <a href="#mypageMain" class="is-active" data-view="mypageMain">마이페이지 메인</a>
             <a href="#memberEdit" data-view="memberEdit">회원정보 수정</a>
-            <a href="#myPosts" data-view="myPosts">내가 쓴 글 관리</a>
+            <a href="#myPosts" data-view="myPosts">내가 쓴 게시글 관리</a>
+            <a href="#myComments" data-view="myComments">내가 쓴 댓글 관리</a>
             <a href="#myChats" data-view="myChats">채팅방 관리</a>
           </nav>
 
@@ -547,7 +548,7 @@
             <div class="summary-grid">
             <article class="summary-card">
                 <span class="summary-icon blue">글</span>
-                <span class="summary-label">내가 쓴 글</span>
+                <span class="summary-label">내가 쓴 게시글</span>
                 <!-- 🌟 변수명 뒤에 ?를 붙여주면 데이터가 없어도 에러 없이 우측의 기본값(6)이 정상 출력됩니다. -->
                 <strong class="summary-value" 
                         th:text="${counts != null} ? (${counts.total_count} ?: (${counts.TOTAL_COUNT} ?: 0)) : 0">6</strong>
@@ -598,15 +599,24 @@
                   <span th:class="|badge badge-${post.boardType == '습득' ? 'found' : 'lost'}|" 
                         th:text="${post.boardType}">습득</span>
                   
-                  <div>
+                  <!-- [레이아웃 보완]: 내용 길이에 따라 우측 배지가 밀리지 않도록 고정 박스 크기 및 배치 설정 -->
+                  <div style="flex-grow: 1; min-width: 0; padding-left: 12px; display: flex; flex-direction: column; justify-content: center;">
                       <!-- 제목 매핑 -->
-                      <h3 class="item-title" th:text="${post.title}">제목</h3>
-                      <p class="item-meta">
-                          <!-- 카테고리 매핑 -->
-                          <span th:text="${post.category}">카테고리</span> · 
-                          <!-- 등록 날짜 매핑 -->
-                          <span th:text="${post.createdAt != null ? #temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm') : ''}">날짜</span>
-                      </p>
+                      <h3 class="item-title" th:text="${post.title}" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0 0 4px 0; font-size: 15px; color: #212529; font-weight: 500;">제목</h3>
+                      
+                      <!-- [말줄임 및 간격 정렬 수정]: 카테고리를 완벽히 지우고, 내용(content) 표시 및 점(·) 대신 공백 여백 처리 -->
+                      <p class="item-meta" style="font-size: 13px; color: #868e96; margin: 0; display: flex; align-items: center; width: 100%; min-width: 0;">
+                          <!-- 🌟 [content 텍스트 말줄임 필수 CSS 적용]: block 처리, 넘치면 숨김, 말줄임표 처리 완료 -->
+                          <span th:text="${post.content}" 
+                                style="color: #495057; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; min-width: 0;">
+                                게시글 본문 내용
+                          </span>
+                          <!-- 내용과 날짜 사이를 확실하게 벌려주는 간격 여백 (점 대신 공백) -->
+                          <span th:text="${post.createdAt != null ? #temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm') : ''}" 
+                                style="margin-left: 20px; flex-shrink: 0; color: #868e96;">
+                                날짜
+                          </span>
+                        </p>
                   </div>
                   
                   <div class="post-actions">
@@ -724,68 +734,177 @@
                 </form>
             </div>
         </div>
-          <section class="mypage-view" id="myPosts">
-            <section class="mypage-panel">
-              <div class="panel-head">
-                <div>
-                  <h2 class="panel-title">내가 쓴 글 관리</h2>
-                  <p class="panel-sub">등록한 습득/분실 게시글을 관리합니다.</p>
-                </div>
-                <a href="/api/write" class="primary-button">+ 글쓰기</a>
+          
+        
+        <!-- 1. 내가 쓴 게시글 관리 섹션 (에러 원천 차단) -->
+        <!-- ========================================== -->
+        <section class="mypage-view" id="myPosts">
+          <section class="mypage-panel">
+            <div class="panel-head">
+              <div>
+                <h2 class="panel-title">내가 쓴 글 관리</h2>
+                <p class="panel-sub">등록한 습득/분실 게시글을 관리합니다.</p>
               </div>
+              <a href="/api/write" class="primary-button">+ 글쓰기</a>
+            </div>
 
-              <div class="post-list">
+            <div class="post-list">
+              
+              <!-- th:data 속성을 활용하여 가독성과 파싱 안정성 확보 -->
+              <article class="post-item" th:each="post : ${allPosts}"
+                      th:data-board-type="${post.boardType}"
+                      th:data-atc-id="${post.atcId}"
+                      th:onclick="location.href = (this.getAttribute('data-board-type') == '습득' ? '/api/found/detail/' : '/api/lost/detail/') + this.getAttribute('data-atc-id');"
+                      style="cursor: pointer;">
                 
-                <!-- 1. 실제 데이터가 존재할 때 전체 글 목록을 최신순으로 출력 -->
-                <article class="post-item" th:each="post : ${allPosts}"
-                         th:onclick="location.href = ( [[${post.boardType}]] == '습득' ? '/api/found/detail/' : '/api/lost/detail/' ) + [[${post.atcId}]]"
-                         style="cursor: pointer;">
+                <span class="badge"
+                      th:classappend="${post.boardType == '습득'} ? ' badge-found' : ' badge-lost'"
+                      th:text="${post.boardType}">습득</span>
+                      
+                <!-- 부모 박스 크기 및 배치 설정 -->
+                <div style="flex-grow: 1; min-width: 0; padding-left: 12px; display: flex; flex-direction: column; justify-content: center;">
+                  <!-- 물품 제목 출력 -->
+                  <h3 class="item-title" th:text="${post.title}" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0 0 4px 0; font-size: 15px; color: #212529; font-weight: 500;">검은색 지갑 습득</h3>
                   
-                  <!-- boardType 배지 스타일 자동 적용 -->
-                  <span class="badge"
-                        th:classappend="${post.boardType == '습득'} ? ' badge-found' : ' badge-lost'"
-                        th:text="${post.boardType}">습득</span>
-                  <div>
-                    <!-- 물품 제목 출력 -->
-                    <h3 class="item-title" th:text="${post.title}">검은색 지갑 습득</h3>
-                    <!-- 카테고리 정보 및 작성 날짜 출력 -->
-                    <p class="item-meta">
-                      <span th:text="${post.category}">가방</span>
-                      <span> · </span>
-                      <span th:text="${post.createdAt != null ? #temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm') : ''}">2026-06-22 14:00</span>
-                    </p>
-                  </div>
-                  <div class="post-actions" style="display: flex; align-items: center; gap: 8px;">
-                    <!-- 진행 상태 배지 -->
-                    <span class="badge"
-                          th:classappend="${post.done == 1} ? ' badge-done' : ' badge-progress'"
-                          th:text="${post.done == 1 ? '완료' : '진행중'}">진행중</span>
-                    
-                    <!-- [수정 버튼]: 현재는 알림창만 작동하도록 가드 처리 -->
-                    <a th:href="@{''}" 
-                       th:onclick="event.stopPropagation(); alert('수정 기능은 현재 준비 중입니다.'); return false;" 
-                       class="line-button">수정</a>
-                       
-                    <!-- 💡 [삭제 버튼 - 404 오류 해결]: 주소 경로의 detail/ 부분을 delete/ 로 명확하게 고쳐 단단히 결합했습니다 -->
-                    <button type="button" 
-                            th:onclick="event.stopPropagation(); if(confirm('정말 이 게시글을 삭제하시겠습니까?')) location.href = ( [[${post.boardType}]] == '습득' ? '/mypage/api/found/delete/' : '/mypage/api/lost/delete/' ) + [[${post.atcId}]];" 
-                            class="line-button" 
-                            style="color: #dc3545; border-color: #f5c6cb; background-color: #fdf3f4; cursor: pointer;">삭제</button>
-                  </div>
-                </article>
-
-                <!-- 2. 작성한 게시글이 아무것도 없을 때만 표출되는 가이드 문구 -->
-                <p class="empty-text" th:if="${allPosts == null or #lists.isEmpty(allPosts)}" style="text-align: center; padding: 40px 0; color: #868e96; font-size: 14px; width: 100%;">아직 작성한 게시글이 없습니다.</p>
+                  <!-- [말줄임 핵심 수정]: 부모 p 태그에 가로 정렬을 부여하여 내용과 날짜를 배치하되, 레이아웃이 깨지지 않도록 방어 -->
+                  <p class="item-meta" style="font-size: 13px; color: #868e96; margin: 0; display: flex; align-items: center; width: 100%; min-width: 0;">
+                    <!-- 🌟 [content 텍스트 말줄임 필수 CSS 적용]: block 처리, 넘치면 숨김, 말줄임표 처리 완료 -->
+                    <span th:text="${post.content}" 
+                          style="color: #495057; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; min-width: 0;">
+                          게시글 본문 내용
+                    </span>
+                    <!-- 내용과 날짜 사이를 확실하게 벌려주는 간격 여백 (점 대신 공백) -->
+                    <span th:text="${post.createdAt != null ? #temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm') : ''}" 
+                          style="margin-left: 20px; flex-shrink: 0; color: #868e96;">
+                          2026-06-22 14:00
+                    </span>
+                  </p>
+                </div>
                 
-              </div>
+                <div class="post-actions" style="display: flex; align-items: center; gap: 8px;">
+                  <span class="badge"
+                        th:classappend="${post.done == 1} ? ' badge-done' : ' badge-progress'"
+                        th:text="${post.done == 1 ? '완료' : '진행중'}">진행중</span>
+                  
+                  <a th:href="@{''}" 
+                    th:onclick="event.stopPropagation(); alert('수정 기능은 현재 준비 중입니다.'); return false;" 
+                    class="line-button">수정</a>
+                    
+                  <button type="button" 
+                          th:data-board-type="${post.boardType}"
+                          th:data-atc-id="${post.atcId}"
+                          th:onclick="
+                              event.stopPropagation(); 
+                              if(confirm('정말 이 게시글을 삭제하시겠습니까?')) {
+                                  const form = document.createElement('form');
+                                  form.method = 'POST';
+                                  form.action = (this.getAttribute('data-board-type') == '습득' ? '/mypage/api/found/delete/' : '/mypage/api/lost/delete/') + this.getAttribute('data-atc-id');
+                                  document.body.appendChild(form);
+                                  form.submit();
+                              }
+                          " 
+                          class="line-button" 
+                          style="color: #dc3545; border-color: #f5c6cb; background-color: #fdf3f4; cursor: pointer;">삭제</button>
+                </div>
+              </article>
 
-
-
-
-
-
-            </section>
+              <p class="empty-text" th:if="${allPosts == null or #lists.isEmpty(allPosts)}" style="text-align: center; padding: 40px 0; color: #868e96; font-size: 14px; width: 100%;">아직 작성한 게시글이 없습니다.</p>
+              
+            </div>
           </section>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 2. 내가 쓴 댓글 관리 섹션 (삭제 기능 동기식 완벽 보완) -->
+        <!-- ========================================== -->
+        <section class="mypage-view" id="myComments">
+          <section class="mypage-panel">
+            <div class="panel-head">
+              <div>
+                <h2 class="panel-title">내가 쓴 댓글 관리</h2>
+                <p class="panel-sub">등록한 습득/분실 게시글의 댓글을 관리합니다.</p>
+              </div>
+              <button type="button"
+                      id="btn-delete-all-comments"
+                      th:data-user-id="${user.id}" 
+                      th:onclick="if(confirm('정말 작성한 모든 댓글을 삭제하시겠습니까?')) deleteAllComments();"
+                      class="primary-button" 
+                      style="background-color: #dc3545; color: #ffffff; cursor: pointer;">
+                작성댓글 모두 삭제
+              </button>
+            </div>
+
+            <div class="post-list">
+              
+              <article class="post-item" th:each="comment : ${allComments}"
+              th:data-board-type="${comment.boardType}"
+              th:data-atc-id="${comment.atcId}"
+              th:onclick="${comment.postTitle == null} ? 
+                          'alert(\'원본 게시글이 삭제되어 이동할 수 없습니다.\'); return false;' : 
+                          'location.href = (this.getAttribute(\'data-board-type\') == \'습득\' ? \'/api/found/detail/\' : \'/api/lost/detail/\') + this.getAttribute(\'data-atc-id\');'"
+              style="cursor: pointer;">
+                
+                <span class="badge"
+                      th:classappend="${comment.boardType == '습득'} ? ' badge-found' : ' badge-lost'"
+                      th:text="${comment.boardType}">습득</span>
+
+                <div style="flex-grow: 1; min-width: 0;">
+                  <!-- 1. 맨 위 큰 글씨: 내가 작성한 실제 댓글 내용 -->
+                  <h3 class="item-title" 
+                      th:text="${comment.content}" 
+                      style="font-size: 15px; color: #212529; font-weight: 500; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                      내가 작성한 실제 댓글 내용
+                  </h3>
+                  
+                  <!-- 2. 아래쪽 메타 정보: 실제 게시글 제목(물품명) 매핑 -->
+                  <p class="item-meta" style="font-size: 13px; color: #868e96; margin: 0;">
+                    <span th:text="${comment.postTitle != null ? '게시글: ' + comment.postTitle : '게시글이 삭제되었습니다'}">[원문: 게시글 제목]</span>
+                    <span>&nbsp;&nbsp;</span>
+                    <span th:text="${comment.createdAt != null ? #temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm') : ''}">2026-06-24 10:30</span>
+                  </p>
+                </div>
+
+                <div class="post-actions" style="display: flex; align-items: center; gap: 8px;">
+                    <!-- 🌟 [동기식 전송 가드 탑재]: 버튼을 누르면 즉석에서 가상 Form을 생성해 세션 끊김 오류 없이 안전하게 POST를 보냅니다 -->
+                    <button type="button" 
+                            th:data-comment-num="${comment.commentNum}"
+                            th:data-board-type="${comment.boardType}"
+                            th:onclick="
+                                event.stopPropagation(); 
+                                if(confirm('정말 이 댓글을 삭제하시겠습니까?')) {
+                                    const form = document.createElement('form');
+                                    form.method = 'POST';
+                                    // 아까 맞추어놓은 단수형 주소(comment/delete) 규격 유지
+                                    form.action = (this.getAttribute('data-board-type') == '습득' ? '/mypage/api/found/comment/delete/' : '/mypage/api/lost/comment/delete/') + this.getAttribute('data-comment-num');
+                                    
+                                    // Spring Security 방어막 통과용 CSRF 임의 토큰 hidden 장착
+                                    const csrfToken = document.querySelector('meta[name=\'_csrf\']')?.getAttribute('content');
+                                    if(csrfToken) {
+                                        const csrfInput = document.createElement('input');
+                                        csrfInput.type = 'hidden';
+                                        csrfInput.name = '_csrf';
+                                        csrfInput.value = csrfToken;
+                                        form.appendChild(csrfInput);
+                                    }
+                                    
+                                    document.body.appendChild(form);
+                                    form.submit();
+                                }
+                            " 
+                            class="line-button" 
+                            style="color: #dc3545; border-color: #f5c6cb; background-color: #fdf3f4; cursor: pointer;">
+                        삭제
+                    </button>
+                </div>
+
+              </article>
+
+              <p class="empty-text" th:if="${allComments == null or #lists.isEmpty(allComments)}" style="text-align: center; padding: 40px 0; color: #868e96; font-size: 14px; width: 100%;">아직 작성한 댓글이 없습니다.</p>
+              
+            </div>
+          </section>
+        </section>
+
 
           <section class="mypage-view" id="myChats">
             <section class="mypage-panel">
@@ -1180,6 +1299,50 @@
       // 4. 서버 컨트롤러를 향해 POST 데이터 일제 격발 전송
       form.submit();
     }
+
+    // [비동기] 전체 댓글 삭제 함수 (사용자 ID 기반)
+    // 매개변수()를 비워둡니다. HTML에서 인자를 안 주던 기존 상태 그대로 둡니다.
+    function deleteAllComments() {
+        
+        // 🌟 핵심 수정: 버튼에 이미 존재하던 th:data-user-id 값을 자바로 직접 찾아옵니다.
+        const deleteBtn = document.querySelector('#btn-delete-all-comments');
+        if (!deleteBtn) return alert('삭제 버튼을 찾을 수 없습니다.');
+        const userId = deleteBtn.getAttribute('data-user-id');
+
+        // 🌟 최종 조립 주소: 이제 undefined가 아니라 실제 ID가 정상적으로 붙습니다.
+        const url = '/mypage/api/comments/delete-all/' + userId;
+
+        // 스프링 시큐리티 CSRF 방어막 토큰 자동 주입
+        const token = document.querySelector("meta[name='_csrf'] ")?.getAttribute("content");
+        const header = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
+
+        const fetchOptions = { method: 'POST' };
+        if (token && header) {
+            fetchOptions.headers = { [header]: token };
+        }
+
+        fetch(url, fetchOptions)
+          .then(response => {
+              if(response.ok) {
+                  alert('모든 댓글이 완전히 삭제되었습니다.');
+                  
+                  // 💡 [옵션 1] 현재 페이지 그대로 새로고침 (가장 추천)
+                  window.location.reload();
+                  
+                  // 💡 [옵션 2] 특정 주소로 강제 리다이렉트 (원하는 주소가 따로 있다면 사용)
+                  // window.location.href = '/mypage/comments'; 
+                  
+              } else {
+                  console.error("전체 삭제 실패 응답 코드:", response.status);
+                  alert('댓글 전체 삭제에 실패했습니다.');
+              }
+          })
+          .catch(error => console.error("네트워크 통신 에러:", error));
+    }
+
+
+
+
 </script>
 </body>
 </html>

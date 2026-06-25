@@ -5,12 +5,12 @@ import java.time.LocalDateTime;
 import lombok.Data;
 
 @Data
-public class FoundCommentVO {
+public class CommentVO {
     
     private Long commentNum;
     private String id;
     private Long num;
-
+    private String dataSource;
     private String content;
 
     private LocalDateTime createdAt;
@@ -19,7 +19,11 @@ public class FoundCommentVO {
     private Integer isDeleted;
     private LocalDateTime deletedAt;
 
-    // 경찰청 API, 습득물 등 경로 알아내기 위함
-    private String dataSource;
-}
+    //추가할 속성: 습득물/분실물 구분용 필드
+    private String boardType; 
+    //추가 : 글 제목 postTitle로 저장
+    private String postTitle;
+    //추가 : 댓글의 주소 게시글의 atcId를 저장
+    private String atcId;
 
+}
