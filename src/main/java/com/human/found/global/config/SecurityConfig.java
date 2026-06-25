@@ -38,9 +38,11 @@ public class SecurityConfig {
             // 사용자 인증 정보 조회
             .userDetailsService(customUserDetailsService)
             .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/mypage/verify-password")
+                .ignoringRequestMatchers("/mypage/verify-password",
+                                        "/mypage/api/**"
+                )
              )
-
+             
             .authorizeHttpRequests(auth -> auth
 
                 // 공지사항 작성/수정/삭제는 관리자 + 담당자만

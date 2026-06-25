@@ -8,13 +8,17 @@ import lombok.Setter;
 @Setter
 @Getter
 public class SearchConditionDTO extends PagingVO {
+    
     private String keyword;
-
-    private String boardType;   // lost, found
-    private String status;      // prograss, done
+    private String boardType = "all";       // all, lost, found
+    private String status = "all";          // all, progress, done
     private String category;    
     private String color;       
     private String place;
-    private String dateText;   
-
+    
+    private String eventDate;   
+    private String startDate;
+    private String endDate;
+    
+    private String searchMode = "like";
 }

@@ -13,12 +13,12 @@ public interface LostCommentService {
     void addComment(CommentVO comment);
 
     // 댓글 단건 조회
-    CommentVO getComment(Long commentNum);
+    CommentVO getCommentByCommentNum(Long commentNum);
 
     // 댓글 수정
     void updateComment(CommentVO comment);
 
     // 댓글 삭제
-    void deleteComment(Long commentNum, String id);
+    void deleteComment(Long commentNum);
     
 }

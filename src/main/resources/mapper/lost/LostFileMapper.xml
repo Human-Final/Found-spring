@@ -7,13 +7,13 @@
 <insert id="insertFile"
         parameterType="com.human.found.domain.lost.vo.LostFileVO">
     INSERT INTO lost_file(
-        lst_filepath_img,
+        fd_filepath_img,
         atc_id,
         save_name,
         file_size,
         file_path
     )VALUES(
-        #{lstFilepathImg},
+        #{fdFilepathImg},
         #{atcId},
         #{saveName},
         #{fileSize},
@@ -35,5 +35,11 @@ WHERE atc_id=#{atcId}
 
 </delete>
 
+<!-- 수정게시판 파일 삭제 -->
+<delete id="deleteBySaveName">
+    DELETE FROM lost_file
+    WHERE save_name=#{saveName}
+</delete>
 
-</mapper>  
+
+</mapper>

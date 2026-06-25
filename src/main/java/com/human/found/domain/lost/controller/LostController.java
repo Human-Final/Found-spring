@@ -23,6 +23,8 @@ import com.human.found.infrastructure.map.KakaoMapConfig;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 
 
@@ -121,6 +123,45 @@ public class LostController {
         model.addAttribute("kakaoMapJsKey", kakaoMapConfig.getJsKey());
         return "lost/detail";
     }
+    
+    //수정
+    @GetMapping("/api/lost/detail/{atcId}/edit")
+    public String LostEditForm(@PathVariable("atcId")String atcId,Model model,Authentication authentication,
+    RedirectAttributes redirectAttributes) {
+        if(authentication==null){
+            redirectAttributes.addFlashAttribute("errormessage", "로그인이 필요합니다");
+            return "redirect:/api/lost";
+        }
+        LostVO lostVO=lostService.lostdetail(atcId);
+        // 작성자 본인 확인 방어 코드
+        String loginId=authentication.getName();
+        boolean isAdmin=authentication.getAuthorities().stream()
+        .anyMatch(auth->auth.getAuthority().equals("ROLE_ADMIN")
+        ||auth.getAuthority().equals("ADMIN"));
+        if(!isAdmin &&(lostVO.getId()==null||!lostVO.getId().equals(loginId))){
+            redirectAttributes.addFlashAttribute("errormessage", "본인이 작성한 게시글만 수정할 수 있습니다");
+            return "redirect:/api/lost/detail/"+atcId;
+        }
+        model.addAttribute("lostVO", lostVO);
+        model.addAttribute("writetype", "lost");
+        model.addAttribute("isEdit", true);
+        return "found/write";
+    }
+    //실제 데이터 수정
+    @PostMapping("api/lost/update")
+    public String LostUpdate(@Valid @ModelAttribute("lostVO")LostVO lostVO,BindingResult bindingResult,Model model,
+    MultipartFile[]files,@RequestParam(value = "files",required = false)List<String>deletefiles) {
+
+        //[입력값 유지 및 임시저장 기능] 검증 에러 발생 시 작성하던 내용 그대로 다시 폼으로 백!
+        if(bindingResult.hasErrors()){
+            model.addAttribute("writetype", "lost");
+            model.addAttribute("isEdit", true);
+            return "found/write";
+        }
+        lostService.UpdateLost(lostVO,files,deletefiles);
+        return "redirect:/api/lost/detail/"+lostVO.getAtcId();
+    }
+    
     
         
 }

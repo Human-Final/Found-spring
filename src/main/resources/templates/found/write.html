@@ -18,19 +18,19 @@
       <a href="javascript:history.back()" class="back-link">← 돌아가기</a>
       <h1 class="page-title">게시글 작성</h1>
 
-        <form
-            id="postForm"
-            th:action="${isEdit == true
-                ? (boardType == 'lost' ? '/api/lost/update' : '/api/found/update')
-                : (boardType == 'lost' ? '/api/lost' : '/api/found')}"
-            method="post"
-            enctype="multipart/form-data"
-            th:data-is-edit="${isEdit == true}"
-            th:data-board-type="${boardType}"
-            data-found-action="/api/found"
-            data-lost-action="/api/lost"
-            data-found-update-action="/api/found/update"
-            data-lost-update-action="/api/lost/update">       
+      <form
+        id="postForm"
+        th:action="${isEdit == true
+          ? (boardType == 'lost' ? '/api/lost/update' : '/api/found/update')
+          : (boardType == 'lost' ? '/api/lost' : '/api/found')}"
+        method="post"
+        enctype="multipart/form-data"
+        th:data-is-edit="${isEdit == true}"
+        th:data-board-type="${boardType}"
+        data-found-action="/api/found"
+        data-lost-action="/api/lost"
+        data-found-update-action="/api/found/update"
+        data-lost-update-action="/api/lost/update">       
 
         <input type="hidden"
                th:if="${isEdit == true}"
@@ -40,7 +40,7 @@
         <input type="hidden"
             th:name="${_csrf.parameterName}"
             th:value="${_csrf.token}">
-          <div class="form-section">
+        <div class="form-section">
           <span class="form-label">게시판 선택 <span class="required-mark">*</span></span>
 
           <div class="board-selector">
@@ -63,7 +63,7 @@
         <div class="form-section">
           <span class="form-label">카테고리 <span class="required-mark">*</span></span>
 
-            <div class="category-list">
+          <div class="category-list">
             <label class="category-chip">
                 <input type="radio" name="prdtClNm" value="가방" checked required>
                 <span>가방</span>
@@ -100,7 +100,7 @@
                 <input type="radio" name="prdtClNm" value="기타" required>
                 <span>기타</span>
             </label>
-            </div>          
+          </div>          
 
         </div>
 

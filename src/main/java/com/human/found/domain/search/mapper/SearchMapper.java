@@ -9,6 +9,13 @@ import com.human.found.domain.search.vo.SearchResultVO;
 
 @Mapper
 public interface SearchMapper {
-    List<SearchResultVO> totalSearch(SearchConditionDTO searchConditionDTO);
-    int countTotalSearch(SearchConditionDTO searchConditionDTO);
+
+    // 페이징용
+    int countTotalSearch(SearchConditionDTO conditionDTO);
+
+    // LIKE 기반 검색
+    List<SearchResultVO> totalLikeSearch(SearchConditionDTO conditionDTO);
+
+    // LLM 기반 검색
+    List<SearchResultVO> llmSearch(SearchConditionDTO conditionDTO);
 }

@@ -21,24 +21,32 @@ public class SearchController {
 
     // 사용자가 보는 view
     @GetMapping("/search")
-    public String searchView(Model model, SearchConditionDTO searchConditionDTO) {
+    public String searchView(Model model, SearchConditionDTO conditionDTO) {
         
-        List<SearchResultVO> searchList = searchService.totalSearch(searchConditionDTO);
+        List<SearchResultVO> searchList;
+        
+        if("hybrid".equals(conditionDTO.getSearchMode())){
+            searchList = searchService.hybridSearch(conditionDTO);
+        }else {
+            searchList = searchService.totalLikeSearch(conditionDTO);
+        }
 
-        model.addAttribute("keyword", searchConditionDTO.getKeyword());
-        model.addAttribute("boardType", searchConditionDTO.getBoardType());
-        model.addAttribute("status", searchConditionDTO.getStatus());
-
+        // 검색 키워드
+        model.addAttribute("conditionDTO", conditionDTO);
+        
+        // 검색 결과
         model.addAttribute("searchList", searchList);
-        model.addAttribute("paging", searchConditionDTO);
+        
+        // 페이징
+        model.addAttribute("paging", conditionDTO);
 
         return "search/result";
     }
 
     // 검색 결과를 json형태로 반환
-    // @GetMapping("/api/search")
-    // @ResponseBody
-    // public List<SearchResultVO> search(SearchConditionDTO searchConditionDTO) {
-    //     return searchService.totalSearch(searchConditionDTO);
-    // }
+    @GetMapping("/api/search")
+    @ResponseBody
+    public List<SearchResultVO> search(SearchConditionDTO conditionDTO) {
+        return searchService.totalLikeSearch(conditionDTO);
+    }
 }

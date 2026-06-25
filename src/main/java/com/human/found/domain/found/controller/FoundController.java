@@ -142,7 +142,8 @@ public class FoundController {
     
     //======수정화면==
     @GetMapping("/api/found/detail/{atcId}/edit")
-    public String FoundEditForm(@PathVariable("atcId")String atcId,Model model,Authentication authentication,RedirectAttributes redirectAttributes) {
+    public String FoundEditForm(@PathVariable("atcId")String atcId,Model model,Authentication authentication,
+    RedirectAttributes redirectAttributes) {
         if(authentication==null){
             redirectAttributes.addFlashAttribute("errorMessage", "로그인이 필요합니다");
             return "redirect:/api/found";

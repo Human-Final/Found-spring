@@ -32,7 +32,7 @@ public class LostCommentServiceImpl implements LostCommentService{
 
     // 댓글 단건 조회
     @Override
-    public CommentVO getComment(Long commentNum) {
+    public CommentVO getCommentByCommentNum(Long commentNum) {
         return lostCommentMapper.findByCommentNum(commentNum);
     }
 
@@ -42,10 +42,10 @@ public class LostCommentServiceImpl implements LostCommentService{
         lostCommentMapper.updateComment(comment);
     }
 
-    // 댓글 삭제
+    // 댓글 1개 삭제
     @Override
-    public void deleteComment(Long commentNum, String id) {
-        lostCommentMapper.deleteComment(commentNum, id);
+    public void deleteComment(Long commentNum) {
+        lostCommentMapper.deleteComment(commentNum);
     }
     
 }
