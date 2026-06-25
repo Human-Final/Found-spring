@@ -287,6 +287,18 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
+    @Override
+    @Transactional // 🌟 중요: 두 테이블 삭제 작업 중 단 하나라도 실패하면 전부 원래대로 되돌리는 트랜잭션 보장
+    public void deleteAllCommentsByUserId(String userId) {
+        
+        // 1. 내가 작성한 습득물 댓글 전체 삭제
+        userMapper.deleteAllFoundCommentsByUserId(userId);
+        
+        // 2. 내가 작성한 분실물 댓글 전체 삭제
+        userMapper.deleteAllLostCommentsByUserId(userId);
+    }
+
+
     /**
      * 회원탈퇴
      * - 입력한 비밀번호와 DB 비밀번호 비교

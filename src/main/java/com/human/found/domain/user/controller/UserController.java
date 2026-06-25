@@ -4,6 +4,10 @@ import java.security.Principal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.human.found.domain.comment.service.FoundCommentService;
+import com.human.found.domain.comment.service.LostCommentService;
 import com.human.found.domain.comment.vo.CommentVO;
 import com.human.found.domain.found.vo.FoundVO;
 import com.human.found.domain.user.service.UserServiceImpl;
@@ -30,6 +36,12 @@ public class UserController {
 
     @Autowired
     private UserServiceImpl userService;
+
+    @Autowired
+    private FoundCommentService foundCommentService;
+
+    @Autowired
+    private LostCommentService lostCommentService;
 
     // /mypage 또는 /mypage/ 로 요청이 들어왔을 때 마이페이지 화면을 보여줍니다.
     @GetMapping({"", "/"})
@@ -202,6 +214,79 @@ public class UserController {
         }
         return "redirect:/mypage"; 
     }
+
+    // 1. 습득물 댓글 비동기 삭제 API -> 동기 리다이렉트 구조로 최종 변경
+    @PostMapping("/api/found/comment/delete/{commentNum}")
+    public String deleteMyPageFoundComment(@PathVariable("commentNum") Long commentNum, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login"; // 로그인 안 되어 있으면 로그인 페이지로
+        }
+
+        try {
+            CommentVO savedComment = foundCommentService.getCommentByCommentNum(commentNum);
+            if (savedComment != null) {
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                boolean isOwner = savedComment.getId().equals(principal.getName());
+                boolean isAdmin = authentication.getAuthorities().stream()
+                        .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN") || auth.getAuthority().equals("ROLE_MANAGER"));
+
+                if (isOwner || isAdmin) {
+                    foundCommentService.deleteComment(commentNum);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // 🌟 [핵심 정답]: 하얀 화면에 Success를 띄우지 않고, 내가 보던 마이페이지 댓글 탭으로 브라우저를 튕겨 보냅니다!
+        return "redirect:/mypage#myComments"; 
+    }
+
+    // 2. 분실물 댓글 비동기 삭제 API -> 동기 리다이렉트 구조로 최종 변경
+    @PostMapping("/api/lost/comment/delete/{commentNum}")
+    public String deleteMyPageLostComment(@PathVariable("commentNum") Long commentNum, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            CommentVO savedComment = lostCommentService.getCommentByCommentNum(commentNum);
+            if (savedComment != null) {
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                boolean isOwner = savedComment.getId().equals(principal.getName());
+                boolean isAdmin = authentication.getAuthorities().stream()
+                        .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN") || auth.getAuthority().equals("ROLE_MANAGER"));
+
+                if (isOwner || isAdmin) {
+                    lostCommentService.deleteComment(commentNum);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // 🌟 [핵심 정답]: 하얀 화면에 Success를 띄우지 않고, 내가 보던 마이페이지 댓글 탭으로 브라우저를 튕겨 보냅니다!
+        return "redirect:/mypage#myComments"; 
+    }
+
+    // 본인 댓글 전체 삭제 컨트롤러
+    @PostMapping("/api/comments/delete-all/{userId}")
+    @ResponseBody 
+    public ResponseEntity<String> deleteAllMyComments(@PathVariable("userId") String userId, Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        }
+        
+        try {
+            // 안전하게 가공된 실제 유저 고유 ID 계정값(예: "11")으로 일괄 삭제 서비스 쿼리를 집도합니다.
+            userService.deleteAllCommentsByUserId(userId);
+            
+            return ResponseEntity.ok("Success"); 
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fail: " + e.getMessage());
+        }
+    }
+
 
 
     @PostMapping("/withdraw")

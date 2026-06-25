@@ -47,4 +47,8 @@ public interface UserMapper {
 
     // 유저의 작성한 모든 댓글 갖고오기
     List<CommentVO> findAllCommentsByUserId(String userId);
+
+    // 유저의 모든 작성 댓글 삭제하기(2개모두)
+    void deleteAllFoundCommentsByUserId(String UserId);
+    void deleteAllLostCommentsByUserId(String UserId);
 }
