@@ -200,6 +200,6 @@ public class SearchServiceImpl implements SearchService{
             conditionCount++;
         }
     return conditionCount >= 2;
-}
+    }
 
 }
