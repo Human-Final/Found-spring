@@ -114,6 +114,24 @@
                     </div>
 
                     <p id="emailCheckResult" class="check-text"></p>
+                    
+                    <div id="emailSendBtnGroup" style="display: none; margin-top: 10px; width: 100%;">
+                        <button type="button" id="btnSendEmail" onclick="sendEmailAuth()" class="id-check-btn" style="width: 100%; height: 38px; background-color: #4dabf7; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                            인증번호 전송하기
+                        </button>
+                    </div>
+
+                    <div id="emailAuthGroup" style="display: none; margin-top: 10px; width: 100%;">
+                        <label style="font-size: 12px; color: #fa5252; font-weight: bold; margin-bottom: 4px; display: block;">
+                            이메일 인증번호 제한시간 <span id="emailTimer">03:00</span>
+                        </label>
+                        <div class="id-row" style="display: flex; gap: 10px;">
+                            <input type="text" id="emailAuthCode" maxlength="6" placeholder="숫자 6자리 입력" style="flex: 1; text-align: center; font-weight: bold; letter-spacing: 4px; height: 38px; border: 1px solid #ced4da; border-radius: 4px;">
+                            <button type="button" id="btnVerifyCode" onclick="submitEmailVerification()" class="id-check-btn" style="white-space: nowrap; background-color: #2b8a3e; color: white; border: none; border-radius: 4px; padding: 0 15px; cursor: pointer; font-weight: bold;">인증확인</button>
+                        </div>
+                        <p id="emailAuthMessage" style="display: none; margin-top: 4px; font-size: 12px;"></p>
+                    </div>
+
                 </div>
 
                 <div class="form-group">
@@ -143,6 +161,9 @@
 
     let isEmailChecked = false;
     let isEmailAvailable = false;
+
+    let emailTimerInterval = null;
+    let isEmailAuthVerified = false;
 
     function validateIdFormat() {
         const id = document.getElementById("id").value;
@@ -298,6 +319,11 @@
             return false;
         }
 
+        if (!isEmailAuthVerified) {
+            alert("이메일로 발송된 6자리 인증번호가 확인되지 않았습니다");
+            document.getElementById("emailAuthCode").focus();
+            return false;
+        }
         return true;
     }
 
@@ -323,10 +349,22 @@
                     isEmailAvailable = false;
                     result.innerText = "이미 사용 중인 이메일입니다.";
                     result.style.color = "red";
+                    
+                    // 🟢 [추가] 중복이면 인증 관련 레이어 전부 숨김 및 타이머 해제
+                    document.getElementById("emailSendBtnGroup").style.display = "none";
+                    document.getElementById("emailAuthGroup").style.display = "none";
+                    if (emailTimerInterval) clearInterval(emailTimerInterval);
                 } else {
                     isEmailAvailable = true;
-                    result.innerText = "사용 가능한 이메일입니다.";
+                    // 🟢 [수정] 안내 멘트 문구 뒤에 행동 유도 지침 추가
+                    result.innerText = "✓ 사용 가능한 이메일입니다. 인증번호를 전송해 주세요.";
                     result.style.color = "green";
+                    isEmailAuthVerified = false; // 가입 인증 상태 초기화
+
+                    // 🟢 [추가] 중복 확인 통과 시 ➡️ "인증번호 전송하기" 파란 버튼 레이어만 노출!
+                    document.getElementById("emailSendBtnGroup").style.display = "block";
+                    document.getElementById("emailAuthGroup").style.display = "none";
+                    if (emailTimerInterval) clearInterval(emailTimerInterval);
                 }
             });
     }
@@ -334,11 +372,138 @@
     function resetEmailCheck() {
         isEmailChecked = false;
         isEmailAvailable = false;
+        isEmailAuthVerified = false;
 
         const result = document.getElementById("emailCheckResult");
         result.innerText = "이메일 중복확인을 해주세요.";
         result.style.color = "gray";
+
+        document.getElementById("emailSendBtnGroup").style.display = "none";
+        document.getElementById("emailAuthGroup").style.display = "none";
+        if (emailTimerInterval) clearInterval(emailTimerInterval);
     }
+
+    function startEmailTimer(duration) {
+        const display = document.getElementById("emailTimer");
+        const btnVerify = document.getElementById("btnVerifyCode");
+        let timer = duration, minutes, seconds;
+
+        if (emailTimerInterval) clearInterval(emailTimerInterval);
+        btnVerify.disabled = false;
+
+        emailTimerInterval = setInterval(function () {
+            minutes = parseInt(timer / 60, 10);
+            seconds = parseInt(timer % 60, 10);
+
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+
+            display.innerText = minutes + ":" + seconds;
+
+            if (--timer < 0) {
+                clearInterval(emailTimerInterval);
+                display.innerText = "시간 만료";
+                btnVerify.disabled = true; // 3분 경과 시 버튼 잠금
+                alert("인증 시간이 만료되었습니다. 다시 인증번호 전송 버튼을 눌러주세요.");
+            }
+        }, 1000);
+    }
+
+    window.sendEmailAuth = function() {
+        const emailInput = document.getElementById("email"); // 가입창 ID인 email 사용
+        const emailValue = emailInput.value.trim();
+        const sendBtn = document.getElementById("btnSendEmail");
+
+        sendBtn.disabled = true; 
+        sendBtn.innerText = "발송 중...";
+
+        // 화면 내에 숨겨져 있는 시큐리티 CSRF 토큰 스캔
+        const tokenElement = document.querySelector("input[name='_csrf']");
+        const csrfToken = tokenElement ? tokenElement.value : "";
+
+        // 🚀 마이페이지 백엔드 발송 엔진 주소(/mypage/api/send-auth-email)를 그대로 호출하여 빌려 씁니다!
+        fetch(`/api/public/send-auth-email`, {
+            method: "POST", 
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRF-TOKEN": csrfToken // 시큐리티 가드 패스용
+            },
+            body: `email=${encodeURIComponent(emailValue)}`
+        })
+        .then(res => res.text()) // 순수 문자열 수신
+        .then(data => {
+            sendBtn.disabled = false;
+            sendBtn.innerText = "인증번호 전송하기";
+
+            if (data === "send_success") {
+                alert("입력하신 이메일로 6자리 가입 인증번호가 성공적으로 발송되었습니다.");
+                
+                // 🕒 3분 타이머와 6자리 인풋창 레이어 노출!
+                document.getElementById("emailAuthGroup").style.display = "block";
+                startEmailTimer(180); 
+            } else {
+                alert("인증 메일 발송에 실패했습니다. 유효한 메일주소인지 확인해 주세요.");
+            }
+        })
+        .catch(err => {
+            sendBtn.disabled = false;
+            sendBtn.innerText = "인증번호 전송하기";
+            console.error("가입 메일 발송 통신 오류:", err);
+        });
+    };
+
+    window.submitEmailVerification = function() {
+        const emailInput = document.getElementById("email");
+        const codeInput = document.getElementById("emailAuthCode");
+        const codeValue = codeInput.value.trim();
+        const emailValue = emailInput.value.trim();
+        const authMessage = document.getElementById("emailAuthMessage");
+        const btnVerify = document.getElementById("btnVerifyCode");
+
+        if (codeValue.length !== 6 || isNaN(codeValue)) {
+            alert("인증번호가 일치하지 않습니다");
+            return;
+        }
+
+        const tokenElement = document.querySelector("input[name='_csrf']");
+        const csrfToken = tokenElement ? tokenElement.value : "";
+
+        // 🚀 백엔드 검증 엔진 주소(/mypage/api/verify-email-code)도 완벽하게 빌려 씁니다!
+        fetch(`/api/public/verify-email-code`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRF-TOKEN": csrfToken
+            },
+            body: `code=${encodeURIComponent(codeValue)}&email=${encodeURIComponent(emailValue)}`
+        })
+        .then(res => res.text())
+        .then(data => {
+            authMessage.style.display = "block";
+
+            if (data === "verified") {
+                clearInterval(emailTimerInterval); // 🕒 타이머 일시정지
+                document.getElementById("emailTimer").innerText = "인증 완료";
+                document.getElementById("emailTimer").style.color = "#2b8a3e";
+
+                authMessage.style.color = "#2b8a3e";
+                authMessage.innerText = "✓ 이메일 인증이 성공적으로 완료되었습니다.";
+                isEmailAuthVerified = true; // 🔓 최종 서브밋 가드 통과 승인
+                
+                // 🔒 인증 완료 후 데이터 임의 조작 방지 안전 잠금(Lock)
+                btnVerify.disabled = true;
+                document.getElementById("btnSendEmail").disabled = true; 
+                emailInput.readOnly = true;
+                codeInput.readOnly = true;
+            } else {
+                authMessage.style.color = "#fa5252";
+                authMessage.innerText = "✗ 인증번호가 틀렸거나 만료되었습니다. 다시 시도해 주세요.";
+                isEmailAuthVerified = false;
+            }
+        })
+        .catch(err => console.error("가입 인증 통신 오류:", err));
+    };
+
 </script>
 
 </body>

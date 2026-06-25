@@ -39,7 +39,9 @@ public class SecurityConfig {
             .userDetailsService(customUserDetailsService)
             .csrf(csrf -> csrf
                 .ignoringRequestMatchers("/mypage/verify-password",
-                                        "/mypage/api/**"
+                                        "/mypage/api/**",
+                                        "/api/public/**"
+
                 )
              )
              
@@ -78,11 +80,13 @@ public class SecurityConfig {
                     "/css/**",
                     "/js/**",
                     "/images/**",
-                    "api/notices/list",
-                    "api/notices/detail",
+                    "/api/notices/list",
+                    "/api/notices/detail",
                     "/lost/**",
                     "/found/**",
-                    "/check-email"
+                    "/check-email",
+                    "/api/public/send-auth-email", 
+                    "/api/public/verify-email-code"
                 ).permitAll()
 
                 // 나머지는 모두 허용

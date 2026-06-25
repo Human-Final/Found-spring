@@ -21,10 +21,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.human.found.domain.comment.service.FoundCommentService;
 import com.human.found.domain.comment.service.LostCommentService;
 import com.human.found.domain.comment.vo.CommentVO;
-import com.human.found.domain.found.vo.FoundVO;
 import com.human.found.domain.user.service.UserServiceImpl;
 import com.human.found.domain.user.vo.MyPagePostVO;
 import com.human.found.domain.user.vo.UserVO;
+import org.springframework.mail.javamail.JavaMailSender;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -42,6 +42,9 @@ public class UserController {
 
     @Autowired
     private LostCommentService lostCommentService;
+
+    @Autowired 
+    private JavaMailSender mailSender; 
 
     // /mypage 또는 /mypage/ 로 요청이 들어왔을 때 마이페이지 화면을 보여줍니다.
     @GetMapping({"", "/"})
@@ -169,7 +172,7 @@ public class UserController {
 
         return "redirect:/mypage";
     }
-
+    
      /**
      * - 로그인한 사용자 ID 확인
      * - 입력한 비밀번호 검증
@@ -178,18 +181,104 @@ public class UserController {
      */
 
     @ResponseBody
-    @GetMapping("/check-email")
+    @GetMapping("/api/check-email")
     public String checkEmail(@RequestParam("email") String email) {
 
         // true면 중복, false면 사용 가능
         boolean isDuplicated = userService.isDuplicatedEmail(email); 
-
+        
         if (isDuplicated) {
             return "duplicated"; // 중복됨
         }
 
         return "available"; // 사용 가능
     }
+
+    /**
+     * ✉️ [신규 개설] 중복 확인 통과 후, 파란 버튼을 눌렀을 때만 진짜 메일을 발송하는 API
+     */
+    @ResponseBody
+    @PostMapping("/api/send-auth-email") // 👈 진짜 메일을 쏘는 전용 무전기 주소를 새로 팝니다.
+    public String sendAuthEmail(@RequestParam("email") String email, HttpSession session) {
+        
+        // 🎲 암호학적으로 안전한 6자리 난수 생성
+        java.util.Random random = new java.util.Random();
+        String verificationCode = String.format("%06d", random.nextInt(1000000));
+        
+        // 🕒 3분 만료 타임스탬프 설정 (현재 시간 + 180,000ms)
+        long expiresAt = System.currentTimeMillis() + (3 * 60 * 1000);
+
+        // 💾 서버 세션(HttpSession)에 인증 코드와 만료 시각 임시 보관
+        session.setAttribute("emailAuthCode", verificationCode);
+        session.setAttribute("emailAuthTarget", email);
+        session.setAttribute("emailAuthExpires", expiresAt);
+
+        // 📝 진짜 이메일 제목과 본문 내용 조립하여 발송
+        try {
+            org.springframework.mail.SimpleMailMessage message = new org.springframework.mail.SimpleMailMessage();
+            
+            message.setTo(email); // 수신자 주소 세팅
+            message.setSubject("[유실물센터] 이메일 인증번호입니다."); 
+            message.setText("안녕하세요. FOUND AI 기반 분실물 찾기 서비스입니다.\n"
+                    + "요청하신 이메일 인증번호 6자리는 [" + verificationCode + "] 입니다.\n"
+                    + "3분 이내에 화면에 입력해 주세요.");
+            
+            mailSender.send(message); // 🚀 실제로 구글 SMTP 서버를 거쳐 메일 발송!
+            
+            System.out.println("=========================================");
+            System.out.println("✉️ [메일 엔진] 파란 버튼 신호 수신! 실제 발송 완수!");
+            System.out.println("🔑 생성된 6자리 번호: " + verificationCode);
+            System.out.println("=========================================");
+            
+        } catch (Exception e) {
+            System.out.println("❌ [메일 엔진] 구글 SMTP 서버 발송 실패. 오류 내용:");
+            e.printStackTrace(); 
+            return "mail_error";
+        }
+
+        return "send_success"; // 발송 완료 신호 반환
+    }
+
+    /**
+     * 🔐 주신 자바스크립트의 application/x-www-form-urlencoded (POST) 데이터 포맷을 
+     * 그대로 수신하여 검증하는 정석 컨트롤러 메서드입니다.
+     */
+    @ResponseBody
+    @PostMapping("/api/verify-email-code") // 👈 자바스크립트의 fetch 경로와 일치
+    public String verifyEmailCode(
+            @RequestParam("code") String inputCode, // 📌 body의 code 값을 매핑
+            @RequestParam("email") String email,     // 📌 body의 email 값을 매핑
+            HttpSession session) {
+        
+        // 1. 세션에 발송할 때 저장해둔 데이터들 드로우
+        String sessionCode = (String) session.getAttribute("emailAuthCode");
+        String sessionEmail = (String) session.getAttribute("emailAuthTarget");
+        Long expiresAt = (Long) session.getAttribute("emailAuthExpires");
+
+        // [가드 1] 세션 내역 부재 시 불법 접근 차단
+        if (expiresAt == null || sessionCode == null || !email.equals(sessionEmail)) {
+            return "no_request";
+        }
+
+        // [가드 2] 3분 제한 시간 타임아웃 검증 (현재 밀리초와 비교)
+        if (System.currentTimeMillis() > expiresAt) {
+            session.invalidate(); 
+            return "timeout";
+        }
+
+        // [가드 3] 입력한 6자리 난수 대조
+        if (!sessionCode.equals(inputCode)) {
+            return "wrong_code";
+        }
+
+        // 🟢 모든 조건이 완벽히 맞으면 "verified" 글자를 리턴하여 
+        // 자바스크립트의 if (data === "verified") 문을 활성화시킵니다.
+        return "verified";
+    }
+
+
+
+
 
     /**
      * 마이페이지 전용 습득물 삭제 처리 (GET)
