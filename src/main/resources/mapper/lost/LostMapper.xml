@@ -19,11 +19,12 @@
         <result property="isDeleted" column="is_deleted"/>
         <result property="lstFilepathImg" column="lst_filepath_img"/>
         <result property="viewConut" column="view_conut"/>
+        <result property="dataSource" column="dataSource"/>
 
         <collection property="filelist" javaType="ArrayList" ofType="com.human.found.domain.lost.vo.LostFileVO">
                 <id property="id" column="file_id"/>
                 <result property="fdFilepathImg" column="fd_filepath_img"/>
-                <result property="atcId" column="atc_id"/>
+                <result property="atcId" column="file_atc_id"/>
                 <result property="saveName" column="save_name"/>
                 <result property="fileSize" column="file_size"/>
                 <result property="filePath" column="file_path"/>
@@ -229,7 +230,7 @@ UPDATE lost
 SET
 
 lst_place =#{lstPlace},
-lst_filepath_img = #{lstFilepathImg},
+
 lst_prdt_nm      = #{lstPrdtNm},
 lst_sbjt         = #{lstSbjt},
 lst_ymd          = #{lstYmd},

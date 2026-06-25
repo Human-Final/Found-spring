@@ -61,6 +61,8 @@ public class SecurityConfig {
                     "/found/*/delete",
                     "/api/found/delete/**",
                     "/api/lost/delete/**",
+                    "/api/found/update",
+                    "/api/lost/update",
                     "/mypage/**"
                 ).authenticated()
 

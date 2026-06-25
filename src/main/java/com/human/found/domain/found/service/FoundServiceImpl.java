@@ -193,9 +193,12 @@ public class FoundServiceImpl implements FoundService {
             for (String saveName : deleteFiles) {
                 
                 foundfilemapper.deleteBySaveName(saveName);
+
+
                 fileUtil.deletePhysicalFile(saveName, "found");
             }
         }
+        
 
         // 새로 첨부한 사진이 있으면 추가로 저장
 
@@ -205,10 +208,10 @@ public class FoundServiceImpl implements FoundService {
             if (uploadMaps != null && !uploadMaps.isEmpty()) {
 
                 //새 파일 중 0번째 파일 이름을 가져와서 대표 이미지로 세팅합니다
-                String saveFileName = (String) uploadMaps.get(0).get("saveFileName");
-                foundVO.setFdFilepathImg("/images/found/" + saveFileName);
+                // String saveFileName = (String) uploadMaps.get(0).get("saveFileName");
+                // foundVO.setFdFilepathImg("/images/found/" + saveFileName);
 
-                foundMapper.updateThumbnail(foundVO);
+                // foundMapper.updateThumbnail(foundVO);
 
                 for (Map<String, Object> info : uploadMaps) {
                     FoundFileVO fileVO = new FoundFileVO();
@@ -225,7 +228,17 @@ public class FoundServiceImpl implements FoundService {
                 }
             }
         }
+        //최종파일 정보 조회
+        List<FoundFileVO> remainFiles=foundfilemapper.findById(foundVO.getAtcId());
+        //대표 이미지 재설정
 
+        if(remainFiles!=null&&!remainFiles.isEmpty()){
+            foundVO.setFdFilepathImg("/images/found/"+remainFiles.get(0).getSaveName());             
+        }else{
+            //파일이 하나도 없으면 대표 이미지 제거
+            foundVO.setFdFilepathImg(null);
+        }
+        foundMapper.updateThumbnail(foundVO);
     }
 
 }

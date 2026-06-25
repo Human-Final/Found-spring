@@ -178,10 +178,10 @@ public class LostServiceImpl implements LostService {
             
             if (uploadMaps != null && !uploadMaps.isEmpty()){
                 //새 파일 중 0번째 파일 이름을 가져와서 대표 이미지로 세팅합니다
-                String saveFileName = (String) uploadMaps.get(0).get("saveFileName");
-                lostVO.setLstFilepathImg("/images/lost/"+saveFileName);
+                //String saveFileName = (String) uploadMaps.get(0).get("saveFileName");
+                //lostVO.setLstFilepathImg("/images/lost/"+saveFileName);
 
-                lostMapper.updateThumbnail(lostVO);
+                //lostMapper.updateThumbnail(lostVO);
 
                 for(Map<String, Object> info : uploadMaps){
                     LostFileVO fileVO=new LostFileVO();
@@ -199,7 +199,16 @@ public class LostServiceImpl implements LostService {
             }
 
         }
-        
+        //최종 파일정보 조회
+        List<LostFileVO> remainFiles=lostFileMapper.findById(lostVO.getAtcId());
+        //대표 이미지 재설정
+        if(remainFiles!=null&&!remainFiles.isEmpty()){
+            lostVO.setLstFilepathImg("/images/lost/"+remainFiles.get(0).getSaveName());
+        }else{
+            //파일이 하나도 없으면 대표 이미지 제거
+            lostVO.setLstFilepathImg(null);
+        }
+        lostMapper.updateThumbnail(lostVO);
     }
 
 }
