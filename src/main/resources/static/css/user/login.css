@@ -139,3 +139,25 @@
   font-weight: 800;
   line-height: 1.5;
 }
+
+/* 로그인 버튼 아래의 아이디 찾기, 비밀번호 찾기 버튼 */
+.login-helper {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.login-helper a {
+  color: #666;
+  text-decoration: none;
+}
+
+.login-helper a:hover {
+  text-decoration: underline;
+}
+
+.login-helper .divider {
+  margin: 0 10px;
+  color: #ccc;
+  font-size: 12px;
+}

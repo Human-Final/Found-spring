@@ -40,7 +40,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf
                 .ignoringRequestMatchers("/mypage/verify-password",
                                         "/mypage/api/**",
-                                        "/api/public/**"
+                                        "/api/public/**",
+                                        "/find-id/**"
 
                 )
              )

@@ -26,6 +26,16 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
+    // 회원의 아이디 조회
+    @Override
+    public String findUserId(String name, String email) {
+        String userId=userMapper.findUserId(name, email);
+        if(userId==null||userId.isEmpty()){
+            return null;
+        }
+        return userId;
+    }
+
     /**
      * 회원가입
      * - 비밀번호 암호화

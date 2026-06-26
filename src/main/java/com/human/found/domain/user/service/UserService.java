@@ -26,6 +26,9 @@ public interface UserService {
      */
     UserVO findById(String id);
 
+    // 사용자 아이디 조회
+    String findUserId(String name, String email);
+
     /**
      * 아이디 중복 확인
      * true : 중복

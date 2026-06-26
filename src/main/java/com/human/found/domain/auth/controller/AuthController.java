@@ -1,11 +1,14 @@
 package com.human.found.domain.auth.controller;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -14,6 +17,7 @@ import com.human.found.domain.user.vo.UserVO;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+
 
 @Controller
 @RequiredArgsConstructor
@@ -156,6 +160,27 @@ public class AuthController {
 
         return "verified";
     }
+
+    @GetMapping("/find-id")
+    public String findIdPage() {
+        return "user/findid";
+    }
+
+    @ResponseBody
+    @PostMapping("/find-id")
+    public String findIdData(@RequestBody Map<String, String> params) {
+        String name = params.get("name");
+        String email = params.get("email");
+
+        String foundId = userService.findUserId(name, email);
+
+        if(foundId==null){
+            return "찾으시는 아이디가 없습니다";
+        }
+        return foundId;
+    }
+    
+    
 
     
 }
