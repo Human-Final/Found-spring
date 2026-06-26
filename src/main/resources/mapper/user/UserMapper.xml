@@ -31,6 +31,14 @@
             AND is_deleted = 0
 
     </select>
+    
+    <select id="isUserExist"
+            resultType="int">
+        select count(*) from user
+        where id=#{id}
+            and name=#{name}
+            and email=#{email}
+    </select>
 
     <select id="findUserId"
             resultType="String">
@@ -40,6 +48,11 @@
             and email=#{email}
     </select>
 
+    <update id="updatePassword">
+        UPDATE user 
+        SET password = #{encodedPassword} 
+        WHERE user_id = #{userId}
+    </update>
 
 
     <select id="selectMyPageCounts" parameterType="string" resultType="map">

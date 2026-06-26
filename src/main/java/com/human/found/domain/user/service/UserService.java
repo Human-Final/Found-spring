@@ -6,6 +6,8 @@ import com.human.found.domain.comment.vo.CommentVO;
 import com.human.found.domain.user.vo.MyPagePostVO;
 import com.human.found.domain.user.vo.UserVO;
 
+import jakarta.servlet.http.HttpSession;
+
 /**
  * 회원 관련 서비스 인터페이스
  * - Controller가 직접 구현체를 알지 않도록 기능 목록만 정의
@@ -29,6 +31,15 @@ public interface UserService {
     // 사용자 아이디 조회
     String findUserId(String name, String email);
 
+    // 사용자 정보3가지로 존재하는 유저인지 확인하기
+    boolean isUserExist(String id,String name,String email);
+
+    // 사용자 비밀번호 조회 이메일 인증
+    String sendPwEmail(String email, HttpSession session);
+
+    // 사용자 비밀번호 조회 이메일 인증코드 확인하기
+    String verifyPwCode(String inputCode, String email, HttpSession session);
+
     /**
      * 아이디 중복 확인
      * true : 중복
@@ -42,6 +53,12 @@ public interface UserService {
      * false : 사용 가능
      */
     boolean isDuplicatedEmail(String email);
+
+    // 회원가입 이메일 인증코드 전송하기
+    public String sendJoinEmail(String email, HttpSession session);
+
+    // 회원가입 인증코드 알맞은지 확인하기
+    public String verifyJoinCode(String inputCode, String email, HttpSession session);
 
     /**
      * 회원가입 입력값 검증
