@@ -188,9 +188,4 @@ public class AuthController {
         return "SUCCESS";
     }
 
-    
-    
-    
-
-    
 }
