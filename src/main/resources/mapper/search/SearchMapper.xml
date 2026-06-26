@@ -265,61 +265,72 @@
         WHERE is_deleted = 0    
     ) AS total_board
    
-   <where>
-        <if test="keyword != null and keyword != ''">
-            AND (
-                title LIKE CONCAT('%', #{keyword}, '%')
-                OR content LIKE CONCAT('%', #{keyword}, '%')
-                OR place LIKE CONCAT('%', #{keyword}, '%')
-                OR category LIKE CONCAT('%', #{keyword}, '%')
-                OR color LIKE CONCAT('%', #{keyword}, '%')
+    <where>
 
-                OR REPLACE(title, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
-                OR REPLACE(content, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
-                OR REPLACE(place, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
-                OR REPLACE(category, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
-                OR REPLACE(color, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
-            )
-        </if>
-
-        <if test="boardType != null and boardType != '' and boardType!= 'all'">
+        <!-- boardType은 검색 대상 게시판이라 hard filter -->
+        <if test="boardType != null and boardType != '' and boardType != 'all'">
             AND boardType = #{boardType}
         </if>
 
+        <!-- status도 명시된 경우만 hard filter -->
         <if test="status != null and status != '' and status != 'all'">
-          <choose>
-            <when test = "status == 'done'">
-                AND done = 1
-            </when>
-            <when test = "status == 'progress'">
-                AND done = 0
-            </when>
-          </choose>
+            <choose>
+                <when test="status == 'done'">
+                    AND done = 1
+                </when>
+                <when test="status == 'progress'">
+                    AND done = 0
+                </when>
+            </choose>
         </if>
 
-        <if test="category != null and category != '' and category != 'all'">
-            AND category LIKE CONCAT('%', #{category}, '%')
+        <!-- LIKE 후보 조건: 원문 keyword + 공백 제거 keyword + LLM coreKeywords를 모두 OR로 넓게 검색 -->
+        <if test="
+            (keyword != null and keyword != '')
+            or (coreKeywords != null and coreKeywords.size() > 0)
+        ">
+            AND (
+                1 = 0
+
+                <!-- 사용자가 입력한 원문 검색어 -->
+                <if test="keyword != null and keyword != ''">
+                    OR (
+                        title LIKE CONCAT('%', #{keyword}, '%')
+                        OR content LIKE CONCAT('%', #{keyword}, '%')
+                        OR place LIKE CONCAT('%', #{keyword}, '%')
+                        OR category LIKE CONCAT('%', #{keyword}, '%')
+                        OR COALESCE(color, '') LIKE CONCAT('%', #{keyword}, '%')
+
+                        OR REPLACE(title, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
+                        OR REPLACE(content, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
+                        OR REPLACE(place, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
+                        OR REPLACE(category, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
+                        OR REPLACE(COALESCE(color, ''), ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
+                    )
+                </if>
+
+                <!-- LLM이 뽑은 핵심 단어 검색 -->
+                <if test="coreKeywords != null and coreKeywords.size() > 0">
+                    <foreach collection="coreKeywords" item="kw">
+                        OR (
+                            title LIKE CONCAT('%', #{kw}, '%')
+                            OR content LIKE CONCAT('%', #{kw}, '%')
+                            OR place LIKE CONCAT('%', #{kw}, '%')
+                            OR category LIKE CONCAT('%', #{kw}, '%')
+                            OR COALESCE(color, '') LIKE CONCAT('%', #{kw}, '%')
+
+                            OR REPLACE(title, ' ', '') LIKE CONCAT('%', REPLACE(#{kw}, ' ', ''), '%')
+                            OR REPLACE(content, ' ', '') LIKE CONCAT('%', REPLACE(#{kw}, ' ', ''), '%')
+                            OR REPLACE(place, ' ', '') LIKE CONCAT('%', REPLACE(#{kw}, ' ', ''), '%')
+                            OR REPLACE(category, ' ', '') LIKE CONCAT('%', REPLACE(#{kw}, ' ', ''), '%')
+                            OR REPLACE(COALESCE(color, ''), ' ', '') LIKE CONCAT('%', REPLACE(#{kw}, ' ', ''), '%')
+                        )
+                    </foreach>
+                </if>
+            )
         </if>
 
-        <if test="color != null and color != ''">
-            AND color LIKE CONCAT('%', #{color}, '%')
-        </if>
-
-        <if test="place != null and place != ''">
-            AND place LIKE CONCAT ('%', #{place}, '%')
-        </if>
-
-        <!-- 이 날짜부터-->
-        <if test="startDate != null and startDate != ''">
-            AND eventDate &gt;= #{startDate}
-        </if>
-
-        <!-- 이 날짜까지-->
-        <if test="endDate != null and endDate != ''">
-            AND eventDate &lt;= #{endDate}
-        </if>
-
-   </where>
+    </where>
 
    ORDER BY eventDate DESC    
     

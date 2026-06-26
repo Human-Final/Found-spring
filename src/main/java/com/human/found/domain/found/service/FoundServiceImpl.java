@@ -167,7 +167,11 @@ public class FoundServiceImpl implements FoundService {
         }
         if ("user".equals(foundVo.getDataSource())) {
             List<FoundFileVO> fileList = foundfilemapper.findById(foundVo.getAtcId());
-            foundVo.setFileList(fileList);
+
+            List<FoundFileVO> validFileList = fileList.stream()
+                .filter(file -> file.getSaveName() != null && !file.getSaveName().isBlank())
+                .toList();
+            foundVo.setFileList(validFileList);
         }
 
         // 정상조회시 반환

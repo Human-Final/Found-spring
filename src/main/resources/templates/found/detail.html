@@ -51,8 +51,6 @@
           제목
         </h1>
 
-
-
         <div class="info-box">
 
           <div class="info-column">
@@ -134,24 +132,98 @@
       </div>
 
       <aside class="detail-image-area">
-        <div class="image-box"
-             th:classappend="${foundVO.fdFilepathImg != null and foundVO.fdFilepathImg != ''}
-                ? 'has-image' 
-                : 'no-image-box'">
-          <img th:if="${foundVO.fdFilepathImg != null and foundVO.fdFilepathImg != ''}"
-               th:src="${foundVO.fdFilepathImg}"
-               alt="습득물 이미지">
+        <!-- 첨부파일이 있는 경우 : 리스트로 받아서 슬라이드-->
+        <div th:if="${foundVO.dataSource == 'user'
+                  and foundVO.fileList != null
+                  and not #lists.isEmpty(foundVO.fileList)}"
+             class="media-slider"
+             id="mediaSlider">
 
-          <span th:if="${foundVO.fdFilepathImg == null or foundVO.fdFilepathImg == ''}"
-                class="no-image">
-            등록된 이미지가 없습니다
-          </span>    
+          <div class="media-track">
+        
+            <div th:each="file, stat : ${foundVO.fileList}"
+                 th:if="${file.saveName != null and file.saveName != ''}"
+                 th:with="fileName=${file.saveName == null 
+                          ? '' 
+                          : #strings.toLowerCase(file.saveName)}"
+                 class="media-slide"
+                 th:classappend="${stat.index == 0} ? ' active' : ''">
+
+              <!-- 이미지 -->
+              <img th:if="${file.saveName != null and file.saveName != ''
+                          and (#strings.endsWith(fileName, '.jpg')
+                          or #strings.endsWith(fileName, '.jpeg')
+                          or #strings.endsWith(fileName, '.png')
+                          or #strings.endsWith(fileName, '.gif')
+                          or #strings.endsWith(fileName, '.webp'))}"
+                    th:src="@{'/images/found/' + ${file.saveName}}"
+                    th:alt="${file.saveName}"
+                    class="slide-media">
+
+              <!-- 동영상 -->
+              <div th:if="${file.saveName != null and file.saveName != ''
+                        and (#strings.endsWith(fileName, '.mp4')
+                        or #strings.endsWith(fileName, '.webm')
+                        or #strings.endsWith(fileName, '.mov'))}"
+                    class="video-wrap">
+
+                <video class="slide-media slide-video"
+                       preload="metadata"
+                       controls>
+                  <source th:src="@{'/images/found/' + ${file.saveName}}">
+                    브라우저가 동영상을 지원하지 않습니다
+                </video>
+
+                <div class="video-hint">동영상을 클릭해 재생하세요</div>
+              </div>              
+            </div>
+          
+            <button type="button"
+                    class="slide-btn prev-btn"
+                    th:if="${#lists.size(foundVO.fileList) > 1}">
+              ‹
+            </button>
+
+            <button type="button"
+                    class="slide-btn next-btn"
+                    th:if="${#lists.size(foundVO.fileList) > 1}">
+              ›
+            </button>
+
+            <div class="slide-counter"
+                th:if="${#lists.size(foundVO.fileList) > 1}">
+              <span id="currentSlide">1</span>
+              /
+              <span th:text="${#lists.size(foundVO.fileList)}">1</span>
+            </div>
+          </div>
+        </div>  
+        <!-- 업로드 첨부파일이 없고 API/XML 이미지가 있는 경우 -->
+        <div th:if="${foundVO.dataSource != 'user'
+                    and foundVO.fdFilepathImg != null
+                    and foundVO.fdFilepathImg != ''}"
+            class="image-box has-image">
+
+          <img th:src="${foundVO.fdFilepathImg}"
+               alt="습득물 이미지">
         </div>
 
-        <p th:if="${foundVO.fdFilepathImg != null and foundVO.fdFilepathImg != ''}"
-           class="image-caption">
-           등록된 이미지
+        <!-- 아무 이미지도 없는 경우 -->
+        <div th:if="${(foundVO.dataSource != 'user'
+                      and (foundVO.fdFilepathImg == null or foundVO.fdFilepathImg == ''))
+                    or (foundVO.dataSource == 'user'
+                      and (foundVO.fileList == null or #lists.isEmpty(foundVO.fileList))
+                      and (foundVO.fdFilepathImg == null or foundVO.fdFilepathImg == ''))}"
+            class="image-box no-image-box">
+          <span class="no-image">등록된 이미지가 없습니다</span>
+        </div>
+
+        <p class="image-caption"
+          th:if="${(foundVO.fileList != null and not #lists.isEmpty(foundVO.fileList))
+                or (foundVO.fdFilepathImg != null and foundVO.fdFilepathImg != '')}">
+          등록된 첨부파일
         </p>
+
       </aside>
 
     </div>
@@ -560,6 +632,115 @@
     });
   });
 
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const slider = document.querySelector("#mediaSlider");
+
+    if(!slider){
+      return;
+    }
+
+    const slides = slider.querySelectorAll(".media-slide");
+    const prevBtn = slider.querySelector(".prev-btn");
+    const nextBtn = slider.querySelector(".next-btn");
+    const currentSlide = slider.querySelector("#currentSlide");
+
+    if(slides.length === 0){
+      return;
+    }
+
+    let currentIndex = 0;
+    let autoTimer = null;
+    const AUTO_DELAY = 1000;
+
+    function pauseAllVideos(){
+      slider.querySelectorAll("video").forEach(video => {
+        video.pause();
+      });
+    }
+
+    function updateCounter(){
+      if(currentSlide){
+        currentSlide.textContent = currentIndex + 1;
+      }
+    }
+
+    function showSlide(nextIndex){
+      pauseAllVideos();
+
+      slides[currentIndex].classList.remove("active");
+
+      currentIndex = nextIndex;
+
+      if(currentIndex < 0){
+        currentIndex = slides.length -1;
+      }
+
+      if(currentIndex >= slides.length){
+        currentIndex = 0;
+      }
+
+      slides[currentIndex].classList.add("active");
+      updateCounter();
+    }
+
+    function nextSlide(){
+      showSlide(currentIndex + 1);
+    }
+
+    function prevSlide(){
+      showSlide(currentIndex -1);
+    }
+
+    function startAutoSlide(){
+      stopAutoSlide();
+
+      if(slides.length <= 1){
+        return;
+      }
+
+      autoTimer = setInterval(() => {
+        nextSlide();
+      }, AUTO_DELAY);
+    }
+
+    function stopAutoSlide(){
+      if(autoTimer){
+        clearInterval(autoTimer);
+        autoTimer = null;
+      }
+    }
+
+    if(nextBtn){
+      nextBtn.addEventListener("click", () => {
+          nextSlide();
+          startAutoSlide();
+      });
+    }
+
+    if(prevBtn){
+      prevBtn.addEventListener("click", () => {
+          prevSlide();
+          startAutoSlide();
+      });
+    }
+
+    slider.querySelectorAll("video").forEach(video => {
+      video.addEventListener("play", () => {
+        stopAutoSlide();
+      });
+
+      video.addEventListener("ended", () => {
+        nextSlide();
+        startAutoSlide();
+      });
+    });
+
+    updateCounter();
+    startAutoSlide();
+  });
 </script>
 
 </body>
