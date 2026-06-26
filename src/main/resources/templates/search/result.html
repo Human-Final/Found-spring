@@ -24,19 +24,26 @@
   </section>
 
   <section class="search-filter-box">
-    <div class="search-input-row">
+    <form th:action="@{/search}" method="get" class="search-input-row">
+
+      <input type="hidden" name="searchMode" value="hybrid">
+
       <div class="search-input-wrap">
         <span class="search-icon">⌕</span>
+
         <input
           type="text"
           id="keywordInput"
-          th:value="${keyword}"
+          name="keyword"
+          th:value="${conditionDTO != null ? conditionDTO.keyword : keyword}"
           placeholder="검색어를 입력하세요...">
       </div>
-      <button type="button" id="searchBtn" class="search-submit-btn">
+
+      <button type="submit" id="searchBtn" class="search-submit-btn">
         검색
       </button>
-    </div>
+
+    </form>
 
     <div class="search-filter-row">
       <div class="filter-section">
@@ -177,10 +184,12 @@
     <a
       th:if="${paging.prev}"
       th:href="@{/search(
+        searchMode='hybrid',
         keyword=${conditionDTO.keyword},
         boardType=${conditionDTO.boardType},
         status=${conditionDTO.status},
-        page=${paging.startPage - 1}
+        page=${paging.startPage - 1},
+        size=${paging.size}
       )}"
       class="page-btn">
       이전
@@ -189,10 +198,12 @@
     <a
       th:each="pageNum : ${#numbers.sequence(paging.startPage, paging.endPage)}"
       th:href="@{/search(
+        searchMode='hybrid',   
         keyword=${conditionDTO.keyword},
         boardType=${conditionDTO.boardType},
         status=${conditionDTO.status},
-        page=${pageNum}
+        page=${pageNum},
+        size=${paging.size}
       )}"
       th:text="${pageNum}"
       th:classappend="${pageNum == paging.page} ? ' active' : ''"
@@ -203,10 +214,12 @@
     <a
       th:if="${paging.next}"
       th:href="@{/search(
+        searchMode='hybrid',
         keyword=${conditionDTO.keyword},
         boardType=${conditionDTO.boardType},
         status=${conditionDTO.status},
-        page=${paging.endPage + 1}
+        page=${paging.endPage + 1},
+        size=${paging.size}
       )}"
       class="page-btn">
       다음
@@ -220,77 +233,11 @@
 
 <script>
   const currentParams = new URLSearchParams(window.location.search);
-  const searchBtn = document.querySelector("#searchBtn");
   const keywordInput = document.querySelector("#keywordInput");
 
-  let selectedBoardType = currentParams.get("boardType") || "";
-  let selectedStatus = currentParams.get("status") || "";
-
-  keywordInput.value = currentParams.get("keyword") || keywordInput.value || "";
-
-  function bindBoardTypeFilter() {
-    const buttons = document.querySelectorAll("#boardTypeFilter .chip");
-
-    buttons.forEach(button => {
-      button.classList.toggle("active", button.dataset.boardType === selectedBoardType);
-
-      button.addEventListener("click", function () {
-        selectedBoardType = this.dataset.boardType;
-        moveSearchPage(1);
-      });
-    });
+  if (keywordInput) {
+    keywordInput.value = currentParams.get("keyword") || keywordInput.value || "";
   }
-
-  function bindStatusFilter() {
-    const buttons = document.querySelectorAll("#statusFilter .chip");
-
-    buttons.forEach(button => {
-      button.classList.toggle("active", button.dataset.status === selectedStatus);
-
-      button.addEventListener("click", function () {
-        selectedStatus = this.dataset.status;
-        moveSearchPage(1);
-      });
-    });
-  }
-
-  function moveSearchPage(page) {
-    const params = new URLSearchParams();
-    const keyword = keywordInput.value.trim();
-
-    if (keyword) {
-      params.set("keyword", keyword);
-    }
-
-    if (selectedBoardType) {
-      params.set("boardType", selectedBoardType);
-    }
-
-    if (selectedStatus) {
-      params.set("status", selectedStatus);
-    }
-
-    params.set("page", page);
-
-    window.location.href = "/search?" + params.toString();
-  }
-
-  keywordInput.addEventListener("keydown", function (event) {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      moveSearchPage(1);
-    }
-  });
-
-  if (searchBtn) {
-    searchBtn.addEventListener("click", function () {
-      moveSearchPage(1);
-    });
-  }
-  
-
-  bindBoardTypeFilter();
-  bindStatusFilter();
 </script>
 
 </body>

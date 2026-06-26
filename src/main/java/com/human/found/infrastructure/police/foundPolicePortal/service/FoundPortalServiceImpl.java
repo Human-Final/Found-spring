@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -25,6 +26,9 @@ public class FoundPortalServiceImpl implements FoundPortalService {
 
     @Value("${portal.api.url}")
     private String apiUrl;
+
+    @Value("${police.api.url}")
+    private String policeApiUrl;
 
     @Value("${police.api.key}")
     private String serviceKey;
@@ -56,7 +60,7 @@ public class FoundPortalServiceImpl implements FoundPortalService {
             System.out.println("요청 URL = " + url);
             System.out.println("포털기관 습득물 API 요청 pageNo = " + pageNo);
 
-            byte[] bytes = restTemplate.getForObject(url, byte[].class);
+            byte[] bytes = getBytesWithRetry(restTemplate, url, pageNo);
 
             if (bytes == null || bytes.length == 0) {
                 System.out.println("API 응답 없음. 수집 종료");
@@ -98,7 +102,7 @@ public class FoundPortalServiceImpl implements FoundPortalService {
             Thread.sleep(300);
         }
 
-        int insertCount = foundPortalTxService.replaceItems(
+        int insertCount = foundPortalTxService.replaceFoundPortalItems(
             allItems,
             today,
             sixMonthsAgo
@@ -107,6 +111,111 @@ public class FoundPortalServiceImpl implements FoundPortalService {
         System.out.println("최근 6개월 포털기관 습득물 API 재수집 완료");
         System.out.println("총 API item 수 = " + allItems.size());
         System.out.println("총 저장 건수 = " + insertCount);
+    }
+
+    @Override
+    public void saveFoundPoliceDataByPortalLogic() throws Exception {
+
+        RestTemplate restTemplate = new RestTemplate();
+        XmlMapper xmlMapper = new XmlMapper();
+
+        int pageNo = 1;
+        int numOfRows = 9999;
+
+        LocalDate today = LocalDate.now();
+        LocalDate sixMonthsAgo = today.minusMonths(6);
+
+        List<FoundPortalApiItemVO> allItems = new ArrayList<>();
+
+        while (true) {
+
+            String url = UriComponentsBuilder.fromHttpUrl(policeApiUrl)
+                    .queryParam("serviceKey", serviceKey)
+                    .queryParam("pageNo", pageNo)
+                    .queryParam("numOfRows", numOfRows)
+                    .queryParam("START_YMD", sixMonthsAgo.format(DateTimeFormatter.BASIC_ISO_DATE))
+                    .queryParam("END_YMD", today.format(DateTimeFormatter.BASIC_ISO_DATE))
+                    .build(false)
+                    .toUriString();
+
+            System.out.println("경찰청 습득물 API 요청 URL = " + url);
+            System.out.println("경찰청 습득물 API 요청 pageNo = " + pageNo);
+
+            byte[] bytes = restTemplate.getForObject(url, byte[].class);
+
+            if (bytes == null || bytes.length == 0) {
+                System.out.println("경찰청 습득물 API 응답 없음. 수집 종료");
+                break;
+            }
+
+            FoundPortalApiResponseVO response =
+                    xmlMapper.readValue(bytes, FoundPortalApiResponseVO.class);
+
+            if (response == null
+                    || response.getBody() == null
+                    || response.getBody().getItems() == null
+                    || response.getBody().getItems().getItem() == null) {
+
+                System.out.println("경찰청 습득물 item 없음. 수집 종료");
+                break;
+            }
+
+            List<FoundPortalApiItemVO> items =
+                    response.getBody().getItems().getItem();
+
+            if (items.isEmpty()) {
+                System.out.println("경찰청 습득물 item 리스트 비어 있음. 수집 종료");
+                break;
+            }
+
+            allItems.addAll(items);
+
+            if (items.size() < numOfRows) {
+                System.out.println("경찰청 습득물 마지막 페이지 도달. 수집 종료");
+                break;
+            }
+
+            pageNo++;
+
+            Thread.sleep(300);
+        }
+
+        int insertCount = foundPortalTxService.replaceFoundPoliceItems(
+                allItems,
+                today,
+                sixMonthsAgo
+        );
+
+        System.out.println("최근 6개월 경찰청 습득물 API 수집 완료");
+        System.out.println("총 API item 수 = " + allItems.size());
+        System.out.println("총 found_police 저장 건수 = " + insertCount);
+    }
+
+    private byte[] getBytesWithRetry(
+        RestTemplate restTemplate,
+        String url,
+        int pageNo
+    ) throws InterruptedException {
+
+        int maxRetry = 3;
+
+        for (int retry = 1; retry <= maxRetry; retry++) {
+            try {
+                return restTemplate.getForObject(url, byte[].class);
+
+            } catch (HttpServerErrorException.GatewayTimeout e) {
+                System.out.println("504 Gateway Timeout 발생 pageNo = " + pageNo
+                        + " / 재시도 " + retry + "회");
+
+                if (retry == maxRetry) {
+                    throw e;
+                }
+
+                Thread.sleep(3000L * retry);
+            }
+        }
+
+        return null;
     }
 
 }

@@ -39,6 +39,7 @@
           <button type="button" class="chip" data-category="도서">도서</button>
           <button type="button" class="chip" data-category="의류">의류</button>
           <button type="button" class="chip" data-category="자동차">자동차</button>
+          <button type="button" class="chip" data-category="핸드폰">핸드폰</button>
           <button type="button" class="chip" data-category="전자기기">전자기기</button>
           <button type="button" class="chip" data-category="지갑">지갑</button>
           <button type="button" class="chip" data-category="카드">카드</button>
@@ -207,7 +208,8 @@
     if (["도서", "책", "서적", "소설"].some(word => prdtClNm.includes(word))) return "도서";
     if (["의류", "모자", "신발"].some(word => prdtClNm.includes(word))) return "의류";
     if (["자동차", "네비", "번호판"].some(word => prdtClNm.includes(word))) return "자동차";
-    if (["전자", "핸드폰", "휴대폰", "아이폰", "노트북", "컴퓨터"].some(word => prdtClNm.includes(word))) return "전자기기";
+    if (["핸드폰", "휴대폰", "아이폰"].some(word => prdtClNm.includes(word))) return "핸드폰";
+    if (["전자","노트북", "컴퓨터"].some(word => prdtClNm.includes(word))) return "전자기기";
     if (prdtClNm.includes("지갑")) return "지갑";
     if (prdtClNm.includes("카드")) return "카드";
 

@@ -25,6 +25,10 @@ public class SearchController {
         
         List<SearchResultVO> searchList;
         
+        // LLM/LIKE 분기
+        // 나중에는 searchList = searchService.hybridSearch(conditionDTO); 만 남기면 됨
+        // LIKE 기반 검색 확인용 URL 예시 : /search?keyword=핸드폰&searchMode=like
+        // 헤더쪽 검색은 아직 LIKE 기반입니다.
         if("hybrid".equals(conditionDTO.getSearchMode())){
             searchList = searchService.hybridSearch(conditionDTO);
         }else {

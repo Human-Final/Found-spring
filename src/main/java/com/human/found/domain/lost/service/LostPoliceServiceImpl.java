@@ -70,11 +70,18 @@ public class LostPoliceServiceImpl implements LostPoliceService{
         if (prdtClNm.contains("자동차") || prdtClNm.contains("네비") || prdtClNm.contains("번호판")) {
             return "자동차";
         }
-        // [전자기기] "전자", "핸드폰", "휴대폰", "아이폰", "노트북", "컴퓨터" 포함 여부
-        if (prdtClNm.contains("전자") || prdtClNm.contains("핸드폰") || prdtClNm.contains("휴대폰") || 
-            prdtClNm.contains("아이폰") || prdtClNm.contains("노트북") || prdtClNm.contains("컴퓨터")) {
+        // [핸드폰] "핸드폰", "휴대폰", "아이폰" 포함 여부
+        if (prdtClNm.contains("핸드폰") || prdtClNm.contains("휴대폰") 
+                || prdtClNm.contains("아이폰")){ 
+            return "핸드폰";
+        }
+
+        // [전자기기] "전자", "노트북", "컴퓨터" 포함 여부
+        if (prdtClNm.contains("전자") || prdtClNm.contains("노트북") 
+                || prdtClNm.contains("컴퓨터")) {
             return "전자기기";
         }
+
         // [지갑]
         if (prdtClNm.contains("지갑")) {
             return "지갑";

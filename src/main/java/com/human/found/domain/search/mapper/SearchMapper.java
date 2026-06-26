@@ -10,11 +10,14 @@ import com.human.found.domain.search.vo.SearchResultVO;
 @Mapper
 public interface SearchMapper {
 
-    // 페이징용
+    // 페이징용 전체 수 조회
     int countTotalSearch(SearchConditionDTO conditionDTO);
 
-    // LIKE 기반 검색
+    // 페이징용 LIKE 기반 검색
     List<SearchResultVO> totalLikeSearch(SearchConditionDTO conditionDTO);
+
+    // 하이브리드 검색 수집용 LIKE 검색
+    List<SearchResultVO> candidateLikeSearch(SearchConditionDTO conditionDTO);
 
     // LLM 기반 검색
     List<SearchResultVO> llmSearch(SearchConditionDTO conditionDTO);
