@@ -159,21 +159,6 @@ body.lost-board .detail-hero h2 {
   color: #16a34a;
 }
 
-.detail-title {
-  margin: 0 0 10px;
-  color: #0f172a;
-  font-size: 22px;
-  font-weight: 900;
-  line-height: 1.35;
-}
-
-.detail-summary {
-  margin: 0 0 20px;
-  color: #64748b;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
 .info-box {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -221,7 +206,39 @@ body.lost-board .detail-hero h2 {
   font-weight: 700;
   line-height: 1.45;
   word-break: keep-all;
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+
+.detail-main {
+  flex: 1;
+  min-width: 0;
+  padding-top: 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-title {
+  margin: 0 ;
+  color: #0f172a;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1.3;
+}
+
+.detail-summary {
+  margin: 2 0 20px;
+  margin-left: 6px;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.6;
+
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+
+  max-height: 160px;
+  overflow-y: auto;
 }
 
 .owner-note {
@@ -239,6 +256,7 @@ body.lost-board .detail-hero h2 {
 
 .image-box {
   width: 100%;
+  height: 300px;
   max-height: 520px;
   border: 1px solid #dbe3ee;
   border-radius: 12px;
@@ -252,7 +270,7 @@ body.lost-board .detail-hero h2 {
 
 .image-box img {
   width: 100%;
-  max-height: 520px;
+  height: 100%;
   object-fit: contain;
   display: block;
 }
@@ -269,6 +287,15 @@ body.lost-board .detail-hero h2 {
   font-size: 12px;
   font-weight: 700;
   text-align: center;
+}
+
+.image-box.no-image-box {
+  border: 1px solid #dbe3ee;
+}
+
+.image-box.has-image {
+  border: none;
+  background: transparent;
 }
 
 .map-section {

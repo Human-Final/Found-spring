@@ -40,7 +40,7 @@
 
         <div class="tag-group">
           <span class="type-tag found">습득</span>
-          <span class="category-tag" th:text="${foundVO.prdtClNm}">지갑</span>
+          <span class="category-tag" th:text="${foundVO.prdtClNm}">카테고리</span>
 
           <span th:if="${foundVO.done == 0}" class="status-tag progress">진행중</span>
           <span th:if="${foundVO.done == 1}" class="status-tag done">완료</span>
@@ -48,13 +48,10 @@
 
         <h1 class="detail-title"
             th:text="${foundVO.fdPrdtNm}">
-          검정색 반지갑을 보관 중입니다
+          제목
         </h1>
 
-        <p class="detail-summary"
-           th:text="${foundVO.fdSbjt}">
-          습득물 정보를 확인한 뒤 보관장소를 참고해 주세요.
-        </p>
+
 
         <div class="info-box">
 
@@ -122,14 +119,25 @@
                 사용자 등록글
               </span>
             </div>
+          
           </div>
+        
+        </div>
 
+        <div class="summary-box">         
+          <p class="detail-summary"
+            th:text="${foundVO.fdSbjt}">
+            내용
+          </p>  
         </div>
 
       </div>
 
       <aside class="detail-image-area">
-        <div class="image-box">
+        <div class="image-box"
+             th:classappend="${foundVO.fdFilepathImg != null and foundVO.fdFilepathImg != ''}
+                ? 'has-image' 
+                : 'no-image-box'">
           <img th:if="${foundVO.fdFilepathImg != null and foundVO.fdFilepathImg != ''}"
                th:src="${foundVO.fdFilepathImg}"
                alt="습득물 이미지">
@@ -137,11 +145,13 @@
           <span th:if="${foundVO.fdFilepathImg == null or foundVO.fdFilepathImg == ''}"
                 class="no-image">
             등록된 이미지가 없습니다
-          </span>
-                  
+          </span>    
         </div>
 
-        <p class="image-caption">등록된 이미지</p>
+        <p th:if="${foundVO.fdFilepathImg != null and foundVO.fdFilepathImg != ''}"
+           class="image-caption">
+           등록된 이미지
+        </p>
       </aside>
 
     </div>

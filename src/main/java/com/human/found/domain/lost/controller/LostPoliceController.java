@@ -8,9 +8,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.human.found.domain.lost.service.LostPoliceServiceImpl;
 import com.human.found.domain.lost.vo.LostVO;
+
+import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequestMapping("/lost")
@@ -40,5 +43,20 @@ public class LostPoliceController {
         model.addAttribute("goods", goods);
         model.addAttribute("kakaoJsKey", kakaoMapConfig.getJsKey()); // 키값 전달
         return "lost/detail"; // 경로 확인하십시오
+    }
+
+
+    // 임시 컨트롤러
+    @RestController
+    @RequiredArgsConstructor
+    public class LostPoliceTestController {
+
+        private final LostPoliceServiceImpl lostPoliceService;
+
+        @GetMapping("/test/lost-police-refresh")
+        public String refreshLostPolice() {
+            lostPoliceService.ScheduledSavePoliceLost();
+            return "lost_police 재수집 실행 완료";
+        }
     }
 }
