@@ -291,7 +291,7 @@ resultType="com.human.found.domain.found.vo.FoundVO">
       AND is_deleted = 0
 </select>
 
-<update id="UpdateFound"
+<update id="updateFound"
 parameterType="com.human.found.domain.found.vo.FoundVO">
 UPDATE found
 SET

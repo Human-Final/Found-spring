@@ -17,6 +17,10 @@ public interface UserMapper {
     // 사용자의 아이디 조회
     String findUserId(String name, String email);
 
+    // 사용자 비밀번호 업데이트 실행
+    int updatePassword(@Param("userId") String userId, 
+                       @Param("encodedPassword") String encodedPassword);
+
     // 회원가입
     void insertUser(UserVO user);
 
@@ -31,6 +35,9 @@ public interface UserMapper {
 
     // 비밀번호만 단독 변경하는 쿼리
     int updatePasswordOnly(@Param("id") String id, @Param("pw") String pw);
+
+    // 비밀번호 찾기 회원정보 유무 확인
+    int isUserExist(String id, String name, String email);
 
     // 회원탈퇴 처리 (실제 삭제는 아니고 is_deleted, deleted_at변경)
     int withdrawUser(String id);

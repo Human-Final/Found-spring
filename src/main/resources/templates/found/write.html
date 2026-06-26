@@ -179,6 +179,27 @@
           </textarea>
         </div>
 
+        <div th:if="${isEdit}" class="existing-files">
+          <h3>기존 첨부파일</h3>
+
+          <div class="file-grid">
+              <label th:each="file : ${foundVO.fileList}"
+                    class="file-item">
+
+                  <input type="checkbox"
+                        name="deleteFiles"
+                        th:value="${file.saveName}"
+                        class="delete-check">
+
+                  <img th:src="@{'/images/found/' + ${file.saveName}}"
+                      th:alt="${file.fdFilepathImg}">
+
+                  <span th:text="${file.fdFilepathImg}"></span>
+
+              </label>
+          </div>
+      </div>
+
         <div class="form-section">
           <span class="form-label">첨부파일</span>
           <label class="upload-box" id="uploadBox">
@@ -327,6 +348,26 @@
     }
 
     setMaxDate();
+
+    document.querySelectorAll(".delete-btn").forEach(btn => {
+
+        btn.addEventListener("click", async function() {
+
+            const saveName = this.dataset.saveName;
+
+            if(!confirm("삭제하시겠습니까?")){
+                return;
+            }
+
+            await fetch("/api/found/file/" + saveName,{
+                method:"DELETE"
+            });
+
+            this.closest(".file-item").remove();
+        });
+
+    });
+
 
   </script>
 </body>
