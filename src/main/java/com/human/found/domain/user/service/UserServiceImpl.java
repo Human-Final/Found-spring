@@ -3,6 +3,8 @@ package com.human.found.domain.user.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +14,7 @@ import com.human.found.domain.user.mapper.UserMapper;
 import com.human.found.domain.user.vo.MyPagePostVO;
 import com.human.found.domain.user.vo.UserVO;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -25,6 +28,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final JavaMailSender mailSender;
 
     // 회원의 아이디 조회
     @Override
@@ -35,6 +39,59 @@ public class UserServiceImpl implements UserService {
         }
         return userId;
     }
+
+    // 회원정보 조회
+    @Override
+    public boolean isUserExist(String id, String name, String email){
+        if(userMapper.isUserExist(id, name, email)>0){
+            return true;
+        }
+        return false;
+    }
+
+    // 회원의 비밀번호 조회용 이메일 인증
+    @Override
+    public String sendPwEmail(String email, HttpSession session) {
+        java.util.Random random = new java.util.Random();
+        String verificationCode = String.format("%06d", random.nextInt(1000000));
+        long expiresAt = System.currentTimeMillis() + (3 * 60 * 1000);
+
+        session.setAttribute("pwEmailAuthCode", verificationCode);
+        session.setAttribute("pwEmailAuthTarget", email);
+        session.setAttribute("pwEmailAuthExpires", expiresAt);
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(email);
+            message.setSubject("[FOUND-AI기반 내 물건 찾기 서비스] 비밀번호 재설정 인증번호입니다."); 
+            message.setText("안녕하세요. 비밀번호 재설정을 위한 인증번호입니다.\n"
+                    + "요청하신 인증번호 6자리는 [" + verificationCode + "] 입니다.\n"
+                    + "3분 이내에 화면에 입력해 주세요.");
+            mailSender.send(message);
+        } catch (Exception e) {
+            e.printStackTrace(); 
+            return "mail_error";
+        }
+        return "send_success";
+    }
+
+    // 비밀번호 찾기 이메일 인증코드 처리
+    @Override
+    public String verifyPwCode(String inputCode, String email, HttpSession session) {
+        String sessionCode = (String) session.getAttribute("pwEmailAuthCode");
+        String sessionEmail = (String) session.getAttribute("pwEmailAuthTarget");
+        Long expiresAt = (Long) session.getAttribute("pwEmailAuthExpires");
+
+        if (expiresAt == null || sessionCode == null || !email.equals(sessionEmail)) return "no_request";
+        if (System.currentTimeMillis() > expiresAt) { return "timeout"; }
+        if (!sessionCode.equals(inputCode)) return "wrong_code";
+
+        session.setAttribute("pwVerifiedStatus", true);
+        return "verified";
+    }
+
+    
+
 
     /**
      * 회원가입
@@ -79,6 +136,46 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean isDuplicatedEmail(String email) {
         return userMapper.countByEmail(email) > 0;
+    }
+
+    // 회원가입 사용자 이메일 확인하기
+    @Override
+    public String sendJoinEmail(String email, HttpSession session) {
+        java.util.Random random = new java.util.Random();
+        String verificationCode = String.format("%06d", random.nextInt(1000000));
+        long expiresAt = System.currentTimeMillis() + (3 * 60 * 1000);
+
+        session.setAttribute("joinEmailAuthCode", verificationCode);
+        session.setAttribute("joinEmailAuthTarget", email);
+        session.setAttribute("joinEmailAuthExpires", expiresAt);
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(email);
+            message.setSubject("[FOUND-AI기반 내 물건 찾기 서비스] 회원가입 이메일 인증번호입니다."); 
+            message.setText("안녕하세요. 회원가입을 환영합니다.\n"
+                    + "요청하신 가입 인증번호 6자리는 [" + verificationCode + "] 입니다.\n"
+                    + "3분 이내에 화면에 입력해 주세요.");
+            mailSender.send(message);
+        } catch (Exception e) {
+            e.printStackTrace(); 
+            return "mail_error";
+        }
+        return "send_success";
+    }
+
+    // 회원가입 이메일 인증코드 알맞은지 확인하기
+    @Override
+    public String verifyJoinCode(String inputCode, String email, HttpSession session) {
+        String sessionCode = (String) session.getAttribute("joinEmailAuthCode");
+        String sessionEmail = (String) session.getAttribute("joinEmailAuthTarget");
+        Long expiresAt = (Long) session.getAttribute("joinEmailAuthExpires");
+
+        if (expiresAt == null || sessionCode == null || !email.equals(sessionEmail)) return "no_request";
+        if (System.currentTimeMillis() > expiresAt) { session.invalidate(); return "timeout"; }
+        if (!sessionCode.equals(inputCode)) return "wrong_code";
+
+        return "verified";
     }
 
     /**
