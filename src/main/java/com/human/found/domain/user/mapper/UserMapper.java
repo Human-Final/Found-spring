@@ -14,6 +14,9 @@ public interface UserMapper {
     // 아이디로 회원 조회
     UserVO findById(@Param("id")String id);
 
+    // 사용자의 아이디 조회
+    String findUserId(String name, String email);
+
     // 회원가입
     void insertUser(UserVO user);
 

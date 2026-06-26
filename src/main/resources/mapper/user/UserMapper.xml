@@ -22,7 +22,7 @@
     </resultMap>
 
     <select id="findById"
-            parameterType="String"
+            parameterType="map"
             resultMap="userMap">
 
         SELECT *
@@ -31,6 +31,16 @@
             AND is_deleted = 0
 
     </select>
+
+    <select id="findUserId"
+            resultType="String">
+        select id 
+        from user
+        where name=#{name}
+            and email=#{email}
+    </select>
+
+
 
     <select id="selectMyPageCounts" parameterType="string" resultType="map">
         SELECT 
