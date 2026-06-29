@@ -20,6 +20,7 @@ import com.human.found.domain.comment.service.FoundCommentService;
 import com.human.found.domain.comment.vo.CommentVO;
 import com.human.found.domain.found.service.FoundService;
 import com.human.found.domain.found.vo.FoundVO;
+import com.human.found.domain.lost.vo.LostVO;
 import com.human.found.global.common.paging.PagingVO;
 import com.human.found.infrastructure.map.KakaoMapConfig;
 
@@ -44,7 +45,7 @@ public class FoundController {
         @RequestParam(value="files",required = false) MultipartFile[]files, Principal principal ) {
         
         if(bindingResult.hasErrors()){
-            model.addAttribute("writetype", "found");
+            model.addAttribute("boardType", "found");
             return "found/write";
         }    
         //작성자 자동설정
@@ -80,12 +81,20 @@ public class FoundController {
     }
     
     @GetMapping("/api/write")
-    public String foundWriteForm(Model model) {
+    public String writeForm(@RequestParam(defaultValue = "found") String boardType,
+                                Model model) {
         // 화면에 습득물(found) 타입을 구분하기 위한 값 전달
-        model.addAttribute("foundVO", new FoundVO());
+        // model.addAttribute("foundVO", new FoundVO());
         
         // 기본값 설정
-        model.addAttribute("writetype", "found");
+        model.addAttribute("boardType", boardType);
+        model.addAttribute("isEdit", false);
+
+        if("lost".equals(boardType)){
+            model.addAttribute("lostVO", new LostVO());
+        }else {
+            model.addAttribute("foundVO", new FoundVO());
+        }
         return "found/write";
     }
     
@@ -160,7 +169,7 @@ public class FoundController {
             return "redirect:/api/found/detail/"+atcId;    
         }    
         model.addAttribute("foundVO", foundVO);
-        model.addAttribute("writetype", "found");
+        model.addAttribute("boardType", "found");
         model.addAttribute("isEdit", true);
         
         return "found/write";
@@ -177,7 +186,7 @@ public class FoundController {
     
     //[입력값 유지 및 임시저장 기능] 검증 에러 발생 시 작성하던 내용 그대로 다시 폼으로 백! 
     if(bindingResult.hasErrors()){
-        model.addAttribute("writetype", "found");
+        model.addAttribute("boardType", "found");
         model.addAttribute("isEdit", true);
         // 이미 매핑된 foundVO가 model에 담겨 있으므로 입력했던 값들이 폼에 그대로 유지
         return "found/write";

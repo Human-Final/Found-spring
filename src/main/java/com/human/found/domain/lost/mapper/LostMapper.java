@@ -4,16 +4,16 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.human.found.domain.lost.vo.LostVO;
+import com.human.found.global.common.paging.PagingVO;
 
 @Mapper
 
 public interface LostMapper {
     public void insertLost(LostVO lostVO);
     
-    public List<LostVO> selectLostList();
+    public List<LostVO> selectLostList(PagingVO pagingVO);
     
     public LostVO selectlostbyId(@Param("atcId")String atcId);
     
@@ -33,6 +33,6 @@ public interface LostMapper {
 
     void UpdateLost(LostVO lostVO);
 
-    
+    long countLostList();
 
 }

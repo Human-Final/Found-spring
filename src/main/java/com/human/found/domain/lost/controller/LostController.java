@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.human.found.domain.comment.service.LostCommentService;
 import com.human.found.domain.lost.service.LostService;
 import com.human.found.domain.lost.vo.LostVO;
+import com.human.found.global.common.paging.PagingVO;
 import com.human.found.infrastructure.map.KakaoMapConfig;
 
 import jakarta.validation.Valid;
@@ -51,7 +52,7 @@ public class LostController {
                 error.getField() + " = " + error.getDefaultMessage()));
             
 
-            model.addAttribute("writetype", "lost");
+            model.addAttribute("boardType", "lost");
             return "found/write";
         }
             
@@ -70,9 +71,18 @@ public class LostController {
     }
     //조회
     @GetMapping("/api/lost")
-    public String Lostlist(Model model) {
-        List<LostVO>getList=lostService.getLostlist();
+    public String Lostlist(Model model,
+        @RequestParam(defaultValue = "1") int page) {
+
+        PagingVO pagingVO = new PagingVO();
+        pagingVO.setPage(page);
+        pagingVO.setSize(10);
+        pagingVO.setPageBlock((10));
+
+        List<LostVO>getList=lostService.getLostlist(pagingVO);
+        model.addAttribute("paging", pagingVO);
         model.addAttribute("getList", getList);
+        model.addAttribute("isEdit", false);
         return "lost/list";
     }
 
@@ -80,7 +90,7 @@ public class LostController {
     public String lostWriteForm(Model model) {
         // 화면에 습득물(lost) 타입을 구분하기 위한 값 전달
         model.addAttribute("lostVO",new LostVO());
-        model.addAttribute("writetype", "lost");
+        model.addAttribute("boardType", "lost");
         return "found/write";
     }
     //삭제
@@ -116,6 +126,7 @@ public class LostController {
     @GetMapping("/api/lost/detail/{atcId}")
     public String lostDetaile(@PathVariable("atcId")String atcId,Model model) {
         LostVO lostVO=lostService.lostdetail(atcId);
+
         model.addAttribute("lostVO", lostVO);
         model.addAttribute("comments", lostCommentService.getComments(
             lostVO.getNum(), lostVO.getDataSource())
@@ -143,7 +154,7 @@ public class LostController {
             return "redirect:/api/lost/detail/"+atcId;
         }
         model.addAttribute("lostVO", lostVO);
-        model.addAttribute("writetype", "lost");
+        model.addAttribute("boardType", "lost");
         model.addAttribute("isEdit", true);
         return "found/write";
     }
@@ -154,7 +165,7 @@ public class LostController {
 
         //[입력값 유지 및 임시저장 기능] 검증 에러 발생 시 작성하던 내용 그대로 다시 폼으로 백!
         if(bindingResult.hasErrors()){
-            model.addAttribute("writetype", "lost");
+            model.addAttribute("boardType", "lost");
             model.addAttribute("isEdit", true);
             return "found/write";
         }

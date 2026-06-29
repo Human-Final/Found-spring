@@ -20,7 +20,7 @@
       <p>분실한 물건을 등록하고 도움을 요청하세요</p>
     </div>
 
-    <a th:href="@{/api/write}" class="write-btn">글쓰기</a>
+    <a th:href="@{/api/write(boardType='lost')}" class="write-btn">글쓰기</a>
   </section>
 
   <section class="filter-box">
@@ -122,7 +122,31 @@
       </div>
     </a>
   </section>
+ 
+  <div class="pagination" th:if="${paging.totalCount > 0}">
+    <a 
+      th:if="${paging.prev}"
+      th:href="@{/api/lost(page=${paging.startPage -1})}"
+      class="page-btn">
+      이전
+    </a>
 
+    <a
+      th:each="pageNum : ${#numbers.sequence(paging.startPage, paging.endPage)}"
+      th:href="@{/api/lost(page=${pageNum})}"
+      th:text="${pageNum}"
+      th:classappend="${pageNum==paging.page} ? 'active' : ''"
+      class="page-btn">
+      1
+    </a>
+
+    <a th:if="${paging.next}"
+      th:href="@{/api/lost(page=${paging.endPage + 1})}"
+      class="page-btn">
+      다음
+    </a>
+
+  </div>
 
 </main>
 
@@ -166,21 +190,6 @@
         loadBoardList();
       });
     });
-  }
-
-  function getCategoryLabel(prdtClNm) {
-    if (!prdtClNm) return "기타";
-
-    if (["가방", "백"].some(word => prdtClNm.includes(word))) return "가방";
-    if (["귀금속", "반지", "목걸이", "귀걸이", "시계"].some(word => prdtClNm.includes(word))) return "귀금속";
-    if (["도서", "책", "서적", "소설"].some(word => prdtClNm.includes(word))) return "도서";
-    if (["의류", "모자", "신발"].some(word => prdtClNm.includes(word))) return "의류";
-    if (["자동차", "네비", "번호판"].some(word => prdtClNm.includes(word))) return "자동차";
-    if (["전자", "핸드폰", "휴대폰", "아이폰", "노트북", "컴퓨터"].some(word => prdtClNm.includes(word))) return "전자기기";
-    if (prdtClNm.includes("지갑")) return "지갑";
-    if (prdtClNm.includes("카드")) return "카드";
-
-    return "기타";
   }
 
   async function loadBoardList() {

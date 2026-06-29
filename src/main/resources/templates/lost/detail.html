@@ -46,12 +46,8 @@
         </div>
 
         <h1 class="detail-title" th:text="${lostVO.lstSbjt}">
-          검정색 반지갑을 보관 중입니다
+          제목
         </h1>
-
-        <p class="detail-summary" th:text="${lostVO.lstPrdtNm}">
-          분실물 정보를 확인한 뒤 보관장소를 참고해 주세요.
-        </p>
 
         <div class="info-box">
 
@@ -69,7 +65,7 @@
             <div class="info-row">
               <span class="info-label">분실일자</span>
               <span class="info-value"
-                    th:text="${#temporals.format(lostVO.lstYmd, 'yyyy-MM-dd HH:mm')}">
+                    th:text="${#temporals.format(lostVO.lstYmd, 'yyyy-MM-dd')}">
               </span>
             </div>
           </div>
@@ -104,28 +100,115 @@
             <div class="info-row">
               <span class="info-label">데이터출처</span>
               <span class="info-value"
-                    th:text="${lostVO.dataSource == 'user' ? '사용자 등록글' : (lostVO.dataSource == 'police' ? '경찰청 API' : '포털기관 API')}">
+                    th:text="${lostVO.dataSource == 'user' ? '사용자 등록글' : '경찰청 API'}">
                 사용자 등록글
               </span>
             </div>
           </div>
+        </div>
 
+        <div class="summary-box">         
+          <p class="detail-summary"
+            th:text="${lostVO.lstSbjt}">
+            내용
+          </p>  
         </div>
       </div>
 
       <aside class="detail-image-area">
-        <div class="image-box">
-          <img th:if="${lostVO.lstFilepathImg != null and lostVO.lstFilepathImg != ''}"
-               th:src="${lostVO.lstFilepathImg}"
-               alt="분실물 이미지">
+        <!-- 첨부파일이 있는 경우 : 리스트로 받아서 슬라이드-->
+        <div th:if="${lostVO.dataSource == 'user'
+                  and lostVO.fileList != null
+                  and not #lists.isEmpty(lostVO.fileList)}"
+             class="media-slider"
+             id="mediaSlider">
 
-          <span th:if="${lostVO.lstFilepathImg == null or lostVO.lstFilepathImg == ''}"
-                class="no-image">
-            등록된 이미지가 없습니다
-          </span>
+          <div class="media-track">
+          
+            <div th:each="file, stat : ${lostVO.fileList}"
+                 th:if="${file.saveName != null and file.saveName != ''}"
+                 th:with="fileName=${file.saveName == null 
+                          ? '' 
+                          : #strings.toLowerCase(file.saveName)}"
+                 class="media-slide"
+                 th:classappend="${stat.index == 0} ? ' active' : ''">
+
+              <!-- 이미지 -->
+              <img th:if="${file.saveName != null and file.saveName != ''
+                          and (#strings.endsWith(fileName, '.jpg')
+                          or #strings.endsWith(fileName, '.jpeg')
+                          or #strings.endsWith(fileName, '.png')
+                          or #strings.endsWith(fileName, '.gif')
+                          or #strings.endsWith(fileName, '.webp'))}"
+                    th:src="@{'/images/lost/' + ${file.saveName}}"
+                    th:alt="${file.saveName}"
+                    class="slide-media">
+
+              <!-- 동영상 -->
+              <div th:if="${file.saveName != null and file.saveName != ''
+                        and (#strings.endsWith(fileName, '.mp4')
+                        or #strings.endsWith(fileName, '.webm')
+                        or #strings.endsWith(fileName, '.mov'))}"
+                    class="video-wrap">
+
+                <video class="slide-media slide-video"
+                       preload="metadata"
+                       controls>
+                  <source th:src="@{'/images/lost/' + ${file.saveName}}">
+                    브라우저가 동영상을 지원하지 않습니다
+                </video>
+
+                <div class="video-hint">동영상을 클릭해 재생하세요</div>
+              </div>              
+            </div>
+            
+            <button type="button"
+                    class="slide-btn prev-btn"
+                    th:if="${#lists.size(lostVO.fileList) > 1}">
+              ‹
+            </button>
+
+            <button type="button"
+                    class="slide-btn next-btn"
+                    th:if="${#lists.size(lostVO.fileList) > 1}">
+              ›
+            </button>
+
+            <div class="slide-counter"
+                 th:if="${#lists.size(lostVO.fileList) > 1}">
+              <span id="currentSlide">1</span>
+              /
+              <span th:text="${#lists.size(lostVO.fileList)}">1</span>
+            </div>
+          </div>
+        </div>  
+        
+        <!-- 업로드 첨부파일이 없고 API/XML 이미지가 있는 경우 -->
+        <div th:if="${lostVO.dataSource != 'user'
+                    and lostVO.lstFilepathImg != null
+                    and lostVO.lstFilepathImg != ''}"
+             class="image-box has-image">
+
+          <img th:src="${lostVO.lstFilepathImg}"
+               alt="분실물 이미지">
         </div>
 
-        <p class="image-caption">등록된 이미지</p>
+        <!-- 아무 이미지도 없는 경우 -->
+        <div th:if="${(lostVO.dataSource != 'user'
+                      and (lostVO.lstFilepathImg == null or lostVO.lstFilepathImg == ''))
+                    or (lostVO.dataSource == 'user'
+                      and (lostVO.fileList == null or #lists.isEmpty(lostVO.fileList))
+                      and (lostVO.lstFilepathImg == null or lostVO.lstFilepathImg == ''))}"
+             class="image-box no-image-box">
+          <span class="no-image">등록된 이미지가 없습니다</span>
+        </div>
+
+        <p class="image-caption"
+           th:if="${(lostVO.fileList != null and not #lists.isEmpty(lostVO.fileList))
+                 or (lostVO.lstFilepathImg != null and lostVO.lstFilepathImg != '')}">
+          등록된 첨부파일
+        </p>
+
       </aside>
 
     </div>
@@ -151,6 +234,7 @@
         ← 목록으로
       </a>
 
+      <!-- 작성자 본인만 수정 가능-->
       <th:block th:if="${#authorization.expression('isAuthenticated()') 
                       and lostVO.dataSource == 'user' 
                       and lostVO.id == #authentication.name}">
@@ -161,34 +245,42 @@
       </th:block>
 
       <form class="delete-form"
-            sec:authorize="hasRole('ADMIN')"
-            th:action="@{/api/lost/{lostNum}(lostNum=${lostVO.num})}"
+            th:if="${#authorization.expression('hasRole(''ADMIN'')') 
+                  or (#authorization.expression('isAuthenticated()')
+                      and lostVO.dataSource == 'user'
+                      and lostVO.id == #authentication.name)}"
+            th:action="@{/api/lost/{atcId}(atcId=${lostVO.atcId})}"
             method="post"
-            data-admin="true"
-            onsubmit="return setDeletePassword(this);">
+            th:data-admin="${#authorization.expression('hasRole(''ADMIN'')')}"
+            onsubmit="return validatePostDelete(this);">
 
-        <input type="hidden" name="password" class="delete-password-input">
+        <input type="hidden" name="_method" value="delete">  
 
-        <button type="submit" class="detail-btn delete-btn">
+        <div class="post-delete-password-area"
+             th:classappend="${errorMessage == null ? ' is-hidden' : ''}">
+          
+          <label for="postDeletePasswordInput">비밀번호 확인</label>
+         
+          <input type="password"
+                 id="postDeletePasswordInput"
+                 name="password"
+                 class="post-delete-password-input"
+                 placeholder="비밀번호 입력"
+                 autocomplete="current-password">
+
+          <p class="post-delete-error"
+             th:if="${errorMessage != null}"
+             th:text="${errorMessage}">
+            비밀번호가 일치하지 않습니다.
+          </p>
+        </div>        
+
+        <button type="submit" 
+                class="detail-btn delete-btn post-delete-btn"
+                th:text="${errorMessage !=null ? '비밀번호 확인 후 삭제' : '삭제하기'}">
           삭제하기
         </button>
       </form>
-
-      <form class="delete-form"
-            sec:authorize="!hasRole('ADMIN')"
-            th:if="${loginId != null and loginId == lostVO.id}"
-            th:action="@{/api/lost/{lostNum}(lostNum=${lostVO.num})}"
-            method="post"
-            data-admin="false"
-            onsubmit="return setDeletePassword(this);">
-
-        <input type="hidden" name="password" class="delete-password-input">
-
-        <button type="submit" class="detail-btn delete-btn">
-          삭제하기
-        </button>
-      </form>
-
     </div>
 
     <!-- 댓글 영역 -->
@@ -267,7 +359,9 @@
 
             <button type="button"
                     class="comment-edit-toggle-btn"
-                    th:if="${#authentication.name == comment.id}">
+                    th:if="${#authentication.name == comment.id}"
+                    th:action="@{/api/lost/detail/{atcId}/edit(atcId=${lostVO.atcId})}"
+                    >
               수정
             </button>
 
@@ -295,30 +389,33 @@
 
 <div th:replace="~{layout/footer :: footerFragment}"></div>
 
-<script
-  type="text/javascript"
-  th:src="|//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoMapJsKey}&libraries=services&autoload=false|">
-</script>
-
 <script th:inline="javascript">
-  function setDeletePassword(form) {
-    const password = prompt("게시글 삭제를 위해 비밀번호를 입력해 주세요.");
+  function validatePostDelete(form){
+    const passwordArea = form.querySelector(".post-delete-password-area");
+    const passwordInput = form.querySelector(".post-delete-password-input");
+    const deleteBtn = form.querySelector(".post-delete-btn");
+    const isAdmin = form.dataset.admin === "true";
 
-    if (password === null) {
+    if(isAdmin){
+      return confirm("정말 게시글을 삭제하시겠습니까?");
+    }
+
+    if(passwordArea.classList.contains("is-hidden")){
+      passwordArea.classList.remove("is-hidden")
+      passwordInput.focus();
+      deleteBtn.textContent = "비밀번호 확인 후 삭제";
       return false;
     }
 
-    if (password.trim() === "") {
-      alert("비밀번호를 입력해 주세요.");
+    const password = passwordInput.value.trim();
+
+    if(password === ""){
+      alert("비밀번호를 입력해 주세요.")
+      passwordInput.focus();
       return false;
     }
 
-    if (!confirm("정말 삭제하시겠습니까?")) {
-      return false;
-    }
-
-    form.querySelector(".delete-password-input").value = password;
-    return true;
+    return confirm("게시글을 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.")
   }
 
   document.addEventListener("DOMContentLoaded", function () {
@@ -335,14 +432,23 @@
 
         updateForm.classList.toggle("is-hidden");
 
-        if (updateForm.classList.contains("is-hidden")) {
-          button.textContent = "수정";
-        } else {
-          button.textContent = "취소";
-        }
+        button.textContent = updateForm.classList.contains("is-hidden")
+          ? "수정"
+          : "취소";
       });
     });
   });
+
+</script>
+
+<!-- 카카오맵 -->
+
+<script
+  type="text/javascript"
+  th:src="|//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoMapJsKey}&libraries=services&autoload=false|">
+</script>
+
+<script th:inline="javascript">
 
   document.addEventListener("DOMContentLoaded", function () {
     const mapAddress = String(/*[[${lostVO.lstPlace}]]*/ "").trim();
@@ -464,6 +570,115 @@
         }, 100);
       }
     });
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const slider = document.querySelector("#mediaSlider");
+
+    if(!slider){
+      return;
+    }
+
+    const slides = slider.querySelectorAll(".media-slide");
+    const prevBtn = slider.querySelector(".prev-btn");
+    const nextBtn = slider.querySelector(".next-btn");
+    const currentSlide = slider.querySelector("#currentSlide");
+
+    if(slides.length === 0){
+      return;
+    }
+
+    let currentIndex = 0;
+    let autoTimer = null;
+    const AUTO_DELAY = 1000;
+
+    function pauseAllVideos(){
+      slider.querySelectorAll("video").forEach(video => {
+        video.pause();
+      });
+    }
+
+    function updateCounter(){
+      if(currentSlide){
+        currentSlide.textContent = currentIndex + 1;
+      }
+    }
+
+    function showSlide(nextIndex){
+      pauseAllVideos();
+
+      slides[currentIndex].classList.remove("active");
+
+      currentIndex = nextIndex;
+
+      if(currentIndex < 0){
+        currentIndex = slides.length -1;
+      }
+
+      if(currentIndex >= slides.length){
+        currentIndex = 0;
+      }
+
+      slides[currentIndex].classList.add("active");
+      updateCounter();
+    }
+
+    function nextSlide(){
+      showSlide(currentIndex + 1);
+    }
+
+    function prevSlide(){
+      showSlide(currentIndex -1);
+    }
+
+    function startAutoSlide(){
+      stopAutoSlide();
+
+      if(slides.length <= 1){
+        return;
+      }
+
+      autoTimer = setInterval(() => {
+        nextSlide();
+      }, AUTO_DELAY);
+    }
+
+    function stopAutoSlide(){
+      if(autoTimer){
+        clearInterval(autoTimer);
+        autoTimer = null;
+      }
+    }
+
+    if(nextBtn){
+      nextBtn.addEventListener("click", () => {
+          nextSlide();
+          startAutoSlide();
+      });
+    }
+
+    if(prevBtn){
+      prevBtn.addEventListener("click", () => {
+          prevSlide();
+          startAutoSlide();
+      });
+    }
+
+    slider.querySelectorAll("video").forEach(video => {
+      video.addEventListener("play", () => {
+        stopAutoSlide();
+      });
+
+      video.addEventListener("ended", () => {
+        nextSlide();
+        startAutoSlide();
+      });
+    });
+
+    updateCounter();
+    startAutoSlide();
   });
 </script>
 

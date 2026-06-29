@@ -19,8 +19,10 @@
         <result property="isDeleted" column="is_deleted"/>
         <result property="lstFilepathImg" column="lst_filepath_img"/>
         <result property="viewConut" column="view_conut"/>
+        <result property="dataSource" column="dataSource"/>
 
-        <collection property="filelist" javaType="ArrayList" ofType="com.human.found.domain.lost.vo.LostFileVO">
+
+        <collection property="fileList" javaType="ArrayList" ofType="com.human.found.domain.lost.vo.LostFileVO">
                 <id property="id" column="file_id"/>
                 <result property="fdFilepathImg" column="fd_filepath_img"/>
                 <result property="atcId" column="atc_id"/>
@@ -108,26 +110,9 @@ lst_filepath_img,
 FROM lost_police
 WHERE 
         is_deleted=0
-<!-- UNION ALL  
-
-SELECT 
-num,
-atc_id,
-id,
-lst_place,
-lst_prdt_nm,
-lst_sbjt,
-lst_ymd,
-prdt_cl_nm,
-created_at,
-updated_at,
-done,
-is_deleted
-FROM lost_portal
-WHERE 
-        is_deleted=0  -->
 ORDER BY lst_ymd DESC
-LIMIT 10
+LIMIT #{size}
+OFFSET #{offset}
 
 </select>
 
@@ -220,7 +205,6 @@ SET
 lst_filepath_img=#{lstFilepathImg}
 WHERE atc_id = #{atcId}
 
-
 </update>
 
 <update id="UpdateLost"
@@ -240,5 +224,22 @@ WHERE
 atc_id=#{atcId}
 
 </update>
+
+<select id="countLostList"
+            resultType="long">
+    select sum(cnt)
+    from (
+        select count(*) cnt
+        from lost
+        where is_deleted = 0
+
+        union all
+
+        select count(*) cnt
+        from lost_police
+        where is_deleted = 0
+    ) as total_lost
+
+</select>
 
 </mapper>       

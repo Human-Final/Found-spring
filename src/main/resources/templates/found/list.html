@@ -19,7 +19,7 @@
       <p>습득한 물건을 등록하고 주인을 찾아주세요</p>
     </div>
 
-    <a th:href="@{/api/write}" class="write-btn">글쓰기</a>
+    <a th:href="@{/api/write(boardType='found')}" class="write-btn">글쓰기</a>
   </section>
 
   <section class="filter-box">
@@ -198,22 +198,6 @@
         loadBoardList();
       });
     });
-  }
-
-  function getCategoryLabel(prdtClNm) {
-    if (!prdtClNm) return "기타";
-
-    if (["가방", "백"].some(word => prdtClNm.includes(word))) return "가방";
-    if (["귀금속", "반지", "목걸이", "귀걸이", "시계"].some(word => prdtClNm.includes(word))) return "귀금속";
-    if (["도서", "책", "서적", "소설"].some(word => prdtClNm.includes(word))) return "도서";
-    if (["의류", "모자", "신발"].some(word => prdtClNm.includes(word))) return "의류";
-    if (["자동차", "네비", "번호판"].some(word => prdtClNm.includes(word))) return "자동차";
-    if (["핸드폰", "휴대폰", "아이폰"].some(word => prdtClNm.includes(word))) return "핸드폰";
-    if (["전자","노트북", "컴퓨터"].some(word => prdtClNm.includes(word))) return "전자기기";
-    if (prdtClNm.includes("지갑")) return "지갑";
-    if (prdtClNm.includes("카드")) return "카드";
-
-    return "기타";
   }
 
   async function loadBoardList() {
