@@ -340,7 +340,7 @@
             return false;
         }
         
-        // 💡 [핵심 교정]: 글 내용이 비어있더라도 '이미지 파일'을 등록했다면 통과되도록 규칙 완화
+        // [핵심 교정]: 글 내용이 비어있더라도 '이미지 파일'을 등록했다면 통과되도록 규칙 완화
         // 글 내용도 없고, 파일도 선택하지 않았을 때만 등록을 제한합니다.
         if (!content && !uploadFile) {
             alert("공지 내용문 혹은 안내 이미지 중 하나는 반드시 입력하셔야 등록이 가능합니다.");
@@ -384,7 +384,7 @@
         }
     }
 
-    // 2. 💡 [핵심] X 버튼을 누르거나 취소할 때 파일 첨부를 원천 무효화하는 함수
+    // 2. [핵심] X 버튼을 누르거나 취소할 때 파일 첨부를 원천 무효화하는 함수
     function cancelFileSelection() {
         const fileInput = document.getElementById("uploadFile");
         const previewContainer = document.getElementById("previewContainer");

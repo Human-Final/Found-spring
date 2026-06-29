@@ -296,7 +296,7 @@ public class UserServiceImpl implements UserService {
 
 
     /**
-     * 🔑 2. 새 비밀번호 유효성 검사 및 변경 처리
+     * 2. 새 비밀번호 유효성 검사 및 변경 처리
      */
     @Override
     @Transactional
@@ -395,7 +395,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional // 🌟 중요: 두 테이블 삭제 작업 중 단 하나라도 실패하면 전부 원래대로 되돌리는 트랜잭션 보장
+    @Transactional // 중요: 두 테이블 삭제 작업 중 단 하나라도 실패하면 전부 원래대로 되돌리는 트랜잭션 보장
     public void deleteAllCommentsByUserId(String userId) {
         
         // 1. 내가 작성한 습득물 댓글 전체 삭제

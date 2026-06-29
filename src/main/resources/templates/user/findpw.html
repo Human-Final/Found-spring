@@ -181,12 +181,12 @@
         params.append('email', email);
 
         // fetch진행하기 전에 로딩 창 띄우기
-        errorDiv.innerText = "📧 인증 메일을 보내는 중입니다. 잠시만 기다려 주세요...";
+        errorDiv.innerText = "인증 메일을 보내는 중입니다. 잠시만 기다려 주세요...";
         errorDiv.style.backgroundColor = "#e8f0fe"; // 파란색 로딩 박스 스타일
         errorDiv.style.color = "#1a73e8";
         errorDiv.style.display = 'block';
 
-        // 💡 실제 매핑 주소인 '/find-pw'로 정확하게 요청을 보냅니다.
+        // 실제 매핑 주소인 '/find-pw'로 정확하게 요청을 보냅니다.
         fetch('/find-pw', {
         method: 'POST',
         headers: { 
@@ -197,7 +197,7 @@
         })
         .then(response => response.text())
         .then(data => {
-        // 💡 컨트롤러가 주는 리턴값 분기 처리
+        // 컨트롤러가 주는 리턴값 분기 처리
         if (data === "send_success") {
             errorDiv.style.display = 'none';
             document.getElementById('step1').classList.remove('active');
