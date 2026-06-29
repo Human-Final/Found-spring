@@ -19,6 +19,7 @@ public class LostVO {
     // @NotBlank(message = "분실일자는 필수 입력 사항입니다.")
     private LocalDateTime lstYmd;
     private String prdtClNm;
+    private String prdtCategory;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Integer done = 0;
