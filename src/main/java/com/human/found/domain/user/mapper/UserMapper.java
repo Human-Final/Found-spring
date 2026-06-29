@@ -61,4 +61,5 @@ public interface UserMapper {
     // 유저의 모든 작성 댓글 삭제하기(2개모두)
     void deleteAllFoundCommentsByUserId(String UserId);
     void deleteAllLostCommentsByUserId(String UserId);
+
 }

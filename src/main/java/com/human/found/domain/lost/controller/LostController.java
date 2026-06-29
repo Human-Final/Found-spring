@@ -109,7 +109,10 @@ public class LostController {
         String loginid=authentication.getName();
         //로그인한 유저의 권한 목록 중 관리자 권한 (ADMIN) 이 있는지 확인
         boolean isAdmin=authentication.getAuthorities().stream()
-        .anyMatch(auth->auth.getAuthority().equals("ROLE_ADMIN")||auth.getAuthority().equals("ADMIN"));
+        .anyMatch(auth->auth.getAuthority().equals("ROLE_ADMIN")
+                        || auth.getAuthority().equals("ADMIN")
+                        || auth.getAuthority().equals("ROLE_MANAGER")
+                        || auth.getAuthority().equals("MANAGER"));
 
         try {
             //서비스단에 글 id 입력번호, 로그인한 유저 id 를 넘겨받아 검증 및 삭제
@@ -148,7 +151,9 @@ public class LostController {
         String loginId=authentication.getName();
         boolean isAdmin=authentication.getAuthorities().stream()
         .anyMatch(auth->auth.getAuthority().equals("ROLE_ADMIN")
-        ||auth.getAuthority().equals("ADMIN"));
+                        || auth.getAuthority().equals("ADMIN")
+                        || auth.getAuthority().equals("ROLE_MANAGER")
+                        || auth.getAuthority().equals("MANAGER"));
         if(!isAdmin &&(lostVO.getId()==null||!lostVO.getId().equals(loginId))){
             redirectAttributes.addFlashAttribute("errormessage", "본인이 작성한 게시글만 수정할 수 있습니다");
             return "redirect:/api/lost/detail/"+atcId;
@@ -160,8 +165,10 @@ public class LostController {
     }
     //실제 데이터 수정
     @PostMapping("api/lost/update")
-    public String LostUpdate(@Valid @ModelAttribute("lostVO")LostVO lostVO,BindingResult bindingResult,Model model,
-    MultipartFile[]files,@RequestParam(value = "files",required = false)List<String>deletefiles) {
+    public String LostUpdate(@Valid @ModelAttribute("lostVO")LostVO lostVO,
+            BindingResult bindingResult,Model model,
+            @RequestParam(value = "files",required = false) MultipartFile[]files,
+            @RequestParam(value = "deleteFiles",required = false)List<String>deleteFiles) {
 
         //[입력값 유지 및 임시저장 기능] 검증 에러 발생 시 작성하던 내용 그대로 다시 폼으로 백!
         if(bindingResult.hasErrors()){
@@ -169,7 +176,7 @@ public class LostController {
             model.addAttribute("isEdit", true);
             return "found/write";
         }
-        lostService.UpdateLost(lostVO,files,deletefiles);
+        lostService.UpdateLost(lostVO,files,deleteFiles);
         return "redirect:/api/lost/detail/"+lostVO.getAtcId();
     }
     

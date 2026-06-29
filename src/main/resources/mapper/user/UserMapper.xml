@@ -14,10 +14,10 @@
         <result property="email" column="email"/>
         <result property="tel" column="tel"/>
         <result property="role" column="role"/>
-
         <result property="signUp" column="sign_up"/>
         <result property="deletedAt" column="deleted_at"/>
-        <result property="isdeleted" column="is_deleted"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="status" column="status"/>
 
     </resultMap>
 
@@ -213,7 +213,6 @@
     </update>
 
 
-
     <!-- 회원탈퇴 , 5년 보존 때문에 소프트 삭제-->
     <update id="withdrawUser"
             parameterType = "string">
@@ -302,9 +301,5 @@
             deleted_at = NOW()
         WHERE id = #{userId} AND is_deleted = 0
     </update>
-
-
-
-
 
 </mapper>

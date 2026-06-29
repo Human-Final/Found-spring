@@ -261,13 +261,15 @@
       </th:block>
 
       <form class="delete-form"
-            th:if="${#authorization.expression('hasRole(''ADMIN'')') 
-                  or (#authorization.expression('isAuthenticated()')
-                      and foundVO.dataSource == 'user'
-                      and foundVO.id == #authentication.name)}"
+            th:if="${#authorization.expression('hasRole(''ADMIN'')')
+                    or #authorization.expression('hasRole(''MANAGER'')')
+                    or (#authorization.expression('isAuthenticated()')
+                        and foundVO.dataSource == 'user'
+                        and foundVO.id == #authentication.name)}"
             th:action="@{/api/found/{atcId}(atcId=${foundVO.atcId})}"
             method="post"
-            th:data-admin="${#authorization.expression('hasRole(''ADMIN'')')}"
+            th:data-admin="${#authorization.expression('hasRole(''ADMIN'')')
+                             or #authorization.expression('hasRole(''MANAGER'')')}"
             onsubmit="return validatePostDelete(this);">
         
           <input type="hidden" name="_method" value="delete">  
@@ -358,7 +360,6 @@
                 class="comment-update-form is-hidden">
 
             <input type="hidden" name="atcId" th:value="${foundVO.atcId}">
-            
 
             <textarea name="content"
                       class="comment-update-textarea"

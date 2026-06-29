@@ -245,13 +245,15 @@
       </th:block>
 
       <form class="delete-form"
-            th:if="${#authorization.expression('hasRole(''ADMIN'')') 
-                  or (#authorization.expression('isAuthenticated()')
-                      and lostVO.dataSource == 'user'
-                      and lostVO.id == #authentication.name)}"
+            th:if="${#authorization.expression('hasRole(''ADMIN'')')
+                    or #authorization.expression('hasRole(''MANAGER'')')
+                    or (#authorization.expression('isAuthenticated()')
+                        and lostVO.dataSource == 'user'
+                        and lostVO.id == #authentication.name)}"
             th:action="@{/api/lost/{atcId}(atcId=${lostVO.atcId})}"
             method="post"
-            th:data-admin="${#authorization.expression('hasRole(''ADMIN'')')}"
+            th:data-admin="${#authorization.expression('hasRole(''ADMIN'')')
+                            or #authorization.expression('hasRole(''MANAGER'')')}"
             onsubmit="return validatePostDelete(this);">
 
         <input type="hidden" name="_method" value="delete">  

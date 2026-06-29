@@ -83,14 +83,14 @@ public class UserController {
     }
 
     /**
-     * 🔒 현재 비밀번호 Ajax 본인 인증 API (데이터 유실 방지 가드 적용)
+     * 현재 비밀번호 Ajax 본인 인증 API (데이터 유실 방지 가드 적용)
      */
     @PostMapping("/verify-password")
     @ResponseBody 
     public boolean verifyPassword(HttpServletRequest request, Principal principal) {
         if (principal == null) return false;
 
-        // 📌 HttpServletRequest를 통해 자바스크립트가 보낸 값을 직접 안전하게 추출
+        // HttpServletRequest를 통해 자바스크립트가 보낸 값을 직접 안전하게 추출
         String pwCheck = request.getParameter("pwCheck");
         
         // 디버깅 출력을 심어 실제로 브라우저가 보낸 글자가 서버에 도착했는지 확인합니다.

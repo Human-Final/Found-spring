@@ -114,7 +114,11 @@ public class FoundController {
         String loginid =authentication.getName(); 
         //로그인한 유저의 권한 목록 중 관리자 권한 (ADMIN) 이 있는지 확인
         boolean isAdmin=authentication.getAuthorities().stream()
-        .anyMatch(auth->auth.getAuthority().equals("ROLE_ADMIN")||auth.getAuthority().equals("ADMIN"));
+        .anyMatch(auth->auth.getAuthority().equals("ROLE_ADMIN")
+                        || auth.getAuthority().equals("ADMIN")
+                        || auth.getAuthority().equals("ROLE_MANAGER")
+                        || auth.getAuthority().equals("MANAGER"));
+
         try {
             //서비스단에 글 id 입력번호, 로그인한 유저 id 를 넘겨받아 검증 및 삭제
             foundService.deletefound(atcId,inputpw,loginid,isAdmin);
@@ -162,8 +166,10 @@ public class FoundController {
         //작성자 본인 확인 방어코드
         String loginid=authentication.getName();
         boolean isAdmin=authentication.getAuthorities().stream()
-            .anyMatch(auth->auth.getAuthority().equals("ROLE_ADMIN")||
-            auth.getAuthority().equals("ADMIN"));
+            .anyMatch(auth->auth.getAuthority().equals("ROLE_ADMIN")
+                        || auth.getAuthority().equals("ADMIN")
+                        || auth.getAuthority().equals("ROLE_MANAGER")
+                        || auth.getAuthority().equals("MANAGER"));
         if(!isAdmin && (foundVO.getId()==null||!foundVO.getId().equals(loginid))){
             redirectAttributes.addFlashAttribute("errorMessage", "본인이 작성한 글만 수정할 수 있습니다");
             return "redirect:/api/found/detail/"+atcId;    
@@ -175,13 +181,11 @@ public class FoundController {
         return "found/write";
     }
     
-
-
-
     // 실제 데이터 수정처리
     @PostMapping("/api/found/update")
     public String FoundUpdate(@Valid @ModelAttribute("foundVO")FoundVO foundVO,
-    BindingResult bindingResult,Model model,@RequestParam(value = "files",required = false)MultipartFile files[],
+    BindingResult bindingResult,Model model,
+    @RequestParam(value = "files",required = false) MultipartFile files[],
     @RequestParam(value = "deleteFiles",required = false )List<String>deleteFiles) {
     
     //[입력값 유지 및 임시저장 기능] 검증 에러 발생 시 작성하던 내용 그대로 다시 폼으로 백! 
