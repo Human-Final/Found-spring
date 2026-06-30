@@ -5,7 +5,15 @@ import java.util.List;
 import com.human.found.domain.user.vo.UserVO;
 
 public interface UserManageService {
-    int updateUserStatusByIds(List<String> userIds, String status, int isDeleted);
-
+    
     List<UserVO> totalUserList();
+
+    int updateUserBulk(
+            List<String> statusUserIds, 
+            List<String> statuses, 
+            List<Integer> isDeletedList,
+            List<String> roleUserIds, 
+            List<String> roles, 
+            boolean isAdmin, 
+            boolean isManager);
 }

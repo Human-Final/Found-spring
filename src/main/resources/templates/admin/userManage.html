@@ -13,14 +13,22 @@
 <body class="admin-user-page">
 
 <!-- 헤더 -->
-<header class="admin-header"
-    <div th:replace="layout/header :: headerFragment"></div>
-</header>
+<div th:replace="layout/header :: headerFragment"></div>
 
 <div class="admin-layout">
 
   <!-- 사이드바 -->
   <aside class="admin-sidebar">
+
+    <button type="button" class="sidebar-toggle-btn" id="sidebarToggle">
+      <svg class="sidebar-toggle-icon" viewBox="0 0 24 24" fill="none">
+          <path d="M4 6h16M4 12h16M4 18h16"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"/>
+      </svg>
+    </button>    
+
     <nav class="admin-side-menu">
 
       <a th:href="@{/api/admin/boards}">
@@ -76,10 +84,11 @@
         일반 회원
       </a>
 
-      <a th:href="@{/api/admin/users(role='admin')}"
-         th:classappend="${role == 'admin'} ? ' active'">
+      <a th:href="@{/api/admin/users(role='manager')}"
+         th:classappend="${role == 'manager'} ? ' active'">
         관리자
       </a>
+
     </section>
 
     <!-- 필터 -->
@@ -134,9 +143,15 @@
           </label>
 
           <label class="filter-chip">
+            <input type="checkbox" name="role" value="manager"
+                   th:checked="${roleList != null and #lists.contains(roleList, 'manager')}">
+            <span>관리자</span>
+          </label>
+
+          <label class="filter-chip">
             <input type="checkbox" name="role" value="admin"
                    th:checked="${roleList != null and #lists.contains(roleList, 'admin')}">
-            <span>관리자</span>
+            <span>최고 관리자</span>
           </label>
         </div>
 
@@ -179,6 +194,12 @@
       </div>
 
       <div class="bulk-actions">
+
+        <button type="button" class="bulk-save-btn" id="saveChangeBtn"
+                sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ADMIN', 'MANAGER')">
+          변경사항 저장
+        </button>
+
         <button type="button" class="bulk-stop-btn" id="bulkBlockBtn">
           <i data-lucide="circle-slash"></i>
           <span>선택 정지</span>
@@ -212,88 +233,116 @@
         </thead>
 
         <tbody>
-        <!-- 실제 DB 연결용 -->
-        <tr th:each="user : ${userList}">
-          <td>
-            <input type="checkbox"
-                   class="user-check"
-                   name="userIds"
-                   th:value="${user.id}">
-          </td>
+          <!-- 실제 DB 연결용 -->
+          <tr th:each="user : ${userList}">
+            <td>
+              <input type="checkbox"
+                     class="user-check"
+                     name="userIds"
+                     th:value="${user.id}"
+                     th:if="${isAdmin or (isManager and user.role == 'USER')}">
+            </td>
 
-          <td th:text="${user.num}">1256</td>
-          <td th:text="${user.id}">user001</td>
-          <td th:text="${user.name}">김민수</td>
-          <td th:text="${user.email}">minsu01@email.com</td>
+            <td th:text="${user.id}">아이디</td>
+            <td th:text="${user.name}">이름</td>
+            <td th:text="${user.email}"
+            >이메일</td>
+            <td th:text="${user.tel}">전화번호</td>
+            <td th:text="${user.signUp != null 
+                          ? #temporals.format(user.signUp, 'yyyy.MM.dd') : '-'}">
+              가입일
+            </td>
 
-          <td th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'yyyy.MM.dd') : '-'}">
-            2025.06.29
-          </td>
+            <td>
+              <select class="role-select"
+                      th:data-user-id="${user.id}"
+                      th:data-original-role="${user.role}"
+                      th:disabled="${!isAdmin}">
 
-          <td>
-            <span class="status-badge active"
-                  th:if="${user.status == 'active'}">활성</span>
+                <option value="USER"
+                        th:selected="${user.role =='USER'}">
+                  일반
+                </option>
 
-            <span class="status-badge dormant"
-                  th:if="${user.status == 'dormant'}">휴면</span>
+                <option value="MANAGER"
+                        th:selected="${user.role =='MANAGER'}">
+                  관리자
+                </option>
+                
+                <option value="ADMIN"
+                        th:selected="${user.role =='ADMIN'}">
+                  최고관리자
+                </option>   
 
-            <span class="status-badge blocked"
-                  th:if="${user.status == 'blocked'}">정지</span>
-          </td>
+              </select>                 
+            </td>          
 
-          <td>
-            <span class="role-badge user"
-                  th:if="${user.role == 'USER'}">일반</span>
+            <td>
+              <select class="status-select"
+                      th:data-user-id="${user.id}"
+                      th:data-original-status="${user.isDeleted == 1 ? 'deleted' : user.status}"
+                      th:data-db-status="${user.status}"
+                      th:disabled="${!isAdmin and !(isManager and user.role == 'USER')}">
 
-            <span class="role-badge admin"
-                  th:if="${user.role == 'ADMIN'}">관리자</span>
-          </td>
+                  <option value="active"
+                          th:selected="${user.status == 'active' and user.isDeleted == 0}">
+                    활성
+                  </option>
 
-          <td th:text="${user.lastLoginAt != null ? #temporals.format(user.lastLoginAt, 'yyyy.MM.dd HH:mm') : '-'}">
-            2025.06.29 14:35
-          </td>
+                  <option value="dormant"
+                          th:selected="${user.status == 'dormant' and user.isDeleted == 0}">
+                    휴면
+                  </option>
 
-          <td class="table-actions">
-            <a th:href="@{/api/admin/users/{id}(id=${user.id})}"
-               class="detail-btn">
-              상세보기
-            </a>
+                  <option value="blocked"
+                          th:selected="${user.status == 'blocked' and user.isDeleted == 0}">
+                    정지
+                  </option>
 
-            <form th:if="${user.status != 'blocked'}"
-                  th:action="@{/api/admin/users/{id}/block(id=${user.id})}"
-                  method="post">
-              <button type="submit" class="stop-btn">정지</button>
-            </form>
+                  <option value="deleted"
+                          th:selected="${user.isDeleted == 1}">
+                    탈퇴
+                  </option>
 
-            <form th:if="${user.status == 'blocked'}"
-                  th:action="@{/api/admin/users/{id}/unblock(id=${user.id})}"
-                  method="post">
-              <button type="submit" class="release-btn">해제</button>
-            </form>
-          </td>
-        </tr>
+              </select>
+            </td>
 
-        <!-- 임시 화면 확인용: userList 없을 때만 출력 -->
-        <tr th:if="${userList == null}">
-          <td><input type="checkbox" class="user-check"></td>
-          <td>1256</td>
-          <td>user001</td>
-          <td>김민수</td>
-          <td>minsu01@email.com</td>
-          <td>2025.06.29</td>
-          <td><span class="status-badge active">활성</span></td>
-          <td><span class="role-badge user">일반</span></td>
-          <td>2025.06.29 14:35</td>
-          <td class="table-actions">
-            <button type="button" class="detail-btn">상세보기</button>
-            <button type="button" class="stop-btn">정지</button>
-          </td>
-        </tr>
+            <td th:text="${user.deletedAt != null 
+                          ? #temporals.format(user.deletedAt, 'yyyy.MM.dd HH:mm') : '-'}">
+              탈퇴일시
+            </td>
 
+            <td class="table-actions">
+              <a th:href="@{/api/admin/users/{id}(id=${user.id})}"
+                class="detail-btn">
+                상세보기
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </section>
 
+    <!-- 빈 결과: 테이블 밖에서 출력 -->
+    <section class="admin-empty-card"
+             th:if="${userList == null or #lists.isEmpty(userList)}">
+      <p>조회된 회원이 없습니다.</p>
+    </section>
+
+    <form id="userBulkUpdateForm"
+          th:action="@{/test/users/edit}"
+          method="post"
+          style="display:none;">
+
+      <input type="hidden"
+             th:if="${_csrf != null}"
+             th:name="${_csrf.parameterName}"
+             th:value="${_csrf.token}">
+    </form>
+
     <!-- 페이지네이션 -->
-    <section class="admin-pagination">
+    <section class="admin-pagination"
+             th:if="${userList != null and !#lists.isEmpty(userList)}">
       <a href="#" class="page-btn">
         <i data-lucide="chevron-left"></i>
       </a>
@@ -306,7 +355,7 @@
         <i data-lucide="chevron-right"></i>
       </a>
     </section>
-
+    
   </main>
 </div>
 
@@ -319,6 +368,163 @@
     const tableCheckAll = document.getElementById("tableCheckAll");
     const userChecks = document.querySelectorAll(".user-check");
     const selectedCount = document.getElementById("selectedCount");
+    const saveChangesBtn = document.getElementById("saveChangeBtn");
+    const userBulkUpdateForm = document.getElementById("userBulkUpdateForm");
+
+    // 상태 변경 사항 저장
+    function getStatusLabel(status){
+      if(status === "active") return "활성";
+      if(status === "dormant") return "휴면";
+      if(status === "blocked") return "정지";
+      if(status === "deleted") return "탈퇴";
+      return status;
+    }
+
+    function getRoleLabel(role) {
+      if (role === "USER") return "일반";
+      if (role === "MANAGER") return "관리자";
+      if (role === "ADMIN") return "최고관리자";
+      return role;
+    }
+
+    /* deleted는 ststus 컬럼에 넣는 것이 아니고 
+       화면에서 deleted를 선택시 isDeleted = 1을 전송*/
+    function getSubmitStatus(select, selectedStatus){
+      if(selectedStatus === "deleted"){
+        return select.dataset.dbStatus;
+      }
+      
+      return selectedStatus;
+    }
+
+    function getSubmitIsDeleted(selectedStatus){
+      return selectedStatus === "deleted" ? 1 : 0;
+    }
+
+    function removeOldDynamicInputs(){
+      userBulkUpdateForm
+      .querySelectorAll(".dynamic-bulk-input")
+      .forEach(input => input.remove());
+    }
+
+    function appendHiddenInput(name, value){
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = name;
+      input.value = value;
+      input.classList.add("dynamic-bulk-input");
+
+      userBulkUpdateForm.appendChild(input);
+    }
+
+    function collectChangedStatuses(){
+      const changedList = [];
+
+      document.querySelectorAll(".status-select").forEach(select => {
+        if (select.disabled) {
+          return;
+        }
+        
+        const userId = select.dataset.userId;
+        const originalStatus = select.dataset.originalStatus;
+        const currentStatus = select.value;
+
+        if(originalStatus !== currentStatus){
+          changedList.push({
+            userId: userId,
+            originalStatus: originalStatus,
+            currentStatus: currentStatus,
+            submitStatus: getSubmitStatus(select, currentStatus),
+            submitIsDeleted: getSubmitIsDeleted(currentStatus)
+          });
+        }
+      });
+
+      return changedList;
+    }
+
+    function collectChangedRoles(){
+      const changedList=[];
+
+      document.querySelectorAll(".role-select").forEach(select => {
+        if(select.disabled){
+          return;
+        }
+
+        const userId = select.dataset.userId;
+        const originalRole = select.dataset.originalRole;
+        const currentRole = select.value;
+
+        if(originalRole !== currentRole){
+          changedList.push({
+            userId: userId,
+            originalRole: originalRole,
+            currentRole: currentRole
+          });
+        }
+      });
+
+      return changedList;
+    }
+
+    function makeBulkConfirmMessage(statusChanges, roleChanges){
+      const lines = [];
+      
+      if(statusChanges.length > 0){
+        lines.push("[상태 변경]");
+
+        statusChanges.forEach(item => {
+          lines.push(`${item.userId}: ${getStatusLabel(item.originalStatus)} → ${getStatusLabel(item.currentStatus)}`);
+        });
+      }
+
+      if(roleChanges.length > 0) {
+        if(lines.length > 0) {
+          lines.push("");
+        }
+
+        lines.push("[권한 변경]")
+
+        roleChanges.forEach(item => {
+          lines.push(`${item.userId}: ${getRoleLabel(item.originalRole)} → ${getRoleLabel(item.currentRole)}`);
+        });
+      }
+
+      return `아래 변경사항을 저장하시겠습니까?\n\n${lines.join("\n")}`;
+    }
+
+    if (saveChangesBtn && userBulkUpdateForm) {
+      saveChangesBtn.addEventListener("click", () => {
+        const statusChanges = collectChangedStatuses();
+        const roleChanges = collectChangedRoles();
+
+        if (statusChanges.length === 0 && roleChanges.length === 0) {
+          alert("변경된 사항이 없습니다.");
+          return;
+        }
+
+        const confirmed = confirm(makeBulkConfirmMessage(statusChanges, roleChanges));
+
+        if (!confirmed) {
+          return;
+        }
+
+        removeOldDynamicInputs();
+
+        statusChanges.forEach(item => {
+          appendHiddenInput("statusUserIds", item.userId);
+          appendHiddenInput("statuses", item.submitStatus);
+          appendHiddenInput("isDeletedList", item.submitIsDeleted);
+        });
+
+        roleChanges.forEach(item => {
+          appendHiddenInput("roleUserIds", item.userId);
+          appendHiddenInput("roles", item.currentRole);
+        });
+
+        userBulkUpdateForm.submit();
+      });
+    }
 
     function updateSelectedCount() {
       const checkedCount = document.querySelectorAll(".user-check:checked").length;
@@ -412,5 +618,19 @@
   });
 </script>
 
-</body>
+<script>
+  const sidebarToggle = document.getElementById("sidebarToggle");
+  const savedSidebarState = localStorage.getItem("adminSidebarCollapsed");
+
+  if (savedSidebarState === "true") {
+    document.body.classList.add("sidebar-collapsed");
+  }
+
+  sidebarToggle.addEventListener("click", function () {
+    document.body.classList.toggle("sidebar-collapsed");
+
+    const isCollapsed = document.body.classList.contains("sidebar-collapsed");
+    localStorage.setItem("adminSidebarCollapsed", isCollapsed);
+  });
+</script>
 </html>
