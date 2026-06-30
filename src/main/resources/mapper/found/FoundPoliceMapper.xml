@@ -28,6 +28,7 @@
             fd_sbjt,
             fd_ymd,
             prdt_cl_nm,
+            prdt_category,
             done,
             is_deleted
         )
@@ -41,9 +42,14 @@
             #{fdSbjt},
             #{fdYmd},
             #{prdtClNm},
+            #{prdtCategory},
             #{done},
             #{isDeleted}
         )
     </insert>
+
+    <delete id="deleteAllFoundPolice">
+        delete from found_police
+    </delete>
 
 </mapper>

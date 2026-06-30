@@ -71,29 +71,39 @@ public class LostController {
     // 카테고리를 활용하는 조회(전체조회 포함)
     @GetMapping("/api/lost")
     public String Lostlist(
-            @RequestParam(value = "category", required = false) List<String> category,
-            @RequestParam(value = "subCategory", required = false) String subCategory,
-            @RequestParam(value = "startDate", required = false) String startDate,
-            @RequestParam(value = "endDate", required = false) String endDate,
-            @RequestParam(value = "author", required = false) String author,
-            @RequestParam(value = "status", required = false) String status,
-            @RequestParam(value = "keyword", required = false) String keyword, // 습득물명
-            @RequestParam(value = "sort", defaultValue = "latest") String sort,
+            @RequestParam(required = false) List<String> category,
+            @RequestParam(required = false) String subCategory,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) String author,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String keyword, // 습득물명
+            @RequestParam(defaultValue = "latest") String sort,
             @RequestParam(defaultValue = "1") int page,
             Model model) {
         
-        // 확장된 6대 필터를 완벽하게 정렬하여 서비스 호출 토스
-        List<LostVO> getList = lostService.searchLostItems(category, subCategory, startDate, endDate, author, status, keyword, sort);
-        
-        // 페이징
+        if (page < 1) {
+            page = 1;
+        }
+
+        // 1. 기존 페이징 VO 인프라 세팅 (보여주신 스펙 100% 유지)
         PagingVO pagingVO = new PagingVO();
         pagingVO.setPage(page);
         pagingVO.setSize(10);
-        pagingVO.setPageBlock((10));
+        pagingVO.setPageBlock(10);
+        
+        // 2. 하단 페이징 바(1 2 3) 계산을 위해 검색 조건에 맞는 '총 데이터 개수'를 먼저 구해옵니다.
+        int totalCount = lostService.getTotalSearchCount(category, subCategory, startDate, endDate, author, status, keyword);
+        pagingVO.setTotalCount(totalCount); // VO 내부에 총 개수를 심어 endPage, prev, next 블록 자동 계산 작동
+
+        pagingVO.pageInfo(totalCount);
   
+        // 3. 기존 6대 필터 인자 뒤에, 페이징 처리를 위해 pagingVO를 마지막 인자로 주입하여 서비스를 호출합니다!
+        List<LostVO> getList = lostService.searchLostItems(category, subCategory, startDate, endDate, author, status, keyword, sort, pagingVO);
+        
         model.addAttribute("getList", getList);
         
-        // HTML 검색 폼 화면에 사용자가 방금 입력/선택했던 검색 조건값들을 고스란히 복원(유지)하기 위해 모델에 바인딩
+        // 검색 필터 및 스타일 복원용 모델 바인딩 (순정 상태 유지)
         model.addAttribute("selectedCategories", category);
         model.addAttribute("selectedSubCategory", subCategory);
         model.addAttribute("startDate", startDate);
@@ -102,11 +112,12 @@ public class LostController {
         model.addAttribute("selectedStatus", status);
         model.addAttribute("keyword", keyword);
         model.addAttribute("sort", sort);
-        model.addAttribute("paging", pagingVO);
+        model.addAttribute("paging", pagingVO); // HTML 하단 th:if="${paging.totalCount > 0}" 페이징 바 그리기 연동
         model.addAttribute("isEdit", false);
         
         return "lost/list";
     }
+
 
 
     @GetMapping("/write")
@@ -203,6 +214,4 @@ public class LostController {
         lostService.UpdateLost(lostVO,files,deleteFiles);
         return "redirect:/api/lost/detail/"+lostVO.getAtcId();
     }
-
-
 }

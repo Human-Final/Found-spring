@@ -69,7 +69,9 @@ public class FoundPortalTxService {
             foundVO.setFdPrdtNm(item.getFdPrdtNm());
             foundVO.setFdSbjt(item.getFdSbjt());
             foundVO.setFdYmd(fdYmd.atStartOfDay());
-            foundVO.setPrdtClNm(getCategoryLabel(item.getPrdtClNm()));
+            String originalPrdtClNm = item.getPrdtClNm(); //카테고리 기본형태 대분류>소분류 임시저장
+            foundVO.setPrdtClNm(getCategoryLabel(originalPrdtClNm)); //임시저장에서 메서드 활용 대분류 걸러내기
+            foundVO.setPrdtCategory(getSubCategoryLabel(originalPrdtClNm)); //임시저장에서 메서드 활용 소분류 걸러내기
 
             foundVO.setDone(hasCompleteMark(item.getFdSbjt()) ? 1 : 0);
 
@@ -84,7 +86,7 @@ public class FoundPortalTxService {
     @Transactional
     public int replaceFoundPoliceItems(List<FoundPortalApiItemVO> items, LocalDate today, LocalDate sixMonthsAgo) {
 
-        // foundPoliceMapper.deleteAllFoundPolice();
+        foundPoliceMapper.deleteAllFoundPolice();
 
         int insertCount = 0;
 
@@ -134,6 +136,8 @@ public class FoundPortalTxService {
             String originalPrdtClNm = item.getPrdtClNm();
             String categoryLabel = getCategoryLabel(originalPrdtClNm);
             foundVO.setPrdtClNm(categoryLabel);
+            
+            foundVO.setPrdtCategory(getSubCategoryLabel(originalPrdtClNm));
 
             foundVO.setFdYmd(fdYmd.atStartOfDay());
 
@@ -158,53 +162,90 @@ public class FoundPortalTxService {
             return "기타";
         }
 
-        if (prdtClNm.contains("가방") || prdtClNm.contains("백")) {
+        // 1. ">" 구분자가 있으면 무조건 앞부분(대분류 파트)만 먼저 잘라냅니다.
+        String mainPart = prdtClNm;
+        if (prdtClNm.contains(">")) {
+            mainPart = prdtClNm.split(">")[0].trim();
+        } else {
+            mainPart = prdtClNm.trim();
+        }
+
+        // 2. 잘라낸 앞부분 단어를 기준으로 프로젝트 9대 라벨링 분류 시작
+        if (mainPart.contains("가방") || mainPart.contains("백")) {
             return "가방";
         }
 
-        if (prdtClNm.contains("귀금속") ||
-                prdtClNm.contains("반지") ||
-                prdtClNm.contains("목걸이") ||
-                prdtClNm.contains("귀걸이") ||
-                prdtClNm.contains("시계")) {
+        if (mainPart.contains("귀금속") ||
+                mainPart.contains("반지") ||
+                mainPart.contains("목걸이") ||
+                mainPart.contains("귀걸이") ||
+                mainPart.contains("시계")) {
             return "귀금속";
         }
 
-        if (prdtClNm.contains("도서") ||
-                prdtClNm.contains("책") ||
-                prdtClNm.contains("서적") ||
-                prdtClNm.contains("소설")) {
+        if (mainPart.contains("도서") ||
+                mainPart.contains("책") ||
+                mainPart.contains("서적") ||
+                mainPart.contains("소설")) {
             return "도서";
         }
 
-        if (prdtClNm.contains("의류") ||
-                prdtClNm.contains("모자") ||
-                prdtClNm.contains("신발")) {
+        if (mainPart.contains("의류") ||
+                mainPart.contains("모자") ||
+                mainPart.contains("신발")) {
             return "의류";
         }
 
-        if (prdtClNm.contains("자동차") ||
-                prdtClNm.contains("네비") ||
-                prdtClNm.contains("번호판")) {
+        if (mainPart.contains("자동차") ||
+                mainPart.contains("네비") ||
+                mainPart.contains("번호판")) {
             return "자동차";
         }
 
-        if (prdtClNm.contains("핸드폰") ||
-                prdtClNm.contains("휴대폰") ||
-                prdtClNm.contains("아이폰")) {
+        if (mainPart.contains("핸드폰") ||
+                mainPart.contains("휴대폰") ||
+                mainPart.contains("아이폰")) {
             return "핸드폰";
         }
 
-        if (prdtClNm.contains("전자") ||
-                prdtClNm.contains("노트북") ||
-                prdtClNm.contains("컴퓨터")) {
+        if (mainPart.contains("전자") ||
+                mainPart.contains("노트북") ||
+                prdtClNm.contains("컴퓨터")) { // 원본 텍스트 유연성 확보
             return "전자기기";
         }
 
-        if (prdtClNm.contains("카드")) {
+        if (mainPart.contains("카드")) {
             return "카드";
         }
 
+        return "기타";
+    }
+
+    /**
+     * [2단계: 소분류 완벽 분리 추출 엔지니어링]
+     * "가방 > 남성용 가방"에서 정확히 뒷부분("남성용 가방")만 싹둑 잘라내 리턴합니다.
+     */
+    private String getSubCategoryLabel(String prdtClNm) {
+        if (prdtClNm == null || prdtClNm.trim().isEmpty()) {
+            return "기타";
+        }
+
+        // 1. ">" 구분자가 존재하면 확실하게 스플릿해서 2번째(인덱스 1번) 데이터를 가져옵니다.
+        if (prdtClNm.contains(">")) {
+            String[] parts = prdtClNm.split(">");
+            if (parts.length > 1) {
+                return parts[1].trim(); // 뒷부분 "남성용 가방"에서 공백 싹 지우고 순수 글자만 리턴
+            }
+        }
+
+        // 2. 만약 ">" 없이 "서류" 처럼 단일 문자열로 들어왔는데 프로젝트 9대 대분류에 안 걸린다면,
+        // 그 글자 자체가 소중한 힌트이므로 소분류 컬럼에 그대로 이식해 둡니다 (유실 방지)
+        String mainCategory = getCategoryLabel(prdtClNm);
+        if ("기타".equals(mainCategory)) {
+            return prdtClNm.trim();
+        }
+
+        // 3. 구분자도 없고 대분류만 매칭되는 밋밋한 단어일 때는 기본값 세팅
         return "기타";
     }
 }
