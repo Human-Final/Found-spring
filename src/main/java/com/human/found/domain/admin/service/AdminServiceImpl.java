@@ -29,6 +29,7 @@ public class AdminServiceImpl implements AdminService{
     public List<AdminLostVO> getPoliceLostList() {
         return adminMapper.selectPoliceLostList();
     }
+
     // 분실물 선택 삭제
     @Override
     @Transactional
@@ -52,7 +53,6 @@ public class AdminServiceImpl implements AdminService{
     }
     
     // 사용자 등록 습득물 게시글 전체 조회
-
     @Override
     public List<AdminFoundVO> getFoundList() {
         return adminMapper.selectFoundList();
@@ -115,5 +115,70 @@ public class AdminServiceImpl implements AdminService{
 
         // 선택된 공지사항 논리 삭제
         adminMapper.deleteNoticeList(nums);
+    }
+
+    // 사용자 등록 분실물 게시글 페이징 조회
+    @Override
+    public List<AdminLostVO> getLostPage(int page, int size) {
+        int offset = (page - 1) * size;
+        return adminMapper.selectLostPage(offset, size);
+    }
+
+    // 경찰청 API 분실물 페이징 조회
+    @Override
+    public List<AdminLostVO> getPoliceLostPage(int page, int size) {
+        int offset = (page - 1) * size;
+        return adminMapper.selectPoliceLostPage(offset, size);
+    }
+
+    // 사용자 등록 습득물 페이징 조회
+    @Override
+    public List<AdminFoundVO> getFoundPage(int page, int size) {
+        int offset = (page - 1) * size;
+        return adminMapper.selectFoundPage(offset, size);
+    }
+
+    // 경찰청 API 습득물 페이징 조회
+    @Override
+    public List<AdminFoundVO> getPoliceFoundPage(int page, int size) {
+        int offset = (page - 1) * size;
+        return adminMapper.selectPoliceFoundPage(offset, size);
+    }
+
+    // 관리자 등록 공지사항 페이징 조회
+    @Override
+    public List<AdminNoticeVO> getNoticePage(int page, int size) {
+        int offset = (page - 1) * size;
+        return adminMapper.selectNoticePage(offset, size);
+    }
+
+    // 사용자 등록 분실물 전체 개수 조회
+    @Override
+    public int countLost() {
+        return adminMapper.countLost();
+    }
+
+    // 경찰청 API 분실물 전체 개수 조회
+    @Override
+    public int countPoliceLost() {
+        return adminMapper.countPoliceLost();
+    }
+
+    // 사용자 등록 습득물 전체 개수 조회
+    @Override
+    public int countFound() {
+        return adminMapper.countFound();
+    }
+
+    // 경찰청 API 습득물 전체 개수 조회
+    @Override
+    public int countPoliceFound() {
+        return adminMapper.countPoliceFound();
+    }
+
+    // 관리자 등록 공지사항 전체 개수 조회
+    @Override
+    public int countNotice() {
+        return adminMapper.countNotice();
     }
 }

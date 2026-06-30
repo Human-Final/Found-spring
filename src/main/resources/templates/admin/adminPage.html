@@ -14,15 +14,15 @@
 
   <!-- 탭 -->
   <div class="tab-box">
-    <a th:href="@{/admin/lost(dataSource=${dataSource})}"
+    <a th:href="@{/admin/lost(dataSource=${dataSource}, page=1)}"
        th:classappend="${boardType == 'lost'} ? ' active' : ''"
        class="tab">분실물</a>
 
-    <a th:href="@{/admin/found(dataSource=${dataSource})}"
+    <a th:href="@{/admin/found(dataSource=${dataSource}, page=1)}"
        th:classappend="${boardType == 'found'} ? ' active' : ''"
        class="tab">습득물</a>
 
-    <a th:href="@{/admin/notice}"
+    <a th:href="@{/admin/notice(page=1)}"
        th:classappend="${boardType == 'notice'} ? ' active' : ''"
        class="tab">공지사항</a>
   </div>
@@ -46,6 +46,8 @@
              th:checked="${dataSource == 'POLICE'}">
       외부 연동
     </label>
+
+    <input type="hidden" name="page" value="1">
 
     <button type="submit">조회</button>
   </form>
@@ -161,6 +163,76 @@
       </tbody>
     </table>
   </form>
+
+  <!-- 페이지 번호 -->
+  <div class="pagination"
+       th:if="${totalPages != null and totalPages > 1}">
+
+    <!-- 분실물 페이지 번호 -->
+    <th:block th:if="${boardType == 'lost'}">
+
+      <a th:if="${page > 1}"
+         th:href="@{/admin/lost(dataSource=${dataSource}, page=${page - 1})}">
+        이전
+      </a>
+
+      <a th:each="p : ${#numbers.sequence(startPage, endPage)}"
+         th:href="@{/admin/lost(dataSource=${dataSource}, page=${p})}"
+         th:text="${p}"
+         th:classappend="${p == page} ? ' active' : ''">
+      </a>
+
+      <a th:if="${page < totalPages}"
+         th:href="@{/admin/lost(dataSource=${dataSource}, page=${page + 1})}">
+        다음
+      </a>
+
+    </th:block>
+
+    <!-- 습득물 페이지 번호 -->
+    <th:block th:if="${boardType == 'found'}">
+
+      <a th:if="${page > 1}"
+         th:href="@{/admin/found(dataSource=${dataSource}, page=${page - 1})}">
+        이전
+      </a>
+
+      <a th:each="p : ${#numbers.sequence(startPage, endPage)}"
+         th:href="@{/admin/found(dataSource=${dataSource}, page=${p})}"
+         th:text="${p}"
+         th:classappend="${p == page} ? ' active' : ''">
+      </a>
+
+      <a th:if="${page < totalPages}"
+         th:href="@{/admin/found(dataSource=${dataSource}, page=${page + 1})}">
+        다음
+      </a>
+
+    </th:block>
+
+    <!-- 공지사항 페이지 번호 -->
+    <th:block th:if="${boardType == 'notice'}">
+
+      <a th:if="${page > 1}"
+         th:href="@{/admin/notice(page=${page - 1})}">
+        이전
+      </a>
+
+      <a th:each="p : ${#numbers.sequence(startPage, endPage)}"
+         th:href="@{/admin/notice(page=${p})}"
+         th:text="${p}"
+         th:classappend="${p == page} ? ' active' : ''">
+      </a>
+
+      <a th:if="${page < totalPages}"
+         th:href="@{/admin/notice(page=${page + 1})}">
+        다음
+      </a>
+
+    </th:block>
+
+  </div>
+
 </div>
 
 <script>

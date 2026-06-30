@@ -41,4 +41,49 @@ public interface AdminMapper {
 
     // 관리자 등록 공지사항 선택 삭제
     int deleteNoticeList(@Param("nums") List<Long> nums);
+
+    // 사용자 등록 분실물 페이징 조회
+    List<AdminLostVO> selectLostPage(
+            @Param("offset") int offset,
+            @Param("size") int size
+    );
+
+    // 경찰청 API 분실물 페이징 조회
+    List<AdminLostVO> selectPoliceLostPage(
+            @Param("offset") int offset,
+            @Param("size") int size
+    );
+
+    // 사용자 등록 습득물 페이징 조회
+    List<AdminFoundVO> selectFoundPage(
+            @Param("offset") int offset,
+            @Param("size") int size
+    );
+
+    // 경찰청 API 습득물 페이징 조회
+    List<AdminFoundVO> selectPoliceFoundPage(
+            @Param("offset") int offset,
+            @Param("size") int size
+    );
+
+    // 관리자 등록 공지사항 페이징 조회
+    List<AdminNoticeVO> selectNoticePage(
+            @Param("offset") int offset,
+            @Param("size") int size
+    );
+
+    // 사용자 등록 분실물 전체 개수 조회
+    int countLost();
+
+    // 경찰청 API 분실물 전체 개수 조회
+    int countPoliceLost();
+
+    // 사용자 등록 습득물 전체 개수 조회
+    int countFound();
+
+    // 경찰청 API 습득물 전체 개수 조회
+    int countPoliceFound();
+
+    // 관리자 등록 공지사항 전체 개수 조회
+    int countNotice();
 }

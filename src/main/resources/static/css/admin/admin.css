@@ -225,3 +225,24 @@ body {
     padding: 40px;
     color: #777;
 }
+
+.pagination {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.pagination a {
+  display: inline-block;
+  padding: 6px 10px;
+  margin: 0 3px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-decoration: none;
+  color: #333;
+}
+
+.pagination a.active {
+  background: #333;
+  color: white;
+  font-weight: bold;
+}
