@@ -242,14 +242,14 @@
         </tr>
       </thead>
       <tbody>
-        <!-- 💡 변경 핵심: 뒤에 ', stat'을 추가하여 현재 반복 순서(index)를 계산에 쓸 수 있게 만듭니다 -->
+        <!-- 변경 핵심: 뒤에 ', stat'을 추가하여 현재 반복 순서(index)를 계산에 쓸 수 있게 만듭니다 -->
         <tr th:each="notice, stat : ${list}" th:classappend="${notice.isImportant == 1} ? 'row-important'">
           
           <!-- 번호 영역: 중요 공지일 때는 뱃지 노출, 일반 공지일 때는 빈틈없는 가상 역순 번호 노출 -->
           <td>
             <span th:if="${notice.isImportant == 1}" class="badge badge-important">중요</span>
             
-            <!-- 💡 가상 번호 공식 적용: totalCount가 0일 때 예외처리 방지용 삼항연산자 추가 안전장치 -->
+            <!-- 가상 번호 공식 적용: totalCount가 0일 때 예외처리 방지용 삼항연산자 추가 안전장치 -->
             <span th:unless="${notice.isImportant == 1}" 
                   th:text="${paging != null ? (paging.totalCount - ((paging.page - 1) * paging.size) - stat.index) : notice.num}">1</span>
           </td>
@@ -281,7 +281,7 @@
 
     </table>
 
-    <!-- 📄 [추가] 페이징 네비게이션 영역 (중앙 정렬 배정) -->
+    <!-- [추가] 페이징 네비게이션 영역 (중앙 정렬 배정) -->
     <div th:if="${paging != null and paging.totalCount > 0}" style="margin: 30px 0 10px 0; display: flex; justify-content: center; font-family: sans-serif;">
       <ul style="display: flex; list-style: none; padding: 0; margin: 0; gap: 6px; align-items: center;">
         
@@ -324,7 +324,7 @@
       </ul>
     </div>
 
-    <!-- 📌 권한 분리 핵심: 세션의 userRole이 MANAGER이거나 ADMIN일 때만 [글쓰기] 버튼을 노출시킴 -->
+    <!-- 권한 분리 핵심: 세션의 userRole이 MANAGER이거나 ADMIN일 때만 [글쓰기] 버튼을 노출시킴 -->
     <div th:if="${#authorization.expression('hasAnyAuthority(''ROLE_ADMIN'', ''ROLE_MANAGER'')')}">
         <a th:href="@{/api/notices/write}" class="btn-write">공지 등록</a>
     </div>
