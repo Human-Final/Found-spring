@@ -23,43 +23,81 @@
     <a th:href="@{/api/write(boardType='lost')}" class="write-btn">글쓰기</a>
   </section>
 
-  <section class="filter-box">
-    <div class="board-search">
-      <span>⌕</span>
-      <input type="text" id="keywordInput" placeholder="게시글 검색...">
-    </div>
-
-    <div class="filter-row">
-      <div class="filter-section">
-        <span class="filter-label">카테고리</span>
-
-        <div id="categoryFilter" class="chip-group">
+  <section class="filter-box-advanced" 
+           style="background: #fff5f5; padding: 25px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #fcdada; box-shadow: 0 4px 12px rgba(253, 218, 218, 0.2);">
+    
+    <form id="advancedSearchForm" onsubmit="return false;" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;">
+      
+      <!-- 대분류 카테고리 -->
+      <div class="form-group" style="grid-column: 1 / -1;">
+        <label style="font-weight: 600; display: block; margin-bottom: 10px; color: #444;">대분류 카테고리 (중복 선택 가능)</label>
+        <div id="categoryFilter" class="chip-group" style="display: flex; flex-wrap: wrap; gap: 8px;">
           <button type="button" class="chip active" data-category="">전체</button>
           <button type="button" class="chip" data-category="가방">가방</button>
           <button type="button" class="chip" data-category="귀금속">귀금속</button>
           <button type="button" class="chip" data-category="도서">도서</button>
           <button type="button" class="chip" data-category="의류">의류</button>
           <button type="button" class="chip" data-category="자동차">자동차</button>
+          <button type="button" class="chip" data-category="핸드폰">핸드폰</button>
           <button type="button" class="chip" data-category="전자기기">전자기기</button>
           <button type="button" class="chip" data-category="지갑">지갑</button>
           <button type="button" class="chip" data-category="카드">카드</button>
           <button type="button" class="chip" data-category="기타">기타</button>
         </div>
       </div>
-      <div class="filter-section status-section">
-        <span class="filter-label">상태</span>
 
-        <div id="statusFilter" class="chip-group">
-          <button type="button" class="chip active" data-status="">전체</button>
-          <button type="button" class="chip" data-status="진행중">진행중</button>
-          <button type="button" class="chip" data-status="완료">완료</button>
+      <!-- 필터 2: 습득물명 -->
+      <div class="form-group">
+        <label for="keywordInput" style="font-weight: 600; display: block; margin-bottom: 6px; color: #555;">습득물명</label>
+        <input type="text" id="keywordInput" th:value="${keyword}" placeholder="물품명 검색..." 
+               style="width: 100%; padding: 10px; border: 1px solid #f5c2c2; border-radius: 6px; background-color: #ffffff; color: #333; outline: none;">
+      </div>
+
+      <!-- 필터 3: 분실자명 -->
+      <div class="form-group">
+        <label for="authorInput" style="font-weight: 600; display: block; margin-bottom: 6px; color: #555;">분실자명 (작성자ID)</label>
+        <input type="text" id="authorInput" th:value="${selectedAuthor}" placeholder="작성자명 입력..." 
+               style="width: 100%; padding: 10px; border: 1px solid #f5c2c2; border-radius: 6px; background-color: #ffffff; color: #333; outline: none;">
+      </div>
+
+      <!-- 필터 4: 진행 상태 필터 -->
+      <div class="form-group">
+        <label style="font-weight: 600; display: block; margin-bottom: 6px; color: #555;">진행 상태</label>
+        <select id="statusSelect" style="width: 100%; padding: 10px; border: 1px solid #f5c2c2; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; cursor: pointer;">
+          <option value="" th:selected="${selectedStatus == null || selectedStatus == ''}">전체</option>
+          <option value="진행중" th:selected="${selectedStatus == '진행중'}">진행중</option>
+          <option value="완료" th:selected="${selectedStatus == '완료'}">완료</option>
+        </select>
+      </div>
+
+      <!-- 필터 5 & 6: 기간 설정 -->
+      <div class="form-group" style="grid-column: span 2; display: flex; gap: 12px; align-items: flex-end;">
+        <div style="flex: 1;">
+          <label style="font-weight: 600; display: block; margin-bottom: 6px; color: #555;">습득일자 범위</label>
+          <input type="date" id="startDateInput" th:value="${startDate}" style="width: 100%; padding: 9px; border: 1px solid #f5c2c2; border-radius: 6px; background-color: #ffffff; color: #333; outline: none;">
+        </div>
+        <span style="padding-bottom: 12px; color: #999; font-weight: bold;">~</span>
+        <div style="flex: 1;">
+          <input type="date" id="endDateInput" th:value="${endDate}" style="width: 100%; padding: 9px; border: 1px solid #f5c2c2; border-radius: 6px; background-color: #ffffff; color: #333; outline: none;">
         </div>
       </div>
-    </div>
+
+      <!-- ⭐️ [버튼 컬러 교정] 쨍한 파란색을 우측 상단 '글쓰기' 버튼과 유사한 차분하고 세련된 오션 네이비 톤으로 변경 -->
+      <div class="form-group" style="display: flex; align-items: flex-end; justify-content: flex-end;">
+        <button type="button" id="searchSubmitBtn" 
+                style="background: #1e3d59; color: white; padding: 11px 25px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; font-size: 15px; transition: background 0.2s ease-in-out;"
+                onmouseover="this.style.background='#173047'" 
+                onmouseout="this.style.background='#1e3d59'">
+          🔍 검색하기
+        </button>
+      </div>
+
+    </form>
   </section>
+
   
   <div class="count-sort">
-    <p class="total-count">총 2건</p>    
+    <p class="total-count">총 <span th:text="${getList != null ? getList.size() : 0}">0</span>건</p>
     <select class="sort-select" id="sortSelect">
       <option value="latest">최신순</option>
       <option value="oldest">오래된순</option>
@@ -164,14 +202,38 @@
   function bindCategoryFilter() {
     const buttons = document.querySelectorAll("#categoryFilter .chip");
 
+    // 초기 로딩 시 주소창(currentParams)에 해당 카테고리가 포함되어 있다면 파란 불 켜기
+    const activeCategories = currentParams.getAll("category");
     buttons.forEach(button => {
-      button.classList.toggle("active",
-        button.dataset.category === selectedCategory
-      );
-        
+      const cat = button.dataset.category;
+      if (activeCategories.includes(cat) || (cat === "" && activeCategories.length === 0)) {
+        button.classList.add("active");
+      } else {
+        button.classList.remove("active");
+      }
+    });
+
+    buttons.forEach(button => {
       button.addEventListener("click", function(){
-        selectedCategory = this.dataset.category;
-        loadBoardList();
+        const clickedCategory = this.dataset.category;
+
+        if (clickedCategory === "") {
+          // '전체' 버튼을 누르면 다른 모든 카테고리 선택을 해제
+          buttons.forEach(btn => btn.classList.remove("active"));
+          this.classList.add("active");
+        } else {
+          // '전체' 버튼 불을 끄고, 내가 누른 버튼을 켜고 끄기(토글)
+          document.querySelector('#categoryFilter .chip[data-category=""]').classList.remove("active");
+          this.classList.toggle("active");
+          
+          // 만약 모든 버튼이 꺼졌다면 다시 '전체' 버튼 켜기
+          const activeCount = document.querySelectorAll("#categoryFilter .chip.active").length;
+          if (activeCount === 0) {
+            document.querySelector('#categoryFilter .chip[data-category=""]').classList.add("active");
+          }
+        }
+        
+        loadBoardList(); // 주소창 새로고침 이동 기기 호출
       });
     });
   }
@@ -192,28 +254,56 @@
     });
   }
 
-  async function loadBoardList() {
+  async function getCategoryLabel(prdtClNm) {
+      if (!prdtClNm) return "기타";
+
+      if (["가방", "백"].some(word => prdtClNm.includes(word))) return "가방";
+      if (["귀금속", "반지", "목걸이", "귀걸이", "시계"].some(word => prdtClNm.includes(word))) return "귀금속";
+      if (["도서", "책", "서적", "소설"].some(word => prdtClNm.includes(word))) return "도서";
+      if (["의류", "모자", "신발"].some(word => prdtClNm.includes(word))) return "의류";
+      if (["자동차", "네비", "번호판"].some(word => prdtClNm.includes(word))) return "자동차";
+      if (["전자", "핸드폰", "휴대폰", "아이폰", "노트북", "컴퓨터"].some(word => prdtClNm.includes(word))) return "전자기기";
+      if (prdtClNm.includes("지갑")) return "지갑";
+      if (prdtClNm.includes("카드")) return "카드";
+
+      return "기타";
+    }
+
+    async function loadBoardList() {
     const params = new URLSearchParams();
+    
+    // 1. 대분류 다중 선택 칩 수집 처리
+    const activeChips = document.querySelectorAll("#categoryFilter .chip.active");
+    activeChips.forEach(chip => {
+      const cat = chip.dataset.category;
+      if (cat !== "") {
+        params.append("category", cat);
+      }
+    });
+
+    // 2. 나머지 5가지 입력 필드 엘리먼트 값들 일제히 낚아채기
     const keyword = document.querySelector("#keywordInput").value.trim();
+    const author = document.querySelector("#authorInput").value.trim();
+    const status = document.querySelector("#statusSelect").value;
+    const startDate = document.querySelector("#startDateInput").value;
+    const endDate = document.querySelector("#endDateInput").value;
 
-    if (keyword) {
-      params.set("keyword", keyword);
-    }
-
-    if (selectedCategory) {
-      params.set("category", selectedCategory);
-    }
-
-    if (selectedStatus) {
-      params.set("status", selectedStatus);
-    }
-
+    // 3. 파라미터 유효값 매핑 검증 바인딩
+    if (keyword) params.set("keyword", keyword);
+    if (author) params.set("author", author);
+    if (status) params.set("status", status);
+    if (startDate) params.set("startDate", startDate);
+    if (endDate) params.set("endDate", endDate);
+    
+    // 정렬값 수집 추가
     params.set("sort", document.querySelector("#sortSelect").value);
 
-    window.location.href = window.location.pathname + "?" + params.toString();
+    // 통합 컨트롤러 관문으로 새로고침 점프!
+    window.location.href = "/api/lost?" + params.toString();
   }
 
-  document.querySelector("#sortSelect").addEventListener("change", loadBoardList);
+  // 4. [검색하기] 버튼 클릭 시 함수가 발동되도록 이벤트 장치 추가 바인딩
+  document.getElementById("searchSubmitBtn").addEventListener("click", loadBoardList);
 
   bindCategoryFilter();
   bindStatusFilter();

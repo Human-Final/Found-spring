@@ -275,15 +275,8 @@ public class UserController {
         // 자바스크립트의 if (data === "verified") 문을 활성화시킵니다.
         return "verified";
     }
-
-
-
-
-
-    /**
-     * 마이페이지 전용 습득물 삭제 처리 (GET)
-     */
-    @GetMapping("/api/found/delete/{atcId}")
+    
+    @PostMapping("/api/found/delete/{atcId}")
     public String deleteFound(@PathVariable("atcId") String atcId, Principal principal) {
         if (principal != null) {
             // 💡 각각 분리해서 만든 습득물 전용 삭제 서비스 호출
@@ -292,10 +285,7 @@ public class UserController {
         return "redirect:/mypage"; 
     }
 
-    /**
-     * 마이페이지 전용 분실물 삭제 처리 (GET)
-     */
-    @GetMapping("/api/lost/delete/{atcId}")
+    @PostMapping("/api/lost/delete/{atcId}")
     public String deleteLost(@PathVariable("atcId") String atcId, Principal principal) {
         if (principal != null) {
             // 💡 각각 분리해서 만든 분실물 전용 삭제 서비스 호출

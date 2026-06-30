@@ -11,4 +11,5 @@ public interface LostPoliceService {
     public List<LostVO> getLostGoodsFromDB();
 
     public LostVO getDetailByAtcId(String atcId);
+
 }

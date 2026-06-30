@@ -20,4 +20,18 @@ public interface LostService {
     LostVO getLostByNum(Long num);
 
     public void UpdateLost(LostVO lostVO,MultipartFile[] files,List<String>deletefiles);
+
+    // 분실물 카테고리별 검색하기
+    public List<LostVO> searchLostItems(
+        List<String> category, 
+        String subCategory, 
+        String startDate, 
+        String endDate, 
+        String author, 
+        String status, 
+        String keyword, 
+        String sort
+    );
+
+
 }

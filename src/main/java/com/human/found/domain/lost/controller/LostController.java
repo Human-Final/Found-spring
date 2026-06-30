@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.human.found.domain.comment.service.LostCommentService;
+import com.human.found.domain.lost.service.LostPoliceService;
 import com.human.found.domain.lost.service.LostService;
 import com.human.found.domain.lost.vo.LostVO;
 import com.human.found.global.common.paging.PagingVO;
@@ -24,7 +25,6 @@ import com.human.found.infrastructure.map.KakaoMapConfig;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.RequestBody;
 
 
 
@@ -34,9 +34,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Controller
 @AllArgsConstructor
 public class LostController {
+    private final LostPoliceService lostPoliceService; 
     private final LostService lostService;
     private final LostCommentService lostCommentService;
     private final KakaoMapConfig kakaoMapConfig;
+
 
     @PostMapping("/api/lost")
     public String LostRegister(@Valid @ModelAttribute LostVO lostVO,
@@ -69,22 +71,47 @@ public class LostController {
         
         return "redirect:/api/lost";
     }
-    //조회
+    
+    // 카테고리를 활용하는 조회(전체조회 포함)
     @GetMapping("/api/lost")
-    public String Lostlist(Model model,
-        @RequestParam(defaultValue = "1") int page) {
-
+    public String Lostlist(
+            @RequestParam(value = "category", required = false) List<String> category,
+            @RequestParam(value = "subCategory", required = false) String subCategory,
+            @RequestParam(value = "startDate", required = false) String startDate,
+            @RequestParam(value = "endDate", required = false) String endDate,
+            @RequestParam(value = "author", required = false) String author,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "keyword", required = false) String keyword, // 습득물명
+            @RequestParam(value = "sort", defaultValue = "latest") String sort,
+            @RequestParam(defaultValue = "1") int page
+            Model model) {
+        
+        // 확장된 6대 필터를 완벽하게 정렬하여 서비스 호출 토스
+        List<LostVO> getList = lostService.searchLostItems(category, subCategory, startDate, endDate, author, status, keyword, sort);
+        
+        // 페이징
         PagingVO pagingVO = new PagingVO();
         pagingVO.setPage(page);
         pagingVO.setSize(10);
         pagingVO.setPageBlock((10));
-
-        List<LostVO>getList=lostService.getLostlist(pagingVO);
-        model.addAttribute("paging", pagingVO);
+  
         model.addAttribute("getList", getList);
+        
+        // HTML 검색 폼 화면에 사용자가 방금 입력/선택했던 검색 조건값들을 고스란히 복원(유지)하기 위해 모델에 바인딩
+        model.addAttribute("selectedCategories", category);
+        model.addAttribute("selectedSubCategory", subCategory);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+        model.addAttribute("selectedAuthor", author);
+        model.addAttribute("selectedStatus", status);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("sort", sort);
+        model.addAttribute("paging", pagingVO);
         model.addAttribute("isEdit", false);
+        
         return "lost/list";
     }
+
 
     @GetMapping("/write")
     public String lostWriteForm(Model model) {
@@ -179,11 +206,6 @@ public class LostController {
         lostService.UpdateLost(lostVO,files,deleteFiles);
         return "redirect:/api/lost/detail/"+lostVO.getAtcId();
     }
-    
-    
-        
-}
-    
-    
-    
 
+
+}
