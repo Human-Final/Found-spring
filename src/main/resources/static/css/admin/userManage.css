@@ -160,8 +160,8 @@ body.admin-user-page input {
 ================================ */
 
 .admin-sidebar {
-  width: 248px;
-  min-width: 248px;
+  width: 220px;
+  min-width: 220px;
   flex-shrink: 0;
   background: #ffffff;
   border-right: 1px solid #e2e8f0;

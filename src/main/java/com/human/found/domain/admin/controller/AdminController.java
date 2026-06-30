@@ -39,7 +39,7 @@ public class AdminController {
     }
 
     // 관리자 분실물 선택 삭제
-    @PostMapping("/lost/delete")
+    @PostMapping("/lost/delete2")
     public String deleteLostList(@RequestParam("nums") List<Long> nums) {
 
         adminService.deleteLostList(nums);

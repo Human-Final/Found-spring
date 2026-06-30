@@ -71,12 +71,12 @@
         전체 회원
       </a>
 
-      <a th:href="@{/api/admin/users(role='user')}"
+      <a th:href="@{/api/admin/users(role='USER')}"
          th:classappend="${role == 'user'} ? ' active'">
         일반 회원
       </a>
 
-      <a th:href="@{/api/admin/users(role='admin')}"
+      <a th:href="@{/api/admin/users(role='MAMAGER')}"
          th:classappend="${role == 'admin'} ? ' active'">
         관리자
       </a>
@@ -221,12 +221,11 @@
                    th:value="${user.id}">
           </td>
 
-          <td th:text="${user.num}">1256</td>
           <td th:text="${user.id}">user001</td>
           <td th:text="${user.name}">김민수</td>
           <td th:text="${user.email}">minsu01@email.com</td>
 
-          <td th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'yyyy.MM.dd') : '-'}">
+          <td th:text="${user.signUp != null ? #temporals.format(user.signUp, 'yyyy.MM.dd') : '-'}">
             2025.06.29
           </td>
 
@@ -246,10 +245,10 @@
                   th:if="${user.role == 'USER'}">일반</span>
 
             <span class="role-badge admin"
-                  th:if="${user.role == 'ADMIN'}">관리자</span>
+                  th:if="${user.role == 'MANAGER'}">관리자</span>
           </td>
 
-          <td th:text="${user.lastLoginAt != null ? #temporals.format(user.lastLoginAt, 'yyyy.MM.dd HH:mm') : '-'}">
+          <td th:text="${user.deletedAt != null ? #temporals.format(user.deletedAt, 'yyyy.MM.dd HH:mm') : '-'}">
             2025.06.29 14:35
           </td>
 
