@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.human.found.domain.admin.mapper.AdminMapper;
 import com.human.found.domain.admin.vo.AdminFoundVO;
 import com.human.found.domain.admin.vo.AdminLostVO;
+import com.human.found.domain.admin.vo.AdminNoticeVO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,13 +24,11 @@ public class AdminServiceImpl implements AdminService{
         return adminMapper.selectLostList();
     }
 
-    // 분실물 게시글 삭제
+    // 경찰청 API 분실물 전체 조회
     @Override
-    @Transactional // DB 변화 때문에 적용
-    public void deleteLost(Long num) {
-        adminMapper.deleteLost(num);
+    public List<AdminLostVO> getPoliceLostList() {
+        return adminMapper.selectPoliceLostList();
     }
-
     // 분실물 선택 삭제
     @Override
     @Transactional
@@ -97,5 +96,24 @@ public class AdminServiceImpl implements AdminService{
 
         // 선택된 게시글 논리 삭제
         adminMapper.deletePoliceFoundList(nums);
+    }
+
+    // 관리자 등록 공지사항 전체 조회
+    @Override
+    public List<AdminNoticeVO> getNoticeList() {
+        return adminMapper.selectNoticeList();
+    }
+
+    // 관리자 등록 공지사항 선택 삭제
+    @Override
+    public void deleteNoticeList(List<Long> nums) {
+        
+        // 선택된 공지사항이 없는 경우 종료
+        if (nums == null || nums.isEmpty()) {
+            return;
+        }
+
+        // 선택된 공지사항 논리 삭제
+        adminMapper.deleteNoticeList(nums);
     }
 }

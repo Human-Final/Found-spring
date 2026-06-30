@@ -48,12 +48,27 @@
         ORDER BY created_at DESC
     </select>
 
-    <!-- 사용자 등록 분실물 게시글 단일 논리 삭제 -->
-    <update id="deleteLost">
-        UPDATE lost
-        SET is_deleted = 1
-        WHERE num = #{num}
-    </update>
+    <!-- 경찰청 API 분실물 삭제-->
+    <select id="selectPoliceLostList" resultMap="AdminLostResultMap">
+        SELECT
+            num,
+            atc_id,
+            id,
+            lst_place,
+            lst_prdt_nm,
+            lst_sbjt,
+            lst_ymd,
+            prdt_cl_nm,
+            created_at,
+            updated_at,
+            done,
+            is_deleted,
+            lst_filepath_img,
+            view_conut
+        FROM lost_police
+        WHERE is_deleted = 0
+        ORDER BY created_at DESC
+    </select>
 
     <!-- 사용자 등록 분실물 게시글 선택 삭제 -->
     <update id="deleteLostList">
@@ -157,6 +172,51 @@
     <!-- 경찰청 API 습득물 선택 삭제 -->
     <update id="deletePoliceFoundList">
         UPDATE found_police
+        SET is_deleted = 1
+        WHERE num IN
+        <foreach collection="nums" item="num" open="(" separator="," close=")">
+            #{num}
+        </foreach>
+    </update>
+
+    <!-- 관리자 공지사항 조회 결과 매핑 -->
+    <resultMap id="AdminNoticeResultMap"
+            type="com.human.found.domain.admin.vo.AdminNoticeVO">
+
+        <id property="num" column="num"/>
+
+        <result property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="isPlanned" column="is_planned"/>
+        <result property="isImportant" column="is_important"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="isDeleted" column="is_deleted"/>
+    </resultMap>
+
+    <!-- 관리자 등록 공지사항 전체 조회 -->
+    <select id="selectNoticeList" resultMap="AdminNoticeResultMap">
+        SELECT
+            num,
+            id,
+            title,
+            content,
+            view_count,
+            is_planned,
+            is_important,
+            created_at,
+            updated_at,
+            is_deleted
+        FROM notice
+        WHERE is_deleted = 0
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 관리자 등록 공지사항 선택 삭제 -->
+    <update id="deleteNoticeList">
+        UPDATE notice
         SET is_deleted = 1
         WHERE num IN
         <foreach collection="nums" item="num" open="(" separator="," close=")">

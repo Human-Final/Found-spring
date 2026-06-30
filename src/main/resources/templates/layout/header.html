@@ -22,6 +22,10 @@
         <a th:href="@{/api/found}">습득 게시판</a>
         <a th:href="@{/api/lost}">분실 게시판</a>
         <a th:href="@{/api/notices/list}">공지사항</a>
+          <!-- 관리자만 보이는 메뉴 -->
+        <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/lost}">
+          관리자 페이지
+        </a>
       </nav>
     </div>
 
