@@ -12,4 +12,6 @@ public interface FoundPoliceMapper {
 
     // 경찰청 습득물 DB 저장
     int insertFoundPolice(FoundVO foundVO);
+
+    void deleteAllFoundPolice();
 }

@@ -162,7 +162,7 @@ public class LostPoliceServiceImpl implements LostPoliceService{
                     }
                 }
 
-                // ⭐️ [수정 핵심: 다단 카테고리 분리 파싱 적용] ⭐️
+                // [수정 핵심: 다단 카테고리 분리 파싱 적용] 
                 String rawPrdtClNm = getTagValue("prdtClNm", el); // 예: "가방 > 남성용 가방" 또는 "악기 > 바이올린"
                 
                 String mainCategory = "기타"; 

@@ -33,7 +33,6 @@ WHERE atc_id = #{atcId}
     WHERE atc_id =#{atcId}
 </delete>
 
-
 <!-- 수정 게시판 파일 삭제 -->
 <delete id="deleteBySaveName">
     DELETE FROM found_file 

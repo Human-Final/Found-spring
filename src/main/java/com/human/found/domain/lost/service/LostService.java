@@ -30,8 +30,18 @@ public interface LostService {
         String author, 
         String status, 
         String keyword, 
-        String sort
+        String sort,
+        PagingVO pagingVO
     );
-
+    
+    public int getTotalSearchCount(
+        List<String> category,
+        String subCategory,
+        String startDate,
+        String endDate,
+        String author,
+        String status,
+        String keyword
+    );
 
 }

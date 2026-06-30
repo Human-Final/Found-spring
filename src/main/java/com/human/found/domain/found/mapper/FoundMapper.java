@@ -13,6 +13,30 @@ public interface FoundMapper {
     public void insertfound(FoundVO foundVO);
     public List<FoundVO> selectFoundList(PagingVO pagingVO);
     public void FoundupdateDelete(@Param("atcId") String atcId );
+
+    // 검색용
+    List<FoundVO> selectFoundSearchList(
+        @Param("category") List<String> category, 
+        @Param("subCategory") String subCategory, 
+        @Param("startDate") String startDate, 
+        @Param("endDate") String endDate, 
+        @Param("author") String author, 
+        @Param("status") String status, 
+        @Param("keyword") String keyword, 
+        @Param("sort") String sort,
+        @Param("paging") PagingVO pagingVO
+    );
+
+    // 조건에 부합하는 검색결과 조회 갯수 확인용
+    int selectFoundSearchCount(
+        @Param("category") List<String> category, 
+        @Param("subCategory") String subCategory, 
+        @Param("startDate") String startDate, 
+        @Param("endDate") String endDate, 
+        @Param("author") String author, 
+        @Param("status") String status, 
+        @Param("keyword") String keyword
+    );
     
     //글 확인용
     public FoundVO selectFoundById(@Param("atcId") String atcId );

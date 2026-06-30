@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>관리자 게시글 관리</title>
+  <link rel="stylesheet" th:href="@{/css/admin/admin.css}">
+</head>
+<body>
+
+<div class="admin-wrap">
+
+  <h2>게시글 관리</h2>
+  <p>분실물 / 습득물 / 공지사항 게시글을 관리할 수 있습니다.</p>
+
+  <!-- 탭 -->
+  <div class="tab-box">
+    <a th:href="@{/admin/lost(dataSource=${dataSource}, page=1)}"
+       th:classappend="${boardType == 'lost'} ? ' active' : ''"
+       class="tab">분실물</a>
+
+    <a th:href="@{/admin/found(dataSource=${dataSource}, page=1)}"
+       th:classappend="${boardType == 'found'} ? ' active' : ''"
+       class="tab">습득물</a>
+
+    <a th:href="@{/admin/notice(page=1)}"
+       th:classappend="${boardType == 'notice'} ? ' active' : ''"
+       class="tab">공지사항</a>
+  </div>
+
+  <!-- 데이터 출처 선택 -->
+  <form method="get"
+        th:if="${boardType != 'notice'}"
+        th:action="${boardType == 'found'} ? @{/admin/found} : @{/admin/lost}"
+        class="filter-box">
+
+    <strong>데이터 출처</strong>
+
+    <label>
+      <input type="radio" name="dataSource" value="USER"
+             th:checked="${dataSource == 'USER'}">
+      사용자 작성
+    </label>
+
+    <label>
+      <input type="radio" name="dataSource" value="POLICE"
+             th:checked="${dataSource == 'POLICE'}">
+      외부 연동
+    </label>
+
+    <input type="hidden" name="page" value="1">
+
+    <button type="submit">조회</button>
+  </form>
+
+  <!-- 공지사항 안내 -->
+  <div class="filter-box" th:if="${boardType == 'notice'}">
+    <strong>데이터 출처</strong>
+    <span class="notice-source">관리자 작성</span>
+  </div>
+
+  <!-- 삭제 form -->
+  <form method="post"
+        th:action="${boardType == 'notice'} ? @{/admin/notice/delete} :
+                   (${boardType == 'found'} ? @{/admin/found/delete} : @{/admin/lost/delete})"
+        id="deleteForm">
+
+    <input type="hidden" name="dataSource" th:value="${dataSource}">
+
+    <div class="table-top">
+      <label>
+        <input type="checkbox" id="checkAll">
+        전체 선택
+      </label>
+
+      <span>
+        선택된 게시글 <strong id="selectedCount">0</strong>개
+      </span>
+
+      <button type="submit" class="delete-btn">선택 삭제</button>
+    </div>
+
+    <table class="admin-table">
+      <thead>
+      <tr>
+        <th></th>
+        <th>번호</th>
+        <th>구분</th>
+        <th>카테고리</th>
+        <th>제목</th>
+        <th>작성자</th>
+        <th>등록일</th>
+        <th>상태</th>
+        <th>데이터 출처</th>
+      </tr>
+      </thead>
+
+      <tbody>
+
+      <!-- 분실물 -->
+      <tr th:if="${boardType == 'lost'}"
+          th:each="lost : ${lostList}">
+        <td>
+          <input type="checkbox" name="nums" class="row-check" th:value="${lost.num}">
+        </td>
+        <td th:text="${lost.num}">1</td>
+        <td><span class="badge red">분실</span></td>
+        <td th:text="${lost.prdtClNm}">카테고리</td>
+        <td class="title-cell" th:text="${lost.lstSbjt}">제목</td>
+        <td th:text="${lost.id != null ? lost.id : '외부연동'}">작성자</td>
+        <td th:text="${#temporals.format(lost.createdAt, 'yyyy.MM.dd')}">등록일</td>
+        <td>
+          <span th:if="${lost.done == 0}" class="badge blue">진행중</span>
+          <span th:if="${lost.done == 1}" class="badge green">완료</span>
+        </td>
+        <td th:text="${dataSource == 'POLICE' ? '외부 연동' : '사용자 작성'}">사용자 작성</td>
+      </tr>
+
+      <!-- 습득물 -->
+      <tr th:if="${boardType == 'found'}"
+          th:each="found : ${foundList}">
+        <td>
+          <input type="checkbox" name="nums" class="row-check" th:value="${found.num}">
+        </td>
+        <td th:text="${found.num}">1</td>
+        <td><span class="badge green">습득</span></td>
+        <td th:text="${found.prdtClNm}">카테고리</td>
+        <td class="title-cell" th:text="${found.fdSbjt}">제목</td>
+        <td th:text="${found.id != null ? found.id : '외부연동'}">작성자</td>
+        <td th:text="${#temporals.format(found.createdAt, 'yyyy.MM.dd')}">등록일</td>
+        <td>
+          <span th:if="${found.done == 0}" class="badge blue">진행중</span>
+          <span th:if="${found.done == 1}" class="badge green">완료</span>
+        </td>
+        <td th:text="${dataSource == 'POLICE' ? '외부 연동' : '사용자 작성'}">사용자 작성</td>
+      </tr>
+
+      <!-- 공지사항 -->
+      <tr th:if="${boardType == 'notice'}"
+          th:each="notice : ${noticeList}">
+        <td>
+          <input type="checkbox" name="nums" class="row-check" th:value="${notice.num}">
+        </td>
+        <td th:text="${notice.num}">1</td>
+        <td><span class="badge blue">공지</span></td>
+        <td>
+          <span th:if="${notice.isImportant == 1}" class="badge red">중요</span>
+          <span th:if="${notice.isImportant == 0}" class="badge gray">일반</span>
+        </td>
+        <td class="title-cell" th:text="${notice.title}">공지 제목</td>
+        <td th:text="${notice.id}">admin</td>
+        <td th:text="${#temporals.format(notice.createdAt, 'yyyy.MM.dd')}">등록일</td>
+        <td><span class="badge green">게시중</span></td>
+        <td>관리자 작성</td>
+      </tr>
+
+      <!-- 빈 목록 -->
+      <tr th:if="${(boardType == 'lost' and #lists.isEmpty(lostList))
+                or (boardType == 'found' and #lists.isEmpty(foundList))
+                or (boardType == 'notice' and #lists.isEmpty(noticeList))}">
+        <td colspan="9" class="empty">조회된 게시글이 없습니다.</td>
+      </tr>
+
+      </tbody>
+    </table>
+  </form>
+
+  <!-- 페이지 번호 -->
+  <div class="pagination"
+       th:if="${totalPages != null and totalPages > 1}">
+
+    <!-- 분실물 페이지 번호 -->
+    <th:block th:if="${boardType == 'lost'}">
+
+      <a th:if="${page > 1}"
+         th:href="@{/admin/lost(dataSource=${dataSource}, page=${page - 1})}">
+        이전
+      </a>
+
+      <a th:each="p : ${#numbers.sequence(startPage, endPage)}"
+         th:href="@{/admin/lost(dataSource=${dataSource}, page=${p})}"
+         th:text="${p}"
+         th:classappend="${p == page} ? ' active' : ''">
+      </a>
+
+      <a th:if="${page < totalPages}"
+         th:href="@{/admin/lost(dataSource=${dataSource}, page=${page + 1})}">
+        다음
+      </a>
+
+    </th:block>
+
+    <!-- 습득물 페이지 번호 -->
+    <th:block th:if="${boardType == 'found'}">
+
+      <a th:if="${page > 1}"
+         th:href="@{/admin/found(dataSource=${dataSource}, page=${page - 1})}">
+        이전
+      </a>
+
+      <a th:each="p : ${#numbers.sequence(startPage, endPage)}"
+         th:href="@{/admin/found(dataSource=${dataSource}, page=${p})}"
+         th:text="${p}"
+         th:classappend="${p == page} ? ' active' : ''">
+      </a>
+
+      <a th:if="${page < totalPages}"
+         th:href="@{/admin/found(dataSource=${dataSource}, page=${page + 1})}">
+        다음
+      </a>
+
+    </th:block>
+
+    <!-- 공지사항 페이지 번호 -->
+    <th:block th:if="${boardType == 'notice'}">
+
+      <a th:if="${page > 1}"
+         th:href="@{/admin/notice(page=${page - 1})}">
+        이전
+      </a>
+
+      <a th:each="p : ${#numbers.sequence(startPage, endPage)}"
+         th:href="@{/admin/notice(page=${p})}"
+         th:text="${p}"
+         th:classappend="${p == page} ? ' active' : ''">
+      </a>
+
+      <a th:if="${page < totalPages}"
+         th:href="@{/admin/notice(page=${page + 1})}">
+        다음
+      </a>
+
+    </th:block>
+
+  </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const checkAll = document.getElementById("checkAll");
+  const rowChecks = document.querySelectorAll(".row-check");
+  const selectedCount = document.getElementById("selectedCount");
+  const deleteForm = document.getElementById("deleteForm");
+
+  function updateSelectedCount() {
+    const checkedCount = document.querySelectorAll(".row-check:checked").length;
+    selectedCount.textContent = checkedCount;
+
+    if (rowChecks.length > 0) {
+      checkAll.checked = checkedCount === rowChecks.length;
+    }
+  }
+
+  if (checkAll) {
+    checkAll.addEventListener("change", function () {
+      rowChecks.forEach(check => {
+        check.checked = checkAll.checked;
+      });
+      updateSelectedCount();
+    });
+  }
+
+  rowChecks.forEach(check => {
+    check.addEventListener("change", updateSelectedCount);
+  });
+
+  if (deleteForm) {
+    deleteForm.addEventListener("submit", function (e) {
+      const checkedCount = document.querySelectorAll(".row-check:checked").length;
+
+      if (checkedCount === 0) {
+        alert("삭제할 게시글을 선택해주세요.");
+        e.preventDefault();
+        return;
+      }
+
+      if (!confirm("선택한 게시글을 삭제하시겠습니까?")) {
+        e.preventDefault();
+      }
+    });
+  }
+});
+</script>
+
+</body>
+</html>

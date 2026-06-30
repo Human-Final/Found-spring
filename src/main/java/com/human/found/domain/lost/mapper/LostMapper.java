@@ -38,8 +38,20 @@ public interface LostMapper {
         @Param("author") String author,         // 추가
         @Param("status") String status, 
         @Param("keyword") String keyword,       // 습득물명
-        @Param("sort") String sort
+        @Param("sort") String sort,
+        @Param("paging") PagingVO pagingVO
     );
+
+    int selectLostSearchCount(
+        @Param("category") List<String> category, 
+        @Param("subCategory") String subCategory, 
+        @Param("startDate") String startDate, 
+        @Param("endDate") String endDate, 
+        @Param("author") String author, 
+        @Param("status") String status, 
+        @Param("keyword") String keyword
+    );
+
     long countLostList();
 
 }
