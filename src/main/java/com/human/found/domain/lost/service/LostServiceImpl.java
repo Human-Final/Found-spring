@@ -14,6 +14,7 @@ import com.human.found.domain.lost.vo.LostFileVO;
 import com.human.found.domain.lost.vo.LostVO;
 import com.human.found.domain.user.mapper.UserMapper;
 import com.human.found.domain.user.vo.UserVO;
+import com.human.found.global.common.paging.PagingVO;
 import com.human.found.infrastructure.file.FileUtil;
 
 import lombok.AllArgsConstructor;
@@ -76,9 +77,37 @@ public class LostServiceImpl implements LostService {
     }
 
     @Override
-    public List<LostVO> getLostlist() {
-        return lostMapper.selectLostList();
+    public List<LostVO> getLostlist(PagingVO pagingVO) {
+        long totalCount = lostMapper.countLostList();
+        pagingVO.pageInfo((int)totalCount);
+        return lostMapper.selectLostList(pagingVO);
     }
+
+    // 다단 비동기 카테고리 필터링 및 동적 검색 처리 비즈니스 로직
+    @Override
+    public List<LostVO> searchLostItems(List<String> category, String subCategory, String startDate, String endDate, String author, String status, String keyword, String sort) {
+        
+        if ("all".equalsIgnoreCase(status)) {
+            status = "";
+        }
+        
+        if (keyword != null) {
+            keyword = keyword.trim();
+        } else {
+            keyword = "";
+        }
+        
+        // 날짜 및 분실자명 공백 문자 안전 정제 처리
+        if (startDate != null) startDate = startDate.trim();
+        if (endDate != null) endDate = endDate.trim();
+        if (author != null) author = author.trim();
+
+        System.out.println("🔄 [6대 필터 엔진 기동] 대분류 개수: " + (category != null ? category.size() : 0) + " | 키워드: " + keyword);
+
+        // 정비 완료된 신형 매퍼 파라미터 라인 가동
+        return lostMapper.selectLostSearchList(category, subCategory, startDate, endDate, author, status, keyword, sort);
+    }
+
 
     @Override
     @Transactional
@@ -148,7 +177,7 @@ public class LostServiceImpl implements LostService {
         }
         if ("user".equals(lostVO.getDataSource())) {
             List<LostFileVO> filevo = lostFileMapper.findById(lostVO.getAtcId());
-            lostVO.setFilelist(filevo);
+            lostVO.setFileList(filevo);
         }
         return lostVO;
     }
