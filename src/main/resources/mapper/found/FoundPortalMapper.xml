@@ -27,6 +27,7 @@
         fd_sbjt,
         fd_ymd,
         prdt_cl_nm,
+        prdt_category,
         done,
         is_deleted
     )VALUES (
@@ -38,6 +39,7 @@
         #{fdSbjt},
         #{fdYmd},
         #{prdtClNm},
+        #{prdtCategory},
         #{done},
         #{isDeleted}
     )

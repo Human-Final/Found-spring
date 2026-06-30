@@ -85,27 +85,37 @@ public class LostServiceImpl implements LostService {
 
     // 다단 비동기 카테고리 필터링 및 동적 검색 처리 비즈니스 로직
     @Override
-    public List<LostVO> searchLostItems(List<String> category, String subCategory, String startDate, String endDate, String author, String status, String keyword, String sort) {
+    public List<LostVO> searchLostItems(List<String> category, String subCategory, String startDate, String endDate, String author, String status, String keyword, String sort, PagingVO pagingVO) {
         
-        if ("all".equalsIgnoreCase(status)) {
-            status = "";
-        }
+        // 검색어 공백 정제 및 "all" 보정 처리
+        if ("all".equalsIgnoreCase(status)) status = "";
+        if (keyword != null) keyword = keyword.trim();
+        else keyword = "";
         
-        if (keyword != null) {
-            keyword = keyword.trim();
-        } else {
-            keyword = "";
-        }
-        
-        // 날짜 및 분실자명 공백 문자 안전 정제 처리
         if (startDate != null) startDate = startDate.trim();
         if (endDate != null) endDate = endDate.trim();
         if (author != null) author = author.trim();
 
-        System.out.println("🔄 [6대 필터 엔진 기동] 대분류 개수: " + (category != null ? category.size() : 0) + " | 키워드: " + keyword);
+        System.out.println("🔄 [서비스단] 복합 검색 및 페이징 기동 -> 현재 페이지: " + pagingVO.getPage());
 
-        // 정비 완료된 신형 매퍼 파라미터 라인 가동
-        return lostMapper.selectLostSearchList(category, subCategory, startDate, endDate, author, status, keyword, sort);
+        // 💡 매퍼 인터페이스로 모든 인자를 토스합니다.
+        return lostMapper.selectLostSearchList(category, subCategory, startDate, endDate, author, status, keyword, sort, pagingVO);
+    }
+
+    // 페이징을 위한 총 결과갯수 카운트
+    @Override
+    public int getTotalSearchCount(List<String> category, String subCategory, String startDate, String endDate, String author, String status, String keyword) {
+        
+        if ("all".equalsIgnoreCase(status)) status = "";
+        if (keyword != null) keyword = keyword.trim();
+        else keyword = "";
+        
+        if (startDate != null) startDate = startDate.trim();
+        if (endDate != null) endDate = endDate.trim();
+        if (author != null) author = author.trim();
+
+        // 매퍼의 카운트 전용 메서드 호출
+        return lostMapper.selectLostSearchCount(category, subCategory, startDate, endDate, author, status, keyword);
     }
 
 

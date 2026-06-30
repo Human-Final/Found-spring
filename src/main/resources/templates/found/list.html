@@ -22,41 +22,94 @@
     <a th:href="@{/api/write(boardType='found')}" class="write-btn">글쓰기</a>
   </section>
 
-  <section class="filter-box">
-    <div class="board-search">
-      <span>⌕</span>
-      <input type="text" id="keywordInput" placeholder="게시글 검색...">
-    </div>
+  <section class="filter-box-advanced" 
+           style="background: #f7fcf9; padding: 25px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #d4f0df; box-shadow: 0 4px 12px rgba(212, 240, 223, 0.2);">
+    
+    <form id="advancedSearchForm" onsubmit="return false;" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;">
+      
+      <!-- 1층 - 1열: 대분류 카테고리 -->
+      <div class="form-group">
+        <label for="mainCategorySelect" style="font-weight: 600; display: block; margin-bottom: 6px; color: #444;">물품 분류 (대분류)</label>
+        <select id="mainCategorySelect" style="width: 100%; padding: 10px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; cursor: pointer;">
+          <option value="">대분류 선택</option>
+          <option value="가방" th:selected="${selectedCategories != null and #lists.contains(selectedCategories, '가방')}">가방</option>
+          <option value="귀금속" th:selected="${selectedCategories != null and #lists.contains(selectedCategories, '귀금속')}">귀금속</option>
+          <option value="도서" th:selected="${selectedCategories != null and #lists.contains(selectedCategories, '도서')}">도서</option>
+          <option value="의류" th:selected="${selectedCategories != null and #lists.contains(selectedCategories, '의류')}">의류</option>
+          <option value="자동차" th:selected="${selectedCategories != null and #lists.contains(selectedCategories, '자동차')}">자동차</option>
+          <option value="핸드폰" th:selected="${selectedCategories != null and #lists.contains(selectedCategories, '핸드폰')}">핸드폰</option>
+          <option value="전자기기" th:selected="${selectedCategories != null and #lists.contains(selectedCategories, '전자기기')}">전자기기</option>
+          <option value="지갑" th:selected="${selectedCategories != null and #lists.contains(selectedCategories, '지갑')}">지갑</option>
+          <option value="카드" th:selected="${selectedCategories != null and #lists.contains(selectedCategories, '카드')}">카드</option>
+          <option value="기타" th:selected="${selectedCategories != null and #lists.contains(selectedCategories, '기타')}">기타</option>
+        </select>
+      </div>
 
-    <div class="filter-row">
-      <div class="filter-section">
-        <span class="filter-label">카테고리</span>
+      <!-- 1층 - 2열: 소분류 카테고리 -->
+      <div class="form-group">
+        <label for="subCategorySelect" style="font-weight: 600; display: block; margin-bottom: 6px; color: #444;">물품 분류 (소분류)</label>
+        <select id="subCategorySelect" style="width: 100%; padding: 10px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; cursor: pointer;">
+          <option value="">소분류 선택</option>
+        </select>
+      </div>
 
-        <div id="categoryFilter" class="chip-group">
-          <button type="button" class="chip active" data-category="">전체</button>
-          <button type="button" class="chip" data-category="가방">가방</button>
-          <button type="button" class="chip" data-category="귀금속">귀금속</button>
-          <button type="button" class="chip" data-category="도서">도서</button>
-          <button type="button" class="chip" data-category="의류">의류</button>
-          <button type="button" class="chip" data-category="자동차">자동차</button>
-          <button type="button" class="chip" data-category="핸드폰">핸드폰</button>
-          <button type="button" class="chip" data-category="전자기기">전자기기</button>
-          <button type="button" class="chip" data-category="지갑">지갑</button>
-          <button type="button" class="chip" data-category="카드">카드</button>
-          <button type="button" class="chip" data-category="기타">기타</button>
+      <!-- 1층 - 3열: 습득자명 (작성자ID) -->
+      <div class="form-group">
+        <label for="authorInput" style="font-weight: 600; display: block; margin-bottom: 6px; color: #555;">습득자명 (작성자ID)</label>
+        <input type="text" id="authorInput" th:value="${selectedAuthor}" placeholder="작성자명 입력..." 
+               style="width: 100%; padding: 10px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; box-sizing: border-box;">
+      </div>
+
+      <!-- 2층 - 1열: 진행 상태 -->
+      <div class="form-group">
+        <label for="statusSelect" style="font-weight: 600; display: block; margin-bottom: 6px; color: #555;">진행 상태</label>
+        <select id="statusSelect" style="width: 100%; padding: 10px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; cursor: pointer;">
+          <option value="" th:selected="${selectedStatus == null || selectedStatus == ''}">전체</option>
+          <option value="진행중" th:selected="${selectedStatus == '진행중'}">진행중</option>
+          <option value="완료" th:selected="${selectedStatus == '완료'}">완료</option>
+        </select>
+      </div>
+
+      <!-- 2층 - 2, 3열: 습득일자 범위 및 습득물명 배치 -->
+      <div class="form-group" style="grid-column: span 2; display: flex; gap: 12px; align-items: flex-end;">
+        <div style="flex: 1;">
+          <label for="startDateInput" style="font-weight: 600; display: block; margin-bottom: 6px; color: #555;">습득일자 범위</label>
+          <input type="date" id="startDateInput" th:value="${startDate}" 
+                 th:max="${#calendars.format(#calendars.createNow(), 'yyyy-MM-dd')}"
+                 style="width: 100%; padding: 9px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; box-sizing: border-box;">
+        </div>
+        <span style="padding-bottom: 12px; color: #999; font-weight: bold;">~</span>
+        <div style="flex: 1;">
+          <input type="date" id="endDateInput" th:value="${endDate}" 
+                 th:max="${#calendars.format(#calendars.createNow(), 'yyyy-MM-dd')}"
+                 style="width: 100%; padding: 9px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; box-sizing: border-box;">
+        </div>
+        
+        <div style="flex: 1.5; margin-left: 10px;">
+          <label for="keywordInput" style="font-weight: 600; display: block; margin-bottom: 6px; color: #555;">습득물명</label>
+          <input type="text" id="keywordInput" th:value="${keyword}" placeholder="습득물명 입력..." 
+                 style="width: 100%; padding: 10px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; box-sizing: border-box;">
         </div>
       </div>
-      <div class="filter-section status-section">
-        <span class="filter-label">상태</span>
 
-        <div id="statusFilter" class="chip-group">
-          <button type="button" class="chip active" data-status="">전체</button>
-          <button type="button" class="chip" data-status="진행중">진행중</button>
-          <button type="button" class="chip" data-status="완료">완료</button>
-        </div>
+      <!-- 3층: 정중앙 정렬 버튼 그룹 (초기화 및 검색하기) -->
+      <div class="form-group" style="grid-column: 1 / -1; display: flex; justify-content: center; gap: 12px; margin-top: 10px;">
+        <button type="button" id="resetBtn" 
+                style="background: #ffffff; color: #27ae60; padding: 11px 30px; border: 1px solid #bce6cc; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 15px; transition: all 0.2s;"
+                onmouseover="this.style.background='#edfcf2'" onmouseout="this.style.background='#ffffff'">
+          🔄 초기화
+        </button>
+
+        <button type="button" id="searchSubmitBtn" 
+                style="background: #2ecc71; color: white; padding: 11px 40px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 15px; transition: background 0.2s;"
+                onmouseover="this.style.background='#27ae60'" onmouseout="this.style.background='#2ecc71'">
+          🔍 검색하기
+        </button>
       </div>
-    </div>
+
+    </form>
   </section>
+
   
   <div class="count-sort">
     <p th:text="|총 ${paging.totalCount}건|" class="total-count">총 2건</p>    
@@ -78,7 +131,7 @@
           <span th:text="${foundVO.prdtClNm}" class="category-tag">카테고리</span>
         </div>
         <span class="status-tag"
-          th:classappend="${foundVO.done==1 ? 'status-tag-done' : 'status-tag-progress'}"
+          th:classappend="${foundVO.done == 1 ? 'status-tag-done' : 'status-tag-progress'}"
           th:text="${foundVO.done == 1 ? '✓ 완료' : '○ 진행중'}">
           상태
         </span>
@@ -98,7 +151,7 @@
         </div>
         <div class="info-item">
           <strong>색상명</strong>
-          <p th:text="${foundVO.clrNm}">색상명</p>
+          <p th:text="${foundVO.clrNm != null and foundVO.clrNm != '' ? foundVO.clrNm : '미지정'}">색상명</p>
         </div>
         <div class="info-item">
           <strong>습득지역</strong>
@@ -106,7 +159,7 @@
         </div>
         <div class="info-item">
           <strong>습득일자</strong>
-          <p th:text="${#temporals.format(foundVO.fdYmd, 'yyyy-MM-dd')}">습득일자</p>
+          <p th:text="${foundVO.fdYmd != null ? #temporals.format(foundVO.fdYmd, 'yyyy-MM-dd') : ''}">습득일자</p>
         </div>
         <div class="info-item">
           <strong>물품분류</strong>
@@ -114,38 +167,71 @@
         </div>
         <div class="info-item">
           <strong>작성자</strong>
-          <p th:text="${foundVO.id !=null ? foundVO.id : foundVO.depPlace}">작성자</p>
+          <p th:text="${foundVO.id != null and foundVO.id != '' ? foundVO.id : foundVO.depPlace}">작성자</p>
         </div>                
       </div>
       <div class="post-bottom">
-        <span>작성날짜(몇일 전 로직으로 구현)</span>
+        <span th:text="${foundVO.createdAt != null ? #temporals.format(foundVO.createdAt, 'yyyy-MM-dd') : ''}">작성날짜</span>
         <div class="post-counts">
-          <span>조회 수</span>
-          <span>댓글 수</span>
+          <!-- 💡 [교정 완수] 객체 널 체킹 가독성을 완전 정형화하여 타임리프 파싱 다운 예외를 해소했습니다. -->
+          <!--<span>조회 수 <span th:text="${foundVO.viewConut != null ? foundVO.viewConut : 0}">0</span></span> -->
+          <span>댓글 수 0</span>
         </div>
       </div>
     </a>
   </section>
   
   <div class="pagination" th:if="${paging.totalCount > 0}">
-    <a 
-      th:if="${paging.prev}"
-      th:href="@{/api/found(page=${paging.startPage -1})}"
+    
+    <!-- 1. [이전] 버튼 교정 -->
+    <a th:if="${paging.prev}"
+      th:href="@{/api/found(
+          page=${paging.startPage - 1},
+          sort=${sort},
+          category=${selectedCategories},
+          subCategory=${selectedSubCategory},
+          startDate=${startDate},
+          endDate=${endDate},
+          author=${selectedAuthor},
+          status=${selectedStatus},
+          keyword=${keyword}
+      )}"
       class="page-btn">
       이전
     </a>
 
-    <a
-      th:each="pageNum : ${#numbers.sequence(paging.startPage, paging.endPage)}"
-      th:href="@{/api/found(page=${pageNum})}"
+    <!-- 2. [페이지 번호 숫자들] 교정 (🌟핵심 부위) -->
+    <a th:each="pageNum : ${#numbers.sequence(paging.startPage, paging.endPage)}"
+      th:href="@{/api/found(
+          page=${pageNum},
+          sort=${sort},
+          category=${selectedCategories},
+          subCategory=${selectedSubCategory},
+          startDate=${startDate},
+          endDate=${endDate},
+          author=${selectedAuthor},
+          status=${selectedStatus},
+          keyword=${keyword}
+      )}"
       th:text="${pageNum}"
-      th:classappend="${pageNum==paging.page} ? 'active' : ''"
+      th:classappend="${pageNum == paging.page} ? 'active' : ''"
       class="page-btn">
       1
     </a>
 
+    <!-- 3. [다음] 버튼 교정 -->
     <a th:if="${paging.next}"
-      th:href="@{/api/found(page=${paging.endPage + 1})}"
+      th:href="@{/api/found(
+          page=${paging.endPage + 1},
+          sort=${sort},
+          category=${selectedCategories},
+          subCategory=${selectedSubCategory},
+          startDate=${startDate},
+          endDate=${endDate},
+          author=${selectedAuthor},
+          status=${selectedStatus},
+          keyword=${keyword}
+      )}"
       class="page-btn">
       다음
     </a>
@@ -156,76 +242,119 @@
 
 <div th:replace="layout/footer :: footerFragment"></div>
 
-<script>
+<script th:inline="javascript">
+/*<![CDATA[*/
+  // 1. 현재 주소창의 파라미터 상태 읽기 및 초기화
   const currentParams = new URLSearchParams(window.location.search);
-  let selectedCategory = currentParams.get("category") || "";
-  let selectedStatus = currentParams.get("status") || "";
 
-  document.querySelector("#keywordInput").value = currentParams.get("keyword") || "";
-  document.querySelector("#sortSelect").value = currentParams.get("sort") || "latest";
+  const mainSelect = document.getElementById("mainCategorySelect");
+  const subSelect = document.getElementById("subCategorySelect");
 
-  // 카테고리 선택 조회 기능
-  function bindCategoryFilter() {
-    const buttons = document.querySelectorAll("#categoryFilter .chip");
+  // 화면 진입 시 주소창 조건에 맞게 인풋창 및 필터 값들 세밀하게 복원
+  if(document.querySelector("#keywordInput")) document.querySelector("#keywordInput").value = currentParams.get("keyword") || "";
+  if(document.querySelector("#authorInput")) document.querySelector("#authorInput").value = currentParams.get("author") || "";
+  if(document.querySelector("#statusSelect")) document.querySelector("#statusSelect").value = currentParams.get("status") || "";
+  if(document.querySelector("#startDateInput")) document.querySelector("#startDateInput").value = currentParams.get("startDate") || "";
+  if(document.querySelector("#endDateInput")) document.querySelector("#endDateInput").value = currentParams.get("endDate") || "";
+  if(document.querySelector("#sortSelect")) document.querySelector("#sortSelect").value = currentParams.get("sort") || "latest";
 
-    buttons.forEach(button => {
-      button.classList.toggle("active",
-        button.dataset.category === selectedCategory
-      );
-        
-      button.addEventListener("click", function(){
-        selectedCategory = this.dataset.category;
+  // 주소창에 기존 대분류가 선택되어 있었다면 셀렉트 박스 강제 동기화
+  const urlMainCat = currentParams.get("category") || "";
+  if (mainSelect) mainSelect.value = urlMainCat;
 
-        buttons.forEach(btn => btn.classList.remove("active"));
-        this.classList.add("active");
-        
-        loadBoardList();
+  // 2. [작성 사양 100% 매칭] 한 오차도 없이 일치시킨 대분류/소분류 정규화 데이터 맵
+  const subCategoryMap = JSON.parse('{' +
+    '"가방":["여성용가방","남성용가방","기타가방"],' +
+    '"귀금속":["반지","목걸이","귀걸이","시계","기타"],' +
+    '"도서":["학습서적","소설","컴퓨터서적","만화책","기타서적"],' +
+    '"의류":["여성의류","남성의류","아기의류","모자","신발","기타의류"],' +
+    '"자동차":["자동차열쇠","네비게이션","자동차번호판","임시번호판","기타용품"],' +
+    '"핸드폰":["삼성휴대폰","LG휴대폰","아이폰","기타휴대폰","기타통신기기"],' +
+    '"전자기기":["태블릿","스마트워치","무선이어폰","카메라","기타용품"],' +
+    '"지갑":["여성용 지갑","남성용 지갑","기타 지갑"],' +
+    '"카드":["신용(체크)카드","일반카드","교통카드","기타카드"]' +
+  '}');
+
+  // 3. [소분류 목록 생성 함수] 대분류 변경 시 소분류 option을 실시간 드로잉하는 장치
+  function updateSubCategoryOptions(mainValue, currentSubValue) {
+    if (!subSelect) return;
+    subSelect.innerHTML = '<option value="">소분류 선택</option>';
+    
+    if (mainValue && subCategoryMap[mainValue]) {
+      subCategoryMap[mainValue].forEach(function(sub) {
+        const opt = document.createElement("option");
+        opt.value = sub;
+        opt.innerText = sub;
+        if (sub === currentSubValue) {
+          opt.selected = true;
+        }
+        subSelect.appendChild(opt);
       });
+    }
+  }
+
+  // 4. 대분류 상자 실시간 변경(change) 감지 리스너 연결
+  if (mainSelect) {
+    mainSelect.addEventListener("change", function() {
+      updateSubCategoryOptions(this.value, "");
     });
   }
 
-  // 상태 선택 조회 기능
-  function bindStatusFilter() {
-    const buttons = document.querySelectorAll("#statusFilter .chip");
-
-    buttons.forEach(button => {
-      button.classList.toggle("active",
-        button.dataset.status === selectedStatus
-      );
-        
-      button.addEventListener("click", function(){
-        selectedStatus = this.dataset.status;
-        loadBoardList();
-      });
-    });
+  // 5. [최초 로딩 스위치] 새로고침 직후 기존 소분류 데이터 리스트 미리 채워두기
+  const urlSubCat = currentParams.get("subCategory") || "";
+  if (urlMainCat) {
+    updateSubCategoryOptions(urlMainCat, urlSubCat);
   }
 
-  async function loadBoardList() {
+  // 6. [교정] 6대 복합 필터 값을 엮어서 새로고침 전송하는 통합 주소 조립기 함수
+  async function loadBoardList(targetPage=1) {
     const params = new URLSearchParams();
-    const keyword = document.querySelector("#keywordInput").value.trim();
+    
+    const mainCat = mainSelect ? mainSelect.value : "";
+    const subCat = subSelect ? subSelect.value : "";
+    const keyword = document.getElementById("keywordInput") ? document.getElementById("keywordInput").value.trim() : "";
+    const author = document.getElementById("authorInput") ? document.getElementById("authorInput").value.trim() : "";
+    const status = document.getElementById("statusSelect") ? document.getElementById("statusSelect").value : "";
+    const startDate = document.getElementById("startDateInput") ? document.getElementById("startDateInput").value : "";
+    const endDate = document.getElementById("endDateInput") ? document.getElementById("endDateInput").value : "";
 
-    if (keyword) {
-      params.set("keyword", keyword);
-    }
+    // 유효성 방어선 검증 바인딩 (빈 선택값이거나 '선택' 단어가 포함되면 params 적재 제외)
+    if (mainCat && mainCat !== "" && !mainCat.includes("선택")) params.set("category", mainCat);
+    if (subCat && subCat !== "" && !subCat.includes("선택")) params.set("subCategory", subCat);
+    if (keyword && keyword !== "") params.set("keyword", keyword);
+    if (author && author !== "") params.set("author", author);
+    if (status && status !== "" && !status.includes("전체")) params.set("status", status);
+    if (startDate && startDate !== "") params.set("startDate", startDate);
+    if (endDate && endDate !== "") params.set("endDate", endDate);
+    
+    // 정렬 엘리먼트 값 수집 추가
+    const sortEl = document.querySelector("#sortSelect");
+    if (sortEl) params.set("sort", sortEl.value);
 
-    if (selectedCategory) {
-      params.set("category", selectedCategory);
-    }
-
-    if (selectedStatus) {
-      params.set("status", selectedStatus);
-    }
-
-    params.set("sort", document.querySelector("#sortSelect").value);
+    // 검색 시 언제나 무조건 1페이지부터 목록 리스트가 개설되도록 처리
+    params.set("page", "1");
 
     window.location.href = window.location.pathname + "?" + params.toString();
   }
 
-  document.querySelector("#sortSelect").addEventListener("change", loadBoardList);
+  // 7. [초기화 실행] 모든 입력 필드를 비우고 파라미터가 없는 순정 첫 페이지 주소로 점프
+  function resetAdvancedSearchForm() {
+    window.location.href = window.location.pathname;
+  }
 
-  bindCategoryFilter();
-  bindStatusFilter();
+  // 8. 최종 물리적 엘리먼트 이벤트 리스너 결합 마감
+  if (document.getElementById("searchSubmitBtn")) {
+    document.getElementById("searchSubmitBtn").addEventListener("click", loadBoardList);
+  }
+  if (document.getElementById("resetBtn")) {
+    document.getElementById("resetBtn").addEventListener("click", resetAdvancedSearchForm);
+  }
+  if (document.querySelector("#sortSelect")) {
+    document.querySelector("#sortSelect").addEventListener("change", loadBoardList);
+  }
+/*]]>*/
 </script>
+
 
 </body>
 </html>
