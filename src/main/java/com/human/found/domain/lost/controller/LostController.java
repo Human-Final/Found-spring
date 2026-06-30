@@ -20,6 +20,7 @@ import com.human.found.domain.comment.service.LostCommentService;
 import com.human.found.domain.lost.service.LostPoliceService;
 import com.human.found.domain.lost.service.LostService;
 import com.human.found.domain.lost.vo.LostVO;
+import com.human.found.global.common.paging.PagingVO;
 import com.human.found.infrastructure.map.KakaoMapConfig;
 
 import jakarta.validation.Valid;
@@ -53,7 +54,7 @@ public class LostController {
                 error.getField() + " = " + error.getDefaultMessage()));
             
 
-            model.addAttribute("writetype", "lost");
+            model.addAttribute("boardType", "lost");
             return "found/write";
         }
             
@@ -82,11 +83,18 @@ public class LostController {
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "keyword", required = false) String keyword, // 습득물명
             @RequestParam(value = "sort", defaultValue = "latest") String sort,
+            @RequestParam(defaultValue = "1") int page
             Model model) {
         
         // 확장된 6대 필터를 완벽하게 정렬하여 서비스 호출 토스
         List<LostVO> getList = lostService.searchLostItems(category, subCategory, startDate, endDate, author, status, keyword, sort);
         
+        // 페이징
+        PagingVO pagingVO = new PagingVO();
+        pagingVO.setPage(page);
+        pagingVO.setSize(10);
+        pagingVO.setPageBlock((10));
+  
         model.addAttribute("getList", getList);
         
         // HTML 검색 폼 화면에 사용자가 방금 입력/선택했던 검색 조건값들을 고스란히 복원(유지)하기 위해 모델에 바인딩
@@ -98,6 +106,8 @@ public class LostController {
         model.addAttribute("selectedStatus", status);
         model.addAttribute("keyword", keyword);
         model.addAttribute("sort", sort);
+        model.addAttribute("paging", pagingVO);
+        model.addAttribute("isEdit", false);
         
         return "lost/list";
     }
@@ -107,7 +117,7 @@ public class LostController {
     public String lostWriteForm(Model model) {
         // 화면에 습득물(lost) 타입을 구분하기 위한 값 전달
         model.addAttribute("lostVO",new LostVO());
-        model.addAttribute("writetype", "lost");
+        model.addAttribute("boardType", "lost");
         return "found/write";
     }
     //삭제
@@ -126,7 +136,10 @@ public class LostController {
         String loginid=authentication.getName();
         //로그인한 유저의 권한 목록 중 관리자 권한 (ADMIN) 이 있는지 확인
         boolean isAdmin=authentication.getAuthorities().stream()
-        .anyMatch(auth->auth.getAuthority().equals("ROLE_ADMIN")||auth.getAuthority().equals("ADMIN"));
+        .anyMatch(auth->auth.getAuthority().equals("ROLE_ADMIN")
+                        || auth.getAuthority().equals("ADMIN")
+                        || auth.getAuthority().equals("ROLE_MANAGER")
+                        || auth.getAuthority().equals("MANAGER"));
 
         try {
             //서비스단에 글 id 입력번호, 로그인한 유저 id 를 넘겨받아 검증 및 삭제
@@ -143,6 +156,7 @@ public class LostController {
     @GetMapping("/api/lost/detail/{atcId}")
     public String lostDetaile(@PathVariable("atcId")String atcId,Model model) {
         LostVO lostVO=lostService.lostdetail(atcId);
+
         model.addAttribute("lostVO", lostVO);
         model.addAttribute("comments", lostCommentService.getComments(
             lostVO.getNum(), lostVO.getDataSource())
@@ -164,28 +178,32 @@ public class LostController {
         String loginId=authentication.getName();
         boolean isAdmin=authentication.getAuthorities().stream()
         .anyMatch(auth->auth.getAuthority().equals("ROLE_ADMIN")
-        ||auth.getAuthority().equals("ADMIN"));
+                        || auth.getAuthority().equals("ADMIN")
+                        || auth.getAuthority().equals("ROLE_MANAGER")
+                        || auth.getAuthority().equals("MANAGER"));
         if(!isAdmin &&(lostVO.getId()==null||!lostVO.getId().equals(loginId))){
             redirectAttributes.addFlashAttribute("errormessage", "본인이 작성한 게시글만 수정할 수 있습니다");
             return "redirect:/api/lost/detail/"+atcId;
         }
         model.addAttribute("lostVO", lostVO);
-        model.addAttribute("writetype", "lost");
+        model.addAttribute("boardType", "lost");
         model.addAttribute("isEdit", true);
         return "found/write";
     }
     //실제 데이터 수정
     @PostMapping("api/lost/update")
-    public String LostUpdate(@Valid @ModelAttribute("lostVO")LostVO lostVO,BindingResult bindingResult,Model model,
-    MultipartFile[]files,@RequestParam(value = "files",required = false)List<String>deletefiles) {
+    public String LostUpdate(@Valid @ModelAttribute("lostVO")LostVO lostVO,
+            BindingResult bindingResult,Model model,
+            @RequestParam(value = "files",required = false) MultipartFile[]files,
+            @RequestParam(value = "deleteFiles",required = false)List<String>deleteFiles) {
 
         //[입력값 유지 및 임시저장 기능] 검증 에러 발생 시 작성하던 내용 그대로 다시 폼으로 백!
         if(bindingResult.hasErrors()){
-            model.addAttribute("writetype", "lost");
+            model.addAttribute("boardType", "lost");
             model.addAttribute("isEdit", true);
             return "found/write";
         }
-        lostService.UpdateLost(lostVO,files,deletefiles);
+        lostService.UpdateLost(lostVO,files,deleteFiles);
         return "redirect:/api/lost/detail/"+lostVO.getAtcId();
     }
 

@@ -4,12 +4,18 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import com.human.found.domain.lost.vo.LostVO;
+import com.human.found.global.common.paging.PagingVO;
 
 @Mapper
 public interface LostMapper {
     public void insertLost(LostVO lostVO);
     
-    public List<LostVO> selectLostList();
+    public List<LostVO> selectLostList(PagingVO pagingVO);
+    
+    public LostVO selectlostbyId(@Param("atcId")String atcId);
+    
+    //게시글 삭제
+    public void lostupdateDelte(@Param("atcId")String atcId);
 
     public LostVO selectlostbyId(@Param("atcId") String atcId);
     
@@ -39,5 +45,6 @@ public interface LostMapper {
         @Param("keyword") String keyword,       // 습득물명
         @Param("sort") String sort
     );
+    long countLostList();
 
 }

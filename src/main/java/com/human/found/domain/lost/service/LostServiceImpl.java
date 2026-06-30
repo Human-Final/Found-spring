@@ -14,6 +14,7 @@ import com.human.found.domain.lost.vo.LostFileVO;
 import com.human.found.domain.lost.vo.LostVO;
 import com.human.found.domain.user.mapper.UserMapper;
 import com.human.found.domain.user.vo.UserVO;
+import com.human.found.global.common.paging.PagingVO;
 import com.human.found.infrastructure.file.FileUtil;
 
 import lombok.AllArgsConstructor;
@@ -76,8 +77,10 @@ public class LostServiceImpl implements LostService {
     }
 
     @Override
-    public List<LostVO> getLostlist() {
-        return lostMapper.selectLostList();
+    public List<LostVO> getLostlist(PagingVO pagingVO) {
+        long totalCount = lostMapper.countLostList();
+        pagingVO.pageInfo((int)totalCount);
+        return lostMapper.selectLostList(pagingVO);
     }
 
     // 다단 비동기 카테고리 필터링 및 동적 검색 처리 비즈니스 로직
@@ -174,7 +177,7 @@ public class LostServiceImpl implements LostService {
         }
         if ("user".equals(lostVO.getDataSource())) {
             List<LostFileVO> filevo = lostFileMapper.findById(lostVO.getAtcId());
-            lostVO.setFilelist(filevo);
+            lostVO.setFileList(filevo);
         }
         return lostVO;
     }

@@ -20,6 +20,7 @@ import com.human.found.domain.comment.service.FoundCommentService;
 import com.human.found.domain.comment.vo.CommentVO;
 import com.human.found.domain.found.service.FoundService;
 import com.human.found.domain.found.vo.FoundVO;
+import com.human.found.domain.lost.vo.LostVO;
 import com.human.found.global.common.paging.PagingVO;
 import com.human.found.infrastructure.map.KakaoMapConfig;
 
@@ -44,7 +45,7 @@ public class FoundController {
         @RequestParam(value="files",required = false) MultipartFile[]files, Principal principal ) {
         
         if(bindingResult.hasErrors()){
-            model.addAttribute("writetype", "found");
+            model.addAttribute("boardType", "found");
             return "found/write";
         }    
         //작성자 자동설정
@@ -80,12 +81,20 @@ public class FoundController {
     }
     
     @GetMapping("/api/write")
-    public String foundWriteForm(Model model) {
+    public String writeForm(@RequestParam(defaultValue = "found") String boardType,
+                                Model model) {
         // 화면에 습득물(found) 타입을 구분하기 위한 값 전달
-        model.addAttribute("foundVO", new FoundVO());
+        // model.addAttribute("foundVO", new FoundVO());
         
         // 기본값 설정
-        model.addAttribute("writetype", "found");
+        model.addAttribute("boardType", boardType);
+        model.addAttribute("isEdit", false);
+
+        if("lost".equals(boardType)){
+            model.addAttribute("lostVO", new LostVO());
+        }else {
+            model.addAttribute("foundVO", new FoundVO());
+        }
         return "found/write";
     }
     
@@ -105,7 +114,11 @@ public class FoundController {
         String loginid =authentication.getName(); 
         //로그인한 유저의 권한 목록 중 관리자 권한 (ADMIN) 이 있는지 확인
         boolean isAdmin=authentication.getAuthorities().stream()
-        .anyMatch(auth->auth.getAuthority().equals("ROLE_ADMIN")||auth.getAuthority().equals("ADMIN"));
+        .anyMatch(auth->auth.getAuthority().equals("ROLE_ADMIN")
+                        || auth.getAuthority().equals("ADMIN")
+                        || auth.getAuthority().equals("ROLE_MANAGER")
+                        || auth.getAuthority().equals("MANAGER"));
+
         try {
             //서비스단에 글 id 입력번호, 로그인한 유저 id 를 넘겨받아 검증 및 삭제
             foundService.deletefound(atcId,inputpw,loginid,isAdmin);
@@ -153,31 +166,31 @@ public class FoundController {
         //작성자 본인 확인 방어코드
         String loginid=authentication.getName();
         boolean isAdmin=authentication.getAuthorities().stream()
-            .anyMatch(auth->auth.getAuthority().equals("ROLE_ADMIN")||
-            auth.getAuthority().equals("ADMIN"));
+            .anyMatch(auth->auth.getAuthority().equals("ROLE_ADMIN")
+                        || auth.getAuthority().equals("ADMIN")
+                        || auth.getAuthority().equals("ROLE_MANAGER")
+                        || auth.getAuthority().equals("MANAGER"));
         if(!isAdmin && (foundVO.getId()==null||!foundVO.getId().equals(loginid))){
             redirectAttributes.addFlashAttribute("errorMessage", "본인이 작성한 글만 수정할 수 있습니다");
             return "redirect:/api/found/detail/"+atcId;    
         }    
         model.addAttribute("foundVO", foundVO);
-        model.addAttribute("writetype", "found");
+        model.addAttribute("boardType", "found");
         model.addAttribute("isEdit", true);
         
         return "found/write";
     }
     
-
-
-
     // 실제 데이터 수정처리
     @PostMapping("/api/found/update")
     public String FoundUpdate(@Valid @ModelAttribute("foundVO")FoundVO foundVO,
-    BindingResult bindingResult,Model model,@RequestParam(value = "files",required = false)MultipartFile files[],
+    BindingResult bindingResult,Model model,
+    @RequestParam(value = "files",required = false) MultipartFile files[],
     @RequestParam(value = "deleteFiles",required = false )List<String>deleteFiles) {
     
     //[입력값 유지 및 임시저장 기능] 검증 에러 발생 시 작성하던 내용 그대로 다시 폼으로 백! 
     if(bindingResult.hasErrors()){
-        model.addAttribute("writetype", "found");
+        model.addAttribute("boardType", "found");
         model.addAttribute("isEdit", true);
         // 이미 매핑된 foundVO가 model에 담겨 있으므로 입력했던 값들이 폼에 그대로 유지
         return "found/write";

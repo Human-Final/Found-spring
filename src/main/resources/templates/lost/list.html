@@ -20,7 +20,7 @@
       <p>분실한 물건을 등록하고 도움을 요청하세요</p>
     </div>
 
-    <a th:href="@{/api/write}" class="write-btn">글쓰기</a>
+    <a th:href="@{/api/write(boardType='lost')}" class="write-btn">글쓰기</a>
   </section>
 
   <section class="filter-box-advanced" 
@@ -160,7 +160,31 @@
       </div>
     </a>
   </section>
+ 
+  <div class="pagination" th:if="${paging.totalCount > 0}">
+    <a 
+      th:if="${paging.prev}"
+      th:href="@{/api/lost(page=${paging.startPage -1})}"
+      class="page-btn">
+      이전
+    </a>
 
+    <a
+      th:each="pageNum : ${#numbers.sequence(paging.startPage, paging.endPage)}"
+      th:href="@{/api/lost(page=${pageNum})}"
+      th:text="${pageNum}"
+      th:classappend="${pageNum==paging.page} ? 'active' : ''"
+      class="page-btn">
+      1
+    </a>
+
+    <a th:if="${paging.next}"
+      th:href="@{/api/lost(page=${paging.endPage + 1})}"
+      class="page-btn">
+      다음
+    </a>
+
+  </div>
 
 </main>
 

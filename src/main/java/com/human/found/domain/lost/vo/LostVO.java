@@ -24,7 +24,7 @@ public class LostVO {
     private LocalDateTime updatedAt;
     private Integer done = 0;
     private Integer isDeleted = 0;
-    private List<LostFileVO> filelist;
+    private List<LostFileVO> fileList;
     private String dataSource;
 
     private String lstFilepathImg;

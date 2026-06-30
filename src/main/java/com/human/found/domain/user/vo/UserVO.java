@@ -16,9 +16,11 @@ public class UserVO {
     private LocalDateTime signUp;
     private LocalDateTime deletedAt;
     
-    private int isdeleted;
+    private int isDeleted;
 
     private String pwCheck;
+    
+    private String status;
 
 
 }

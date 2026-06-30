@@ -6,10 +6,11 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.human.found.domain.lost.vo.LostVO;
+import com.human.found.global.common.paging.PagingVO;
 
 public interface LostService {
     public void LostRegister(LostVO lostVO,MultipartFile[]files);
-    public List<LostVO> getLostlist();
+    public List<LostVO> getLostlist(PagingVO pagingVO);
     //삭제
     public void deletelost(String inputpw , String atcId ,String loginid,boolean isAdmin);
     
