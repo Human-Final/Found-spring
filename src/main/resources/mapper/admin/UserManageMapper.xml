@@ -5,7 +5,7 @@
 
 <mapper namespace="com.human.found.domain.admin.mapper.UserManageMapper">    
     
-    <!-- 유저 권한 변경-->
+    <!-- 유저 상태 변경-->
     <update id="updateUserStatusByIds">
         UPDATE user
         SET 
@@ -27,6 +27,13 @@
         </foreach>
     </update>
 
+    <!-- 유저 권한 변경 -->
+    <update id="updateUserRoleById">
+        UPDATE user
+        SET role = #{role}
+        WHERE id = #{id}
+    </update>
+
     <!-- 유저 전체 리스트 조회 -->
     <select id="totalUserList"
             resultType="com.human.found.domain.user.vo.UserVO">
@@ -36,11 +43,27 @@
             email,
             tel,
             role,
-            sign_up,
+            sign_up AS signUp, 
             status,
-            is_deleted,
-            deleted_at
+            is_deleted AS isDeleted,
+            deleted_at AS deletedAt
         FROM user
     </select>
+
+    <select id="findByIdIncludeDeleted"
+            resultType="com.human.found.domain.user.vo.UserVO">
+    SELECT
+        id,
+        name,
+        email,
+        tel,
+        role,
+        sign_up AS signUp,
+        status,
+        is_deleted AS isDeleted,
+        deleted_at AS deletedAt
+    FROM user
+    WHERE id = #{id}
+</select>
 
 </mapper>

@@ -152,7 +152,8 @@ body.admin-user-page input {
 
 .admin-layout {
   display: flex;
-  min-height: calc(100vh - 70px);
+  flex: 1;
+  min-height: calc(100vh - 64px);
 }
 
 /* ===============================
@@ -160,14 +161,60 @@ body.admin-user-page input {
 ================================ */
 
 .admin-sidebar {
-  width: 220px;
-  min-width: 220px;
+  width: 210px;
+  min-width: 210px;
   flex-shrink: 0;
+
+  position: relative;
+
   background: #ffffff;
   border-right: 1px solid #e2e8f0;
-  padding: 28px 15px;
+
+  /* 핵심: 위쪽에 토글 버튼 자리 확보 */
+  padding: 72px 15px 28px;
+
+  transition: width 0.25s ease, min-width 0.25s ease, padding 0.25s ease;
 }
 
+/* 우측 상단 토글 버튼 */
+.sidebar-toggle-btn {
+  width: 36px;
+  height: 36px;
+
+  position: absolute;
+  top: 18px;
+  right: 18px;
+
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #334155;
+  cursor: pointer;
+  z-index: 20;
+}
+
+.sidebar-toggle-btn:hover {
+  background: #f1f5f9;
+}
+
+.sidebar-toggle-btn:focus,
+.sidebar-toggle-btn:focus-visible {
+  outline: none;
+}
+
+.sidebar-toggle-icon {
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0;
+}
+
+/* 메뉴 */
 .admin-side-menu {
   display: flex;
   flex-direction: column;
@@ -178,16 +225,16 @@ body.admin-user-page input {
   height: 54px;
   padding: 0 20px;
   border-radius: 7px;
+
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: 18px;
+
   color: #1e293b;
   font-size: 15px;
   font-weight: 600;
   white-space: nowrap;
-  word-break: keep-all;
-  writing-mode: horizontal-tb;
 }
 
 .admin-side-menu a svg {
@@ -201,8 +248,6 @@ body.admin-user-page input {
 .admin-side-menu a span {
   display: inline-block;
   white-space: nowrap;
-  word-break: keep-all;
-  writing-mode: horizontal-tb;
   line-height: 1;
 }
 
@@ -216,6 +261,71 @@ body.admin-user-page input {
   color: #ffffff;
 }
 
+/* 툴팁 */
+.sidebar-toggle-btn::after {
+  content: "사이드바 접기";
+  position: absolute;
+
+  top: calc(100% + 6px);
+  right: 0;
+
+  padding: 6px 9px;
+  border-radius: 5px;
+  background: #111827;
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition: opacity 0.12s ease, visibility 0.12s ease;
+  z-index: 999;
+}
+
+.sidebar-toggle-btn:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 접힌 상태 */
+body.sidebar-collapsed .admin-sidebar {
+  width: 72px;
+  min-width: 72px;
+  padding: 72px 10px 28px;
+}
+
+body.sidebar-collapsed .sidebar-toggle-btn {
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+
+body.sidebar-collapsed .admin-side-menu a {
+  justify-content: center;
+  padding: 0;
+  gap: 0;
+}
+
+body.sidebar-collapsed .admin-side-menu a span {
+  display: none;
+}
+
+body.sidebar-collapsed .admin-side-menu a svg {
+  margin: 0;
+}
+
+body.sidebar-collapsed .sidebar-toggle-btn::after {
+  content: "사이드바 펼치기";
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+
 /* ===============================
    Main
 ================================ */
@@ -225,6 +335,7 @@ body.admin-user-page input {
   min-width: 0;
   padding: 34px 32px 50px;
 }
+
 
 .admin-page-title {
   display: flex;
@@ -533,7 +644,8 @@ body.admin-user-page input {
   background: #ffffff;
   border: 1px solid #e0e7f0;
   border-radius: 10px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
 }
 
@@ -561,7 +673,11 @@ body.admin-user-page input {
   border-bottom: 1px solid #e2e8f0;
   text-align: center;
   vertical-align: middle;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.35;
+  padding: 8px 8px;
 }
 
 .user-manage-table tbody tr:last-child td {
@@ -570,27 +686,28 @@ body.admin-user-page input {
 
 .user-manage-table th:nth-child(1),
 .user-manage-table td:nth-child(1) {
-  width: 46px;
-}
+  width: 44px;
+  min-width: 44px;
+  text-align: center;}
 
 .user-manage-table th:nth-child(2),
 .user-manage-table td:nth-child(2) {
-  width: 70px;
+  width: 95px;
 }
 
 .user-manage-table th:nth-child(3),
 .user-manage-table td:nth-child(3) {
-  width: 110px;
+  width: 70px;
 }
 
 .user-manage-table th:nth-child(4),
 .user-manage-table td:nth-child(4) {
-  width: 95px;
+  width: 150px;
 }
 
 .user-manage-table th:nth-child(5),
 .user-manage-table td:nth-child(5) {
-  width: 215px;
+  width: 130px;
 }
 
 .user-manage-table th:nth-child(6),
@@ -600,12 +717,12 @@ body.admin-user-page input {
 
 .user-manage-table th:nth-child(7),
 .user-manage-table td:nth-child(7) {
-  width: 90px;
+  width: 100px;
 }
 
 .user-manage-table th:nth-child(8),
 .user-manage-table td:nth-child(8) {
-  width: 90px;
+  width: 100px;
 }
 
 .user-manage-table th:nth-child(9),
@@ -615,7 +732,7 @@ body.admin-user-page input {
 
 .user-manage-table th:nth-child(10),
 .user-manage-table td:nth-child(10) {
-  width: 150px;
+  width: 170px;
 }
 
 .status-badge,
@@ -625,19 +742,20 @@ body.admin-user-page input {
   justify-content: center;
   min-width: 54px;
   height: 28px;
+  padding: 0 10px;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 700;
 }
 
 .status-badge.active {
-  background: #e8f1ff;
-  color: #0b63f6;
+  background: #dbeafe;
+  color: #1d4ed8;
 }
 
 .status-badge.dormant {
-  background: #dcf5e7;
-  color: #16803c;
+  background: #bbf7d0;
+  color: #166534;
 }
 
 .status-badge.blocked {
@@ -646,13 +764,18 @@ body.admin-user-page input {
 }
 
 .role-badge.user {
-  background: #e8f1ff;
-  color: #0b63f6;
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.role-badge.manager {
+  background: #bbf7d0;
+  color: #166534;
 }
 
 .role-badge.admin {
-  background: #f2e8ff;
-  color: #8b2cf5;
+  background: #e9d5ff;
+  color: #6b21a8;
 }
 
 .table-actions {
@@ -695,6 +818,26 @@ body.admin-user-page input {
 .release-btn {
   border: 1px solid #b7d3ff;
   color: #0b63f6;
+}
+
+.admin-empty-card {
+  height: 160px;
+  background: #ffffff;
+  border: 1px solid #e0e7f0;
+  border-radius: 10px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.admin-empty-card p {
+  margin: 0;
 }
 
 /* ===============================
