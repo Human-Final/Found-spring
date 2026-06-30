@@ -27,10 +27,6 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 
-
-
-
-
 @Controller
 @AllArgsConstructor
 public class LostController {
@@ -83,7 +79,7 @@ public class LostController {
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "keyword", required = false) String keyword, // 습득물명
             @RequestParam(value = "sort", defaultValue = "latest") String sort,
-            @RequestParam(defaultValue = "1") int page
+            @RequestParam(defaultValue = "1") int page,
             Model model) {
         
         // 확장된 6대 필터를 완벽하게 정렬하여 서비스 호출 토스
@@ -125,13 +121,14 @@ public class LostController {
     //비밀번호/게시글번호(lostnum)/사용자검증(principla)/
     // 삭제가 성공하거나 실패했을 때, 리다이렉트 되는 페이지(목록이나 상세페이지)로 일회성 메시지 전달
     public String DeletedLost(
-        @RequestParam("password")String inputpw,@PathVariable("atcId") String atcId,Authentication authentication,
+        @RequestParam("password")String inputpw,@PathVariable("atcId") String atcId,
+        Authentication authentication,
         RedirectAttributes redirectAttributes){
         
         //로그인체크
         if(authentication==null){
             redirectAttributes.addFlashAttribute("errorMessage", "로그인이 필요합니다.");
-            return "redirect:/api/lost/";
+            return "redirect:/api/lost";
         }
         String loginid=authentication.getName();
         //로그인한 유저의 권한 목록 중 관리자 권한 (ADMIN) 이 있는지 확인
@@ -145,7 +142,7 @@ public class LostController {
             //서비스단에 글 id 입력번호, 로그인한 유저 id 를 넘겨받아 검증 및 삭제
             lostService.deletelost(inputpw,atcId,loginid,isAdmin);
             redirectAttributes.addFlashAttribute("Message", "삭제완료");
-            return "redirect:/api/lost/";
+            return "redirect:/api/lost";
         } catch (Exception e) {
             // 검증 실패 시 에러 메시지를 들고 원래 상세 페이지로 리턴
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());           

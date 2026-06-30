@@ -17,11 +17,6 @@ public interface LostMapper {
     //게시글 삭제
     public void lostupdateDelte(@Param("atcId")String atcId);
 
-    public LostVO selectlostbyId(@Param("atcId") String atcId);
-    
-    // 게시글 삭제
-    public void lostupdateDelte(@Param("atcId") String atcId);
-
     public LostVO selectDetailAtcId(@Param("atcId") String atcId);
 
     // 외부 api 삭제
