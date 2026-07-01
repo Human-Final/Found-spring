@@ -87,7 +87,8 @@ public class SecurityConfig {
                     "/found/**",
                     "/check-email",
                     "/api/public/send-auth-email", 
-                    "/api/public/verify-email-code"
+                    "/api/public/verify-email-code",
+                    "/test"
                 ).permitAll()
 
                 // 나머지는 모두 허용
