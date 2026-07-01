@@ -19,10 +19,15 @@
       </a>
       
       <nav>
+        <th:block sec:authorize="!hasAnyRole('ADMIN','MANAGER')">
         <a th:href="@{/api/found}">습득 게시판</a>
         <a th:href="@{/api/lost}">분실 게시판</a>
         <a th:href="@{/api/notices/list}">공지사항</a>
-        <a sec:authorize="hasAnyRole('ADMIN','MANAGER')" th:href="@{/api/admin/board}">게시판 관리</a>
+      </th:block>
+      <th:block sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+        <a th:href="@{/admin/lost}">게시판 관리</a>
+        <a th:href="@{api/admin/test}">회원 관리</a>
+    </th:block>
       </nav>
     </div>
 

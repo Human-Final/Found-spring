@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class AdminController {
 
-    @GetMapping("/api/admin/board")
+    @GetMapping("/admin/lost")
     public String board(Model model) {
          model.addAttribute("startPage", 1);
         model.addAttribute("endPage", 5);
