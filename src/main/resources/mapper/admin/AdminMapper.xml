@@ -24,79 +24,12 @@
         <result property="isDeleted" column="is_deleted"/>
         <result property="lstFilepathImg" column="lst_filepath_img"/>
         <result property="viewCount" column="view_count"/>
+        <result property="dataSource" column="data_source"/>
     </resultMap>
-
-    <!-- 사용자 등록 분실물 게시글 전체 조회 -->
-    <select id="selectLostList" resultMap="AdminLostResultMap">
-        SELECT
-            num,
-            atc_id,
-            id,
-            lst_place,
-            lst_prdt_nm,
-            lst_sbjt,
-            lst_ymd,
-            prdt_cl_nm,
-            created_at,
-            updated_at,
-            done,
-            is_deleted,
-            lst_filepath_img,
-            view_count
-        FROM lost
-        WHERE is_deleted = 0
-        ORDER BY created_at DESC
-    </select>
-
-    <!-- 경찰청 API 분실물 삭제-->
-    <select id="selectPoliceLostList" resultMap="AdminLostResultMap">
-        SELECT
-            num,
-            atc_id,
-            id,
-            lst_place,
-            lst_prdt_nm,
-            lst_sbjt,
-            lst_ymd,
-            prdt_cl_nm,
-            created_at,
-            updated_at,
-            done,
-            is_deleted,
-            lst_filepath_img,
-            view_count
-        FROM lost_police
-        WHERE is_deleted = 0
-        ORDER BY created_at DESC
-    </select>
-
-    <!-- 사용자 등록 분실물 게시글 선택 삭제 -->
-    <update id="deleteLostList">
-        UPDATE lost
-        SET is_deleted = 1
-        WHERE num IN
-        <foreach collection="nums"
-                item="num"
-                open="("
-                separator=","
-                close=")">
-            #{num}
-        </foreach>
-    </update>
-
-    <!-- 경찰청 API 분실물 선택 삭제 -->
-    <update id="deletePoliceLostList">
-        UPDATE lost_police
-        SET is_deleted = 1
-        WHERE num IN
-        <foreach collection="nums" item="num" open="(" separator="," close=")">
-            #{num}
-        </foreach>
-    </update>
 
     <!-- 관리자 습득물 게시글 조회 결과 매핑 -->
     <resultMap id="AdminFoundResultMap"
-            type="com.human.found.domain.admin.vo.AdminFoundVO">
+               type="com.human.found.domain.admin.vo.AdminFoundVO">
 
         <id property="num" column="num"/>
 
@@ -113,51 +46,46 @@
         <result property="updatedAt" column="updated_at"/>
         <result property="done" column="done"/>
         <result property="isDeleted" column="is_deleted"/>
+        <result property="dataSource" column="data_source"/>
     </resultMap>
 
-    <!-- 사용자 등록 습득물 전체 조회 -->
-    <select id="selectFoundList" resultMap="AdminFoundResultMap">
-        SELECT
-            num,
-            atc_id,
-            id,
-            clr_nm,
-            dep_place,
-            fd_filepath_img,
-            fd_prdt_nm,
-            fd_sbjt,
-            fd_ymd,
-            prdt_cl_nm,
-            created_at,
-            updated_at,
-            done,
-            is_deleted
-        FROM found
-        WHERE is_deleted = 0
-        ORDER BY created_at DESC
-    </select>
+    <!-- 관리자 공지사항 조회 결과 매핑 -->
+    <resultMap id="AdminNoticeResultMap"
+               type="com.human.found.domain.admin.vo.AdminNoticeVO">
 
-    <!-- 경찰청 API 습득물 전체 조회 -->
-    <select id="selectPoliceFoundList" resultMap="AdminFoundResultMap">
-        SELECT
-            num,
-            atc_id,
-            id,
-            clr_nm,
-            dep_place,
-            fd_filepath_img,
-            fd_prdt_nm,
-            fd_sbjt,
-            fd_ymd,
-            prdt_cl_nm,
-            created_at,
-            updated_at,
-            done,
-            is_deleted
-        FROM found_police
-        WHERE is_deleted = 0
-        ORDER BY created_at DESC
-    </select>
+        <id property="num" column="num"/>
+
+        <result property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="isPlanned" column="is_planned"/>
+        <result property="isImportant" column="is_important"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="dataSource" column="data_source"/>
+    </resultMap>
+
+    <!-- 사용자 등록 분실물 선택 삭제 -->
+    <update id="deleteLostList">
+        UPDATE lost
+        SET is_deleted = 1
+        WHERE num IN
+        <foreach collection="nums" item="num" open="(" separator="," close=")">
+            #{num}
+        </foreach>
+    </update>
+
+    <!-- 경찰청 API 분실물 선택 삭제 -->
+    <update id="deletePoliceLostList">
+        UPDATE lost_police
+        SET is_deleted = 1
+        WHERE num IN
+        <foreach collection="nums" item="num" open="(" separator="," close=")">
+            #{num}
+        </foreach>
+    </update>
 
     <!-- 사용자 등록 습득물 선택 삭제 -->
     <update id="deleteFoundList">
@@ -179,41 +107,6 @@
         </foreach>
     </update>
 
-    <!-- 관리자 공지사항 조회 결과 매핑 -->
-    <resultMap id="AdminNoticeResultMap"
-            type="com.human.found.domain.admin.vo.AdminNoticeVO">
-
-        <id property="num" column="num"/>
-
-        <result property="id" column="id"/>
-        <result property="title" column="title"/>
-        <result property="content" column="content"/>
-        <result property="viewCount" column="view_count"/>
-        <result property="isPlanned" column="is_planned"/>
-        <result property="isImportant" column="is_important"/>
-        <result property="createdAt" column="created_at"/>
-        <result property="updatedAt" column="updated_at"/>
-        <result property="isDeleted" column="is_deleted"/>
-    </resultMap>
-
-    <!-- 관리자 등록 공지사항 전체 조회 -->
-    <select id="selectNoticeList" resultMap="AdminNoticeResultMap">
-        SELECT
-            num,
-            id,
-            title,
-            content,
-            view_count,
-            is_planned,
-            is_important,
-            created_at,
-            updated_at,
-            is_deleted
-        FROM notice
-        WHERE is_deleted = 0
-        ORDER BY created_at DESC
-    </select>
-
     <!-- 관리자 등록 공지사항 선택 삭제 -->
     <update id="deleteNoticeList">
         UPDATE notice
@@ -224,100 +117,112 @@
         </foreach>
     </update>
 
-    <!-- 사용자 등록 분실물 페이징 조회 -->
-    <select id="selectLostPage" resultMap="AdminLostResultMap">
-        SELECT
-            num,
-            atc_id,
-            id,
-            lst_place,
-            lst_prdt_nm,
-            lst_sbjt,
-            lst_ymd,
-            prdt_cl_nm,
-            created_at,
-            updated_at,
-            done,
-            is_deleted,
-            lst_filepath_img,
-            view_count
-        FROM lost
-        WHERE is_deleted = 0
+    <!-- 관리자 분실물 검색 + 페이징 조회 -->
+    <select id="searchLostPage" resultMap="AdminLostResultMap">
+        SELECT *
+        FROM (
+            SELECT
+                num, atc_id, id, lst_place, lst_prdt_nm, lst_sbjt, lst_ymd,
+                prdt_cl_nm, created_at, updated_at, done, is_deleted,
+                lst_filepath_img, view_count, 'USER' AS data_source
+            FROM lost
+            WHERE is_deleted = 0
+
+            UNION ALL
+
+            SELECT
+                num, atc_id, id, lst_place, lst_prdt_nm, lst_sbjt, lst_ymd,
+                prdt_cl_nm, created_at, updated_at, done, is_deleted,
+                lst_filepath_img, view_count, 'POLICE' AS data_source
+            FROM lost_police
+            WHERE is_deleted = 0
+        ) A
+        WHERE 1 = 1
+
+        <include refid="lostSearchCondition"/>
+
         ORDER BY created_at DESC
         LIMIT #{size} OFFSET #{offset}
     </select>
 
-    <!-- 경찰청 API 분실물 페이징 조회 -->
-    <select id="selectPoliceLostPage" resultMap="AdminLostResultMap">
-        SELECT
-            num,
-            atc_id,
-            id,
-            lst_place,
-            lst_prdt_nm,
-            lst_sbjt,
-            lst_ymd,
-            prdt_cl_nm,
-            created_at,
-            updated_at,
-            done,
-            is_deleted,
-            lst_filepath_img,
-            view_count
-        FROM lost_police
-        WHERE is_deleted = 0
+    <!-- 관리자 분실물 검색 결과 개수 조회 -->
+    <select id="countSearchLost" resultType="int">
+        SELECT COUNT(*)
+        FROM (
+            SELECT
+                lst_sbjt, lst_prdt_nm, id, prdt_cl_nm, done,
+                created_at, 'USER' AS data_source
+            FROM lost
+            WHERE is_deleted = 0
+
+            UNION ALL
+
+            SELECT
+                lst_sbjt, lst_prdt_nm, id, prdt_cl_nm, done,
+                created_at, 'POLICE' AS data_source
+            FROM lost_police
+            WHERE is_deleted = 0
+        ) A
+        WHERE 1 = 1
+
+        <include refid="lostSearchCondition"/>
+    </select>
+
+    <!-- 관리자 습득물 검색 + 페이징 조회 -->
+    <select id="searchFoundPage" resultMap="AdminFoundResultMap">
+        SELECT *
+        FROM (
+            SELECT
+                num, atc_id, id, clr_nm, dep_place, fd_filepath_img,
+                fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm,
+                created_at, updated_at, done, is_deleted,
+                'USER' AS data_source
+            FROM found
+            WHERE is_deleted = 0
+
+            UNION ALL
+
+            SELECT
+                num, atc_id, id, clr_nm, dep_place, fd_filepath_img,
+                fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm,
+                created_at, updated_at, done, is_deleted,
+                'POLICE' AS data_source
+            FROM found_police
+            WHERE is_deleted = 0
+        ) A
+        WHERE 1 = 1
+
+        <include refid="foundSearchCondition"/>
+
         ORDER BY created_at DESC
         LIMIT #{size} OFFSET #{offset}
     </select>
 
-    <!-- 사용자 등록 습득물 페이징 조회 -->
-    <select id="selectFoundPage" resultMap="AdminFoundResultMap">
-        SELECT
-            num,
-            atc_id,
-            id,
-            clr_nm,
-            dep_place,
-            fd_filepath_img,
-            fd_prdt_nm,
-            fd_sbjt,
-            fd_ymd,
-            prdt_cl_nm,
-            created_at,
-            updated_at,
-            done,
-            is_deleted
-        FROM found
-        WHERE is_deleted = 0
-        ORDER BY created_at DESC
-        LIMIT #{size} OFFSET #{offset}
+    <!-- 관리자 습득물 검색 결과 개수 조회 -->
+    <select id="countSearchFound" resultType="int">
+        SELECT COUNT(*)
+        FROM (
+            SELECT
+                fd_sbjt, fd_prdt_nm, id, prdt_cl_nm, done,
+                created_at, 'USER' AS data_source
+            FROM found
+            WHERE is_deleted = 0
+
+            UNION ALL
+
+            SELECT
+                fd_sbjt, fd_prdt_nm, id, prdt_cl_nm, done,
+                created_at, 'POLICE' AS data_source
+            FROM found_police
+            WHERE is_deleted = 0
+        ) A
+        WHERE 1 = 1
+
+        <include refid="foundSearchCondition"/>
     </select>
 
-    <!-- 경찰청 API 습득물 페이징 조회 -->
-    <select id="selectPoliceFoundPage" resultMap="AdminFoundResultMap">
-        SELECT
-            num,
-            atc_id,
-            id,
-            clr_nm,
-            dep_place,
-            fd_filepath_img,
-            fd_prdt_nm,
-            fd_sbjt,
-            fd_ymd,
-            prdt_cl_nm,
-            created_at,
-            updated_at,
-            done,
-            is_deleted
-        FROM found_police
-        WHERE is_deleted = 0
-        ORDER BY created_at DESC
-        LIMIT #{size} OFFSET #{offset}
-    </select>
-
-    <!-- 관리자 등록 공지사항 페이징 조회 -->
-    <select id="selectNoticePage" resultMap="AdminNoticeResultMap">
+    <!-- 관리자 공지사항 검색 + 페이징 조회 -->
+    <select id="searchNoticePage" resultMap="AdminNoticeResultMap">
         SELECT
             num,
             id,
@@ -331,43 +236,119 @@
             is_deleted
         FROM notice
         WHERE is_deleted = 0
+
+        <include refid="noticeSearchCondition"/>
+
         ORDER BY created_at DESC
         LIMIT #{size} OFFSET #{offset}
     </select>
 
-    <!-- 사용자 등록 분실물 전체 개수 조회 -->
-    <select id="countLost" resultType="int">
-        SELECT COUNT(*)
-        FROM lost
-        WHERE is_deleted = 0
-    </select>
-
-    <!-- 경찰청 API 분실물 전체 개수 조회 -->
-    <select id="countPoliceLost" resultType="int">
-        SELECT COUNT(*)
-        FROM lost_police
-        WHERE is_deleted = 0
-    </select>
-
-    <!-- 사용자 등록 습득물 전체 개수 조회 -->
-    <select id="countFound" resultType="int">
-        SELECT COUNT(*)
-        FROM found
-        WHERE is_deleted = 0
-    </select>
-
-    <!-- 경찰청 API 습득물 전체 개수 조회 -->
-    <select id="countPoliceFound" resultType="int">
-        SELECT COUNT(*)
-        FROM found_police
-        WHERE is_deleted = 0
-    </select>
-
-    <!-- 관리자 등록 공지사항 전체 개수 조회 -->
-    <select id="countNotice" resultType="int">
+    <!-- 관리자 공지사항 검색 결과 개수 조회 -->
+    <select id="countSearchNotice" resultType="int">
         SELECT COUNT(*)
         FROM notice
         WHERE is_deleted = 0
+
+        <include refid="noticeSearchCondition"/>
     </select>
+
+    <!-- 분실물 검색 조건 -->
+    <sql id="lostSearchCondition">
+        <if test="keyword != null and keyword != ''">
+            AND (
+                lst_sbjt LIKE CONCAT('%', #{keyword}, '%')
+                OR lst_prdt_nm LIKE CONCAT('%', #{keyword}, '%')
+                OR id LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+
+        <if test="categories != null and categories.size() > 0">
+            AND prdt_cl_nm IN
+            <foreach collection="categories" item="category" open="(" separator="," close=")">
+                #{category}
+            </foreach>
+        </if>
+
+        <if test="doneList != null and doneList.size() > 0">
+            AND done IN
+            <foreach collection="doneList" item="done" open="(" separator="," close=")">
+                #{done}
+            </foreach>
+        </if>
+
+        <if test="startDate != null and startDate != ''">
+            AND DATE(created_at) &gt;= #{startDate}
+        </if>
+
+        <if test="endDate != null and endDate != ''">
+            AND DATE(created_at) &lt;= #{endDate}
+        </if>
+
+        <if test="dataSources != null and dataSources.size() > 0">
+            AND data_source IN
+            <foreach collection="dataSources" item="source" open="(" separator="," close=")">
+                #{source}
+            </foreach>
+        </if>
+    </sql>
+
+    <!-- 습득물 검색 조건 -->
+    <sql id="foundSearchCondition">
+        <if test="keyword != null and keyword != ''">
+            AND (
+                fd_sbjt LIKE CONCAT('%', #{keyword}, '%')
+                OR fd_prdt_nm LIKE CONCAT('%', #{keyword}, '%')
+                OR id LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+
+        <if test="categories != null and categories.size() > 0">
+            AND prdt_cl_nm IN
+            <foreach collection="categories" item="category" open="(" separator="," close=")">
+                #{category}
+            </foreach>
+        </if>
+
+        <if test="doneList != null and doneList.size() > 0">
+            AND done IN
+            <foreach collection="doneList" item="done" open="(" separator="," close=")">
+                #{done}
+            </foreach>
+        </if>
+
+        <if test="startDate != null and startDate != ''">
+            AND DATE(created_at) &gt;= #{startDate}
+        </if>
+
+        <if test="endDate != null and endDate != ''">
+            AND DATE(created_at) &lt;= #{endDate}
+        </if>
+
+        <if test="dataSources != null and dataSources.size() > 0">
+            AND data_source IN
+            <foreach collection="dataSources" item="source" open="(" separator="," close=")">
+                #{source}
+            </foreach>
+        </if>
+    </sql>
+
+    <!-- 공지사항 검색 조건 -->
+    <sql id="noticeSearchCondition">
+        <if test="keyword != null and keyword != ''">
+            AND (
+                title LIKE CONCAT('%', #{keyword}, '%')
+                OR content LIKE CONCAT('%', #{keyword}, '%')
+                OR id LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+
+        <if test="startDate != null and startDate != ''">
+            AND DATE(created_at) &gt;= #{startDate}
+        </if>
+
+        <if test="endDate != null and endDate != ''">
+            AND DATE(created_at) &lt;= #{endDate}
+        </if>
+    </sql>
 
 </mapper>

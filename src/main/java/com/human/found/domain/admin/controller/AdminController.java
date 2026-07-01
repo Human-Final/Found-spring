@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.human.found.domain.admin.service.AdminService;
+import com.human.found.domain.admin.vo.AdminSearchVO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,38 +23,21 @@ public class AdminController {
 
     /**
      * 관리자 분실물 게시글 목록
-     * - dataSource 값에 따라 사용자 등록 / 외부 연동 목록 조회
-     * - 한 화면에 10개씩 페이징 처리
+     * - 검색 조건에 따라 사용자 등록 / 외부 연동 목록 조회
+     * - PagingVO를 상속받은 AdminSearchVO를 이용하여 한 화면에 10개씩 페이징 처리
      */
     @GetMapping("/lost")
-    public String lostList(
-            @RequestParam(value = "dataSource", required = false, defaultValue = "USER") String dataSource,
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            Model model) {
+    public String lostList(AdminSearchVO searchVO, Model model) {
 
-        int size = 10;
-        int blockSize = 5;
-        int totalCount;
+        searchVO.setBoardType("lost");
+        searchVO.setSize(10);
 
-        if ("POLICE".equals(dataSource)) {
-            model.addAttribute("lostList", adminService.getPoliceLostPage(page, size));
-            totalCount = adminService.countPoliceLost();
-        } else {
-            model.addAttribute("lostList", adminService.getLostPage(page, size));
-            totalCount = adminService.countLost();
-        }
+        int totalCount = adminService.countSearchLost(searchVO);
+        searchVO.pageInfo(totalCount);
 
-        int totalPages = (int) Math.ceil((double) totalCount / size);
-        int startPage = ((page - 1) / blockSize) * blockSize + 1;
-        int endPage = Math.min(startPage + blockSize - 1, totalPages);
-
-        model.addAttribute("dataSource", dataSource);
+        model.addAttribute("lostList", adminService.searchLostPage(searchVO));
+        model.addAttribute("searchVO", searchVO);
         model.addAttribute("boardType", "lost");
-
-        model.addAttribute("page", page);
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("startPage", startPage);
-        model.addAttribute("endPage", endPage);
 
         return "admin/adminPage";
     }
@@ -69,47 +53,30 @@ public class AdminController {
 
         if ("POLICE".equals(dataSource)) {
             adminService.deletePoliceLostList(nums);
-            return "redirect:/admin/lost?dataSource=POLICE";
+            return "redirect:/admin/lost?dataSources=POLICE";
         }
 
         adminService.deleteLostList(nums);
-        return "redirect:/admin/lost?dataSource=USER";
+        return "redirect:/admin/lost?dataSources=USER";
     }
 
     /**
      * 관리자 습득물 게시글 목록
-     * - dataSource 값에 따라 사용자 등록 / 외부 연동 목록 조회
-     * - 한 화면에 10개씩 페이징 처리
+     * - 검색 조건에 따라 사용자 등록 / 외부 연동 목록 조회
+     * - PagingVO를 상속받은 AdminSearchVO를 이용하여 한 화면에 10개씩 페이징 처리
      */
     @GetMapping("/found")
-    public String foundList(
-            @RequestParam(value = "dataSource", required = false, defaultValue = "USER") String dataSource,
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            Model model) {
+    public String foundList(AdminSearchVO searchVO, Model model) {
 
-        int size = 10;
-        int blockSize = 5;
-        int totalCount;
+        searchVO.setBoardType("found");
+        searchVO.setSize(10);
 
-        if ("POLICE".equals(dataSource)) {
-            model.addAttribute("foundList", adminService.getPoliceFoundPage(page, size));
-            totalCount = adminService.countPoliceFound();
-        } else {
-            model.addAttribute("foundList", adminService.getFoundPage(page, size));
-            totalCount = adminService.countFound();
-        }
+        int totalCount = adminService.countSearchFound(searchVO);
+        searchVO.pageInfo(totalCount);
 
-        int totalPages = (int) Math.ceil((double) totalCount / size);
-        int startPage = ((page - 1) / blockSize) * blockSize + 1;
-        int endPage = Math.min(startPage + blockSize - 1, totalPages);
-
-        model.addAttribute("dataSource", dataSource);
+        model.addAttribute("foundList", adminService.searchFoundPage(searchVO));
+        model.addAttribute("searchVO", searchVO);
         model.addAttribute("boardType", "found");
-
-        model.addAttribute("page", page);
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("startPage", startPage);
-        model.addAttribute("endPage", endPage);
 
         return "admin/adminPage";
     }
@@ -125,40 +92,30 @@ public class AdminController {
 
         if ("POLICE".equals(dataSource)) {
             adminService.deletePoliceFoundList(nums);
-            return "redirect:/admin/found?dataSource=POLICE";
+            return "redirect:/admin/found?dataSources=POLICE";
         }
 
         adminService.deleteFoundList(nums);
-        return "redirect:/admin/found?dataSource=USER";
+        return "redirect:/admin/found?dataSources=USER";
     }
 
     /**
      * 관리자 공지사항 목록
-     * - 관리자 작성 공지사항 목록 조회
-     * - 한 화면에 10개씩 페이징 처리
+     * - 검색 조건에 따라 관리자 작성 공지사항 목록 조회
+     * - PagingVO를 상속받은 AdminSearchVO를 이용하여 한 화면에 10개씩 페이징 처리
      */
     @GetMapping("/notice")
-    public String noticeList(
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            Model model) {
+    public String noticeList(AdminSearchVO searchVO, Model model) {
 
-        int size = 10;
-        int blockSize = 5;
+        searchVO.setBoardType("notice");
+        searchVO.setSize(10);
 
-        model.addAttribute("noticeList", adminService.getNoticePage(page, size));
+        int totalCount = adminService.countSearchNotice(searchVO);
+        searchVO.pageInfo(totalCount);
 
-        int totalCount = adminService.countNotice();
-        int totalPages = (int) Math.ceil((double) totalCount / size);
-        int startPage = ((page - 1) / blockSize) * blockSize + 1;
-        int endPage = Math.min(startPage + blockSize - 1, totalPages);
-
+        model.addAttribute("noticeList", adminService.searchNoticePage(searchVO));
+        model.addAttribute("searchVO", searchVO);
         model.addAttribute("boardType", "notice");
-        model.addAttribute("dataSource", "ADMIN");
-
-        model.addAttribute("page", page);
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("startPage", startPage);
-        model.addAttribute("endPage", endPage);
 
         return "admin/adminPage";
     }
