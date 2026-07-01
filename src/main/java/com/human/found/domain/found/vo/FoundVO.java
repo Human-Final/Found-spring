@@ -31,4 +31,5 @@ public class FoundVO {
     private List<FoundFileVO>fileList;
     private String dataSource;
     private long viewCount;
+    private int commentCount;
 }

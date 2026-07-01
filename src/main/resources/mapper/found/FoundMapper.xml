@@ -22,6 +22,7 @@
     <result property="isDeleted" column="is_deleted"/>
     <result property="viewCount" column="view_count"/>
     <result property="dataSource" column="dataSource"/>
+    <result property="commentCount" column="commentCount"/>
 
     <collection property="fileList"  javaType="ArrayList" ofType="com.human.found.domain.found.vo.FoundFileVO">
         <id property="id" column="file_id"/>
@@ -145,53 +146,58 @@
 
     </select>
 
-    <!-- ================= 1. 습득물 통합 복합 필터 및 페이징 조회 쿼리 (DB 사양 100% 매칭) ================= -->
+    <!-- ================= 1. 습득물 통합 복합 필터 및 페이징 조회 쿼리 (댓글 수 포함 완료) ================= -->
     <select id="selectFoundSearchList" resultMap="FoundDetailResultMap">
-    SELECT 
-        total.*
-    FROM (
-            /* 1) 유저 습득물 데이터 */
-            SELECT num, atc_id, id, clr_nm, dep_place, fd_filepath_img, fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm, created_at, updated_at, done, is_deleted, 'user' AS dataSource FROM found WHERE is_deleted = 0
-            <if test="category != null and category.size() > 0">AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach></if>
-            <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
-            <if test="colorSelect != null and colorSelect != ''">AND clr_nm LIKE CONCAT('%', #{colorSelect}, '%')</if>
-            <if test="startDate != null and startDate != ''">AND fd_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')</if>
-            <if test="endDate != null and endDate != ''">AND fd_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')</if>
-            <if test="author != null and author != ''">AND id LIKE CONCAT('%', #{author}, '%')</if>
-            <if test='status != null and status != ""'><choose><when test='status == "진행중"'>AND done = 0</when><when test='status == "완료"'>AND done = 1</when></choose></if>
-            <if test="keyword != null and keyword != ''">AND fd_prdt_nm LIKE CONCAT('%', #{keyword}, '%')</if>
+        SELECT 
+            total.*,
+            (
+                SELECT COUNT(*) 
+                FROM found_comment c       <!-- 💡 실제 습득물 댓글 테이블명과 다르면 여기만 변경하세요 -->
+                WHERE c.num = total.num    <!-- 💡 댓글 테이블 내의 외래키 컬럼명이 num이 맞는지 확인해 주세요 -->
+            ) AS commentCount
+        FROM (
+                /* 1) 유저 습득물 데이터 */
+                SELECT num, atc_id, id, clr_nm, dep_place, fd_filepath_img, fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm, created_at, updated_at, done, is_deleted, 'user' AS dataSource FROM found WHERE is_deleted = 0
+                <if test="category != null and category.size() > 0">AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach></if>
+                <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
+                <if test="colorSelect != null and colorSelect != ''">AND clr_nm LIKE CONCAT('%', #{colorSelect}, '%')</if>
+                <if test="startDate != null and startDate != ''">AND fd_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')</if>
+                <if test="endDate != null and endDate != ''">AND fd_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')</if>
+                <if test="author != null and author != ''">AND id LIKE CONCAT('%', #{author}, '%')</if>
+                <if test='status != null and status != ""'><choose><when test='status == "진행중"'>AND done = 0</when><when test='status == "완료"'>AND done = 1</when></choose></if>
+                <if test="keyword != null and keyword != ''">AND fd_prdt_nm LIKE CONCAT('%', #{keyword}, '%')</if>
 
-            UNION ALL
+                UNION ALL
 
-            /* 2) 경찰청 습득물 데이터 */
-            SELECT num, atc_id, id, clr_nm, dep_place, fd_filepath_img, fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm, created_at, updated_at, done, is_deleted, 'police' AS dataSource FROM found_police WHERE is_deleted = 0
-            <if test="category != null and category.size() > 0">AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach></if>
-            <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
-            <if test="colorSelect != null and colorSelect != ''">AND clr_nm LIKE CONCAT('%', #{colorSelect}, '%')</if>
-            <if test="startDate != null and startDate != ''">AND fd_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')</if>
-            <if test="endDate != null and endDate != ''">AND fd_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')</if>
-            <if test="author != null and author != ''">AND id LIKE CONCAT('%', #{author}, '%')</if>
-            <if test='status != null and status != ""'><choose><when test='status == "진행중"'>AND done = 0</when><when test='status == "완료"'>AND done = 1</when></choose></if>
-            <if test="keyword != null and keyword != ''">AND fd_prdt_nm LIKE CONCAT('%', #{keyword}, '%')</if>
+                /* 2) 경찰청 습득물 데이터 */
+                SELECT num, atc_id, id, clr_nm, dep_place, fd_filepath_img, fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm, created_at, updated_at, done, is_deleted, 'police' AS dataSource FROM found_police WHERE is_deleted = 0
+                <if test="category != null and category.size() > 0">AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach></if>
+                <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
+                <if test="colorSelect != null and colorSelect != ''">AND clr_nm LIKE CONCAT('%', #{colorSelect}, '%')</if>
+                <if test="startDate != null and startDate != ''">AND fd_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')</if>
+                <if test="endDate != null and endDate != ''">AND fd_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')</if>
+                <if test="author != null and author != ''">AND id LIKE CONCAT('%', #{author}, '%')</if>
+                <if test='status != null and status != ""'><choose><when test='status == "진행중"'>AND done = 0</when><when test='status == "완료"'>AND done = 1</when></choose></if>
+                <if test="keyword != null and keyword != ''">AND fd_prdt_nm LIKE CONCAT('%', #{keyword}, '%')</if>
 
-            UNION ALL
+                UNION ALL
 
-            /* 3) 포털 습득물 데이터 */
-            SELECT num, atc_id, id, clr_nm, dep_place, fd_filepath_img, fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm, created_at, updated_at, done, is_deleted, 'portal' AS dataSource FROM found_portal WHERE is_deleted = 0
-            <if test="category != null and category.size() > 0">AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach></if>
-            <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
-            <if test="colorSelect != null and colorSelect != ''">AND clr_nm LIKE CONCAT('%', #{colorSelect}, '%')</if>
-            <if test="startDate != null and startDate != ''">AND fd_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')</if>
-            <if test="endDate != null and endDate != ''">AND fd_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')</if>
-            <if test="author != null and author != ''">AND id LIKE CONCAT('%', #{author}, '%')</if>
-            <if test='status != null and status != ""'><choose><when test='status == "진행중"'>AND done = 0</when><when test='status == "완료"'>AND done = 1</when></choose></if>
-            <if test="keyword != null and keyword != ''">AND fd_prdt_nm LIKE CONCAT('%', #{keyword}, '%')</if>
-    ) total
-    <choose>
-            <when test="sort == 'oldest'">ORDER BY total.fd_ymd ASC</when>
-            <otherwise>ORDER BY total.fd_ymd DESC</otherwise>
-    </choose>
-    LIMIT #{paging.offset}, #{paging.size}
+                /* 3) 포털 습득물 데이터 */
+                SELECT num, atc_id, id, clr_nm, dep_place, fd_filepath_img, fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm, created_at, updated_at, done, is_deleted, 'portal' AS dataSource FROM found_portal WHERE is_deleted = 0
+                <if test="category != null and category.size() > 0">AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach></if>
+                <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
+                <if test="colorSelect != null and colorSelect != ''">AND clr_nm LIKE CONCAT('%', #{colorSelect}, '%')</if>
+                <if test="startDate != null and startDate != ''">AND fd_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')</if>
+                <if test="endDate != null and endDate != ''">AND fd_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')</if>
+                <if test="author != null and author != ''">AND id LIKE CONCAT('%', #{author}, '%')</if>
+                <if test='status != null and status != ""'><choose><when test='status == "진행중"'>AND done = 0</when><when test='status == "완료"'>AND done = 1</when></choose></if>
+                <if test="keyword != null and keyword != ''">AND fd_prdt_nm LIKE CONCAT('%', #{keyword}, '%')</if>
+        ) total
+        <choose>
+                <when test="sort == 'oldest'">ORDER BY total.fd_ymd ASC</when>
+                <otherwise>ORDER BY total.fd_ymd DESC</otherwise>
+        </choose>
+        LIMIT #{paging.offset}, #{paging.size}
     </select>
 
     <!-- ================= 2. 습득물 조건별 전체 합산 개수 카운트 쿼리 (DB 사양 100% 매칭) ================= -->

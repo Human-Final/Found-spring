@@ -129,7 +129,7 @@
 
       <!-- [2층 - 3열] 습득물명 -->
       <div class="form-group">
-        <label for="keywordInput" style="font-weight: 600; display: block; margin-bottom: 8px; color: #555;">습득물명</label>
+        <label for="keywordInput" style="font-weight: 600; display: block; margin-bottom: 8px; color: #555;">물품명</label>
         <input type="text" id="keywordInput" th:value="${keyword}" placeholder="습득물명 입력..." 
                style="width: 100%; height: 42px; padding: 10px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; box-sizing: border-box;">
       </div>
@@ -227,11 +227,17 @@
         </div>                
       </div>
       <div class="post-bottom">
+        <div>
+        <span>작성날짜 : </span>
         <span th:text="${foundVO.createdAt != null ? #temporals.format(foundVO.createdAt, 'yyyy-MM-dd') : ''}">작성날짜</span>
+        </div>
         <div class="post-counts">
-          <!-- 💡 [교정 완수] 객체 널 체킹 가독성을 완전 정형화하여 타임리프 파싱 다운 예외를 해소했습니다. -->
-          <!--<span>조회 수 <span th:text="${foundVO.viewConut != null ? foundVO.viewConut : 0}">0</span></span> -->
-          <span>댓글 수 0</span>
+          <span>
+            조회 수 : <span th:text="${foundVO.viewCount !=null ? foundVO.viewCount+'회' : '0'+'회'}"></span>            
+          </span>
+          <span>
+            댓글 수 : <span th:text="${foundVO.commentCount !=null ? foundVO.commentCount+'개' : 0+'개'}"></span>
+          </span>
         </div>
       </div>
     </a>

@@ -40,7 +40,7 @@
         WHERE comment_num = #{commentNum}
           AND is_deleted = 0
     </select>
-
+    
     <insert id="insertComment"
             parameterType="com.human.found.domain.comment.vo.CommentVO">
         INSERT INTO lost_comment (

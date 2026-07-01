@@ -9,37 +9,6 @@
   <title>마이페이지 | 분실물 센터</title>
   <style>
 
-    .status-toggle-btn {
-      border: 1px solid #bce6cc;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-    }
-
-    /* 호버 시 텍스트 전환 처리 구조 */
-    .status-toggle-btn .status-text-hover {
-      display: none;
-    }
-
-    .status-toggle-btn:hover {
-      background-color: #2ecc71 !important; /* 완료 상징 초록색 테마 */
-      color: #ffffff !important;
-      border-color: #2ecc71 !important;
-    }
-
-    .status-toggle-btn:hover .status-text-default {
-      display: none;
-    }
-
-    .status-toggle-btn:hover .status-text-hover {
-      display: inline;
-      font-weight: bold;
-    }
-
     button,
     input {
       font: inherit;
@@ -545,14 +514,22 @@
         </div>
         
         <div class="hero-profile">
+          <!-- [수정] user 객체가 null인지 먼저 검증하는 구조 -->
           <strong th:text="${user != null} ? |${user.name} 님| : '김분실 님'">김분실 님</strong>
           
-          <span th:if="${user != null}" th:switch="${user.role}">회원등급 : 
+          <!-- [추가] user가 null이 아닐 때 role 값에 따라 한글 등급 출력, null이면 기본 텍스트 출력 -->
+          <span th:if="${user != null}" th:switch="${user.role}">
+            회원등급 - 
             <th:block th:case="'ADMIN'">최고관리자</th:block>
             <th:block th:case="'MANAGER'">관리자</th:block>
             <th:block th:case="'USER'">일반회원</th:block>
             <th:block th:case="*">일반회원</th:block> <!-- 예외 방어용 기본값 -->
           </span>
+          <div>
+            <span>
+              최근접속일 - (개발예정)
+            </span> 
+          </div>
         </div>
       </section>
 
@@ -575,7 +552,7 @@
             <a href="#myComments" data-view="myComments">내가 쓴 댓글 관리</a>
             <a href="#myChats" data-view="myChats">채팅방 관리</a>
           </nav>
-          
+
           <a href="#memberWithdraw" class="withdraw-link" data-view="memberWithdraw">회원탈퇴</a>
         </aside>
 
@@ -657,8 +634,7 @@
                   
                   <div class="post-actions">
                       <!-- 진행 상태 매핑 -->
-                      <span class="badge" 
-                            th:classappend="${post.done == 1} ? 'badge-done' : 'badge-progress'"
+                      <span class="badge badge-progress" 
                             th:text="${post.done == 1 ? '완료' : '진행중'}">진행중</span>
                   </div>
                   
@@ -730,36 +706,22 @@
                             </div>
                         </label>
 
-                        <!-- 전화번호 -->
-                        <div class="form-group" style="margin-bottom: 20px;">
-                            <label style="font-weight: 600; display: block; margin-bottom: 8px; color: #444; font-size: 14px;">전화번호</label>
-                            
-                            <div style="display: flex; align-items: center; gap: 8px; width: 60%; max-width: 420px;">
-                                <!-- 010 고정창 -->
-                                <input type="text" id="phone1" value="010" readonly 
-                                      class="form-input readonly-input" style="width: 25%; text-align: center; height: 44px; box-sizing: border-box;" />
-                                <span style="color: #dcdfe6; font-size: 14px;">-</span>
-                                
-                                <!-- 중간 번호 (oninput으로 직관적이고 즉각적인 자바스크립트 실시간 제어) -->
-                                <input type="text" id="phone2" placeholder="0000" class="form-input" required maxlength="4"
-                                      th:value="${user != null and user.tel != null and #strings.length(user.tel) >= 10} ? ${user.tel.substring(3, #strings.length(user.tel) - 4)} : ''"
-                                      oninput="livePhoneCheck(this, 'phone3')"
-                                      style="width: 35%; text-align: center; height: 44px; box-sizing: border-box; outline: none;" />
-                                <span style="color: #dcdfe6; font-size: 14px;">-</span>
-                                
-                                <!-- 마지막 번호 (oninput으로 직관적이고 즉각적인 자바스크립트 실시간 제어) -->
-                                <input type="text" id="phone3" placeholder="0000" class="form-input" required maxlength="4"
-                                      th:value="${user != null and user.tel != null and #strings.length(user.tel) >= 10} ? ${user.tel.substring(#strings.length(user.tel) - 4, #strings.length(user.tel))} : ''"
-                                      oninput="livePhoneCheck(this, null)"
-                                      style="width: 35%; text-align: center; height: 44px; box-sizing: border-box; outline: none;" />
-                            </div>
-
-                            <!-- 🎯 명시적이고 직관적인 자바스크립트 전용 실시간 결과 메시지창 -->
-                            <span id="telResult" style="font-size: 13px; display: block; margin-top: 6px;"></span>
-                            
-                            <!-- 서버 전송용 히든 파라미터 (name="tel") -->
-                            <input type="hidden" id="tel" name="tel" th:value="${user != null ? user.tel : ''}" />
-                        </div>
+                        <!-- 연락처 -->
+                        <label class="form-row">
+                          <span class="form-label">연락처</span>
+                          <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
+                            <!-- 첫 번째 칸: 010 고정 및 읽기전용 -->
+                            <input type="text" id="tel1" name="tel1" class="form-input" value="010" readonly style="flex: 1; text-align: center; background-color: #e9ecef;">
+                            <span>-</span>
+                            <!-- 두 번째 칸: 중간 번호 (숫자 최대 4자리) -->
+                            <input type="text" id="tel2" name="tel2" class="form-input" placeholder="0000" maxlength="4" required style="flex: 1; text-align: center;">
+                            <span>-</span>
+                            <!-- 세 번째 칸: 마지막 번호 (숫자 최대 4자리) -->
+                            <input type="text" id="tel3" name="tel3" class="form-input" placeholder="0000" maxlength="4" required style="flex: 1; text-align: center;">
+                          </div>
+                          <!-- 기존 통째로 들어가던 name="tel"을 서버로 전송하기 위한 숨겨진(hidden) 필드 -->
+                          <input type="hidden" id="fullTel" name="tel" th:value="${user.tel}">
+                        </label>
 
 
                         <!-- 회원정보 수정 내 배치된 비밀번호 변경 유도 인터페이스 -->
@@ -860,24 +822,30 @@
                   </p>
                 </div>
                 
-                <!-- 마이페이지 게시글 완료처리 버튼 -->
                 <div class="post-actions" style="display: flex; align-items: center; gap: 8px;">
+                  <span class="badge"
+                        th:classappend="${post.done == 1} ? ' badge-done' : ' badge-progress'"
+                        th:text="${post.done == 1 ? '완료' : '진행중'}">진행중</span>
                   
+                  <a th:href="@{''}" 
+                    th:onclick="event.stopPropagation(); alert('수정 기능은 현재 준비 중입니다.'); return false;" 
+                    class="line-button">수정</a>
+                    
                   <button type="button" 
-                          th:if="${post.done == 0}"
-                          class="badge badge-progress status-toggle-btn"
-                          th:onclick="executeDonePost([[${post.boardType}]], [[${post.atcId}]], event);"
-                          style="cursor: pointer;">
-                    <form id="hiddenDoneForm" method="POST" style="display: none;"></form>
-                    <span class="status-text-default">진행중</span>
-                    <span class="status-text-hover">완료로 변경</span>
-                  </button>
-
-                  <!-- [유지] 완료 상태일 때는 클릭 및 호버가 불가능한 순수 배지로 노출 -->
-                  <span th:if="${post.done == 1}" class="badge badge-done">완료</span>
-                  
-                  <a th:href="@{''}" th:onclick="event.stopPropagation(); alert('수정 기능은 현재 준비 중입니다.'); return false;" class="line-button">수정</a>
-                  <button type="button" th:data-board-type="${post.boardType}" th:data-atc-id="${post.atcId}" th:onclick="event.stopPropagation(); if(confirm('정말 이 게시글을 삭제하시겠습니까?')) { const form = document.createElement('form'); form.method = 'POST'; form.action = (this.getAttribute('data-board-type') == '습득' ? '/mypage/api/found/delete/' : '/mypage/api/lost/delete/') + this.getAttribute('data-atc-id'); document.body.appendChild(form); form.submit(); }" class="line-button" style="color: #dc3545; border-color: #f5c6cb; background-color: #fdf3f4; cursor: pointer;">삭제</button>
+                          th:data-board-type="${post.boardType}"
+                          th:data-atc-id="${post.atcId}"
+                          th:onclick="
+                              event.stopPropagation(); 
+                              if(confirm('정말 이 게시글을 삭제하시겠습니까?')) {
+                                  const form = document.createElement('form');
+                                  form.method = 'POST';
+                                  form.action = (this.getAttribute('data-board-type') == '습득' ? '/mypage/api/found/delete/' : '/mypage/api/lost/delete/') + this.getAttribute('data-atc-id');
+                                  document.body.appendChild(form);
+                                  form.submit();
+                              }
+                          " 
+                          class="line-button" 
+                          style="color: #dc3545; border-color: #f5c6cb; background-color: #fdf3f4; cursor: pointer;">삭제</button>
                 </div>
               </article>
 
@@ -938,7 +906,7 @@
                 </div>
 
                 <div class="post-actions" style="display: flex; align-items: center; gap: 8px;">
-                    <!-- [동기식 전송 가드 탑재]: 버튼을 누르면 즉석에서 가상 Form을 생성해 세션 끊김 오류 없이 안전하게 POST를 보냅니다 -->
+                    <!-- 🌟 [동기식 전송 가드 탑재]: 버튼을 누르면 즉석에서 가상 Form을 생성해 세션 끊김 오류 없이 안전하게 POST를 보냅니다 -->
                     <button type="button" 
                             th:data-comment-num="${comment.commentNum}"
                             th:data-board-type="${comment.boardType}"
@@ -1068,6 +1036,31 @@
     const viewButtons = document.querySelectorAll("[data-view], [data-view-button]");
     const views = document.querySelectorAll(".mypage-view");
     const sideLinks = document.querySelectorAll("[data-view]");
+    const tel2 = document.getElementById("tel2");
+    const tel3 = document.getElementById("tel3");
+    const fullTel = document.getElementById("fullTel");
+
+    [tel2, tel3].forEach(input => {
+        input.addEventListener("input", function() {
+            // 숫자가 아닌 문자 제거
+            this.value = this.value.replace(/[^0-9]/g, "");
+            
+            // 4자리가 모두 채워지면 다음 칸으로 자동 이동 (tel2 -> tel3)
+            if (this === tel2 && this.value.length === 4) {
+                tel3.focus();
+            }
+        });
+    });
+
+    if (fullTel && fullTel.value) {
+        const rawTel = fullTel.value.replace(/[^0-9]/g, ""); // 숫자만 추출
+        if (rawTel.length === 11) {
+            tel2.value = rawTel.substring(3, 7); // 중간 4자리
+            tel3.value = rawTel.substring(7, 11); // 마지막 4자리
+        }
+    }
+
+
     
     function showView(targetId) {
       views.forEach((view) => {
@@ -1132,14 +1125,6 @@
         const btnCheckEmail = document.getElementById("btnCheckEmail");     // 중복확인 버튼
         const emailCheckMessage = document.getElementById("emailCheckMessage"); // 결과 메시지창
 
-        const phone2 = document.getElementById("phone2");                   // 전화번호 중간 4자리 인풋
-        const phone3 = document.getElementById("phone3");                   // 전화번호 마지막 4자리 인풋
-        const telResult = document.getElementById("telResult");
-
-        if (typeof validateTel === "function") {
-            validateTel();
-        }
-
         let originalEmail = "";    // 회원의 기존 이메일 저장 변수
         let isEmailChecked = true; // 중복확인 상태 플래그
 
@@ -1173,61 +1158,7 @@
             }, 1000);
         }
 
-        function livePhoneCheck(currentInput, nextInputId) {
-            // 한글, 영문 등 숫자가 아닌 모든 문자는 타이핑 순간 즉시 삭제
-            currentInput.value = currentInput.value.replace(/[^0-9]/g, '');
 
-            // 4자리가 다 차면 다음 칸으로 자동 포커스 점프
-            if (currentInput.value.length >= 4 && nextInputId) {
-                const nextEl = document.getElementById(nextInputId);
-                if (nextEl) nextEl.focus();
-            }
-
-            // 각 칸의 값을 결합하여 hidden 태그에 동기화
-            const p1 = document.getElementById("phone1") ? document.getElementById("phone1").value : "010";
-            const p2 = document.getElementById("phone2") ? document.getElementById("phone2").value : "";
-            const p3 = document.getElementById("phone3") ? document.getElementById("phone3").value : "";
-            const telHidden = document.getElementById("tel");
-
-            if (telHidden) {
-                telHidden.value = p1 + p2 + p3;
-            }
-
-            // 🎯 숫자를 지우거나 쓸 때마다 실시간으로 메시지 색상을 반전시킵니다.
-            validateTel();
-        }
-
-        /**
-        * 2. 대한민국 국룰 10자리 / 11자리 번호를 모두 판별하여 텍스트를 실시간 스위칭하는 최종 검증기
-        */
-        function validateTel() {
-            const telHidden = document.getElementById("tel");
-            const result = document.getElementById("telResult");
-
-            if (!telHidden || !result) return false;
-            
-            const totalTel = telHidden.value;
-
-            // 010을 제외하고 최소 자릿수 미달 체크
-            if (totalTel === "" || totalTel.length < 10) {
-                result.innerText = "전화번호 형식을 확인해 주세요. (숫자 3~4자리가 필요합니다.)";
-                result.style.color = "#dc3545"; // 실시간 빨간색 전환
-                return false;
-            }
-
-            // 010 + 7~8자리 정규식 필터링
-            const telRegex = /^010\d{7,8}$/;
-
-            if (!telRegex.test(totalTel)) {
-                result.innerText = "올바른 전화번호 형식이 아닙니다.";
-                result.style.color = "#dc3545"; // 실시간 빨간색 전환
-                return false;
-            } else {
-                result.innerText = "올바른 전화번호 형식입니다.";
-                result.style.color = "#2ecc71"; // 실시간 초록색 전환
-                return true;
-            }
-        }
 
         // [보정 추가] 페이지 최초 진입 시 개인정보 영역이 멋대로 열려있지 않도록 확실하게 숨깁니다.
         if (infoSection) {
@@ -1312,7 +1243,7 @@
                 if (emailValue === originalEmail) {
                     emailCheckMessage.style.display = "block";
                     emailCheckMessage.style.color = "#2b8a3e";
-                    emailCheckMessage.innerText = "✓ 본인이 사용 중인 이메일입니다";
+                    emailCheckMessage.innerText = "✓ 현재 본인이 사용 중인 이메일입니다.";
                     isEmailChecked = true;
                     isEmailAuthVerified = true; // 본인 원래 메일이면 인증 패스
                     
@@ -1482,6 +1413,9 @@
             .catch(err => console.error("인증 통신 오류:", err));
         };
 
+
+
+
         // 🪟 B. 회원정보 수정창 내 배치된 변경 단추 클릭 시 모달 레이어 제어
         if (btnOpenPwModal) {
             btnOpenPwModal.addEventListener("click", () => passwordModal.style.display = "flex");
@@ -1539,25 +1473,14 @@
 
         if (profileForm) {
             profileForm.addEventListener("submit", function(e) {
-                const p1 = document.getElementById("phone1") ? document.getElementById("phone1").value : "010";
-                const p2 = document.getElementById("phone2") ? document.getElementById("phone2").value.trim() : "";
-                const p3 = document.getElementById("phone3") ? document.getElementById("phone3").value.trim() : "";
-                const telHidden = document.getElementById("tel");
-                const totalTel = p1 + p2 + p3;
-
-                // 글자 수가 부족하면 여기서 폼 전송을 자르고 경고를 띄웁니다.
-                if (totalTel.length < 10) {
-                    e.preventDefault(); 
-                    alert("올바른 전화번호 형식이 아닙니다. 입력값을 다시 확인해 주세요.");
-                    const phoneInput2 = document.getElementById("phone2");
-                    if (phoneInput2) phoneInput2.focus();
-                    return; // 폼 전송 중단
+                if (tel2.value.length !== 4 || tel3.value.length !== 4) {
+                    e.preventDefault(); // 서버 전송 중단
+                    alert("전화번호 뒷자리는 각각 정확히 숫자 4자리여야 합니다.");
+                    tel2.value.length !== 4 ? tel2.focus() : tel3.focus();
+                    return false;
                 }
 
-                // 10~11자리 정상 번호라면 서버로 전송될 히든 태그(name="tel")에 임무 완수 주입!
-                if (telHidden) {
-                    telHidden.value = totalTel;
-                }
+                fullTel.value = `010-${tel2.value}-${tel3.value}`;
 
                 if (!isEmailChecked) {
                     e.preventDefault(); 
@@ -1569,7 +1492,7 @@
                 // [핵심 추가] 6자리 이메일 소유권 미인증 시 폼 전송 강제 블로킹
                 if (!isEmailAuthVerified) {
                     e.preventDefault(); // 폼 실제 전송을 가로채서 백엔드 전송 전면 차단
-                    alert("회원정보 수정에는 이메일 중복확인이 필요합니다");
+                    alert("회원정보 변경 전, 이메일 중복확인을 해주세요");
                     document.getElementById("emailAuthCode").focus();
                 }
             });
@@ -1590,35 +1513,6 @@
             }
         }
     });
-    // 마이페이지 본인 게시글 완료처리하기
-    function executeDonePost(boardType, num, event) {
-      // 1. 부모 태그의 상세보기 이동(location.href)을 강력하게 즉시 정지
-      if (event) {
-        event.stopPropagation();
-        event.preventDefault();
-      }
-
-      // 2. 완료 변경 의사 확인 (삭제 함수의 prompt 검증과 동일한 메커니즘)
-      const msg = "이 게시글을 처리 완료 상태로 변경하시겠습니까?";
-      if (!confirm(msg)) return;
-
-      // 3. HTML에 미리 대기 중인 상태 완료용 고정 히든 폼 가져오기
-      const form = document.getElementById("hiddenDoneForm");
-      
-      if (!form) {
-        alert("시스템 오류: 전송용 히든 폼을 찾을 수 없습니다.");
-        return;
-      }
-
-      // 4. 호출 타겟 주소창 동적 조립 및 주입
-      // 작성하신 컨트롤러 매핑 주소 규격인 /mypage/api/found/complete/{id} 구조를 정확히 추종합니다.
-      form.action = (boardType === '습득' ? '/mypage/api/found/done/' : '/mypage/api/lost/done/') + num;
-
-      // 5. 서버 컨트롤러를 향해 POST 데이터 강력하게 격발 전송
-      form.submit();
-    }
-
-    // 마이페이지 본인 게시글 삭제하기
     function executeDeletePost(boardType, num) {
       // 1. 컨트롤러의 조건에 맞게 비밀번호 입력 창 작동
       const password = prompt("게시글을 삭제하시겠습니까?\n본인 확인을 위해 현재 비밀번호를 입력해 주세요.");

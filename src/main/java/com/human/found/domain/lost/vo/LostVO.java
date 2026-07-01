@@ -26,6 +26,7 @@ public class LostVO {
     private Integer isDeleted = 0;
     private List<LostFileVO> fileList;
     private String dataSource;
+    private int commentCount;
     private long viewCount;
     private String lstFilepathImg;
     

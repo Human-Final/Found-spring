@@ -95,7 +95,7 @@ public class FoundController {
   
         // 5. 최종 조건별 페이징 리스트 조회
         List<FoundVO> getList = foundService.searchFoundItems(category, subCategory, colorSelect, startDate, endDate, author, status, keyword, sort, pagingVO);
-        
+
         model.addAttribute("getList", getList);
         
         // 6. 화면단 옵션 상태 및 텍스트 유지 백 바인딩
