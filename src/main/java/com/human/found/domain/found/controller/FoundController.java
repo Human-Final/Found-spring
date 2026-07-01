@@ -65,6 +65,7 @@ public class FoundController {
     public String getFoundList(
             @RequestParam(required = false) List<String> category,
             @RequestParam(required = false) String subCategory,
+            @RequestParam(required = false) String colorSelect,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
             @RequestParam(required = false) String author,  // 습득자명
@@ -86,20 +87,21 @@ public class FoundController {
         pagingVO.setPageBlock(10);
         
         // 3. 습득물 조건에 맞는 전체 데이터 개수 카운트 실행
-        int totalCount = foundService.getTotalSearchCount(category, subCategory, startDate, endDate, author, status, keyword);
+        int totalCount = foundService.getTotalSearchCount(category, subCategory, colorSelect, startDate, endDate, author, status, keyword);
         pagingVO.setTotalCount(totalCount); 
         
         // 4. [놓치면 안 되는 핵심] 페이징 바 번호 계산 연산 가동!
         pagingVO.pageInfo(totalCount); 
   
         // 5. 최종 조건별 페이징 리스트 조회
-        List<FoundVO> getList = foundService.searchFoundItems(category, subCategory, startDate, endDate, author, status, keyword, sort, pagingVO);
+        List<FoundVO> getList = foundService.searchFoundItems(category, subCategory, colorSelect, startDate, endDate, author, status, keyword, sort, pagingVO);
         
         model.addAttribute("getList", getList);
         
         // 6. 화면단 옵션 상태 및 텍스트 유지 백 바인딩
         model.addAttribute("selectedCategories", category);
         model.addAttribute("selectedSubCategory", subCategory);
+        model.addAttribute("colorSelected", colorSelect);
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
         model.addAttribute("selectedAuthor", author);

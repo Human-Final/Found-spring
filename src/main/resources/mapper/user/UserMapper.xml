@@ -229,6 +229,20 @@
         FROM user 
         WHERE email = #{email}
     </select>
+    
+    <!-- 마이페이지 전용 습득물 완료처리 -->
+    <update id="doneFoundPost" parameterType="String">
+        update found
+        set done=1
+        where atc_id=#{atcId}
+    </update>
+
+    <!-- 마이페이지 전용 분실물 완료처리 -->
+    <update id="doneLostPost" parameterType="String">
+        update Lost
+        set done=1
+        where atc_id=#{atcId}
+    </update>
 
     <!-- 마이페이지 전용 습득물 삭제 (is_deleted 업데이트) -->
     <update id="deleteFoundPostByAtcId" parameterType="string">

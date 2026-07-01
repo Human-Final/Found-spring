@@ -23,14 +23,14 @@
   </section>
 
   <section class="filter-box-advanced" 
-           style="background: #f7fcf9; padding: 25px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #d4f0df; box-shadow: 0 4px 12px rgba(212, 240, 223, 0.2);">
+         style="background: #f7fcf9; padding: 25px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #d4f0df; box-shadow: 0 4px 12px rgba(212, 240, 223, 0.2);">
     
-    <form id="advancedSearchForm" onsubmit="return false;" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;">
+    <form id="advancedSearchForm" onsubmit="return false;" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
       
-      <!-- 1층 - 1열: 대분류 카테고리 -->
+      <!-- [1층 - 1열] 대분류 카테고리 -->
       <div class="form-group">
-        <label for="mainCategorySelect" style="font-weight: 600; display: block; margin-bottom: 6px; color: #444;">물품 분류 (대분류)</label>
-        <select id="mainCategorySelect" style="width: 100%; padding: 10px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; cursor: pointer;">
+        <label for="mainCategorySelect" style="font-weight: 600; display: block; margin-bottom: 8px; color: #444;">물품 분류 (대분류)</label>
+        <select id="mainCategorySelect" style="width: 100%; height: 42px; padding: 10px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; cursor: pointer; box-sizing: border-box;">
           <option value="">대분류 선택</option>
           <option value="가방" th:selected="${selectedCategories != null and #lists.contains(selectedCategories, '가방')}">가방</option>
           <option value="귀금속" th:selected="${selectedCategories != null and #lists.contains(selectedCategories, '귀금속')}">귀금속</option>
@@ -45,70 +45,126 @@
         </select>
       </div>
 
-      <!-- 1층 - 2열: 소분류 카테고리 -->
+      <!-- [1층 - 2열] 소분류 카테고리 -->
       <div class="form-group">
-        <label for="subCategorySelect" style="font-weight: 600; display: block; margin-bottom: 6px; color: #444;">물품 분류 (소분류)</label>
-        <select id="subCategorySelect" style="width: 100%; padding: 10px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; cursor: pointer;">
+        <label for="subCategorySelect" style="font-weight: 600; display: block; margin-bottom: 8px; color: #444;">물품 분류 (소분류)</label>
+        <select id="subCategorySelect" style="width: 100%; height: 42px; padding: 10px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; cursor: pointer; box-sizing: border-box;">
           <option value="">소분류 선택</option>
         </select>
       </div>
 
-      <!-- 1층 - 3열: 습득자명 (작성자ID) -->
+      <!-- [1층 - 3열] 색상 선택 -->
       <div class="form-group">
-        <label for="authorInput" style="font-weight: 600; display: block; margin-bottom: 6px; color: #555;">습득자명 (작성자ID)</label>
-        <input type="text" id="authorInput" th:value="${selectedAuthor}" placeholder="작성자명 입력..." 
-               style="width: 100%; padding: 10px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; box-sizing: border-box;">
+        <label for="colorSelect" style="font-weight: 600; display: block; margin-bottom: 8px; color: #444;">색상 선택</label>
+        <select id="colorSelect" style="width: 100%; height: 42px; padding: 10px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; cursor: pointer; box-sizing: border-box;">
+          <option value="">물건의 색상 선택</option>
+          <option value="그레이(암회)" th:selected="${colorSelected  == '그레이(암회)'}">그레이(암회)</option>
+          <option value="그레이(회)" th:selected="${colorSelected  == '그레이(회)'}">그레이(회)</option>
+          <option value="그린(초록)" th:selected="${colorSelected  == '그린(초록)'}">그린(초록)</option>
+          <option value="네온그린(형광초록)" th:selected="${colorSelected  == '네온그린(형광초록)'}">네온그린(형광초록)</option>
+          <option value="다크레드(진빨강)" th:selected="${colorSelected  == '다크레드(진빨강)'}">다크레드(진빨강)</option>
+          <option value="다크바이올렛(진보라)" th:selected="${colorSelected  == '다크바이올렛(진보라)'}">다크바이올렛(진보라)</option>
+          <option value="다크블루(어두운파랑)" th:selected="${colorSelected  == '다크블루(어두운파랑)'}">다크블루(어두운파랑)</option>
+          <option value="다크시안(어두운청록)" th:selected="${colorSelected  == '다크시안(어두운청록)'}">다크시안(어두운청록)</option>
+          <option value="다크오렌지(어두운오렌지)" th:selected="${colorSelected  == '다크오렌지(어두운오렌지)'}">다크오렌지(어두운오렌지)</option>
+          <option value="다크핑크(진분홍)" th:selected="${colorSelected  == '다크핑크(진분홍)'}">다크핑크(진분홍)</option>
+          <option value="딥스카이블루(새파란하늘)" th:selected="${colorSelected  == '딥스카이블루(새파란하늘)'}">딥스카이블루(새파란하늘)</option>
+          <option value="라이트그레이(옅은회)" th:selected="${colorSelected  == '라이트그레이(옅은회)'}">라이트그레이(옅은회)</option>
+          <option value="라임(라임)" th:selected="${colorSelected  == '라임(라임)'}">라임(라임)</option>
+          <option value="라임그린(어두운청록)" th:selected="${colorSelected  == '라임그린(어두운청록)'}">라임그린(어두운청록)</option>
+          <option value="레드(빨강)" th:selected="${colorSelected  == '레드(빨강)'}">레드(빨강)</option>
+          <option value="레드(연한레드)" th:selected="${colorSelected  == '레드(연한레드)'}">레드(연한레드)</option>
+          <option value="레드(연한빨강)" th:selected="${colorSelected  == '레드(연한빨강)'}">레드(연한빨강)</option>
+          <option value="로열블루(밝은남)" th:selected="${colorSelected  == '로열블루(밝은남)'}">로열블루(밝은남)</option>
+          <option value="마젠타(자홍)" th:selected="${colorSelected  == '마젠타(자홍)'}">마젠타(자홍)</option>
+          <option value="바이올렛(보라)" th:selected="${colorSelected  == '바이올렛(보라)'}">바이올렛(보라)</option>
+          <option value="브라운(갈)" th:selected="${colorSelected  == '브라운(갈)'}">브라운(갈)</option>
+          <option value="블랙(검정)" th:selected="${colorSelected  == '블랙(검정)'}">블랙(검정)</option>
+          <option value="블루(어두운파랑)" th:selected="${colorSelected  == '블루(어두운파랑)'}">블루(어두운파랑)</option>
+          <option value="블루(파랑)" th:selected="${colorSelected == '블루(파랑)'}">블루(파랑)</option>
+          <option value="블루바이올렛(남보라)" th:selected="${colorSelected == '블루바이올렛(남보라)'}">블루바이올렛(남보라)</option>
+          <option value="샤르트뢰즈(역녹)" th:selected="${colorSelected == '샤르트뢰즈(역녹)'}">샤르트뢰즈(역녹)</option>
+          <option value="스트롱시안(진한청록)" th:selected="${colorSelected == '스트롱시안(진한청록)'}">스트롱시안(진한청록)</option>
+          <option value="시안(청록)" th:selected="${colorSelected == '시안(청록)'}">시안(청록)</option>
+          <option value="실버(은)" th:selected="${colorSelected == '실버(은)'}">실버(은)</option>
+          <option value="씨그린(노르스름한녹)" th:selected="${colorSelected == '씨그린(노르스름한녹)'}">씨그린(노르스름한녹)</option>
+          <option value="알리자린(홍)" th:selected="${colorSelected == '알리자린(홍)'}">알리자린(홍)</option>
+          <option value="에메랄드(선녹)" th:selected="${colorSelected == '에메랄드(선녹)'}">에메랄드(선녹)</option>
+          <option value="엘로우(노랑)" th:selected="${colorSelected == '엘로우(노랑)'}">엘로우(노랑)</option>
+          <option value="엘로우(밝은노랑)" th:selected="${colorSelected == '엘로우(밝은노랑)'}">엘로우(밝은노랑)</option>
+          <option value="오렌지(선명한오렌지)" th:selected="${colorSelected == '오렌지(선명한오렌지)'}">오렌지(선명한오렌지)</option>
+          <option value="오렌지(연한오렌지)" th:selected="${colorSelected == '오렌지(연한오렌지)'}">오렌지(연한오렌지)</option>
+          <option value="오렌지(주황)" th:selected="${colorSelected == '오렌지(주황)'}">오렌지(주황)</option>
+          <option value="올리브(녹갈)" th:selected="${colorSelected == '올리브(녹갈)'}">올리브(녹갈)</option>
+          <option value="코럴(산호)" th:selected="${colorSelected == '코럴(산호)'}">코럴(산호)</option>
+          <option value="코발트(밝은남)" th:selected="${colorSelected == '코발트(밝은남)'}">코발트(밝은남)</option>
+          <option value="코발트(짙은청록)" th:selected="${colorSelected == '코발트(짙은청록)'}">코발트(짙은청록)</option>
+          <option value="터키오이스(옥)" th:selected="${colorSelected == '터키오이스(옥)'}">터키오이스(옥)</option>
+          <option value="퓨시아(자홍)" th:selected="${colorSelected == '퓨시아(자홍)'}">퓨시아(자홍)</option>
+          <option value="피치오렌지(오렌지)" th:selected="${colorSelected == '피치오렌지(오렌지)'}">피치오렌지(오렌지)</option>
+          <option value="핑크(분홍)" th:selected="${colorSelected == '핑크(분홍)'}">핑크(분홍)</option>
+          <option value="핑크(선명한분홍)" th:selected="${colorSelected == '핑크(선명한분홍)'}">핑크(선명한분홍)</option>
+          <option value="핑크(연한핑크)" th:selected="${colorSelected == '핑크(연한핑크)'}">핑크(연한핑크)</option>
+          <option value="화이트(흰)" th:selected="${colorSelected == '화이트(흰)'}">화이트(흰)</option>
+          <option value="기타" th:selected="${colorSelected == '기타'}">기타</option>
+        </select>
       </div>
 
-      <!-- 2층 - 1열: 진행 상태 -->
+      <!-- [2층 - 1열] 습득자명 -->
       <div class="form-group">
-        <label for="statusSelect" style="font-weight: 600; display: block; margin-bottom: 6px; color: #555;">진행 상태</label>
-        <select id="statusSelect" style="width: 100%; padding: 10px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; cursor: pointer;">
+        <label for="authorInput" style="font-weight: 600; display: block; margin-bottom: 8px; color: #555;">습득자명 (작성자ID)</label>
+        <input type="text" id="authorInput" th:value="${selectedAuthor}" placeholder="작성자명 입력..." 
+               style="width: 100%; height: 42px; padding: 10px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; box-sizing: border-box;">
+      </div>
+
+      <!-- [2층 - 2열] 진행 상태 -->
+      <div class="form-group">
+        <label for="statusSelect" style="font-weight: 600; display: block; margin-bottom: 8px; color: #555;">진행 상태</label>
+        <select id="statusSelect" style="width: 100%; height: 42px; padding: 10px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; cursor: pointer; box-sizing: border-box;">
           <option value="" th:selected="${selectedStatus == null || selectedStatus == ''}">전체</option>
           <option value="진행중" th:selected="${selectedStatus == '진행중'}">진행중</option>
           <option value="완료" th:selected="${selectedStatus == '완료'}">완료</option>
         </select>
       </div>
 
-      <!-- 2층 - 2, 3열: 습득일자 범위 및 습득물명 배치 -->
-      <div class="form-group" style="grid-column: span 2; display: flex; gap: 12px; align-items: flex-end;">
-        <div style="flex: 1;">
-          <label for="startDateInput" style="font-weight: 600; display: block; margin-bottom: 6px; color: #555;">습득일자 범위</label>
+      <!-- [2층 - 3열] 습득물명 -->
+      <div class="form-group">
+        <label for="keywordInput" style="font-weight: 600; display: block; margin-bottom: 8px; color: #555;">습득물명</label>
+        <input type="text" id="keywordInput" th:value="${keyword}" placeholder="습득물명 입력..." 
+               style="width: 100%; height: 42px; padding: 10px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; box-sizing: border-box;">
+      </div>
+
+      <!-- [3층 - 전체] 습득일자 범위 (전체 3열을 가로로 길게 배치하여 가시성 확보) -->
+      <div class="form-group" style="grid-column: span 3; display: flex; flex-direction: column;">
+        <label style="font-weight: 600; display: block; margin-bottom: 8px; color: #555;">습득일자 범위</label>
+        <div style="display: flex; gap: 12px; align-items: center;">
           <input type="date" id="startDateInput" th:value="${startDate}" 
                  th:max="${#calendars.format(#calendars.createNow(), 'yyyy-MM-dd')}"
-                 style="width: 100%; padding: 9px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; box-sizing: border-box;">
-        </div>
-        <span style="padding-bottom: 12px; color: #999; font-weight: bold;">~</span>
-        <div style="flex: 1;">
+                 style="flex: 1; height: 42px; padding: 10px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; box-sizing: border-box;">
+          <span style="color: #999; font-weight: bold;">~</span>
           <input type="date" id="endDateInput" th:value="${endDate}" 
                  th:max="${#calendars.format(#calendars.createNow(), 'yyyy-MM-dd')}"
-                 style="width: 100%; padding: 9px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; box-sizing: border-box;">
-        </div>
-        
-        <div style="flex: 1.5; margin-left: 10px;">
-          <label for="keywordInput" style="font-weight: 600; display: block; margin-bottom: 6px; color: #555;">습득물명</label>
-          <input type="text" id="keywordInput" th:value="${keyword}" placeholder="습득물명 입력..." 
-                 style="width: 100%; padding: 10px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; box-sizing: border-box;">
+                 style="flex: 1; height: 42px; padding: 10px; border: 1px solid #bce6cc; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; box-sizing: border-box;">
         </div>
       </div>
 
-      <!-- 3층: 정중앙 정렬 버튼 그룹 (초기화 및 검색하기) -->
-      <div class="form-group" style="grid-column: 1 / -1; display: flex; justify-content: center; gap: 12px; margin-top: 10px;">
+      <!-- [4층] 하단 버튼 그룹 -->
+      <div class="form-group" style="grid-column: 1 / -1; display: flex; justify-content: center; gap: 12px; margin-top: 15px;">
         <button type="button" id="resetBtn" 
-                style="background: #ffffff; color: #27ae60; padding: 11px 30px; border: 1px solid #bce6cc; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 15px; transition: all 0.2s;"
+                style="background: #ffffff; color: #27ae60; padding: 12px 35px; border: 1px solid #bce6cc; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 15px; transition: all 0.2s;"
                 onmouseover="this.style.background='#edfcf2'" onmouseout="this.style.background='#ffffff'">
           🔄 초기화
         </button>
 
         <button type="button" id="searchSubmitBtn" 
-                style="background: #2ecc71; color: white; padding: 11px 40px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 15px; transition: background 0.2s;"
+                style="background: #2ecc71; color: white; padding: 12px 45px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 15px; transition: background 0.2s;"
                 onmouseover="this.style.background='#27ae60'" onmouseout="this.style.background='#2ecc71'">
           🔍 검색하기
         </button>
       </div>
 
     </form>
-  </section>
+</section>
 
   
   <div class="count-sort">
@@ -190,6 +246,7 @@
           sort=${sort},
           category=${selectedCategories},
           subCategory=${selectedSubCategory},
+          colorSelect=${colorSelected},
           startDate=${startDate},
           endDate=${endDate},
           author=${selectedAuthor},
@@ -207,6 +264,7 @@
           sort=${sort},
           category=${selectedCategories},
           subCategory=${selectedSubCategory},
+          colorSelect=${colorSelected},
           startDate=${startDate},
           endDate=${endDate},
           author=${selectedAuthor},
@@ -226,6 +284,7 @@
           sort=${sort},
           category=${selectedCategories},
           subCategory=${selectedSubCategory},
+          colorSelect=${colorSelected},
           startDate=${startDate},
           endDate=${endDate},
           author=${selectedAuthor},
@@ -249,6 +308,7 @@
 
   const mainSelect = document.getElementById("mainCategorySelect");
   const subSelect = document.getElementById("subCategorySelect");
+  const colorSelect = document.getElementById("colorSelect");
 
   // 화면 진입 시 주소창 조건에 맞게 인풋창 및 필터 값들 세밀하게 복원
   if(document.querySelector("#keywordInput")) document.querySelector("#keywordInput").value = currentParams.get("keyword") || "";
@@ -257,6 +317,9 @@
   if(document.querySelector("#startDateInput")) document.querySelector("#startDateInput").value = currentParams.get("startDate") || "";
   if(document.querySelector("#endDateInput")) document.querySelector("#endDateInput").value = currentParams.get("endDate") || "";
   if(document.querySelector("#sortSelect")) document.querySelector("#sortSelect").value = currentParams.get("sort") || "latest";
+
+  // 주소창 색상 선택되어 있었다면 강제 동기화
+  if(colorSelect) colorSelect.value = currentParams.get("colorSelect") || "";
 
   // 주소창에 기존 대분류가 선택되어 있었다면 셀렉트 박스 강제 동기화
   const urlMainCat = currentParams.get("category") || "";
@@ -309,9 +372,9 @@
   // 6. [교정] 6대 복합 필터 값을 엮어서 새로고침 전송하는 통합 주소 조립기 함수
   async function loadBoardList(targetPage=1) {
     const params = new URLSearchParams();
-    
     const mainCat = mainSelect ? mainSelect.value : "";
     const subCat = subSelect ? subSelect.value : "";
+    const color = colorSelect ? colorSelect.value : ""; 
     const keyword = document.getElementById("keywordInput") ? document.getElementById("keywordInput").value.trim() : "";
     const author = document.getElementById("authorInput") ? document.getElementById("authorInput").value.trim() : "";
     const status = document.getElementById("statusSelect") ? document.getElementById("statusSelect").value : "";
@@ -321,6 +384,7 @@
     // 유효성 방어선 검증 바인딩 (빈 선택값이거나 '선택' 단어가 포함되면 params 적재 제외)
     if (mainCat && mainCat !== "" && !mainCat.includes("선택")) params.set("category", mainCat);
     if (subCat && subCat !== "" && !subCat.includes("선택")) params.set("subCategory", subCat);
+    if (color && color !== "" && !color.includes("선택")) params.set("colorSelect", color);
     if (keyword && keyword !== "") params.set("keyword", keyword);
     if (author && author !== "") params.set("author", author);
     if (status && status !== "" && !status.includes("전체")) params.set("status", status);

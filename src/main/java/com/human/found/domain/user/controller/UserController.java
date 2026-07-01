@@ -28,6 +28,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 
 @Controller
@@ -275,6 +277,20 @@ public class UserController {
         // 자바스크립트의 if (data === "verified") 문을 활성화시킵니다.
         return "verified";
     }
+    
+    //found 게시물 완료처리
+    @PostMapping("/api/found/done/{atcId}")
+    public String doneFound(@PathVariable("atcId") String atcId) {
+        userService.doneFoundPost(atcId);
+        return "redirect:/mypage#myPosts";
+    }
+    //lost 게시물 완료처리
+    @PostMapping("/api/lost/done/{atcId}")
+    public String donelost(@PathVariable("atcId") String atcId) {
+        userService.doneLostPost(atcId);
+        return "redirect:/mypage#myPosts";
+    }
+    
     
     @PostMapping("/api/found/delete/{atcId}")
     public String deleteFound(@PathVariable("atcId") String atcId, Principal principal) {

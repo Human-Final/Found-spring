@@ -17,10 +17,10 @@ public interface FoundService {
     public List<FoundVO> getFoundList(PagingVO pagingVO);
 
     //검색조회
-    public List<FoundVO> searchFoundItems(List<String> category, String subCategory, String startDate, String endDate, String author, String status, String keyword, String sort, PagingVO pagingVO);
+    public List<FoundVO> searchFoundItems(List<String> category, String subCategory, String colorSelect, String startDate, String endDate, String author, String status, String keyword, String sort, PagingVO pagingVO);
     
     //조회 결과 갯수 확인 
-    public int getTotalSearchCount(List<String> category, String subCategory, String startDate, String endDate, String author, String status, String keyword);
+    public int getTotalSearchCount(List<String> category, String subCategory, String colorSelect, String startDate, String endDate, String author, String status, String keyword);
 
     //삭제
     public void deletefound(String atcId,String inputpw,String loginid,boolean isAdmin);

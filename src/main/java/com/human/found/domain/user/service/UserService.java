@@ -86,6 +86,10 @@ public interface UserService {
      */
     UserVO getUserInfo(String id);
 
+    // 마이페이지 습득, 분실 게시물 완료처리 
+    void doneFoundPost(String atcId);
+    void doneLostPost(String atcId);
+
     // 사용자가 작성한 글의 갯수 갖고오기 메서드
     java.util.Map<String, Object> getMyPageCounts(String userId);
 

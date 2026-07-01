@@ -154,6 +154,7 @@
             SELECT num, atc_id, id, clr_nm, dep_place, fd_filepath_img, fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm, created_at, updated_at, done, is_deleted, 'user' AS dataSource FROM found WHERE is_deleted = 0
             <if test="category != null and category.size() > 0">AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach></if>
             <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
+            <if test="colorSelect != null and colorSelect != ''">AND clr_nm LIKE CONCAT('%', #{colorSelect}, '%')</if>
             <if test="startDate != null and startDate != ''">AND fd_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')</if>
             <if test="endDate != null and endDate != ''">AND fd_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')</if>
             <if test="author != null and author != ''">AND id LIKE CONCAT('%', #{author}, '%')</if>
@@ -166,6 +167,7 @@
             SELECT num, atc_id, id, clr_nm, dep_place, fd_filepath_img, fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm, created_at, updated_at, done, is_deleted, 'police' AS dataSource FROM found_police WHERE is_deleted = 0
             <if test="category != null and category.size() > 0">AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach></if>
             <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
+            <if test="colorSelect != null and colorSelect != ''">AND clr_nm LIKE CONCAT('%', #{colorSelect}, '%')</if>
             <if test="startDate != null and startDate != ''">AND fd_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')</if>
             <if test="endDate != null and endDate != ''">AND fd_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')</if>
             <if test="author != null and author != ''">AND id LIKE CONCAT('%', #{author}, '%')</if>
@@ -178,6 +180,7 @@
             SELECT num, atc_id, id, clr_nm, dep_place, fd_filepath_img, fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm, created_at, updated_at, done, is_deleted, 'portal' AS dataSource FROM found_portal WHERE is_deleted = 0
             <if test="category != null and category.size() > 0">AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach></if>
             <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
+            <if test="colorSelect != null and colorSelect != ''">AND clr_nm LIKE CONCAT('%', #{colorSelect}, '%')</if>
             <if test="startDate != null and startDate != ''">AND fd_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')</if>
             <if test="endDate != null and endDate != ''">AND fd_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')</if>
             <if test="author != null and author != ''">AND id LIKE CONCAT('%', #{author}, '%')</if>
@@ -201,6 +204,7 @@
         <if test="category != null and category.size() > 0">
             AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach>
         </if>
+        <if test="colorSelect != null and colorSelect != ''">AND clr_nm LIKE CONCAT('%', #{colorSelect}, '%')</if>
         <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
         <if test="startDate != null and startDate != ''">AND fd_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')</if>
         <if test="endDate != null and endDate != ''">AND fd_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')</if>
@@ -221,6 +225,7 @@
             AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach>
         </if>
         <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
+        <if test="colorSelect != null and colorSelect != ''">AND clr_nm LIKE CONCAT('%', #{colorSelect}, '%')</if>
         <if test="startDate != null and startDate != ''">AND fd_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')</if>
         <if test="endDate != null and endDate != ''">AND fd_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')</if>
         <if test="author != null and author != ''">AND id LIKE CONCAT('%', #{author}, '%')</if>
@@ -239,6 +244,7 @@
             AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach>
         </if>
         <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
+        <if test="colorSelect != null and colorSelect != ''">AND clr_nm LIKE CONCAT('%', #{colorSelect}, '%')</if>
         <if test="startDate != null and startDate != ''">AND fd_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')</if>
         <if test="endDate != null and endDate != ''">AND fd_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')</if>
         <if test="author != null and author != ''">AND id LIKE CONCAT('%', #{author}, '%')</if>

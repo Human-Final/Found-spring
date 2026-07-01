@@ -370,6 +370,18 @@ public class UserServiceImpl implements UserService {
         return userMapper.findById(id);
     }
 
+    // 마이페이지 습득물 게시글 완료처리
+    @Override
+    public void doneFoundPost(String atcId){
+        userMapper.doneFoundPost(atcId);
+    }
+
+    // 마이페이지 분실물 게시글 완료처리
+    @Override
+    public void doneLostPost(String atcId){
+        userMapper.doneLostPost(atcId);
+    }
+
     @Override
     @Transactional
     public void removeFoundPost(String atcId) {
