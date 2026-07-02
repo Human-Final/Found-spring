@@ -14,11 +14,11 @@
 
   <!-- 탭 -->
   <div class="tab-box">
-    <a th:href="@{/admin/lost(dataSource=${dataSource}, page=1)}"
+    <a th:href="@{/admin/lost(page=1)}"
        th:classappend="${boardType == 'lost'} ? ' active' : ''"
        class="tab">분실물</a>
 
-    <a th:href="@{/admin/found(dataSource=${dataSource}, page=1)}"
+    <a th:href="@{/admin/found(page=1)}"
        th:classappend="${boardType == 'found'} ? ' active' : ''"
        class="tab">습득물</a>
 
@@ -27,44 +27,168 @@
        class="tab">공지사항</a>
   </div>
 
-  <!-- 데이터 출처 선택 -->
+  <!-- 검색 / 필터 form -->
   <form method="get"
-        th:if="${boardType != 'notice'}"
-        th:action="${boardType == 'found'} ? @{/admin/found} : @{/admin/lost}"
+        th:action="${boardType == 'found'} ? @{/admin/found} :
+                   (${boardType == 'lost'} ? @{/admin/lost} : @{/admin/notice})"
         class="filter-box">
-
-    <strong>데이터 출처</strong>
-
-    <label>
-      <input type="radio" name="dataSource" value="USER"
-             th:checked="${dataSource == 'USER'}">
-      사용자 작성
-    </label>
-
-    <label>
-      <input type="radio" name="dataSource" value="POLICE"
-             th:checked="${dataSource == 'POLICE'}">
-      외부 연동
-    </label>
 
     <input type="hidden" name="page" value="1">
 
-    <button type="submit">조회</button>
-  </form>
+    <!-- 검색어 -->
+    <div class="filter-row">
+      <strong>검색어</strong>
+      <input type="text"
+             name="keyword"
+             class="search-input"
+             placeholder="제목, 물품명, 작성자 검색"
+             th:value="${searchVO.keyword}">
+      <button type="submit">검색</button>
+    </div>
 
-  <!-- 공지사항 안내 -->
-  <div class="filter-box" th:if="${boardType == 'notice'}">
-    <strong>데이터 출처</strong>
-    <span class="notice-source">관리자 작성</span>
-  </div>
+    <!-- 카테고리 -->
+    <div class="filter-row" th:if="${boardType != 'notice'}">
+      <strong>카테고리</strong>
+
+      <label>
+        <input type="checkbox" name="categories" value="가방"
+               th:checked="${searchVO.categories != null and searchVO.categories.contains('가방')}">
+        가방
+      </label>
+
+      <label>
+        <input type="checkbox" name="categories" value="귀금속"
+               th:checked="${searchVO.categories != null and searchVO.categories.contains('귀금속')}">
+        귀금속
+      </label>
+
+      <label>
+        <input type="checkbox" name="categories" value="도서"
+               th:checked="${searchVO.categories != null and searchVO.categories.contains('도서')}">
+        도서
+      </label>
+
+      <label>
+        <input type="checkbox" name="categories" value="의류"
+               th:checked="${searchVO.categories != null and searchVO.categories.contains('의류')}">
+        의류
+      </label>
+
+      <label>
+        <input type="checkbox" name="categories" value="전자기기"
+               th:checked="${searchVO.categories != null and searchVO.categories.contains('전자기기')}">
+        전자기기
+      </label>
+
+      <label>
+        <input type="checkbox" name="categories" value="핸드폰"
+               th:checked="${searchVO.categories != null and searchVO.categories.contains('핸드폰')}">
+        핸드폰
+      </label>
+
+      <label>
+        <input type="checkbox" name="categories" value="지갑"
+               th:checked="${searchVO.categories != null and searchVO.categories.contains('지갑')}">
+        지갑
+      </label>
+
+      <label>
+        <input type="checkbox" name="categories" value="카드"
+               th:checked="${searchVO.categories != null and searchVO.categories.contains('카드')}">
+        카드
+      </label>
+
+      <label>
+        <input type="checkbox" name="categories" value="자동차"
+               th:checked="${searchVO.categories != null and searchVO.categories.contains('자동차')}">
+        자동차
+      </label>
+
+      <label>
+        <input type="checkbox" name="categories" value="기타"
+               th:checked="${searchVO.categories != null and searchVO.categories.contains('기타')}">
+        기타
+      </label>
+    </div>
+
+    <!-- 상태 -->
+    <div class="filter-row" th:if="${boardType != 'notice'}">
+      <strong>상태</strong>
+
+      <label>
+        <input type="checkbox" name="doneList" value="0"
+               th:checked="${searchVO.doneList != null and searchVO.doneList.contains(0)}">
+        진행중
+      </label>
+
+      <label>
+        <input type="checkbox" name="doneList" value="1"
+               th:checked="${searchVO.doneList != null and searchVO.doneList.contains(1)}">
+        완료
+      </label>
+    </div>
+
+    <!-- 등록일 -->
+    <div class="filter-row">
+      <strong>등록일</strong>
+
+      <input type="date"
+             name="startDate"
+             th:value="${searchVO.startDate}">
+
+      <span>~</span>
+
+      <input type="date"
+             name="endDate"
+             th:value="${searchVO.endDate}">
+    </div>
+
+    <!-- 데이터 출처 -->
+    <div class="filter-row" th:if="${boardType != 'notice'}">
+      <strong>데이터 출처</strong>
+
+      <label>
+        <input type="checkbox" name="dataSources" value="USER"
+               th:checked="${searchVO.dataSources == null or searchVO.dataSources.contains('USER')}">
+        사용자 작성
+      </label>
+
+      <label>
+        <input type="checkbox" name="dataSources" value="POLICE"
+               th:checked="${searchVO.dataSources == null or searchVO.dataSources.contains('POLICE')}">
+        외부 연동
+      </label>
+    </div>
+
+    <!-- 공지사항 출처 -->
+    <div class="filter-row" th:if="${boardType == 'notice'}">
+      <strong>데이터 출처</strong>
+      <span class="notice-source">관리자 작성</span>
+    </div>
+
+    <div class="filter-btn-row">
+      <button type="submit">조건 검색</button>
+
+      <a th:if="${boardType == 'lost'}"
+         th:href="@{/admin/lost(page=1)}"
+         class="reset-btn">초기화</a>
+
+      <a th:if="${boardType == 'found'}"
+         th:href="@{/admin/found(page=1)}"
+         class="reset-btn">초기화</a>
+
+      <a th:if="${boardType == 'notice'}"
+         th:href="@{/admin/notice(page=1)}"
+         class="reset-btn">초기화</a>
+    </div>
+
+  </form>
 
   <!-- 삭제 form -->
   <form method="post"
         th:action="${boardType == 'notice'} ? @{/admin/notice/delete} :
                    (${boardType == 'found'} ? @{/admin/found/delete} : @{/admin/lost/delete})"
         id="deleteForm">
-
-    <input type="hidden" name="dataSource" th:value="${dataSource}">
 
     <div class="table-top">
       <label>
@@ -112,7 +236,10 @@
           <span th:if="${lost.done == 0}" class="badge blue">진행중</span>
           <span th:if="${lost.done == 1}" class="badge green">완료</span>
         </td>
-        <td th:text="${dataSource == 'POLICE' ? '외부 연동' : '사용자 작성'}">사용자 작성</td>
+        <td>
+          <span th:if="${lost.dataSource == 'USER'}">사용자 작성</span>
+          <span th:if="${lost.dataSource == 'POLICE'}">외부 연동</span>
+        </td>
       </tr>
 
       <!-- 습득물 -->
@@ -131,7 +258,10 @@
           <span th:if="${found.done == 0}" class="badge blue">진행중</span>
           <span th:if="${found.done == 1}" class="badge green">완료</span>
         </td>
-        <td th:text="${dataSource == 'POLICE' ? '외부 연동' : '사용자 작성'}">사용자 작성</td>
+        <td>
+          <span th:if="${found.dataSource == 'USER'}">사용자 작성</span>
+          <span th:if="${found.dataSource == 'POLICE'}">외부 연동</span>
+        </td>
       </tr>
 
       <!-- 공지사항 -->
@@ -166,66 +296,129 @@
 
   <!-- 페이지 번호 -->
   <div class="pagination"
-       th:if="${totalPages != null and totalPages > 1}">
+       th:if="${searchVO.totalPage > 1}">
 
-    <!-- 분실물 페이지 번호 -->
+    <!-- 분실물 페이지 -->
     <th:block th:if="${boardType == 'lost'}">
 
-      <a th:if="${page > 1}"
-         th:href="@{/admin/lost(dataSource=${dataSource}, page=${page - 1})}">
+      <a th:if="${searchVO.prev}"
+         th:href="@{/admin/lost(
+            page=${searchVO.startPage - 1},
+            keyword=${searchVO.keyword},
+            categories=${searchVO.categories},
+            doneList=${searchVO.doneList},
+            startDate=${searchVO.startDate},
+            endDate=${searchVO.endDate},
+            dataSources=${searchVO.dataSources}
+         )}">
         이전
       </a>
 
-      <a th:each="p : ${#numbers.sequence(startPage, endPage)}"
-         th:href="@{/admin/lost(dataSource=${dataSource}, page=${p})}"
+      <a th:each="p : ${#numbers.sequence(searchVO.startPage, searchVO.endPage)}"
+         th:href="@{/admin/lost(
+            page=${p},
+            keyword=${searchVO.keyword},
+            categories=${searchVO.categories},
+            doneList=${searchVO.doneList},
+            startDate=${searchVO.startDate},
+            endDate=${searchVO.endDate},
+            dataSources=${searchVO.dataSources}
+         )}"
          th:text="${p}"
-         th:classappend="${p == page} ? ' active' : ''">
+         th:classappend="${p == searchVO.page} ? ' active' : ''">
       </a>
 
-      <a th:if="${page < totalPages}"
-         th:href="@{/admin/lost(dataSource=${dataSource}, page=${page + 1})}">
+      <a th:if="${searchVO.next}"
+         th:href="@{/admin/lost(
+            page=${searchVO.endPage + 1},
+            keyword=${searchVO.keyword},
+            categories=${searchVO.categories},
+            doneList=${searchVO.doneList},
+            startDate=${searchVO.startDate},
+            endDate=${searchVO.endDate},
+            dataSources=${searchVO.dataSources}
+         )}">
         다음
       </a>
 
     </th:block>
 
-    <!-- 습득물 페이지 번호 -->
+    <!-- 습득물 페이지 -->
     <th:block th:if="${boardType == 'found'}">
 
-      <a th:if="${page > 1}"
-         th:href="@{/admin/found(dataSource=${dataSource}, page=${page - 1})}">
+      <a th:if="${searchVO.prev}"
+         th:href="@{/admin/found(
+            page=${searchVO.startPage - 1},
+            keyword=${searchVO.keyword},
+            categories=${searchVO.categories},
+            doneList=${searchVO.doneList},
+            startDate=${searchVO.startDate},
+            endDate=${searchVO.endDate},
+            dataSources=${searchVO.dataSources}
+         )}">
         이전
       </a>
 
-      <a th:each="p : ${#numbers.sequence(startPage, endPage)}"
-         th:href="@{/admin/found(dataSource=${dataSource}, page=${p})}"
+      <a th:each="p : ${#numbers.sequence(searchVO.startPage, searchVO.endPage)}"
+         th:href="@{/admin/found(
+            page=${p},
+            keyword=${searchVO.keyword},
+            categories=${searchVO.categories},
+            doneList=${searchVO.doneList},
+            startDate=${searchVO.startDate},
+            endDate=${searchVO.endDate},
+            dataSources=${searchVO.dataSources}
+         )}"
          th:text="${p}"
-         th:classappend="${p == page} ? ' active' : ''">
+         th:classappend="${p == searchVO.page} ? ' active' : ''">
       </a>
 
-      <a th:if="${page < totalPages}"
-         th:href="@{/admin/found(dataSource=${dataSource}, page=${page + 1})}">
+      <a th:if="${searchVO.next}"
+         th:href="@{/admin/found(
+            page=${searchVO.endPage + 1},
+            keyword=${searchVO.keyword},
+            categories=${searchVO.categories},
+            doneList=${searchVO.doneList},
+            startDate=${searchVO.startDate},
+            endDate=${searchVO.endDate},
+            dataSources=${searchVO.dataSources}
+         )}">
         다음
       </a>
 
     </th:block>
 
-    <!-- 공지사항 페이지 번호 -->
+    <!-- 공지사항 페이지 -->
     <th:block th:if="${boardType == 'notice'}">
 
-      <a th:if="${page > 1}"
-         th:href="@{/admin/notice(page=${page - 1})}">
+      <a th:if="${searchVO.prev}"
+         th:href="@{/admin/notice(
+            page=${searchVO.startPage - 1},
+            keyword=${searchVO.keyword},
+            startDate=${searchVO.startDate},
+            endDate=${searchVO.endDate}
+         )}">
         이전
       </a>
 
-      <a th:each="p : ${#numbers.sequence(startPage, endPage)}"
-         th:href="@{/admin/notice(page=${p})}"
+      <a th:each="p : ${#numbers.sequence(searchVO.startPage, searchVO.endPage)}"
+         th:href="@{/admin/notice(
+            page=${p},
+            keyword=${searchVO.keyword},
+            startDate=${searchVO.startDate},
+            endDate=${searchVO.endDate}
+         )}"
          th:text="${p}"
-         th:classappend="${p == page} ? ' active' : ''">
+         th:classappend="${p == searchVO.page} ? ' active' : ''">
       </a>
 
-      <a th:if="${page < totalPages}"
-         th:href="@{/admin/notice(page=${page + 1})}">
+      <a th:if="${searchVO.next}"
+         th:href="@{/admin/notice(
+            page=${searchVO.endPage + 1},
+            keyword=${searchVO.keyword},
+            startDate=${searchVO.startDate},
+            endDate=${searchVO.endDate}
+         )}">
         다음
       </a>
 

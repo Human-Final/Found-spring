@@ -16,12 +16,14 @@ public class AdminLostVO {
     private String lstSbjt;
     private LocalDateTime lstYmd;
     private String prdtClNm;
+    
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     private Integer done;
     private Integer isDeleted;
+    private String dataSource;
 
     private String lstFilepathImg;
     private Long viewConut;

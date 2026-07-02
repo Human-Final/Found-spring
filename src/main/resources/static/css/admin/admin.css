@@ -246,3 +246,47 @@ body {
   color: white;
   font-weight: bold;
 }
+
+.filter-row {
+  margin: 12px 0;
+}
+
+.search-input {
+  width: 260px;
+  padding: 6px 8px;
+}
+
+.filter-btn-row {
+  margin-top: 15px;
+}
+
+.reset-btn {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-left: 8px;
+  border: 1px solid #ccc;
+  text-decoration: none;
+  color: #333;
+  border-radius: 4px;
+}
+
+.pagination {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.pagination a {
+  display: inline-block;
+  padding: 6px 10px;
+  margin: 0 3px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-decoration: none;
+  color: #333;
+}
+
+.pagination a.active {
+  background: #333;
+  color: white;
+  font-weight: bold;
+}

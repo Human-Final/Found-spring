@@ -24,4 +24,5 @@ public class AdminFoundVO {
 
     private Integer done;
     private Integer isDeleted;
+    private String dataSource;
 }
