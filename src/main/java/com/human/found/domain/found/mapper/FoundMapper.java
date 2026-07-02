@@ -18,6 +18,7 @@ public interface FoundMapper {
     List<FoundVO> selectFoundSearchList(
         @Param("category") List<String> category, 
         @Param("subCategory") String subCategory, 
+        @Param("colorSelect") String colorSelect, 
         @Param("startDate") String startDate, 
         @Param("endDate") String endDate, 
         @Param("author") String author, 
@@ -30,7 +31,8 @@ public interface FoundMapper {
     // 조건에 부합하는 검색결과 조회 갯수 확인용
     int selectFoundSearchCount(
         @Param("category") List<String> category, 
-        @Param("subCategory") String subCategory, 
+        @Param("subCategory") String subCategory,
+        @Param("colorSelect") String colorSelect,
         @Param("startDate") String startDate, 
         @Param("endDate") String endDate, 
         @Param("author") String author, 

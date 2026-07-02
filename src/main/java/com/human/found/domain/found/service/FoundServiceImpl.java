@@ -93,7 +93,7 @@ public class FoundServiceImpl implements FoundService {
 
     // 검색
     @Override
-    public List<FoundVO> searchFoundItems(List<String> category, String subCategory, String startDate, String endDate, String author, String status, String keyword, String sort, PagingVO pagingVO) {
+    public List<FoundVO> searchFoundItems(List<String> category, String subCategory, String colorSelect, String startDate, String endDate, String author, String status, String keyword, String sort, PagingVO pagingVO) {
         
         // 데이터 정제 안전장치 가동
         if ("all".equalsIgnoreCase(status)) status = "";
@@ -115,12 +115,12 @@ public class FoundServiceImpl implements FoundService {
         System.out.println("🔄 [습득물 서비스단] 복합 검색 엔진 기동 -> 현재 페이지: " + pagingVO.getPage());
 
         // 매퍼 인터페이스로 모든 인자 토스
-        return foundMapper.selectFoundSearchList(category, subCategory, startDate, endDate, author, status, keyword, sort, pagingVO);
+        return foundMapper.selectFoundSearchList(category, subCategory, colorSelect, startDate, endDate, author, status, keyword, sort, pagingVO);
     }
 
     // 페이징을 위한 조회결과 갯수 세기
     @Override
-    public int getTotalSearchCount(List<String> category, String subCategory, String startDate, String endDate, String author, String status, String keyword) {
+    public int getTotalSearchCount(List<String> category, String subCategory, String colorSelect, String startDate, String endDate, String author, String status, String keyword) {
         
         if ("all".equalsIgnoreCase(status)) status = "";
         if (keyword != null) keyword = keyword.trim();
@@ -139,7 +139,7 @@ public class FoundServiceImpl implements FoundService {
         }
 
         // 매퍼의 카운트 전용 메서드 호출
-        return foundMapper.selectFoundSearchCount(category, subCategory, startDate, endDate, author, status, keyword);
+        return foundMapper.selectFoundSearchCount(category, subCategory, colorSelect, startDate, endDate, author, status, keyword);
     }
 
     // 삭제

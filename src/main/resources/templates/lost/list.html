@@ -85,7 +85,7 @@
                 style="width: 100%; padding: 9px; border: 1px solid #f5c2c2; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; box-sizing: border-box;">
         </div>
         <div style="flex: 1.5; margin-left: 10px;">
-          <label for="keywordInput" style="font-weight: 600; display: block; margin-bottom: 6px; color: #555;">습득물명</label>
+          <label for="keywordInput" style="font-weight: 600; display: block; margin-bottom: 6px; color: #555;">물품명</label>
           <input type="text" id="keywordInput" th:value="${keyword}" placeholder="습득물명 입력..." 
                 style="width: 100%; padding: 10px; border: 1px solid #f5c2c2; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; box-sizing: border-box;">
         </div>
@@ -171,10 +171,17 @@
         </div>                
       </div>
       <div class="post-bottom">
-        <span>작성날짜(몇일 전 로직으로 구현)</span>
+        <div>
+          <span>작성날짜 : </span>
+          <span th:text="${lostVO.createdAt != null ? #temporals.format(lostVO.createdAt, 'yyyy-MM-dd') : ''}">작성날짜</span>
+        </div>
         <div class="post-counts">
-          <span>조회 수</span>
-          <span>댓글 수</span>
+          <span>
+            조회 수 : <span th:text="${lostVO.viewCount !=null ? lostVO.viewCount+'회' : '0'+'회'}"></span>            
+          </span>
+          <span>
+            댓글 수 : <span th:text="${lostVO.commentCount !=null ? lostVO.commentCount+'개' : 0+'개'}"></span>
+          </span>
         </div>
       </div>
     </a>

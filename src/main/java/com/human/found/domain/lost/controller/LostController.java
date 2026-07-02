@@ -41,8 +41,6 @@ public class LostController {
         BindingResult bindingResult,Model model,
         @RequestParam(value="files",required = false) MultipartFile[]files, Principal principal) {
         
-        // [입구 컷] 검증 에러가 있다면 정상 로직 수행 전에 리턴!    
-        System.out.println("컨트롤러 진입");
         if(bindingResult.hasErrors()){
             
             bindingResult.getFieldErrors()
@@ -95,7 +93,6 @@ public class LostController {
         // 2. 하단 페이징 바(1 2 3) 계산을 위해 검색 조건에 맞는 '총 데이터 개수'를 먼저 구해옵니다.
         int totalCount = lostService.getTotalSearchCount(category, subCategory, startDate, endDate, author, status, keyword);
         pagingVO.setTotalCount(totalCount); // VO 내부에 총 개수를 심어 endPage, prev, next 블록 자동 계산 작동
-
         pagingVO.pageInfo(totalCount);
   
         // 3. 기존 6대 필터 인자 뒤에, 페이징 처리를 위해 pagingVO를 마지막 인자로 주입하여 서비스를 호출합니다!
@@ -112,7 +109,7 @@ public class LostController {
         model.addAttribute("selectedStatus", status);
         model.addAttribute("keyword", keyword);
         model.addAttribute("sort", sort);
-        model.addAttribute("paging", pagingVO); // HTML 하단 th:if="${paging.totalCount > 0}" 페이징 바 그리기 연동
+        model.addAttribute("paging", pagingVO);
         model.addAttribute("isEdit", false);
         
         return "lost/list";

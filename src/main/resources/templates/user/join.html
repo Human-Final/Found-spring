@@ -135,13 +135,35 @@
                 </div>
 
                 <div class="form-group">
-                    <label>전화번호</label>
-
-                    <input type="text"
-                           name="tel"
-                           required
-                           placeholder="010-0000-0000">
+                    <label style="font-weight: 600; display: block; margin-bottom: 8px; color: #444; font-size: 14px;">전화번호</label>
+                    
+                    <!-- flex 레이아웃을 활용해 입력창들과 버튼을 한 줄로 나란히 배치 -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;">
+                        
+                        <!-- 입력창 박스 그룹 (하이픈 포함 가로 배치) -->
+                        <div style="display: flex; align-items: center; gap: 6px; flex-grow: 1;">
+                            <!-- 010 기본 세팅 및 수정 불가 -->
+                            <input type="text" id="phone1" value="010" readonly 
+                                style="width: 25%; min-width: 50px; text-align: center; padding: 12px; border: 1px solid #dcdfe6; border-radius: 6px; background-color: #f5f7fa; color: #606266; font-size: 14px; box-sizing: border-box;" />
+                            <span style="color: #dcdfe6;">-</span>
+                            
+                            <input type="text" id="phone2" maxlength="4" placeholder="0000" oninput="commonPhoneHandler(this, 'phone3')" required
+                                style="width: 36%; height: 46px; text-align: center; border: 1px solid #dcdfe6; border-radius: 8px; outline: none; font-size: 14px; color: #333; box-sizing: border-box; transition: border-color 0.2s;" 
+                                onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#dcdfe6'" />
+                            <span style="color: #dcdfe6; font-size: 14px;">-</span>
+                            
+                            <!-- 마지막 4자리 입력창 -->
+                            <input type="text" id="phone3" maxlength="4" placeholder="0000" oninput="commonPhoneHandler(this, null)" required
+                                style="width: 36%; height: 46px; text-align: center; border: 1px solid #dcdfe6; border-radius: 8px; outline: none; font-size: 14px; color: #333; box-sizing: border-box; transition: border-color 0.2s;" 
+                                onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#dcdfe6'" />
+                        </div>
+                    </div>
+                    <span id="telResult" style="font-size: 13px; display: block; margin-top: 6px;"></span>
+                    
+                    <!-- 실제 서버 전송 및 스크립트 결합용 히든 파라미터 -->
+                    <input type="hidden" id="tel" name="tel" />
                 </div>
+
 
                 <button type="submit" class="join-submit">회원가입</button>
 
@@ -229,6 +251,53 @@
     function resetIdCheck() {
         isIdChecked = false;
         isIdAvailable = false;
+    }
+
+    function validateTel() {
+        const tel = document.getElementById("tel").value;
+        const result = document.getElementById("telResult");
+
+        // HTML에 메시지를 찍어줄 엘리먼트(#telResult)가 없다면 함수 실행 방지
+        if (!result) return false;
+
+        // 1. 빈 값 방어선 검사
+        if (tel === "" || tel.length <= 3) {
+            result.innerText = "전화번호를 입력해 주세요.";
+            result.style.color = "#dc3545"; // 경고 빨간색
+            return false;
+        }
+
+        // 2. 🎯 하이픈 없이 010으로 시작하는 순수 숫자 11자리 검증 정규식 (010 + 숫자 8자리)
+        const telRegex = /^010\d{8}$/;
+
+        if (!telRegex.test(tel)) {
+            // 정규식을 통과하지 못한 경우 (숫자가 모자라거나 포맷이 틀린 경우)
+            result.innerText = "올바른 전화번호 형식(11자리 숫자)이 아닙니다.";
+            result.style.color = "#dc3545";
+            return false;
+        } else {
+            // 3. 모든 검증을 완벽하게 통과한 경우
+            result.innerText = "올바른 전화번호 형식입니다.";
+            result.style.color = "#2ecc71"; // 통과 초록색
+            return true;
+        }
+    }
+
+    function commonPhoneHandler(currentInput, nextInputId) {
+        currentInput.value = currentInput.value.replace(/[^0-9]/g, '');
+
+        if (currentInput.value.length >= 4 && nextInputId) {
+            const nextEl = document.getElementById(nextInputId);
+            if (nextEl) nextEl.focus();
+        }
+
+        const p1 = document.getElementById("phone1").value;
+        const p2 = document.getElementById("phone2").value;
+        const p3 = document.getElementById("phone3").value;
+
+        document.getElementById("tel").value = p1 + p2 + p3;
+
+        validateTel();
     }
 
     function validatePassword() {
@@ -324,6 +393,12 @@
             document.getElementById("emailAuthCode").focus();
             return false;
         }
+
+        if (!validateTel()) {
+            alert("전화번호 형식이 올바르지 않습니다")
+            return false;
+        }
+        
         return true;
     }
 

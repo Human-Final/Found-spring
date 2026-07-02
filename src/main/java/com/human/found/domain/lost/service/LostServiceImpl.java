@@ -97,8 +97,6 @@ public class LostServiceImpl implements LostService {
         if (author != null) author = author.trim();
 
         System.out.println("🔄 [서비스단] 복합 검색 및 페이징 기동 -> 현재 페이지: " + pagingVO.getPage());
-
-        // 💡 매퍼 인터페이스로 모든 인자를 토스합니다.
         return lostMapper.selectLostSearchList(category, subCategory, startDate, endDate, author, status, keyword, sort, pagingVO);
     }
 
@@ -117,7 +115,6 @@ public class LostServiceImpl implements LostService {
         // 매퍼의 카운트 전용 메서드 호출
         return lostMapper.selectLostSearchCount(category, subCategory, startDate, endDate, author, status, keyword);
     }
-
 
     @Override
     @Transactional
