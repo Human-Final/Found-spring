@@ -28,7 +28,6 @@ public class AdminController {
      */
     @GetMapping("/lost")
     public String lostList(AdminSearchVO searchVO, Model model) {
-
         searchVO.setBoardType("lost");
         searchVO.setSize(10);
 
