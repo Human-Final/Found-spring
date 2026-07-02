@@ -13,14 +13,17 @@
         <result property="lstSbjt" column="lst_sbjt"/>
         <result property="lstYmd" column="lst_ymd"/>
         <result property="prdtClNm" column="prdt_cl_nm"/>
+        <result property="prdtCategory" column="prdt_category"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
         <result property="done" column="done"/>
         <result property="isDeleted" column="is_deleted"/>
         <result property="lstFilepathImg" column="lst_filepath_img"/>
-        <result property="viewConut" column="view_conut"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="dataSource" column="dataSource"/>
 
-        <collection property="filelist" javaType="ArrayList" ofType="com.human.found.domain.lost.vo.LostFileVO">
+
+        <collection property="fileList" javaType="ArrayList" ofType="com.human.found.domain.lost.vo.LostFileVO">
                 <id property="id" column="file_id"/>
                 <result property="fdFilepathImg" column="fd_filepath_img"/>
                 <result property="atcId" column="atc_id"/>
@@ -49,6 +52,7 @@ lst_prdt_nm,
 lst_sbjt,
 lst_ymd,
 prdt_cl_nm,
+prdt_category,
 done,
 is_deleted,
 lst_filepath_img
@@ -61,6 +65,7 @@ lst_filepath_img
 #{lstSbjt},
 #{lstYmd},
 #{prdtClNm},
+#{prdtCategory},
 #{done},
 #{isDeleted},
 #{lstFilepathImg}
@@ -80,11 +85,13 @@ lst_prdt_nm,
 lst_sbjt,
 lst_ymd,
 prdt_cl_nm,
+prdt_category,
 created_at,
 updated_at,
 done,
 is_deleted,
 lst_filepath_img,
+view_count,
 'user' AS dataSource
 FROM lost
 WHERE is_deleted=0
@@ -99,37 +106,113 @@ lst_prdt_nm,
 lst_sbjt,
 lst_ymd,
 prdt_cl_nm,
+prdt_category,
 created_at,
 updated_at,
 done,
 is_deleted,
 lst_filepath_img,
+view_count,
 'police' AS dataSource
 FROM lost_police
 WHERE 
         is_deleted=0
-<!-- UNION ALL  
-
-SELECT 
-num,
-atc_id,
-id,
-lst_place,
-lst_prdt_nm,
-lst_sbjt,
-lst_ymd,
-prdt_cl_nm,
-created_at,
-updated_at,
-done,
-is_deleted
-FROM lost_portal
-WHERE 
-        is_deleted=0  -->
 ORDER BY lst_ymd DESC
-LIMIT 10
+LIMIT #{size}
+OFFSET #{offset}
 
 </select>
+
+<!-- [신규 추가] 다단 비동기 카테고리 필터링 및 복합 조건 동적 검색 쿼리 -->
+<select id="selectLostSearchList" resultMap="LostDetailResultMap"> <!-- ⭐️ 교정: resultType을 resultMap으로 변경하여 카멜케이스 유실 방지 -->
+SELECT 
+        combined.*
+FROM (
+        /* ================= 1. 사용자 분실물 데이터 (lost) ================= */
+        SELECT 
+            num, atc_id, id, lst_place, lst_prdt_nm, lst_sbjt, lst_ymd, prdt_cl_nm, prdt_category,
+            created_at, updated_at, done, is_deleted, lst_filepath_img, view_count, 'user' AS dataSource
+        FROM lost
+        WHERE is_deleted = 0
+        <if test="category != null and category.size() > 0">
+            AND prdt_cl_nm IN 
+            <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach>
+        </if>
+        <if test="subCategory != null and subCategory != ''">
+            AND prdt_category = #{subCategory}
+        </if>
+        <!-- [6대 필터 확장 1] 습득일자 기간 조건 (시작일 ~ 종료일) -->
+        <if test="startDate != null and startDate != ''">
+            AND lst_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND lst_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test='status != null and status != ""'>
+            <choose>
+                <when test='status == "진행중"'>AND done = 0</when>
+                <when test='status == "완료"'>AND done = 1</when>
+            </choose>
+        </if>
+        <!-- 분실자명(작성자 id) 조건 -->
+        <if test="author != null and author != ''">
+            AND id LIKE CONCAT('%', #{author}, '%')
+        </if>
+        <!-- 습득물명(기존 키워드) 조건 -->
+        <if test="keyword != null and keyword != ''">
+            AND lst_prdt_nm LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        <!-- 만약 DB 테이블에 색상(clr_nm 등) 컬럼을 추가하셨다면 아래 주석을 풀어 사용하세요 -->
+        <!-- <if test="color != null and color != ''">AND clr_nm = #{color}</if> -->
+
+        UNION ALL
+
+        /* ================= 2. 경찰청 유실물 데이터 (lost_police) ================= */
+        SELECT 
+            num, atc_id, id, lst_place, lst_prdt_nm, lst_sbjt, lst_ymd, prdt_cl_nm, prdt_category,
+            created_at, updated_at, done, is_deleted, lst_filepath_img, view_count, 'police' AS dataSource
+        FROM lost_police
+        WHERE is_deleted = 0
+        <if test="category != null and category.size() > 0">
+            AND prdt_cl_nm IN 
+            <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach>
+        </if>
+        <if test="subCategory != null and subCategory != ''">
+            AND prdt_category = #{subCategory}
+        </if>
+        <!-- [6대 필터 확장 1] 경찰청 데이터 일자 기간 조건 -->
+        <if test="startDate != null and startDate != ''">
+            AND lst_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND lst_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')
+        </if>
+        <!-- [6대 필터 확장 2] 경찰청 데이터 분실자명 조건 -->
+        <if test="author != null and author != ''">
+            AND id LIKE CONCAT('%', #{author}, '%')
+        </if>
+        <if test='status != null and status != ""'>
+            <choose>
+                <when test='status == "진행중"'>AND done = 0</when>
+                <when test='status == "완료"'>AND done = 1</when>
+            </choose>
+        </if>
+        <!-- [6대 필터 확장 3] 경찰청 데이터 습득물명 조건 -->
+        <if test="keyword != null and keyword != ''">
+            AND lst_prdt_nm LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        <!-- <if test="color != null and color != ''">AND clr_nm = #{color}</if> -->
+) combined
+
+<choose>
+        <when test="sort == 'oldest'">ORDER BY combined.lst_ymd ASC</when>
+        <otherwise>ORDER BY combined.lst_ymd DESC</otherwise>
+</choose>
+LIMIT #{paging.offset}, #{paging.size}
+</select>
+
+
+
 
 <select id="selectlostbyId"
 resultType="com.human.found.domain.lost.vo.LostVO">
@@ -165,6 +248,7 @@ resultMap="LostDetailResultMap">
                 lst_sbjt,
                 lst_ymd,
                 prdt_cl_nm,
+                prdt_category,
                 created_at,
                 updated_at,
                 done,
@@ -185,6 +269,7 @@ resultMap="LostDetailResultMap">
                 lst_sbjt,
                 lst_ymd,
                 prdt_cl_nm,
+                prdt_category,
                 created_at,
                 updated_at,
                 done,
@@ -220,7 +305,6 @@ SET
 lst_filepath_img=#{lstFilepathImg}
 WHERE atc_id = #{atcId}
 
-
 </update>
 
 <update id="UpdateLost"
@@ -234,11 +318,82 @@ lst_prdt_nm      = #{lstPrdtNm},
 lst_sbjt         = #{lstSbjt},
 lst_ymd          = #{lstYmd},
 prdt_cl_nm      = #{prdtClNm},
+prdt_category   = #{prdtCategory},
 done            = #{done},
 is_deleted      = #{isDeleted}
 WHERE
 atc_id=#{atcId}
 
 </update>
+
+<select id="selectLostSearchCount" resultType="int">
+SELECT 
+    COUNT(*)
+FROM (
+    /* 1. 유저 데이터 개수 */
+    SELECT num FROM lost
+    WHERE is_deleted = 0
+    <if test="category != null and category.size() > 0">
+        AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach>
+    </if>
+    <if test="subCategory != null and subCategory != ''">AND prdt_category = #{subCategory}</if>
+    <if test="startDate != null and startDate != ''">AND lst_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')</if>
+    <if test="endDate != null and endDate != ''">AND lst_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')</if>
+    <if test="author != null and author != ''">AND id LIKE CONCAT('%', #{author}, '%')</if>
+    <if test="keyword != null and keyword != ''">AND lst_prdt_nm LIKE CONCAT('%', #{keyword}, '%')</if>
+    <if test="status != null and status != ''">
+        <choose>
+            <when test="status == '진행중'">AND done = 0</when>
+            <when test="status == '완료'">AND done = 1</when>
+        </choose>
+    </if>
+
+    UNION ALL
+
+    /* 2. 경찰청 데이터 개수 */
+    SELECT num FROM lost_police
+    WHERE is_deleted = 0
+    <if test="category != null and category.size() > 0">
+        AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach>
+    </if>
+    <if test="subCategory != null and subCategory != ''">AND prdt_category = #{subCategory}</if>
+    <if test="startDate != null and startDate != ''">AND lst_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')</if>
+    <if test="endDate != null and endDate != ''">AND lst_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')</if>
+    <if test="author != null and author != ''">AND id LIKE CONCAT('%', #{author}, '%')</if>
+    <if test="keyword != null and keyword != ''">AND lst_prdt_nm LIKE CONCAT('%', #{keyword}, '%')</if>
+    <if test="status != null and status != ''">
+        <choose>
+            <when test="status == '진행중'">AND done = 0</when>
+            <when test="status == '완료'">AND done = 1</when>
+        </choose>
+    </if>
+) total_count
+</select>
+
+<select id="countLostList"
+            resultType="long">
+    select sum(cnt)
+    from (
+        select count(*) cnt
+        from lost
+        where is_deleted = 0
+
+        union all
+
+        select count(*) cnt
+        from lost_police
+        where is_deleted = 0
+    ) as total_lost
+
+</select>
+
+<!-- 사용자 등록 분실물 -->
+<select id="selectLostPage" resultType="LostVO">
+    SELECT *
+    FROM lost
+    WHERE is_deleted = 0
+    ORDER BY created_at DESC
+    LIMIT #{size} OFFSET #{offset}
+</select>
 
 </mapper>       

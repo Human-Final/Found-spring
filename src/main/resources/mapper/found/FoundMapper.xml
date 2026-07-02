@@ -144,19 +144,127 @@
         OFFSET #{offset}
 
     </select>
-    
-<select id="selectFoundById"
-resultType="com.human.found.domain.found.vo.FoundVO">
-    SELECT * 
-    FROM found
-    WHERE atc_id =#{atcId}
-</select>
 
-<update id="FoundupdateDelete">
-    UPDATE found
-    SET is_deleted=1
-    WHERE atc_id =#{atcId}
-</update>
+    <!-- ================= 1. 습득물 통합 복합 필터 및 페이징 조회 쿼리 (DB 사양 100% 매칭) ================= -->
+    <select id="selectFoundSearchList" resultMap="FoundDetailResultMap">
+    SELECT 
+        total.*
+    FROM (
+            /* 1) 유저 습득물 데이터 */
+            SELECT num, atc_id, id, clr_nm, dep_place, fd_filepath_img, fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm, created_at, updated_at, done, is_deleted, 'user' AS dataSource FROM found WHERE is_deleted = 0
+            <if test="category != null and category.size() > 0">AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach></if>
+            <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
+            <if test="startDate != null and startDate != ''">AND fd_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')</if>
+            <if test="endDate != null and endDate != ''">AND fd_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')</if>
+            <if test="author != null and author != ''">AND id LIKE CONCAT('%', #{author}, '%')</if>
+            <if test='status != null and status != ""'><choose><when test='status == "진행중"'>AND done = 0</when><when test='status == "완료"'>AND done = 1</when></choose></if>
+            <if test="keyword != null and keyword != ''">AND fd_prdt_nm LIKE CONCAT('%', #{keyword}, '%')</if>
+
+            UNION ALL
+
+            /* 2) 경찰청 습득물 데이터 */
+            SELECT num, atc_id, id, clr_nm, dep_place, fd_filepath_img, fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm, created_at, updated_at, done, is_deleted, 'police' AS dataSource FROM found_police WHERE is_deleted = 0
+            <if test="category != null and category.size() > 0">AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach></if>
+            <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
+            <if test="startDate != null and startDate != ''">AND fd_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')</if>
+            <if test="endDate != null and endDate != ''">AND fd_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')</if>
+            <if test="author != null and author != ''">AND id LIKE CONCAT('%', #{author}, '%')</if>
+            <if test='status != null and status != ""'><choose><when test='status == "진행중"'>AND done = 0</when><when test='status == "완료"'>AND done = 1</when></choose></if>
+            <if test="keyword != null and keyword != ''">AND fd_prdt_nm LIKE CONCAT('%', #{keyword}, '%')</if>
+
+            UNION ALL
+
+            /* 3) 포털 습득물 데이터 */
+            SELECT num, atc_id, id, clr_nm, dep_place, fd_filepath_img, fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm, created_at, updated_at, done, is_deleted, 'portal' AS dataSource FROM found_portal WHERE is_deleted = 0
+            <if test="category != null and category.size() > 0">AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach></if>
+            <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
+            <if test="startDate != null and startDate != ''">AND fd_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')</if>
+            <if test="endDate != null and endDate != ''">AND fd_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')</if>
+            <if test="author != null and author != ''">AND id LIKE CONCAT('%', #{author}, '%')</if>
+            <if test='status != null and status != ""'><choose><when test='status == "진행중"'>AND done = 0</when><when test='status == "완료"'>AND done = 1</when></choose></if>
+            <if test="keyword != null and keyword != ''">AND fd_prdt_nm LIKE CONCAT('%', #{keyword}, '%')</if>
+    ) total
+    <choose>
+            <when test="sort == 'oldest'">ORDER BY total.fd_ymd ASC</when>
+            <otherwise>ORDER BY total.fd_ymd DESC</otherwise>
+    </choose>
+    LIMIT #{paging.offset}, #{paging.size}
+    </select>
+
+    <!-- ================= 2. 습득물 조건별 전체 합산 개수 카운트 쿼리 (DB 사양 100% 매칭) ================= -->
+    <select id="selectFoundSearchCount" resultType="int">
+    SELECT 
+        COUNT(*)
+    FROM (
+        SELECT num FROM found
+        WHERE is_deleted = 0
+        <if test="category != null and category.size() > 0">
+            AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach>
+        </if>
+        <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
+        <if test="startDate != null and startDate != ''">AND fd_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')</if>
+        <if test="endDate != null and endDate != ''">AND fd_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')</if>
+        <if test="author != null and author != ''">AND id LIKE CONCAT('%', #{author}, '%')</if>
+        <if test='status != null and status != ""'>
+            <choose>
+                <when test='status == "진행중"'>AND done = 0</when>
+                <when test='status == "완료"'>AND done = 1</when>
+            </choose>
+        </if>
+        <if test="keyword != null and keyword != ''">AND fd_prdt_nm LIKE CONCAT('%', #{keyword}, '%')</if>
+
+        UNION ALL
+
+        SELECT num FROM found_police
+        WHERE is_deleted = 0
+        <if test="category != null and category.size() > 0">
+            AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach>
+        </if>
+        <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
+        <if test="startDate != null and startDate != ''">AND fd_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')</if>
+        <if test="endDate != null and endDate != ''">AND fd_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')</if>
+        <if test="author != null and author != ''">AND id LIKE CONCAT('%', #{author}, '%')</if>
+        <if test='status != null and status != ""'>
+            <choose>
+                <when test='status == "진행중"'>AND done = 0</when>
+                <when test='status == "완료"'>AND done = 1</when>
+            </choose>
+        </if>
+        <if test="keyword != null and keyword != ''">AND fd_prdt_nm LIKE CONCAT('%', #{keyword}, '%')</if>
+        UNION ALL
+
+        SELECT num FROM found_portal
+        WHERE is_deleted = 0
+        <if test="category != null and category.size() > 0">
+            AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach>
+        </if>
+        <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
+        <if test="startDate != null and startDate != ''">AND fd_ymd &gt;= STR_TO_DATE(CONCAT(#{startDate}, ' 00:00:00'), '%Y-%m-%d %H:%i:%s')</if>
+        <if test="endDate != null and endDate != ''">AND fd_ymd &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')</if>
+        <if test="author != null and author != ''">AND id LIKE CONCAT('%', #{author}, '%')</if>
+        <if test='status != null and status != ""'>
+            <choose>
+                <when test='status == "진행중"'>AND done = 0</when>
+                <when test='status == "완료"'>AND done = 1</when>
+            </choose>
+        </if>
+        <if test="keyword != null and keyword != ''">AND fd_prdt_nm LIKE CONCAT('%', #{keyword}, '%')</if>
+    ) total_count
+    </select>
+
+    
+    <select id="selectFoundById"
+    resultType="com.human.found.domain.found.vo.FoundVO">
+        SELECT * 
+        FROM found
+        WHERE atc_id =#{atcId}
+    </select>
+
+    <update id="FoundupdateDelete">
+        UPDATE found
+        SET is_deleted=1
+        WHERE atc_id =#{atcId}
+    </update>
 
     <select id="selectDetailatcId" parameterType="string" resultMap="FoundDetailResultMap">
         SELECT combined_found.*, 
@@ -318,6 +426,13 @@ WHERE atc_id = #{atcId}
 
 </update>
 
-
+<!-- 사용자 등록 습득물 -->
+<select id="selectFoundPage" resultType="FoundVO">
+    SELECT *
+    FROM found
+    WHERE is_deleted = 0
+    ORDER BY created_at DESC
+    LIMIT #{size} OFFSET #{offset}
+</select>
 
 </mapper>

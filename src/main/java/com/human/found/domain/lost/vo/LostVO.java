@@ -19,13 +19,14 @@ public class LostVO {
     // @NotBlank(message = "분실일자는 필수 입력 사항입니다.")
     private LocalDateTime lstYmd;
     private String prdtClNm;
+    private String prdtCategory;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Integer done = 0;
     private Integer isDeleted = 0;
-    private List<LostFileVO> filelist;
+    private List<LostFileVO> fileList;
     private String dataSource;
-
+    private long viewCount;
     private String lstFilepathImg;
     
 

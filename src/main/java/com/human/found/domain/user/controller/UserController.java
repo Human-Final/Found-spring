@@ -83,14 +83,14 @@ public class UserController {
     }
 
     /**
-     * 🔒 현재 비밀번호 Ajax 본인 인증 API (데이터 유실 방지 가드 적용)
+     * 현재 비밀번호 Ajax 본인 인증 API (데이터 유실 방지 가드 적용)
      */
     @PostMapping("/verify-password")
     @ResponseBody 
     public boolean verifyPassword(HttpServletRequest request, Principal principal) {
         if (principal == null) return false;
 
-        // 📌 HttpServletRequest를 통해 자바스크립트가 보낸 값을 직접 안전하게 추출
+        // HttpServletRequest를 통해 자바스크립트가 보낸 값을 직접 안전하게 추출
         String pwCheck = request.getParameter("pwCheck");
         
         // 디버깅 출력을 심어 실제로 브라우저가 보낸 글자가 서버에 도착했는지 확인합니다.
@@ -195,25 +195,25 @@ public class UserController {
     }
 
     /**
-     * ✉️ [신규 개설] 중복 확인 통과 후, 파란 버튼을 눌렀을 때만 진짜 메일을 발송하는 API
+     * [신규 개설] 중복 확인 통과 후, 파란 버튼을 눌렀을 때만 진짜 메일을 발송하는 API
      */
     @ResponseBody
-    @PostMapping("/api/send-auth-email") // 👈 진짜 메일을 쏘는 전용 무전기 주소를 새로 팝니다.
+    @PostMapping("/api/send-auth-email") // 진짜 메일을 쏘는 전용 무전기 주소를 새로 팝니다.
     public String sendAuthEmail(@RequestParam("email") String email, HttpSession session) {
         
-        // 🎲 암호학적으로 안전한 6자리 난수 생성
+        // 암호학적으로 안전한 6자리 난수 생성
         java.util.Random random = new java.util.Random();
         String verificationCode = String.format("%06d", random.nextInt(1000000));
         
-        // 🕒 3분 만료 타임스탬프 설정 (현재 시간 + 180,000ms)
+        // 3분 만료 타임스탬프 설정 (현재 시간 + 180,000ms)
         long expiresAt = System.currentTimeMillis() + (3 * 60 * 1000);
 
-        // 💾 서버 세션(HttpSession)에 인증 코드와 만료 시각 임시 보관
+        // 서버 세션(HttpSession)에 인증 코드와 만료 시각 임시 보관
         session.setAttribute("emailAuthCode", verificationCode);
         session.setAttribute("emailAuthTarget", email);
         session.setAttribute("emailAuthExpires", expiresAt);
 
-        // 📝 진짜 이메일 제목과 본문 내용 조립하여 발송
+        // 진짜 이메일 제목과 본문 내용 조립하여 발송
         try {
             org.springframework.mail.SimpleMailMessage message = new org.springframework.mail.SimpleMailMessage();
             
@@ -223,15 +223,15 @@ public class UserController {
                     + "요청하신 이메일 인증번호 6자리는 [" + verificationCode + "] 입니다.\n"
                     + "3분 이내에 화면에 입력해 주세요.");
             
-            mailSender.send(message); // 🚀 실제로 구글 SMTP 서버를 거쳐 메일 발송!
+            mailSender.send(message); // 실제로 구글 SMTP 서버를 거쳐 메일 발송!
             
             System.out.println("=========================================");
-            System.out.println("✉️ [메일 엔진] 파란 버튼 신호 수신! 실제 발송 완수!");
-            System.out.println("🔑 생성된 6자리 번호: " + verificationCode);
+            System.out.println("[메일 엔진] 파란 버튼 신호 수신! 실제 발송 완수!");
+            System.out.println("생성된 6자리 번호: " + verificationCode);
             System.out.println("=========================================");
             
         } catch (Exception e) {
-            System.out.println("❌ [메일 엔진] 구글 SMTP 서버 발송 실패. 오류 내용:");
+            System.out.println("[메일 엔진] 구글 SMTP 서버 발송 실패. 오류 내용:");
             e.printStackTrace(); 
             return "mail_error";
         }
@@ -240,14 +240,14 @@ public class UserController {
     }
 
     /**
-     * 🔐 주신 자바스크립트의 application/x-www-form-urlencoded (POST) 데이터 포맷을 
+     * 주신 자바스크립트의 application/x-www-form-urlencoded (POST) 데이터 포맷을 
      * 그대로 수신하여 검증하는 정석 컨트롤러 메서드입니다.
      */
     @ResponseBody
-    @PostMapping("/api/verify-email-code") // 👈 자바스크립트의 fetch 경로와 일치
+    @PostMapping("/api/verify-email-code") // 자바스크립트의 fetch 경로와 일치
     public String verifyEmailCode(
-            @RequestParam("code") String inputCode, // 📌 body의 code 값을 매핑
-            @RequestParam("email") String email,     // 📌 body의 email 값을 매핑
+            @RequestParam("code") String inputCode, // body의 code 값을 매핑
+            @RequestParam("email") String email,     // body의 email 값을 매핑
             HttpSession session) {
         
         // 1. 세션에 발송할 때 저장해둔 데이터들 드로우
@@ -271,19 +271,12 @@ public class UserController {
             return "wrong_code";
         }
 
-        // 🟢 모든 조건이 완벽히 맞으면 "verified" 글자를 리턴하여 
+        // 모든 조건이 완벽히 맞으면 "verified" 글자를 리턴하여 
         // 자바스크립트의 if (data === "verified") 문을 활성화시킵니다.
         return "verified";
     }
-
-
-
-
-
-    /**
-     * 마이페이지 전용 습득물 삭제 처리 (GET)
-     */
-    @GetMapping("/api/found/delete/{atcId}")
+    
+    @PostMapping("/api/found/delete/{atcId}")
     public String deleteFound(@PathVariable("atcId") String atcId, Principal principal) {
         if (principal != null) {
             // 💡 각각 분리해서 만든 습득물 전용 삭제 서비스 호출
@@ -292,10 +285,7 @@ public class UserController {
         return "redirect:/mypage"; 
     }
 
-    /**
-     * 마이페이지 전용 분실물 삭제 처리 (GET)
-     */
-    @GetMapping("/api/lost/delete/{atcId}")
+    @PostMapping("/api/lost/delete/{atcId}")
     public String deleteLost(@PathVariable("atcId") String atcId, Principal principal) {
         if (principal != null) {
             // 💡 각각 분리해서 만든 분실물 전용 삭제 서비스 호출
@@ -354,7 +344,7 @@ public class UserController {
             e.printStackTrace();
         }
 
-        // 🌟 [핵심 정답]: 하얀 화면에 Success를 띄우지 않고, 내가 보던 마이페이지 댓글 탭으로 브라우저를 튕겨 보냅니다!
+        // [핵심 정답]: 하얀 화면에 Success를 띄우지 않고, 내가 보던 마이페이지 댓글 탭으로 브라우저를 튕겨 보냅니다!
         return "redirect:/mypage#myComments"; 
     }
 

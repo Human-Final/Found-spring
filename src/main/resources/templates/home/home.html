@@ -24,7 +24,7 @@
           th:id="'popup-window-' + ${popupNotice.num}"
           style="background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); border-radius: 12px; width: max-content; max-width: 450px; overflow: hidden; font-family: sans-serif; pointer-events: auto;">
         
-        <!-- 팝업 본문 영역 (✨기존 padding: 24px; 을 제거하고 세부 조절합니다) -->
+        <!-- 팝업 본문 영역 (기존 padding: 24px; 을 제거하고 세부 조절합니다) -->
         <div class="popup-body" style="text-align: center; background: #ffffff;">
             
             <!-- [CASE 1] 이미지가 있는 경우: 여백을 최소화하여 이미지 크기에 딱 맞춤 -->
@@ -41,7 +41,7 @@
             <div th:unless="${popupNotice.imagePath != null and !#strings.isEmpty(popupNotice.imagePath)}" 
                 class="popup-text-content" 
                 style="text-align: left; padding: 24px;"> <!-- 텍스트 전용 패딩 적용 -->
-                <!-- 🌟 전체 영역을 상세페이지 링크로 감싸고, 마우스 커서를 포인터로 변경 및 미세한 클릭 효과 부여 -->
+                <!-- 전체 영역을 상세페이지 링크로 감싸고, 마우스 커서를 포인터로 변경 및 미세한 클릭 효과 부여 -->
                 <a th:href="@{/api/notices/detail(num=${popupNotice.num})}" 
                   style="text-decoration: none; display: block; color: inherit; transition: opacity 0.2s ease;"
                   onmouseover="this.style.opacity='0.85'" 
@@ -356,7 +356,7 @@
         
         const popupElement = document.getElementById('popup-window-' + num);
         if (popupElement) {
-            // 🌟 display: none 대신 투명하게 숨겨서 자리를 유지시킵니다.
+            // display: none 대신 투명하게 숨겨서 자리를 유지시킵니다.
             popupElement.style.visibility = "hidden"; 
         }
     }

@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <title>회원 관리 | 분실물 센터</title>
+
+  <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <link rel="stylesheet" th:href="@{/css/admin/userManage.css}">
+</head>
+
+<body class="admin-user-page">
+
+<!-- 헤더 -->
+<div th:replace="layout/header :: headerFragment"></div>
+
+<div class="admin-layout">
+
+  <!-- 사이드바 -->
+  <aside class="admin-sidebar">
+
+    <button type="button" class="sidebar-toggle-btn" id="sidebarToggle">
+      <svg class="sidebar-toggle-icon" viewBox="0 0 24 24" fill="none">
+          <path d="M4 6h16M4 12h16M4 18h16"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"/>
+      </svg>
+    </button>    
+
+    <nav class="admin-side-menu">
+
+      <a th:href="@{/api/admin/boards}">
+        <i data-lucide="panel-top"></i>
+        <span>게시글 관리</span>
+      </a>
+
+      <a th:href="@{/api/admin/users}" class="active">
+        <i data-lucide="user-round"></i>
+        <span>회원 관리</span>
+      </a>
+
+      <a th:href="@{/api/admin/notices}">
+        <i data-lucide="bell"></i>
+        <span>공지사항 관리</span>
+      </a>
+
+      <a th:href="@{/api/admin/stats}">
+        <i data-lucide="bar-chart-3"></i>
+        <span>통계 관리</span>
+      </a>
+
+      <a th:href="@{/api/admin/inquiries}">
+        <i data-lucide="message-square"></i>
+        <span>문의 관리</span>
+      </a>
+
+      <a th:href="@{/api/admin/settings}">
+        <i data-lucide="settings"></i>
+        <span>설정</span>
+      </a>
+
+    </nav>
+  </aside>
+
+  <!-- 본문 -->
+  <main class="admin-main">
+
+    <section class="admin-page-title">
+      <h1>회원 관리</h1>
+      <p>전체 회원 정보를 조회하고 관리할 수 있습니다.</p>
+    </section>
+
+    <!-- 탭 -->
+    <section class="admin-tabs">
+      <a th:href="@{/api/admin/users(role='all')}"
+         th:classappend="${role == null or role == 'all'} ? ' active'">
+        전체 회원
+      </a>
+
+      <a th:href="@{/api/admin/users(role='user')}"
+         th:classappend="${role == 'user'} ? ' active'">
+        일반 회원
+      </a>
+
+      <a th:href="@{/api/admin/users(role='manager')}"
+         th:classappend="${role == 'manager'} ? ' active'">
+        관리자
+      </a>
+
+    </section>
+
+    <!-- 필터 -->
+    <section class="admin-filter-card">
+      <form th:action="@{/api/admin/users}" method="get" class="admin-filter-form">
+
+        <div class="filter-top">
+          <div class="filter-search-wrap">
+            <input type="text"
+                   name="keyword"
+                   th:value="${conditionDTO != null ? conditionDTO.keyword : ''}"
+                   placeholder="아이디, 이름, 이메일 검색">
+
+            <button type="submit" class="filter-search-btn">검색</button>
+          </div>
+
+          <a th:href="@{/api/admin/users}" class="filter-reset-btn">
+            <i data-lucide="rotate-cw"></i>
+            <span>초기화</span>
+          </a>
+        </div>
+
+        <div class="filter-row">
+          <div class="filter-label">회원 상태</div>
+
+          <label class="filter-chip">
+            <input type="checkbox" name="status" value="active"
+                   th:checked="${statusList != null and #lists.contains(statusList, 'active')}">
+            <span>활성</span>
+          </label>
+
+          <label class="filter-chip">
+            <input type="checkbox" name="status" value="dormant"
+                   th:checked="${statusList != null and #lists.contains(statusList, 'dormant')}">
+            <span>휴면</span>
+          </label>
+
+          <label class="filter-chip">
+            <input type="checkbox" name="status" value="blocked"
+                   th:checked="${statusList != null and #lists.contains(statusList, 'blocked')}">
+            <span>정지</span>
+          </label>
+        </div>
+
+        <div class="filter-row">
+          <div class="filter-label">권한</div>
+
+          <label class="filter-chip">
+            <input type="checkbox" name="role" value="user"
+                   th:checked="${roleList != null and #lists.contains(roleList, 'user')}">
+            <span>일반 회원</span>
+          </label>
+
+          <label class="filter-chip">
+            <input type="checkbox" name="role" value="manager"
+                   th:checked="${roleList != null and #lists.contains(roleList, 'manager')}">
+            <span>관리자</span>
+          </label>
+
+          <label class="filter-chip">
+            <input type="checkbox" name="role" value="admin"
+                   th:checked="${roleList != null and #lists.contains(roleList, 'admin')}">
+            <span>최고 관리자</span>
+          </label>
+        </div>
+
+        <div class="filter-row">
+          <div class="filter-label">가입일</div>
+
+          <input type="date"
+                 name="startDate"
+                 class="filter-date"
+                 th:value="${conditionDTO != null ? conditionDTO.startDate : ''}">
+
+          <span class="date-separator">~</span>
+
+          <input type="date"
+                 name="endDate"
+                 class="filter-date"
+                 th:value="${conditionDTO != null ? conditionDTO.endDate : ''}">
+
+          <div class="date-shortcuts">
+            <button type="button" data-range="today">오늘</button>
+            <button type="button" data-range="7days">7일</button>
+            <button type="button" data-range="1month" class="active">1개월</button>
+            <button type="button" data-range="3months">3개월</button>
+            <button type="button" data-range="all">전체</button>
+          </div>
+        </div>
+
+      </form>
+    </section>
+
+    <!-- 선택 액션 바 -->
+    <section class="admin-bulk-bar">
+      <label class="bulk-check">
+        <input type="checkbox" id="checkAll">
+        <span>전체 선택</span>
+      </label>
+
+      <div class="bulk-selected-text">
+        선택된 회원 <strong id="selectedCount">0</strong>명
+      </div>
+
+      <div class="bulk-actions">
+
+        <button type="button" class="bulk-save-btn" id="saveChangeBtn"
+                sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ROLE_MANAGER', 'ADMIN', 'MANAGER')">
+          변경사항 저장
+        </button>
+
+        <button type="button" class="bulk-stop-btn" id="bulkBlockBtn">
+          <i data-lucide="circle-slash"></i>
+          <span>선택 정지</span>
+        </button>
+
+        <button type="button" class="bulk-role-btn" id="bulkRoleBtn">
+          <i data-lucide="user-cog"></i>
+          <span>권한 변경</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 회원 테이블 -->
+    <section class="admin-table-card">
+      <table class="user-manage-table">
+        <thead>
+        <tr>
+          <th>
+            <input type="checkbox" id="tableCheckAll">
+          </th>
+          <th>아이디</th>
+          <th>이름</th>
+          <th>이메일</th>
+          <th>전화번호</th>          
+          <th>가입일</th>
+          <th>권한</th>
+          <th>상태</th>
+          <th>탈퇴일</th>
+          <th>관리</th>
+        </tr>
+        </thead>
+
+        <tbody>
+          <!-- 실제 DB 연결용 -->
+          <tr th:each="user : ${userList}">
+            <td>
+              <input type="checkbox"
+                     class="user-check"
+                     name="userIds"
+                     th:value="${user.id}"
+                     th:if="${isAdmin or (isManager and user.role == 'USER')}">
+            </td>
+
+            <td th:text="${user.id}">아이디</td>
+            <td th:text="${user.name}">이름</td>
+            <td th:text="${user.email}"
+            >이메일</td>
+            <td th:text="${user.tel}">전화번호</td>
+            <td th:text="${user.signUp != null 
+                          ? #temporals.format(user.signUp, 'yyyy.MM.dd') : '-'}">
+              가입일
+            </td>
+
+            <td>
+              <select class="role-select"
+                      th:data-user-id="${user.id}"
+                      th:data-original-role="${user.role}"
+                      th:disabled="${!isAdmin}">
+
+                <option value="USER"
+                        th:selected="${user.role =='USER'}">
+                  일반
+                </option>
+
+                <option value="MANAGER"
+                        th:selected="${user.role =='MANAGER'}">
+                  관리자
+                </option>
+                
+                <option value="ADMIN"
+                        th:selected="${user.role =='ADMIN'}">
+                  최고관리자
+                </option>   
+
+              </select>                 
+            </td>          
+
+            <td>
+              <select class="status-select"
+                      th:data-user-id="${user.id}"
+                      th:data-original-status="${user.isDeleted == 1 ? 'deleted' : user.status}"
+                      th:data-db-status="${user.status}"
+                      th:disabled="${!isAdmin and !(isManager and user.role == 'USER')}">
+
+                  <option value="active"
+                          th:selected="${user.status == 'active' and user.isDeleted == 0}">
+                    활성
+                  </option>
+
+                  <option value="dormant"
+                          th:selected="${user.status == 'dormant' and user.isDeleted == 0}">
+                    휴면
+                  </option>
+
+                  <option value="blocked"
+                          th:selected="${user.status == 'blocked' and user.isDeleted == 0}">
+                    정지
+                  </option>
+
+                  <option value="deleted"
+                          th:selected="${user.isDeleted == 1}">
+                    탈퇴
+                  </option>
+
+              </select>
+            </td>
+
+            <td th:text="${user.deletedAt != null 
+                          ? #temporals.format(user.deletedAt, 'yyyy.MM.dd HH:mm') : '-'}">
+              탈퇴일시
+            </td>
+
+            <td class="table-actions">
+              <a th:href="@{/api/admin/users/{id}(id=${user.id})}"
+                class="detail-btn">
+                상세보기
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 빈 결과: 테이블 밖에서 출력 -->
+    <section class="admin-empty-card"
+             th:if="${userList == null or #lists.isEmpty(userList)}">
+      <p>조회된 회원이 없습니다.</p>
+    </section>
+
+    <form id="userBulkUpdateForm"
+          th:action="@{/test/users/edit}"
+          method="post"
+          style="display:none;">
+
+      <input type="hidden"
+             th:if="${_csrf != null}"
+             th:name="${_csrf.parameterName}"
+             th:value="${_csrf.token}">
+    </form>
+
+    <!-- 페이지네이션 -->
+    <section class="admin-pagination"
+             th:if="${userList != null and !#lists.isEmpty(userList)}">
+      <a href="#" class="page-btn">
+        <i data-lucide="chevron-left"></i>
+      </a>
+      <a href="#" class="page-btn active">1</a>
+      <a href="#" class="page-btn">2</a>
+      <a href="#" class="page-btn">3</a>
+      <a href="#" class="page-btn">4</a>
+      <a href="#" class="page-btn">5</a>
+      <a href="#" class="page-btn">
+        <i data-lucide="chevron-right"></i>
+      </a>
+    </section>
+    
+  </main>
+</div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  lucide.createIcons();
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const checkAll = document.getElementById("checkAll");
+    const tableCheckAll = document.getElementById("tableCheckAll");
+    const userChecks = document.querySelectorAll(".user-check");
+    const selectedCount = document.getElementById("selectedCount");
+    const saveChangesBtn = document.getElementById("saveChangeBtn");
+    const userBulkUpdateForm = document.getElementById("userBulkUpdateForm");
+
+    // 상태 변경 사항 저장
+    function getStatusLabel(status){
+      if(status === "active") return "활성";
+      if(status === "dormant") return "휴면";
+      if(status === "blocked") return "정지";
+      if(status === "deleted") return "탈퇴";
+      return status;
+    }
+
+    function getRoleLabel(role) {
+      if (role === "USER") return "일반";
+      if (role === "MANAGER") return "관리자";
+      if (role === "ADMIN") return "최고관리자";
+      return role;
+    }
+
+    /* deleted는 ststus 컬럼에 넣는 것이 아니고 
+       화면에서 deleted를 선택시 isDeleted = 1을 전송*/
+    function getSubmitStatus(select, selectedStatus){
+      if(selectedStatus === "deleted"){
+        return select.dataset.dbStatus;
+      }
+      
+      return selectedStatus;
+    }
+
+    function getSubmitIsDeleted(selectedStatus){
+      return selectedStatus === "deleted" ? 1 : 0;
+    }
+
+    function removeOldDynamicInputs(){
+      userBulkUpdateForm
+      .querySelectorAll(".dynamic-bulk-input")
+      .forEach(input => input.remove());
+    }
+
+    function appendHiddenInput(name, value){
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = name;
+      input.value = value;
+      input.classList.add("dynamic-bulk-input");
+
+      userBulkUpdateForm.appendChild(input);
+    }
+
+    function collectChangedStatuses(){
+      const changedList = [];
+
+      document.querySelectorAll(".status-select").forEach(select => {
+        if (select.disabled) {
+          return;
+        }
+        
+        const userId = select.dataset.userId;
+        const originalStatus = select.dataset.originalStatus;
+        const currentStatus = select.value;
+
+        if(originalStatus !== currentStatus){
+          changedList.push({
+            userId: userId,
+            originalStatus: originalStatus,
+            currentStatus: currentStatus,
+            submitStatus: getSubmitStatus(select, currentStatus),
+            submitIsDeleted: getSubmitIsDeleted(currentStatus)
+          });
+        }
+      });
+
+      return changedList;
+    }
+
+    function collectChangedRoles(){
+      const changedList=[];
+
+      document.querySelectorAll(".role-select").forEach(select => {
+        if(select.disabled){
+          return;
+        }
+
+        const userId = select.dataset.userId;
+        const originalRole = select.dataset.originalRole;
+        const currentRole = select.value;
+
+        if(originalRole !== currentRole){
+          changedList.push({
+            userId: userId,
+            originalRole: originalRole,
+            currentRole: currentRole
+          });
+        }
+      });
+
+      return changedList;
+    }
+
+    function makeBulkConfirmMessage(statusChanges, roleChanges){
+      const lines = [];
+      
+      if(statusChanges.length > 0){
+        lines.push("[상태 변경]");
+
+        statusChanges.forEach(item => {
+          lines.push(`${item.userId}: ${getStatusLabel(item.originalStatus)} → ${getStatusLabel(item.currentStatus)}`);
+        });
+      }
+
+      if(roleChanges.length > 0) {
+        if(lines.length > 0) {
+          lines.push("");
+        }
+
+        lines.push("[권한 변경]")
+
+        roleChanges.forEach(item => {
+          lines.push(`${item.userId}: ${getRoleLabel(item.originalRole)} → ${getRoleLabel(item.currentRole)}`);
+        });
+      }
+
+      return `아래 변경사항을 저장하시겠습니까?\n\n${lines.join("\n")}`;
+    }
+
+    if (saveChangesBtn && userBulkUpdateForm) {
+      saveChangesBtn.addEventListener("click", () => {
+        const statusChanges = collectChangedStatuses();
+        const roleChanges = collectChangedRoles();
+
+        if (statusChanges.length === 0 && roleChanges.length === 0) {
+          alert("변경된 사항이 없습니다.");
+          return;
+        }
+
+        const confirmed = confirm(makeBulkConfirmMessage(statusChanges, roleChanges));
+
+        if (!confirmed) {
+          return;
+        }
+
+        removeOldDynamicInputs();
+
+        statusChanges.forEach(item => {
+          appendHiddenInput("statusUserIds", item.userId);
+          appendHiddenInput("statuses", item.submitStatus);
+          appendHiddenInput("isDeletedList", item.submitIsDeleted);
+        });
+
+        roleChanges.forEach(item => {
+          appendHiddenInput("roleUserIds", item.userId);
+          appendHiddenInput("roles", item.currentRole);
+        });
+
+        userBulkUpdateForm.submit();
+      });
+    }
+
+    function updateSelectedCount() {
+      const checkedCount = document.querySelectorAll(".user-check:checked").length;
+
+      selectedCount.textContent = checkedCount;
+
+      const isAllChecked = userChecks.length > 0 && checkedCount === userChecks.length;
+
+      if (checkAll) {
+        checkAll.checked = isAllChecked;
+      }
+
+      if (tableCheckAll) {
+        tableCheckAll.checked = isAllChecked;
+      }
+    }
+
+    function setAllChecked(checked) {
+      userChecks.forEach(check => {
+        check.checked = checked;
+      });
+
+      updateSelectedCount();
+    }
+
+    if (checkAll) {
+      checkAll.addEventListener("change", () => {
+        setAllChecked(checkAll.checked);
+      });
+    }
+
+    if (tableCheckAll) {
+      tableCheckAll.addEventListener("change", () => {
+        setAllChecked(tableCheckAll.checked);
+      });
+    }
+
+    userChecks.forEach(check => {
+      check.addEventListener("change", updateSelectedCount);
+    });
+
+    const startDateInput = document.querySelector("input[name='startDate']");
+    const endDateInput = document.querySelector("input[name='endDate']");
+    const rangeButtons = document.querySelectorAll(".date-shortcuts button");
+
+    function formatDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+
+      return `${year}-${month}-${day}`;
+    }
+
+    function setDateRange(range) {
+      if (!startDateInput || !endDateInput) {
+        return;
+      }
+
+      const today = new Date();
+      const startDate = new Date(today);
+      const endDate = new Date(today);
+
+      if (range === "today") {
+        // 오늘 그대로
+      } else if (range === "7days") {
+        startDate.setDate(today.getDate() - 7);
+      } else if (range === "1month") {
+        startDate.setMonth(today.getMonth() - 1);
+      } else if (range === "3months") {
+        startDate.setMonth(today.getMonth() - 3);
+      } else if (range === "all") {
+        startDateInput.value = "";
+        endDateInput.value = "";
+        return;
+      }
+
+      startDateInput.value = formatDate(startDate);
+      endDateInput.value = formatDate(endDate);
+    }
+
+    rangeButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        rangeButtons.forEach(btn => btn.classList.remove("active"));
+        button.classList.add("active");
+
+        setDateRange(button.dataset.range);
+      });
+    });
+
+    updateSelectedCount();
+  });
+</script>
+
+<script>
+  const sidebarToggle = document.getElementById("sidebarToggle");
+  const savedSidebarState = localStorage.getItem("adminSidebarCollapsed");
+
+  if (savedSidebarState === "true") {
+    document.body.classList.add("sidebar-collapsed");
+  }
+
+  sidebarToggle.addEventListener("click", function () {
+    document.body.classList.toggle("sidebar-collapsed");
+
+    const isCollapsed = document.body.classList.contains("sidebar-collapsed");
+    localStorage.setItem("adminSidebarCollapsed", isCollapsed);
+  });
+</script>
+</html>

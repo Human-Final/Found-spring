@@ -143,11 +143,11 @@
       if (!response.ok) {
         throw new Error('일치하는 회원 정보가 없습니다.');
       }
-      // 💡 1. 기존의 response.json() 대신 response.text()로 변경하여 글자 그대로 읽습니다!
+      // 1. 기존의 response.json() 대신 response.text()로 변경하여 글자 그대로 읽습니다!
       return response.text(); 
     })
     .then(data => {
-      // 💡 2. 데이터가 존재하고, 컨트롤러가 보낸 실패 신호("FAIL")가 아니라면 성공 처리합니다.
+      // 2. 데이터가 존재하고, 컨트롤러가 보낸 실패 신호("FAIL")가 아니라면 성공 처리합니다.
       if (data && data !== "FAIL") {
         userIdDisplay.innerText = data; // 가져온 아이디 글자("tyk517")를 그대로 화면에 꽂아줍니다.
         resultBox.classList.add('active'); // 결과창 노출

@@ -14,6 +14,7 @@ import com.human.found.domain.lost.vo.LostFileVO;
 import com.human.found.domain.lost.vo.LostVO;
 import com.human.found.domain.user.mapper.UserMapper;
 import com.human.found.domain.user.vo.UserVO;
+import com.human.found.global.common.paging.PagingVO;
 import com.human.found.infrastructure.file.FileUtil;
 
 import lombok.AllArgsConstructor;
@@ -76,9 +77,47 @@ public class LostServiceImpl implements LostService {
     }
 
     @Override
-    public List<LostVO> getLostlist() {
-        return lostMapper.selectLostList();
+    public List<LostVO> getLostlist(PagingVO pagingVO) {
+        long totalCount = lostMapper.countLostList();
+        pagingVO.pageInfo((int)totalCount);
+        return lostMapper.selectLostList(pagingVO);
     }
+
+    // 다단 비동기 카테고리 필터링 및 동적 검색 처리 비즈니스 로직
+    @Override
+    public List<LostVO> searchLostItems(List<String> category, String subCategory, String startDate, String endDate, String author, String status, String keyword, String sort, PagingVO pagingVO) {
+        
+        // 검색어 공백 정제 및 "all" 보정 처리
+        if ("all".equalsIgnoreCase(status)) status = "";
+        if (keyword != null) keyword = keyword.trim();
+        else keyword = "";
+        
+        if (startDate != null) startDate = startDate.trim();
+        if (endDate != null) endDate = endDate.trim();
+        if (author != null) author = author.trim();
+
+        System.out.println("🔄 [서비스단] 복합 검색 및 페이징 기동 -> 현재 페이지: " + pagingVO.getPage());
+
+        // 💡 매퍼 인터페이스로 모든 인자를 토스합니다.
+        return lostMapper.selectLostSearchList(category, subCategory, startDate, endDate, author, status, keyword, sort, pagingVO);
+    }
+
+    // 페이징을 위한 총 결과갯수 카운트
+    @Override
+    public int getTotalSearchCount(List<String> category, String subCategory, String startDate, String endDate, String author, String status, String keyword) {
+        
+        if ("all".equalsIgnoreCase(status)) status = "";
+        if (keyword != null) keyword = keyword.trim();
+        else keyword = "";
+        
+        if (startDate != null) startDate = startDate.trim();
+        if (endDate != null) endDate = endDate.trim();
+        if (author != null) author = author.trim();
+
+        // 매퍼의 카운트 전용 메서드 호출
+        return lostMapper.selectLostSearchCount(category, subCategory, startDate, endDate, author, status, keyword);
+    }
+
 
     @Override
     @Transactional
@@ -148,7 +187,7 @@ public class LostServiceImpl implements LostService {
         }
         if ("user".equals(lostVO.getDataSource())) {
             List<LostFileVO> filevo = lostFileMapper.findById(lostVO.getAtcId());
-            lostVO.setFilelist(filevo);
+            lostVO.setFileList(filevo);
         }
         return lostVO;
     }

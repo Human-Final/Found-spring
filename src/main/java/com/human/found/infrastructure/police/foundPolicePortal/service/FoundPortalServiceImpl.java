@@ -43,7 +43,7 @@ public class FoundPortalServiceImpl implements FoundPortalService {
         int numOfRows = 9999;
 
         LocalDate today = LocalDate.now();
-        LocalDate sixMonthsAgo = today.minusMonths(6);
+        LocalDate sixMonthsAgo = today.minusMonths(1);
 
         List<FoundPortalApiItemVO> allItems = new ArrayList<>();
 
@@ -123,7 +123,7 @@ public class FoundPortalServiceImpl implements FoundPortalService {
         int numOfRows = 9999;
 
         LocalDate today = LocalDate.now();
-        LocalDate sixMonthsAgo = today.minusMonths(6);
+        LocalDate sixMonthsAgo = today.minusMonths(1);
 
         List<FoundPortalApiItemVO> allItems = new ArrayList<>();
 

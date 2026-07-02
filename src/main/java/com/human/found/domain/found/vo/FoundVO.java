@@ -23,10 +23,12 @@ public class FoundVO {
     // @NotBlank(message = "습득일자는 필수 입력 사항입니다.")
     private LocalDateTime fdYmd;
     private String prdtClNm;
+    private String prdtCategory;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Integer done = 0;
     private Integer isDeleted = 0;
     private List<FoundFileVO>fileList;
     private String dataSource;
+    private long viewCount;
 }

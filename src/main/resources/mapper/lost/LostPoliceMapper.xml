@@ -11,6 +11,7 @@
             lst_sbjt,
             lst_ymd,
             prdt_cl_nm,
+            prdt_category,
             done,
             is_deleted
         ) VALUES 
@@ -22,6 +23,7 @@
             LEFT(#{item.lstSbjt}, 100),  
             #{item.lstYmd}, <!-- 📌 STR_TO_DATE와 REPLACE를 제거하고 객체 그대로 주입 -->
             LEFT(#{item.prdtClNm}, 50),  
+            LEFT(#{item.prdtCategory}, 50),
             0,                            
             0                             
         )
@@ -31,7 +33,8 @@
             lst_prdt_nm  = VALUES(lst_prdt_nm),
             lst_sbjt     = VALUES(lst_sbjt),
             lst_ymd      = VALUES(lst_ymd),
-            prdt_cl_nm   = VALUES(prdt_cl_nm)
+            prdt_cl_nm   = VALUES(prdt_cl_nm),
+            prdt_category= Values(prdt_category)
     </insert>
 
     <delete id="lostPoliceDelete">
@@ -47,7 +50,8 @@
             lst_prdt_nm AS lstPrdtNm, 
             lst_sbjt AS lstSbjt, 
             lst_ymd AS lstYmd, 
-            prdt_cl_nm AS prdtClNm, 
+            prdt_cl_nm AS prdtClNm,
+            prdt_category AS prdtCategory, 
             created_at, 
             updated_at, 
             done, 
@@ -66,6 +70,7 @@
             lst_sbjt AS lstSbjt, 
             lst_ymd AS lstYmd, 
             prdt_cl_nm AS prdtClNm, 
+            prdt_category AS prdtCategory,
             created_at, 
             updated_at, 
             done, 

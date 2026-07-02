@@ -1,0 +1,248 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #f8fafc;
+    font-family: Arial, sans-serif;
+    color: #0f172a;
+}
+
+.admin-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px;
+}
+
+.admin-wrap h2 {
+    margin-bottom: 8px;
+}
+
+.admin-wrap p {
+    color: #555;
+    margin-bottom: 22px;
+}
+
+.tab-box {
+    display: flex;
+    margin: 20px 0;
+}
+
+.tab {
+    width: 140px;
+    height: 48px;
+    border: 1px solid #ddd;
+    background: #fff;
+    text-decoration: none;
+    color: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.tab.active {
+    background: #0066ff;
+    color: white;
+}
+
+.filter-box {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.filter-box label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filter-box input[type="radio"] {
+    accent-color: #0066ff;
+}
+
+.filter-box button {
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.notice-source {
+    padding: 6px 12px;
+    background: #e8f1ff;
+    color: #0066ff;
+    border-radius: 6px;
+    font-weight: 700;
+}
+
+.table-top {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table-top input[type="checkbox"],
+.row-check {
+    width: 16px;
+    height: 16px;
+    accent-color: #0066ff;
+}
+
+.delete-btn {
+    padding: 8px 18px;
+    border: 1px solid red;
+    color: red;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    background: red;
+    color: white;
+}
+
+.admin-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    background: white;
+    border: 1px solid #ddd;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 14px 10px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+    vertical-align: middle;
+    word-break: keep-all;
+}
+
+.admin-table th {
+    background: #f8fafc;
+    font-weight: 800;
+}
+
+.admin-table th:nth-child(1),
+.admin-table td:nth-child(1) {
+    width: 45px;
+}
+
+.admin-table th:nth-child(2),
+.admin-table td:nth-child(2) {
+    width: 70px;
+}
+
+.admin-table th:nth-child(3),
+.admin-table td:nth-child(3) {
+    width: 70px;
+}
+
+.admin-table th:nth-child(4),
+.admin-table td:nth-child(4) {
+    width: 95px;
+}
+
+.admin-table th:nth-child(5),
+.admin-table td:nth-child(5) {
+    width: 360px;
+}
+
+.admin-table th:nth-child(6),
+.admin-table td:nth-child(6) {
+    width: 110px;
+}
+
+.admin-table th:nth-child(7),
+.admin-table td:nth-child(7) {
+    width: 110px;
+}
+
+.admin-table th:nth-child(8),
+.admin-table td:nth-child(8) {
+    width: 80px;
+}
+
+.admin-table th:nth-child(9),
+.admin-table td:nth-child(9) {
+    width: 120px;
+}
+
+.title-cell {
+    text-align: left;
+    line-height: 1.5;
+    word-break: keep-all;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.badge.red {
+    background: #ffe4e4;
+    color: red;
+}
+
+.badge.blue {
+    background: #e5f0ff;
+    color: #0066ff;
+}
+
+.badge.green {
+    background: #dff5e5;
+    color: green;
+}
+
+.badge.gray {
+    background: #e5e7eb;
+    color: #555;
+}
+
+.empty {
+    padding: 40px;
+    color: #777;
+}
+
+.pagination {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.pagination a {
+  display: inline-block;
+  padding: 6px 10px;
+  margin: 0 3px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-decoration: none;
+  color: #333;
+}
+
+.pagination a.active {
+  background: #333;
+  color: white;
+  font-weight: bold;
+}
