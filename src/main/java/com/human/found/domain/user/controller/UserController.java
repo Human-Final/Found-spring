@@ -96,15 +96,15 @@ public class UserController {
         String pwCheck = request.getParameter("pwCheck");
         
         // 디버깅 출력을 심어 실제로 브라우저가 보낸 글자가 서버에 도착했는지 확인합니다.
-        System.out.println("=========================================");
-        System.out.println("⌨️ [컨트롤러 수신 확인] pwCheck 원본 값: [" + pwCheck + "]");
-        if(pwCheck != null) {
-            System.out.println("⌨️ [컨트롤러 수신 확인] 글자 수: " + pwCheck.length());
-        }
-        System.out.println("=========================================");
+        // System.out.println("=========================================");
+        // System.out.println("⌨️ [컨트롤러 수신 확인] pwCheck 원본 값: [" + pwCheck + "]");
+        // if(pwCheck != null) {
+        //     System.out.println("⌨️ [컨트롤러 수신 확인] 글자 수: " + pwCheck.length());
+        // }
+        // System.out.println("=========================================");
 
         if (pwCheck == null || pwCheck.trim().isEmpty()) {
-            System.out.println("❌ [인증 실패] 브라우저에서 보낸 비밀번호 데이터가 유실되었습니다.");
+            // System.out.println("[인증 실패] 브라우저에서 보낸 비밀번호 데이터가 유실되었습니다.");
             return false;
         }
 
@@ -119,19 +119,19 @@ public class UserController {
      */
     @PostMapping("/change-password")
     public String changePassword(@RequestParam("pw") String newPw, Principal principal, RedirectAttributes redirectAttributes) {
-        // 📌 [디버깅 추가] 컨트롤러 진입 확인용
-        System.out.println("=========================================");
-        System.out.println("🛸 [컨트롤러] /mypage/change-password 매핑 주소 호출 성공!");
-        System.out.println("👤 로그인된 아이디(Principal): " + (principal != null ? principal.getName() : "null"));
-        System.out.println("⌨️ 컨트롤러가 가로챈 새 패스워드: [" + newPw + "]");
-        System.out.println("=========================================");
+        // [디버깅 추가] 컨트롤러 진입 확인용
+        // System.out.println("=========================================");
+        // System.out.println("[컨트롤러] /mypage/change-password 매핑 주소 호출 성공!");
+        // System.out.println("로그인된 아이디(Principal): " + (principal != null ? principal.getName() : "null"));
+        // System.out.println("⌨컨트롤러가 가로챈 새 패스워드: [" + newPw + "]");
+        // System.out.println("=========================================");
 
         if (principal == null) return "redirect:/login";
 
         String loginUserId = principal.getName();
 
         try {
-            // 📌 서비스단을 호출하여 유효성 검사 및 패스워드 암호화 변경 동시 수행
+            // 서비스단을 호출하여 유효성 검사 및 패스워드 암호화 변경 동시 수행
             userService.updateUserPassword(loginUserId, newPw);
             redirectAttributes.addFlashAttribute("successMessage", "비밀번호가 성공적으로 변경되었습니다.");
         } catch (IllegalArgumentException e) {
@@ -227,13 +227,13 @@ public class UserController {
             
             mailSender.send(message); // 실제로 구글 SMTP 서버를 거쳐 메일 발송!
             
-            System.out.println("=========================================");
-            System.out.println("[메일 엔진] 파란 버튼 신호 수신! 실제 발송 완수!");
-            System.out.println("생성된 6자리 번호: " + verificationCode);
-            System.out.println("=========================================");
+            // System.out.println("=========================================");
+            // System.out.println("[메일 엔진] 파란 버튼 신호 수신! 실제 발송 완수!");
+            // System.out.println("생성된 6자리 번호: " + verificationCode);
+            // System.out.println("=========================================");
             
         } catch (Exception e) {
-            System.out.println("[메일 엔진] 구글 SMTP 서버 발송 실패. 오류 내용:");
+            // System.out.println("[메일 엔진] 구글 SMTP 서버 발송 실패. 오류 내용:");
             e.printStackTrace(); 
             return "mail_error";
         }
@@ -295,7 +295,7 @@ public class UserController {
     @PostMapping("/api/found/delete/{atcId}")
     public String deleteFound(@PathVariable("atcId") String atcId, Principal principal) {
         if (principal != null) {
-            // 💡 각각 분리해서 만든 습득물 전용 삭제 서비스 호출
+            // 각각 분리해서 만든 습득물 전용 삭제 서비스 호출
             userService.removeFoundPost(atcId); 
         }
         return "redirect:/mypage"; 
@@ -304,7 +304,7 @@ public class UserController {
     @PostMapping("/api/lost/delete/{atcId}")
     public String deleteLost(@PathVariable("atcId") String atcId, Principal principal) {
         if (principal != null) {
-            // 💡 각각 분리해서 만든 분실물 전용 삭제 서비스 호출
+            // 각각 분리해서 만든 분실물 전용 삭제 서비스 호출
             userService.removeLostPost(atcId);
         }
         return "redirect:/mypage"; 
@@ -333,7 +333,7 @@ public class UserController {
             e.printStackTrace();
         }
 
-        // 🌟 [핵심 정답]: 하얀 화면에 Success를 띄우지 않고, 내가 보던 마이페이지 댓글 탭으로 브라우저를 튕겨 보냅니다!
+        // 하얀 화면에 Success를 띄우지 않고, 내가 보던 마이페이지 댓글 탭으로 브라우저를 튕겨 보냅니다!
         return "redirect:/mypage#myComments"; 
     }
 
@@ -360,7 +360,7 @@ public class UserController {
             e.printStackTrace();
         }
 
-        // [핵심 정답]: 하얀 화면에 Success를 띄우지 않고, 내가 보던 마이페이지 댓글 탭으로 브라우저를 튕겨 보냅니다!
+        // 하얀 화면에 Success를 띄우지 않고, 내가 보던 마이페이지 댓글 탭으로 브라우저를 튕겨 보냅니다!
         return "redirect:/mypage#myComments"; 
     }
 
@@ -381,8 +381,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fail: " + e.getMessage());
         }
     }
-
-
 
     @PostMapping("/withdraw")
     public String withdrawUser(

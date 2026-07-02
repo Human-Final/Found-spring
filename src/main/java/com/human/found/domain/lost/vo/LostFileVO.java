@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class LostFileVO {
     private String id;
-    private String fdFilepathImg;
+    private String lstFilepathImg;
     private String atcId;
     private String saveName;
     private Long fileSize;

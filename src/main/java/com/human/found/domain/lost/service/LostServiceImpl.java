@@ -60,7 +60,7 @@ public class LostServiceImpl implements LostService {
             for(Map<String,Object> info:uploadedMaps){
             LostFileVO fileVO=new LostFileVO();
             
-                fileVO.setFdFilepathImg((String)info.get("originalname"));//Object강제 형변환(String)
+                fileVO.setLstFilepathImg((String)info.get("originalname"));//Object강제 형변환(String)
                 fileVO.setAtcId((String)info.get("atcId"));
                 fileVO.setSaveName((String)info.get("saveFileName"));
                 fileVO.setFilePath((String)info.get("filePath"));
@@ -222,7 +222,7 @@ public class LostServiceImpl implements LostService {
                 for(Map<String, Object> info : uploadMaps){
                     LostFileVO fileVO=new LostFileVO();
                     fileVO.setAtcId(lostVO.getAtcId());
-                    fileVO.setFdFilepathImg((String)info.get("originalname"));
+                    fileVO.setLstFilepathImg((String)info.get("originalname"));
                     fileVO.setSaveName((String)info.get("saveFileName"));
                     fileVO.setFilePath((String)info.get("filePath"));
 

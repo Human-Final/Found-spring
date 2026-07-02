@@ -101,9 +101,16 @@ public class SecurityConfig {
                 .loginProcessingUrl("/login")
                 .usernameParameter("id")
                 .passwordParameter("pw")
-                .defaultSuccessUrl("/", true)
+                .defaultSuccessUrl("/", false)
                 .failureUrl("/login?error=true")
                 .permitAll()
+            )
+
+            // 개발용 로그인 유지
+            .rememberMe(remember -> remember
+                .key("found-dev-remember-me-key")
+                .tokenValiditySeconds(60 * 60)
+                .rememberMeParameter("remember-me")
             )
 
             // 로그아웃 설정

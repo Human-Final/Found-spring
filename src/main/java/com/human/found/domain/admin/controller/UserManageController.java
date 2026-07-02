@@ -6,9 +6,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.human.found.domain.admin.dto.UserSearchConditionDTO;
 import com.human.found.domain.admin.service.UserManageService;
 import com.human.found.domain.user.vo.UserVO;
 
@@ -21,19 +24,29 @@ public class UserManageController {
     
     private final UserManageService userManageService;
 
-    // 전체 회원 조회
+    // 회원 목록 조회 + 필터 + 페이징
     @GetMapping("/test/users")
-    public String userManageView(Model model, Authentication authentication) {
+    public String userManageView(
+                @ModelAttribute("conditionDTO") UserSearchConditionDTO conditionDTO,
+                Model model, 
+                Authentication authentication) {
 
         boolean isAdmin = hasRole(authentication, "ADMIN");
         boolean isManager = hasRole(authentication, "MANAGER");
 
         model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("isManager", isManager);
+        
+        conditionDTO.setSize(50);
 
-        List<UserVO> userList = userManageService.totalUserList();
+        int totalCount = userManageService.countUsers(conditionDTO);
+        conditionDTO.pageInfo(totalCount);
+
+        List<UserVO> userList = userManageService.searchUsers(conditionDTO);
         
         model.addAttribute("userList", userList);
+        model.addAttribute("conditionDTO", conditionDTO);
+        model.addAttribute("paging", conditionDTO);
         return "admin/userManage";
     }
 
@@ -46,6 +59,11 @@ public class UserManageController {
                 @RequestParam(value = "isDeletedList", required = false) List<Integer> isDeletedList,
                 @RequestParam(value = "roleUserIds", required = false) List<String> roleUserIds,
                 @RequestParam(value="roles", required = false) List<String> roles,
+                @RequestParam(required = false) List<String> profileUserIds,
+                @RequestParam(required = false) List<String> names,
+                @RequestParam(required = false) List<String> emails,
+                @RequestParam(required = false) List<String> tels,
+                RedirectAttributes redirectAttributes,
                 Authentication authentication) {
 
 
@@ -58,20 +76,28 @@ public class UserManageController {
                 isDeletedList,
                 roleUserIds,
                 roles,
+                profileUserIds,
+                names,
+                emails,
+                tels,
                 isAdmin,
                 isManager
         );
 
+        redirectAttributes.addFlashAttribute(
+            "message", "회원 정보가 수정되었습니다.");
+
         return "redirect:/test/users";
     }
-    
-    private boolean hasRole(Authentication authentication, String role) {
-    if (authentication == null || !authentication.isAuthenticated()) {
-        return false;
-    }
 
-    return authentication.getAuthorities().stream()
-            .anyMatch(auth -> auth.getAuthority().equals("ROLE_" + role)
-                           || auth.getAuthority().equals(role));
-}
+    // 권한 설정용 메서드
+    private boolean hasRole(Authentication authentication, String role) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
+
+        return authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_" + role)
+                            || auth.getAuthority().equals(role));
+        }
 }
