@@ -254,13 +254,13 @@ public class UserServiceImpl implements UserService {
         boolean isMatch = passwordEncoder.matches(cleanPwCheck, cleanDbPassword);
 
         // 콘솔 디버깅을 통해 데이터 무결성을 검증합니다.
-        System.out.println("=========================================");
-        System.out.println("[마이페이지 본인 인증 디버깅 데이터]");
-        System.out.println("조회 대상 아이디 : " + id);
-        System.out.println("전달된 입력 평문 : [" + cleanPwCheck + "] (길이: " + cleanPwCheck.length() + ")");
-        System.out.println("가져온 DB 암호문 : [" + cleanDbPassword + "]");
-        System.out.println("최종 매칭 일치 여부 : " + isMatch);
-        System.out.println("=========================================");
+        // System.out.println("=========================================");
+        // System.out.println("[마이페이지 본인 인증 디버깅 데이터]");
+        // System.out.println("조회 대상 아이디 : " + id);
+        // System.out.println("전달된 입력 평문 : [" + cleanPwCheck + "] (길이: " + cleanPwCheck.length() + ")");
+        // System.out.println("가져온 DB 암호문 : [" + cleanDbPassword + "]");
+        // System.out.println("최종 매칭 일치 여부 : " + isMatch);
+        // System.out.println("=========================================");
 
         return isMatch;
     }

@@ -25,7 +25,7 @@
 
         <collection property="fileList" javaType="ArrayList" ofType="com.human.found.domain.lost.vo.LostFileVO">
                 <id property="id" column="file_id"/>
-                <result property="fdFilepathImg" column="fd_filepath_img"/>
+                <result property="lstFilepathImg" column="lst_filepath_img"/>
                 <result property="atcId" column="atc_id"/>
                 <result property="saveName" column="save_name"/>
                 <result property="fileSize" column="file_size"/>
@@ -234,7 +234,7 @@ resultMap="LostDetailResultMap">
         combined_lost.dataSource,
         f.id AS file_id,
         f.atc_id AS file_atc_id,
-        f.fd_filepath_img,
+        f.lst_filepath_img AS lst_filepath_img,
         f.save_name,
         f.file_size,
         f.file_path

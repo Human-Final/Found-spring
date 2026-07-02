@@ -360,45 +360,10 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
 }
 
 /* ===============================
-   Tabs
-================================ */
-
-.admin-tabs {
-  display: inline-flex;
-  align-items: center;
-  margin-bottom: 14px;
-  border: 1px solid #dbe3ef;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #ffffff;
-}
-
-.admin-tabs a {
-  width: 140px;
-  height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #0f172a;
-  font-size: 14px;
-  font-weight: 700;
-  border-right: 1px solid #dbe3ef;
-}
-
-.admin-tabs a:last-child {
-  border-right: 0;
-}
-
-.admin-tabs a.active {
-  background: #0b63f6;
-  color: #ffffff;
-}
-
-/* ===============================
    Filter Card
 ================================ */
 
-.admin-filter-card {
+.user-filter-card {
   background: #ffffff;
   border: 1px solid #e0e7f0;
   border-radius: 10px;
@@ -407,7 +372,7 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
   margin-bottom: 16px;
 }
 
-.admin-filter-form {
+.user-filter-form {
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -605,32 +570,53 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
 }
 
 .bulk-stop-btn,
-.bulk-role-btn {
+.bulk-role-btn,
+.bulk-save-btn {
   height: 40px;
-  padding: 0 20px;
+  padding: 0 18px;
   border-radius: 6px;
+
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+
   font-size: 14px;
   font-weight: 700;
+  white-space: nowrap;
   cursor: pointer;
 }
 
 .bulk-stop-btn {
-  border: 1px solid #ff4d4f;
+  border: 1px solid #ffb3b3;
   background: #ffffff;
   color: #ff1f1f;
 }
 
+.bulk-stop-btn:hover {
+  background: #fff5f5;
+}
+
 .bulk-role-btn {
+  border: 1px solid #b7d3ff;
+  background: #ffffff;
+  color: #0b63f6;
+}
+
+.bulk-role-btn:hover {
+  background: #f0f6ff;
+}
+
+.bulk-save-btn {
   border: 1px solid #0b63f6;
   background: #0b63f6;
   color: #ffffff;
+  box-shadow: 0 6px 14px rgba(11, 99, 246, 0.16);
 }
 
 .bulk-stop-btn svg,
-.bulk-role-btn svg {
+.bulk-role-btn svg,
+.bulk-save-btn svg {
   width: 17px;
   height: 17px;
   stroke-width: 2.2;
@@ -680,6 +666,53 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
   padding: 8px 8px;
 }
 
+.user-manage-table tbody tr:hover td {
+  background-color: #f8fbff;
+}
+
+/* 행 자체 배경 */
+.user-manage-table tbody tr.modified td,
+.user-manage-table tbody tr.modified:hover td,
+.user-manage-table tbody tr.editing td,
+.user-manage-table tbody tr.editing:hover td {
+  background-color: #fff8db;
+}
+
+/* 행 안의 select 배경 */
+.user-manage-table tbody tr.modified .role-select,
+.user-manage-table tbody tr.modified .status-select,
+.user-manage-table tbody tr.editing .role-select,
+.user-manage-table tbody tr.editing .status-select {
+  background-color: #fff8db;
+  border-color: transparent ;
+}
+
+.user-manage-table tbody tr.modified td:first-child {
+  border-left: 4px solid #f59e0b;
+}
+
+.user-manage-table tbody tr.editing .edit-btn {
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: #ffffff;
+  box-shadow: 0 6px 12px rgba(245, 158, 11, 0.18);
+}
+
+.user-manage-table tbody tr.editing .edit-btn:hover {
+  background: #d97706;
+  border-color: #d97706;
+}
+
+.user-manage-table tbody tr.editing .detail-btn {
+  background: #ffffff;
+  border-color: #fbbf24;
+  color: #92400e;
+}
+
+.user-manage-table tbody tr.editing .detail-btn:hover {
+  background: #fffbeb;
+}
+
 .user-manage-table tbody tr:last-child td {
   border-bottom: 0;
 }
@@ -715,14 +748,16 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
   width: 120px;
 }
 
+/* 권한 */
 .user-manage-table th:nth-child(7),
 .user-manage-table td:nth-child(7) {
-  width: 100px;
+  width: 120px;
 }
 
+/* 상태 */
 .user-manage-table th:nth-child(8),
 .user-manage-table td:nth-child(8) {
-  width: 100px;
+  width: 84px;
 }
 
 .user-manage-table th:nth-child(9),
@@ -735,79 +770,63 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
   width: 170px;
 }
 
-.status-badge,
-.role-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 54px;
-  height: 28px;
-  padding: 0 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.status-badge.active {
-  background: #dbeafe;
-  color: #1d4ed8;
-}
-
-.status-badge.dormant {
-  background: #bbf7d0;
-  color: #166534;
-}
-
-.status-badge.blocked {
-  background: #ffe4e4;
-  color: #ff1f1f;
-}
-
-.role-badge.user {
-  background: #dbeafe;
-  color: #1d4ed8;
-}
-
-.role-badge.manager {
-  background: #bbf7d0;
-  color: #166534;
-}
-
-.role-badge.admin {
-  background: #e9d5ff;
-  color: #6b21a8;
-}
-
 .table-actions {
+  min-height: 58px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.table-actions button,
+.table-actions a {
+  flex-shrink: 0;
 }
 
 .table-actions form {
   display: inline-flex;
 }
 
+.edit-btn,
 .detail-btn,
 .stop-btn,
 .release-btn {
   min-width: 64px;
   height: 32px;
   padding: 0 10px;
+
   border-radius: 5px;
   background: #ffffff;
+
   font-size: 13px;
   font-weight: 700;
+  white-space: nowrap;
+
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
+.edit-btn {
+  border: 1px solid #b7d3ff;
+  color: #0b63f6;
+}
+
+.edit-btn:hover {
+  background: #f0f6ff;
+}
+
 .detail-btn {
   border: 1px solid #d7dee9;
   color: #1e293b;
+}
+
+.detail-btn:hover {
+  background: #f8fafc;
+  border-color: #b7d3ff;
+  color: #0b63f6;
 }
 
 .stop-btn {
@@ -818,6 +837,112 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
 .release-btn {
   border: 1px solid #b7d3ff;
   color: #0b63f6;
+}
+
+.role-select,
+.status-select {
+  height: 32px;
+
+  border: 1px solid #d7dee9;
+  border-radius: 6px;
+
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 32px;
+  text-align: center;
+  text-align-last: center;
+
+  outline: none;
+  cursor: pointer;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 11px 11px;
+}
+
+.role-select {
+  width: 108px;
+  padding: 0 22px 0 9px;
+}
+
+.status-select {
+  width: 70px;
+  padding: 0 20px 0 8px;
+}
+
+/* option 목록은 브라우저 기본 드롭다운이라 과한 색상 상속 방지 */
+.role-select option,
+.status-select option {
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.role-select:focus,
+.status-select:focus {
+  box-shadow: 0 0 0 3px rgba(11, 99, 246, 0.12);
+}
+
+.role-select:disabled,
+.status-select:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* 권한 태그 색상 */
+/* 최고관리자 - 보라 */
+.role-select.role-admin {
+  color: #6b21a8;
+  border: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%236b21a8' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* 관리자 - 초록 */
+.role-select.role-manager {
+  border: none;
+  color: #166534;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23166534' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* 일반 - 파랑 */
+.role-select.role-user {
+  border: none;
+  color: #1d4ed8;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%231d4ed8' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* 상태 태그 색상 */
+/* 활성 - 파랑 */
+.status-select.status-active {
+  border: none;
+  color: #1d4ed8;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%231d4ed8' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* 휴면 - 노랑 */
+.status-select.status-dormant {
+  border: none;
+  color: #92400e;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%2392400e' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* 정지 - 빨강 */
+.status-select.status-blocked {
+  border: none;
+  color: #b91c1c;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23b91c1c' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* 탈퇴 - 회색 */
+.status-select.status-deleted {
+  border: none;
+  color: #334155;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%23334155' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
 .admin-empty-card {
@@ -838,6 +963,60 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
 
 .admin-empty-card p {
   margin: 0;
+}
+
+/* ===============================
+   Inline Edit Inputs
+================================ */
+
+.edit-input {
+  width: 100%;
+  max-width: 100%;
+  height: 32px;
+
+  padding: 0 8px;
+  border: 1px solid #d7dee9;
+  border-radius: 6px;
+  background: #ffffff;
+
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 600;
+
+  outline: none;
+  text-align: center;
+}
+
+.edit-input:focus {
+  border-color: #0b63f6;
+  box-shadow: 0 0 0 3px rgba(11, 99, 246, 0.10);
+}
+
+.edit-input:invalid {
+  border-color: #ff4d4f;
+}
+
+/* 이메일은 길어서 왼쪽 정렬 */
+.email-input {
+  text-align: left;
+}
+
+/* 전화번호는 숫자 간격 살짝 정리 */
+.tel-input {
+  letter-spacing: 0.01em;
+}
+
+/* 수정 모드에서는 input이 행 배경에서 너무 튀지 않게 */
+.user-manage-table tbody tr.editing .edit-input {
+  background: #fffef7;
+  border-color: #f6e7ad;
+}
+
+/* 수정 모드 input focus */
+.user-manage-table tbody tr.editing .edit-input:focus {
+  background: #ffffff;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.14);
 }
 
 /* ===============================
@@ -864,6 +1043,8 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
   justify-content: center;
   font-size: 15px;
   font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .page-btn svg {
@@ -876,4 +1057,57 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
   background: #0b63f6;
   border-color: #0b63f6;
   color: #ffffff;
+}
+
+.page-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ===============================
+   New HTML Patch
+   - bulk save button
+   - inline edit inputs
+   - select controls
+   - checked filter chips
+================================ */
+
+/* select도 기존 input/button과 같은 폰트 사용 */
+body.admin-user-page select {
+  font-family: inherit;
+}
+
+/* 필터 체크 선택 상태 강조 */
+.filter-chip:has(input:checked) {
+  border-color: #b7d3ff;
+  background: #e8f1ff;
+  color: #0b63f6;
+  font-weight: 700;
+}
+
+/* 필터 칩 hover */
+.filter-chip:hover {
+  border-color: #b7d3ff;
+  background: #f8fbff;
+}
+
+/* 날짜 단축 버튼 hover */
+.date-shortcuts button:hover {
+  border-color: #b7d3ff;
+  background: #f8fbff;
+  color: #0b63f6;
+}
+
+/* 검색/초기화 버튼 hover */
+.filter-search-btn:hover,
+.bulk-save-btn:hover,
+.bulk-role-btn:hover {
+  filter: brightness(0.96);
+}
+
+.filter-reset-btn:hover {
+  background: #f8fafc;
+  border-color: #b7d3ff;
+  color: #0b63f6;
 }
