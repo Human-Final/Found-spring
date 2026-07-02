@@ -1,7 +1,17 @@
 package com.human.found.domain.admin.service;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,6 +20,7 @@ import com.human.found.domain.admin.mapper.UserManageMapper;
 import com.human.found.domain.user.mapper.UserMapper;
 import com.human.found.domain.user.vo.UserVO;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -27,7 +38,7 @@ public class UserManageServiceImpl implements UserManageService{
     }
 
 
-    // 유저 상태 변경 ------------
+    // 유저 정보 변경 ------------
     @Transactional
     @Override
     public int updateUserBulk(
@@ -331,5 +342,105 @@ public class UserManageServiceImpl implements UserManageService{
        return userManageMapper.searchUsers(conditionDTO);
     }
 
+
+    @Override
+    public void userInfoDownload(
+            UserSearchConditionDTO conditionDTO, 
+            HttpServletResponse response
+        ) throws IOException {
+        
+        List<UserVO> userList = userManageMapper.userInfoDownload(conditionDTO);
+
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("회원목록");
+
+        String[] headers = {
+            "아이디", "이름", "이메일", "전화번호", "가입일", "권한", "상태", "탈퇴일"
+        };
+
+        CellStyle headerStyle = workbook.createCellStyle();
+        Font headerFont = workbook.createFont();
+        headerFont.setBold(true);
+        headerStyle.setFont(headerFont);
+
+        Row headerRow = sheet.createRow(0);
+
+        for(int i = 0; i < headers.length; i++){
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(headers[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        int rowIndex = 1;
+
+        for(UserVO user : userList){
+            Row row = sheet.createRow(rowIndex++);
+
+            row.createCell(0).setCellValue(nullToBlank(user.getId()));
+            row.createCell(1).setCellValue(nullToBlank(user.getName()));
+            row.createCell(2).setCellValue(nullToBlank(user.getEmail()));
+            row.createCell(3).setCellValue(nullToBlank(user.getTel()));
+            row.createCell(4).setCellValue(
+                user.getSignUp() != null ? user.getSignUp().toString() : "");
+            row.createCell(5).setCellValue(getRoleLabel(user.getRole()));
+            row.createCell(6).setCellValue(getStatusLabel(user));
+            row.createCell(7).setCellValue(
+                user.getDeletedAt() != null ? user.getDeletedAt().toString() : "");
+        }  
+
+        for(int i = 0; i < headers.length; i++){
+            sheet.autoSizeColumn(i);
+        }
+
+        String fileName = URLEncoder.encode("회원목록.xlsx", StandardCharsets.UTF_8)
+                .replaceAll("\\+", "%20");
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + fileName);
+
+            workbook.write(response.getOutputStream());
+            workbook.close();
+
+    }
+
+    private String nullToBlank(String value){
+        return value == null? "" : value;
+    }
+
+    private String getRoleLabel(String role){
+        if("USER".equals(role)){
+            return "일반 회원";
+        }
+        
+        if("MANAGER".equals(role)){
+            return "관리자";
+        }
+
+        if("ADMIN".equals(role)){
+            return "최고관리자";
+        }
+
+        return role == null ? "" : role;
+    }
+     
+    private String getStatusLabel(UserVO userVO){
+        if(userVO.getIsDeleted() == 1){
+            return "탈퇴";
+        }
+
+        String status = userVO.getStatus();
+        if("active".equals(status)){
+            return "활성";
+        }
+
+        if("dormant".equals(status)){
+            return "휴면";
+        }
+
+        if("blocked".equals(status)){
+            return "정지";
+        }
+
+        return status == null ? "" : status;
+    }
 
 }

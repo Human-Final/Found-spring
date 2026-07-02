@@ -169,12 +169,36 @@
                  th:value="${conditionDTO.endDate}">
 
           <div class="date-shortcuts">
-            <button type="button" data-range="today">오늘</button>
-            <button type="button" data-range="7days">7일</button>
-            <button type="button" data-range="1month" class="active">1개월</button>
-            <button type="button" data-range="3months">3개월</button>
-            <button type="button" data-range="all">전체</button>
+            
+            <div class="date-filter">
+              <button type="button" data-range="today">오늘</button>
+              <button type="button" data-range="7days">7일</button>
+              <button type="button" data-range="1month" class="active">1개월</button>
+              <button type="button" data-range="3months">3개월</button>
+              <button type="button" data-range="all">전체</button>
+            </div>
+
+            <div class="download">
+              <button type="button" id="downloadBtn" class="download-btn">
+                 <svg class="download-icon"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round">
+                  <path d="M12 3v12"></path>
+                  <path d="m7 10 5 5 5-5"></path>
+                  <path d="M5 21h14"></path>
+                </svg>
+                <span>다운로드</span>
+              </button>
+            </div>
+
           </div>
+
+          
         </div>
 
       </form>
@@ -195,12 +219,12 @@
 
         <button type="button" class="bulk-stop-btn" id="bulkBlockBtn">
           <i data-lucide="circle-slash"></i>
-          <span>영구 삭제</span>
+          <span>삭제</span>
         </button>
 
         <button type="button" class="bulk-role-btn" id="bulkRoleBtn">
           <i data-lucide="user-cog"></i>
-          <span>권한 변경</span>
+          <span>회원 추가</span>
         </button>
 
         <button type="button" class="bulk-save-btn" id="saveChangeBtn"
@@ -1086,6 +1110,100 @@ function setPage(page) {
     pageInput.value = page;
   }
 }
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const downloadBtn = document.getElementById("downloadBtn");
+
+    if (!downloadBtn) {
+      return;
+    }
+
+    downloadBtn.addEventListener("click", function () {
+      const params = new URLSearchParams();
+
+      const keywordInput = document.querySelector("input[name='keyword']");
+      const startDateInput = document.querySelector("input[name='startDate']");
+      const endDateInput = document.querySelector("input[name='endDate']");
+
+      const keyword = keywordInput ? keywordInput.value.trim() : "";
+      const startDate = startDateInput ? startDateInput.value : "";
+      const endDate = endDateInput ? endDateInput.value : "";
+
+      if (keyword !== "") {
+        params.append("keyword", keyword);
+      }
+
+      const statusLabels = [];
+      const roleLabels = [];
+
+      document.querySelectorAll("input[name='statuses']:checked")
+        .forEach(function (input) {
+          params.append("statuses", input.value);
+          statusLabels.push(getLabelText(input));
+        });
+
+      document.querySelectorAll("input[name='roles']:checked")
+        .forEach(function (input) {
+          params.append("roles", input.value);
+          roleLabels.push(getLabelText(input));
+        });
+
+      if (startDate !== "") {
+        params.append("startDate", startDate);
+      }
+
+      if (endDate !== "") {
+        params.append("endDate", endDate);
+      }
+
+      const confirmMessage =
+        "현재 조건으로 회원 목록을 다운로드하시겠습니까?\n\n" +
+        "검색어: " + (keyword || "전체") + "\n" +
+        "회원 상태: " + (statusLabels.length > 0 ? statusLabels.join(", ") : "전체") + "\n" +
+        "권한: " + (roleLabels.length > 0 ? roleLabels.join(", ") : "전체") + "\n" +
+        "가입일: " + getDateRangeText(startDate, endDate);
+
+      if (!confirm(confirmMessage)) {
+        return;
+      }
+
+      const queryString = params.toString();
+
+      if (queryString) {
+        location.href = "/api/test/users/download?" + queryString;
+      } else {
+        location.href = "/api/test/users/download";
+      }
+    });
+  });
+
+  function getLabelText(input) {
+    const label = input.closest("label");
+
+    if (label) {
+      return label.textContent.trim();
+    }
+
+    return input.value;
+  }
+
+  function getDateRangeText(startDate, endDate) {
+    if (!startDate && !endDate) {
+      return "전체";
+    }
+
+    if (startDate && endDate) {
+      return startDate + " ~ " + endDate;
+    }
+
+    if (startDate) {
+      return startDate + " 이후";
+    }
+
+    return endDate + " 이전";
+  }
 </script>
 </body>
 </html>

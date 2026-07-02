@@ -119,7 +119,33 @@
 
     </select>
 
-    <!-- 검색 공통 where-->
+    <select id="userInfoDownload"
+            parameterType="com.human.found.domain.admin.dto.UserSearchConditionDTO"
+            resultType="com.human.found.domain.user.vo.UserVO">
+        SELECT
+            id,
+            name,
+            email,
+            tel,
+            sign_up AS signUp,
+            role,
+            status,
+            is_deleted AS isDeleted,
+            deleted_at As deletedAt
+        FROM user
+
+        <include refid="userSearchWhere"/>
+
+        ORDER BY
+            CASE role
+                WHEN 'ADMIN' THEN 1
+                WHEN 'MANAGER' THEN 2
+                ELSE 3
+            END,
+            id ASC
+    </select>
+
+    <!-- 회원 관리 페이지 내 검색 공통 where-->
     <sql id="userSearchWhere">
         WHERE 1 = 1
 
@@ -138,10 +164,10 @@
                         is_deleted = 0
                         AND status IN
                         <foreach collection="statuses"
-                                item="status"
-                                open="("
-                                separator=","
-                                close=")">
+                                 item="status"
+                                 open="("
+                                 separator=","
+                                 close=")">
                             #{status}
                         </foreach>
                     )
@@ -159,10 +185,10 @@
         <if test="roles != null and roles.size() > 0">
             AND role IN
             <foreach collection="roles"
-                    item="role"
-                    open="("
-                    separator=","
-                    close=")">
+                     item="role"
+                     open="("
+                     separator=","
+                     close=")">
                 #{role}
             </foreach>
         </if>
@@ -175,4 +201,6 @@
             AND sign_up &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')
         </if>
     </sql>
+
+    
 </mapper>

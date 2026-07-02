@@ -7,13 +7,13 @@
 <insert id="insertFile"
         parameterType="com.human.found.domain.lost.vo.LostFileVO">
     INSERT INTO lost_file(
-        fd_filepath_img,
+        lst_filepath_img,
         atc_id,
         save_name,
         file_size,
         file_path
     )VALUES(
-        #{fdFilepathImg},
+        #{lstFilepathImg},
         #{atcId},
         #{saveName},
         #{fileSize},
@@ -23,15 +23,15 @@
 </insert>    
 
 <select id="findById"
-resultType="com.human.found.domain.lost.vo.LostFileVO">
+        resultType="com.human.found.domain.lost.vo.LostFileVO">
 SELECT *
-FROM lost_file
-WHERE atc_id=#{atcId}
+    FROM lost_file
+    WHERE atc_id=#{atcId}
 </select>
 
 <delete id="deleteByAtcId">
-DELETE FROM lost_file
-WHERE atc_id=#{atcId}
+    DELETE FROM lost_file
+    WHERE atc_id=#{atcId}
 
 </delete>
 
