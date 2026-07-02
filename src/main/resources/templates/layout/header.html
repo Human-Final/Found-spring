@@ -19,13 +19,16 @@
       </a>
       
       <nav>
-        <a th:href="@{/api/found}">습득 게시판</a>
-        <a th:href="@{/api/lost}">분실 게시판</a>
-        <a th:href="@{/api/notices/list}">공지사항</a>
-          <!-- 관리자만 보이는 메뉴 -->
-        <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/lost}">
-          관리자 페이지
-        </a>
+       <th:block sec:authorize="!hasAnyRole('ADMIN','MANAGER')">
+           <a th:href="@{/api/found}">습득 게시판</a>
+           <a th:href="@{/api/lost}">분실 게시판</a>
+           <a th:href="@{/api/notices/list}">공지사항</a>
+      </th:block>
+      <th:block sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+           <a th:href="@{/admin/lost}">게시판 관리</a>
+           <a th:href="@{/test/users}">회원 관리</a>
+           <a th:href="@{/api/notices/list}">공지사항</a>
+      </th:block>
       </nav>
     </div>
 
