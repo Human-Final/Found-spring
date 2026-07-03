@@ -39,7 +39,7 @@ public class AdminController {
         model.addAttribute("searchVO", searchVO);
         model.addAttribute("boardType", "lost");
 
-        return "admin/adminPage";
+        return "admin/board";
     }
 
     /**
@@ -78,7 +78,7 @@ public class AdminController {
         model.addAttribute("searchVO", searchVO);
         model.addAttribute("boardType", "found");
 
-        return "admin/adminPage";
+        return "admin/board";
     }
 
     /**
