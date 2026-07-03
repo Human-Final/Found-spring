@@ -1,5 +1,6 @@
 package com.human.found.domain.admin.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.security.core.Authentication;
@@ -15,6 +16,7 @@ import com.human.found.domain.admin.dto.UserSearchConditionDTO;
 import com.human.found.domain.admin.service.UserManageService;
 import com.human.found.domain.user.vo.UserVO;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 
@@ -49,6 +51,16 @@ public class UserManageController {
         model.addAttribute("paging", conditionDTO);
         return "admin/userManage";
     }
+
+    @GetMapping("/api/test/users/download")
+    public void downloadUsers(
+            @ModelAttribute UserSearchConditionDTO conditionDTO,
+            HttpServletResponse response
+        ) throws IOException {
+        
+        userManageService.userInfoDownload(conditionDTO, response);
+    }
+    
 
 
     // 유저 권한 변경
@@ -99,5 +111,9 @@ public class UserManageController {
         return authentication.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_" + role)
                             || auth.getAuthority().equals(role));
-        }
+    }
+
+    
+
 }
+

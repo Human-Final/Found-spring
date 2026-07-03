@@ -36,4 +36,6 @@ public interface UserManageMapper {
     List<UserVO> searchUsers(UserSearchConditionDTO conditionDTO);
 
     int countUsers(UserSearchConditionDTO conditionDTO);
+
+    List<UserVO> userInfoDownload(UserSearchConditionDTO conditionDTO);
 }
