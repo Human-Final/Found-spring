@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>채팅방 | 분실물 센터</title>
+
+    <link rel="stylesheet" th:href="@{/css/common/common.css}">
+    <link rel="stylesheet" th:href="@{/css/chat/chat.css}">
+
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+
+<body>
+
+<div th:replace="layout/header :: headerFragment"></div>
+
+<main class="chat-page">
+
+    <section class="chat-wrap">
+
+        <div class="chat-head">
+            <h2>채팅방</h2>
+        </div>
+
+        <div id="chatBox" class="chat-box">
+
+            <div
+                th:each="msg : ${messages}"
+                class="chat-message"
+                th:classappend="${msg.senderId == loginId} ? ' mine' : ''">
+
+                <span class="sender"
+                      th:text="${msg.senderId}">
+                    user
+                </span>
+
+                <span class="bubble"
+                      th:text="${msg.content}">
+                    내용
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="chat-input">
+
+            <input
+                id="messageInput"
+                type="text"
+                placeholder="메시지를 입력하세요."
+                autocomplete="off"
+                onkeydown="if(event.key==='Enter'){sendMessage();}">
+
+            <button onclick="sendMessage()">
+                전송
+            </button>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script th:inline="javascript">
+
+const chatNum = [[${chatNum}]];
+const loginId = [[${loginId}]];
+
+const socket = new SockJS("/ws-stomp");
+const stompClient = Stomp.over(socket);
+
+stompClient.connect({}, function () {
+
+    stompClient.subscribe("/sub/chat/room/" + chatNum, function(message){
+
+        appendMessage(JSON.parse(message.body));
+
+    });
+
+});
+
+function sendMessage(){
+
+    const input=document.getElementById("messageInput");
+
+    const content=input.value.trim();
+
+    if(content===""){
+        return;
+    }
+
+    stompClient.send("/pub/chat/message",{},JSON.stringify({
+
+        chatNum:chatNum,
+        senderId:loginId,
+        content:content
+
+    }));
+
+    input.value="";
+
+}
+
+function appendMessage(msg){
+
+    const chatBox=document.getElementById("chatBox");
+
+    const div=document.createElement("div");
+
+    div.className="chat-message";
+
+    if(msg.senderId===loginId){
+        div.classList.add("mine");
+    }
+
+    div.innerHTML=
+        "<span class='sender'>"+msg.senderId+"</span>"
+        +"<span class='bubble'></span>";
+
+    div.querySelector(".bubble").textContent=msg.content;
+
+    chatBox.appendChild(div);
+
+    chatBox.scrollTop=chatBox.scrollHeight;
+
+}
+
+window.onload=function(){
+
+    const chatBox=document.getElementById("chatBox");
+
+    chatBox.scrollTop=chatBox.scrollHeight;
+
+}
+
+</script>
+
+</body>
+</html>

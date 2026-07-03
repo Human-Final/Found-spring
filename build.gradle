@@ -56,6 +56,10 @@ dependencies {
 	// 자바 스프링 프레임워크 메일 보내는 라이브러리 추가
 	// team.found.help@gmail.com 가 발송하는데 쓰이게 될 공식이메일입니다
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+	// Spring WebSocket 서버 구축
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
 }
 
 tasks.named('test') {

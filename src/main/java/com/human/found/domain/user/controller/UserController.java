@@ -28,25 +28,21 @@ import org.springframework.mail.javamail.JavaMailSender;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.web.bind.annotation.RequestBody;
+import lombok.RequiredArgsConstructor;
 
-
+import com.human.found.domain.chat.service.ChatService;
+import com.human.found.domain.chat.vo.ChatRoomVO;
 
 @Controller
 @RequestMapping("/mypage")
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserServiceImpl userService;
-
-    @Autowired
-    private FoundCommentService foundCommentService;
-
-    @Autowired
-    private LostCommentService lostCommentService;
-
-    @Autowired 
-    private JavaMailSender mailSender; 
+    private final UserServiceImpl userService;
+    private final FoundCommentService foundCommentService;
+    private final LostCommentService lostCommentService;
+    private final JavaMailSender mailSender;
+    private final ChatService chatService;
 
     // /mypage 또는 /mypage/ 로 요청이 들어왔을 때 마이페이지 화면을 보여줍니다.
     @GetMapping({"", "/"})
@@ -73,6 +69,8 @@ public class UserController {
         // 6. 유저가 작성한 모든 글들의 정보를 리스트화해서 DB에서 조회하기
 
         List<CommentVO> allComments = userService.findAllCommentsByUserId(loginUserId);
+
+        List<ChatRoomVO> chatRooms = chatService.getMyChatRooms(loginUserId);
         
         // 7. 중요: 화면(Thymeleaf)으로 데이터를 던져줍니다.
         model.addAttribute("user", user);
@@ -80,6 +78,8 @@ public class UserController {
         model.addAttribute("recentPosts", recentPosts);
         model.addAttribute("allPosts", allPosts);
         model.addAttribute("allComments", allComments);
+        model.addAttribute("chatRooms", chatRooms);
+        model.addAttribute("chatRoomCount", chatRooms.size());
         // 8. 마이페이지 파일 경로를 리턴합니다.
         return "user/mypage";
     }
