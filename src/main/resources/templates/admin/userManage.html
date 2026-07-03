@@ -461,7 +461,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 버튼
   const saveChangesBtn = document.getElementById("saveChangeBtn");
   const userBulkUpdateForm = document.getElementById("userBulkUpdateForm");
-  const rangeButtons = document.querySelectorAll(".date-shortcuts button");
+  const rangeButtons = document.querySelectorAll(".date-filter button");
 
   // 입력창
   const startDateInput = document.querySelector("input[name='startDate']");
@@ -1052,6 +1052,10 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    if (!range) {
+      return;
+    }
+    
     const today = new Date();
     const startDate = new Date(today);
     const endDate = new Date(today);
@@ -1067,6 +1071,8 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (range === "all") {
       startDateInput.value = "";
       endDateInput.value = "";
+      return;
+    }else {
       return;
     }
 
