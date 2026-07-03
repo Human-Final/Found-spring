@@ -13,7 +13,7 @@
 
 <body>
 
-<div th:replace="layout/header :: headerFragment"></div>
+<div th:replace="~{layout/header :: headerFragment}"></div>
 
 <main class="chat-page">
 
@@ -25,10 +25,10 @@
 
         <div id="chatBox" class="chat-box">
 
-            <div
-                th:each="msg : ${messages}"
-                class="chat-message"
-                th:classappend="${msg.senderId == loginId} ? ' mine' : ''">
+            <!-- 기존 DB 메시지 출력 -->
+            <div th:each="msg : ${messages}"
+                 class="chat-message"
+                 th:classappend="${msg.senderId == loginId} ? ' mine' : ''">
 
                 <span class="sender"
                       th:text="${msg.senderId}">
@@ -46,14 +46,13 @@
 
         <div class="chat-input">
 
-            <input
-                id="messageInput"
-                type="text"
-                placeholder="메시지를 입력하세요."
-                autocomplete="off"
-                onkeydown="if(event.key==='Enter'){sendMessage();}">
+            <input id="messageInput"
+                   type="text"
+                   placeholder="메시지를 입력하세요."
+                   autocomplete="off"
+                   onkeydown="if(event.key === 'Enter'){sendMessage();}">
 
-            <button onclick="sendMessage()">
+            <button type="button" onclick="sendMessage()">
                 전송
             </button>
 
@@ -64,77 +63,112 @@
 </main>
 
 <script th:inline="javascript">
+    const chatNum = [[${chatNum}]];
+    const loginId = [[${loginId}]];
 
-const chatNum = [[${chatNum}]];
-const loginId = [[${loginId}]];
+    let stompClient = null;
+    let connected = false;
 
-const socket = new SockJS("/ws-stomp");
-const stompClient = Stomp.over(socket);
+    // SockJS 연결
+    const socket = new SockJS("/ws-stomp");
+    stompClient = Stomp.over(socket);
 
-stompClient.connect({}, function () {
+    // 필요 없으면 로그 끄기
+    // stompClient.debug = null;
 
-    stompClient.subscribe("/sub/chat/room/" + chatNum, function(message){
+    stompClient.connect({}, function () {
 
-        appendMessage(JSON.parse(message.body));
+        connected = true;
 
+        console.log("STOMP 연결 성공");
+        console.log("구독 주소:", "/sub/chat/room/" + chatNum);
+
+        // 현재 채팅방 구독
+        stompClient.subscribe("/sub/chat/room/" + chatNum, function (message) {
+
+            console.log("수신 메시지:", message.body);
+
+            const msg = JSON.parse(message.body);
+
+            // 수신 즉시 화면에 추가
+            appendMessage(msg);
+        });
+
+    }, function (error) {
+        connected = false;
+        console.error("STOMP 연결 실패:", error);
     });
 
-});
+    function sendMessage() {
 
-function sendMessage(){
+        const input = document.getElementById("messageInput");
+        const content = input.value.trim();
 
-    const input=document.getElementById("messageInput");
+        if (content === "") {
+            return;
+        }
 
-    const content=input.value.trim();
+        if (!connected) {
+            alert("채팅 서버 연결 중입니다. 잠시 후 다시 시도해 주세요.");
+            return;
+        }
 
-    if(content===""){
-        return;
+        console.log("전송 메시지:", content);
+
+        stompClient.send("/pub/chat/message", {}, JSON.stringify({
+            chatNum: chatNum,
+            senderId: loginId,
+            content: content
+        }));
+
+        input.value = "";
+        input.focus();
     }
 
-    stompClient.send("/pub/chat/message",{},JSON.stringify({
+    function appendMessage(msg) {
 
-        chatNum:chatNum,
-        senderId:loginId,
-        content:content
+        const chatBox = document.getElementById("chatBox");
 
-    }));
+        if (!chatBox) {
+            console.error("chatBox를 찾을 수 없습니다.");
+            return;
+        }
 
-    input.value="";
+        const div = document.createElement("div");
+        div.classList.add("chat-message");
 
-}
+        if (String(msg.senderId) === String(loginId)) {
+            div.classList.add("mine");
+        }
 
-function appendMessage(msg){
+        const sender = document.createElement("span");
+        sender.classList.add("sender");
+        sender.textContent = msg.senderId;
 
-    const chatBox=document.getElementById("chatBox");
+        const bubble = document.createElement("span");
+        bubble.classList.add("bubble");
+        bubble.textContent = msg.content;
 
-    const div=document.createElement("div");
+        div.appendChild(sender);
+        div.appendChild(bubble);
 
-    div.className="chat-message";
+        chatBox.appendChild(div);
 
-    if(msg.senderId===loginId){
-        div.classList.add("mine");
+        // 스크롤 맨 아래로 이동
+        requestAnimationFrame(function () {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+
+        console.log("화면 추가 완료:", div);
     }
 
-    div.innerHTML=
-        "<span class='sender'>"+msg.senderId+"</span>"
-        +"<span class='bubble'></span>";
+    window.addEventListener("load", function () {
+        const chatBox = document.getElementById("chatBox");
 
-    div.querySelector(".bubble").textContent=msg.content;
-
-    chatBox.appendChild(div);
-
-    chatBox.scrollTop=chatBox.scrollHeight;
-
-}
-
-window.onload=function(){
-
-    const chatBox=document.getElementById("chatBox");
-
-    chatBox.scrollTop=chatBox.scrollHeight;
-
-}
-
+        if (chatBox) {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    });
 </script>
 
 </body>
