@@ -94,7 +94,7 @@
             appendMessage(msg);
         });
 
-    }, function (error) {
+    }, function (error) { 
         connected = false;
         console.error("STOMP 연결 실패:", error);
     });
@@ -134,11 +134,11 @@
             return;
         }
 
-        const div = document.createElement("div");
-        div.classList.add("chat-message");
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("chat-message");
 
         if (String(msg.senderId) === String(loginId)) {
-            div.classList.add("mine");
+            messageDiv.classList.add("mine");
         }
 
         const sender = document.createElement("span");
@@ -149,17 +149,14 @@
         bubble.classList.add("bubble");
         bubble.textContent = msg.content;
 
-        div.appendChild(sender);
-        div.appendChild(bubble);
+        messageDiv.appendChild(sender);
+        messageDiv.appendChild(bubble);
 
-        chatBox.appendChild(div);
+        chatBox.appendChild(messageDiv);
 
-        // 스크롤 맨 아래로 이동
-        requestAnimationFrame(function () {
-            chatBox.scrollTop = chatBox.scrollHeight;
-        });
+        chatBox.scrollTop = chatBox.scrollHeight;
 
-        console.log("화면 추가 완료:", div);
+        console.log("화면 추가 완료:", messageDiv);
     }
 
     window.addEventListener("load", function () {
