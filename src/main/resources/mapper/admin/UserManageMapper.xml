@@ -5,37 +5,28 @@
 
 <mapper namespace="com.human.found.domain.admin.mapper.UserManageMapper">    
     
-    <!-- 유저 상태 변경-->
-    <update id="updateUserStatusById">
+    <!-- 유저 정보 변경-->
+    <update id="updateUserById">
         UPDATE user
         SET 
+            name = #{name},
+            email = #{email},
+            tel = #{tel},
             status = #{status},
             is_deleted = #{isDeleted},
-            deleted_at =
             CASE
                 WHEN #{isDeleted} = 1 THEN NOW()
                 WHEN #{isDeleted} = 0 THEN NULL
                 ELSE deleted_at
             END 
+        <if test="canUpdateRole">
+            , `role` = #{role}
+        </if>
+
         WHERE id = #{id}
     </update>
 
-    <!-- 유저 권한 변경 -->
-    <update id="updateUserRoleById">
-        UPDATE user
-        SET role = #{role}
-        WHERE id = #{id}
-    </update>
 
-    <!-- 유저 정보 변경 -->
-    <update id="updateUserProfileById">
-        UPDATE user
-        SET
-            name = #{name},
-            email = #{email},
-            tel = #{tel}
-        WHERE id = #{id}
-    </update>
 
     <!-- 유저 전체 리스트 조회(탈퇴회원 포함) -->
     <select id="totalUserList"

@@ -3,10 +3,10 @@ package com.human.found.domain.admin.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.human.found.domain.user.vo.UserVO;
 import com.human.found.global.common.paging.PagingVO;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
 
@@ -30,7 +30,11 @@ public class UserSearchConditionDTO extends PagingVO{
     private String startDate;
     private String endDate;
 
+    // 신규 회원 추가를 위한 리스트
+    private List<UserVO> newUsers = new ArrayList<>();
 
+
+    // 상태에 탈퇴를 포함시키기 위해 세터를 따로 만들 필요가 있음 -> @Setter 사용 안함
     public void setKeyword(String keyword) {
         this.keyword = keyword;
     }

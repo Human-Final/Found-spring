@@ -3,7 +3,9 @@ package com.human.found.domain.admin.service;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -12,9 +14,11 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.human.found.domain.admin.dto.UserBulkInfoDTO;
 import com.human.found.domain.admin.dto.UserSearchConditionDTO;
 import com.human.found.domain.admin.mapper.UserManageMapper;
 import com.human.found.domain.user.mapper.UserMapper;
@@ -29,6 +33,7 @@ public class UserManageServiceImpl implements UserManageService{
     
     private final UserManageMapper userManageMapper;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
 
     // 유저 전체 조회 -----------
@@ -38,101 +43,76 @@ public class UserManageServiceImpl implements UserManageService{
     }
 
 
-    // 유저 정보 변경 ------------
+    // 유저 정보 변경/등록 한번에 처리 ------------
     @Transactional
     @Override
     public int updateUserBulk(
-            List<String> statusUserIds,
-            List<String> statuses, 
-            List<Integer> isDeletedList,
-
-            List<String> roleUserIds,
-            List<String> roles,
-            
-            List<String> profileUserIds,
-            List<String> names,
-            List<String> emails,
-            List<String> tels,
-            
+            UserBulkInfoDTO userInfo,             
             boolean isAdmin,
             boolean isManager){
 
 
-        int updatedCount = 0;
-
-       // 상태 변경이 있는 경우에만 실행
-        if (statusUserIds != null && !statusUserIds.isEmpty()) {
-            updatedCount += updateUserStatusBulk(
-                statusUserIds,
-                statuses,
-                isDeletedList,
-                isAdmin,
-                isManager
-            );
+        if (!isAdmin && !isManager) {
+            throw new IllegalArgumentException("회원 관리 권한이 없습니다.");
         }
 
-        // 권한 변경이 있는 경우만 실행
-        if (roleUserIds != null && !roleUserIds.isEmpty()) {
-            updatedCount += updateUserRoleBulk(
-                roleUserIds,
-                roles,
-                isAdmin
-            );
+        if (userInfo == null) {
+            throw new IllegalArgumentException("수정할 회원 정보가 없습니다.");
         }
 
-        // 이름 / 이메일 / 전화번호 변경이 있는 경우만 실행
-        if (profileUserIds != null && !profileUserIds.isEmpty()) {
-            updatedCount += updateUserProfileBulk(
-                profileUserIds,
-                names,
-                emails,
-                tels,
-                isAdmin,
-                isManager
-            );
+        int totalCount = 0;
+
+        List<UserVO> changedUsers =
+                userInfo.getChangedUsers() == null ? List.of() : userInfo.getChangedUsers();
+
+        List<UserVO> newUsers =
+                userInfo.getNewUsers() == null ? List.of() : userInfo.getNewUsers();
+
+        if (!changedUsers.isEmpty()) {
+            totalCount += updateUserChangedBulk(changedUsers, isAdmin, isManager);
         }
 
-        return updatedCount;
+        if (!newUsers.isEmpty()) {
+            totalCount += insertNewUsersBulk(newUsers, isAdmin, isManager);
+        }
+
+        return totalCount;
     }
 
 
-    // 유저 상태 변경 --------------
-    private int updateUserStatusBulk(List<String> statusUserIds,
-            List<String> statuses,
-            List<Integer> isDeletedList,
+    // 유저 정보 변경 --------------
+    private int updateUserChangedBulk(
+            List<UserVO> changedUsers,
             boolean isAdmin,
             boolean isManager) {
 
-        if (statuses == null || isDeletedList == null) {
-            throw new IllegalArgumentException("변경할 상태 정보가 없습니다.");
-        }
-
-        if(statusUserIds.size() != statuses.size()
-                || statusUserIds.size() != isDeletedList.size()) {
-            throw new IllegalArgumentException("회원 ID, 상태, 삭제 여부 개수가 일치하지 않습니다.");
-        }
-
         int updatedCount = 0;
+        
+        
+        for (UserVO changedUser : changedUsers) {
 
-        for(int i = 0; i < statusUserIds.size(); i++){
-            String userId = statusUserIds.get(i);
-            String status = statuses.get(i);
-            Integer isDeleted = isDeletedList.get(i);
+            if (changedUser == null) {
+                continue;
+            }
 
-            validateStatus(status);
-            validateIsDeleted(isDeleted);
+            String userId = changedUser.getId();
 
-            UserVO targetUser =  userManageMapper.findByIdIncludeDeleted(userId);
+            if (userId == null || userId.trim().isEmpty()) {
+                throw new IllegalArgumentException("회원 ID가 없습니다.");
+            }
 
-            if(targetUser == null){
+            userId = userId.trim();
+
+            UserVO targetUser = userManageMapper.findByIdIncludeDeleted(userId);
+
+            if (targetUser == null) {
                 throw new IllegalArgumentException("존재하지 않는 회원입니다: " + userId);
             }
 
-            // ADMIN은 전부 가능
+            // ADMIN은 전부 가능. MANAGER는 USER만 수정 가능
             if(!isAdmin){
-                // MANAGER도 아니면 불가
                 if (!isManager) {
-                    throw new IllegalArgumentException("상태 변경 권한이 없습니다.");
+                    throw new IllegalArgumentException("회원 정보 변경 권한이 없습니다.");
                 }
             
 
@@ -142,109 +122,23 @@ public class UserManageServiceImpl implements UserManageService{
                 }
             }
 
-            updatedCount += userManageMapper.updateUserStatusById(
-                    userId,
-                    status, 
-                    isDeleted
-            );
-        }
-        
-        return updatedCount;
-    }
+        String name = changedUser.getName();
+        String email = changedUser.getEmail();
+        String tel = changedUser.getTel();
+        String status = changedUser.getStatus();
+        Integer isDeleted = changedUser.getIsDeleted();
+        String role = changedUser.getRole();
 
+        validateProfile(name, email, tel);
+        validateStatus(status);
+        validateIsDeleted(isDeleted);
 
-    // 유저 권한 변경 -------------------------
-    private int updateUserRoleBulk(List<String> roleUserIds,
-                                   List<String> roles,
-                                   boolean isAdmin) {
-
-        if (!isAdmin) {
-            throw new IllegalArgumentException("권한 변경은 최고관리자만 가능합니다.");
-        }
-
-        if (roles == null) {
-            throw new IllegalArgumentException("변경할 권한 정보가 없습니다.");
-        }
-
-        if (roleUserIds.size() != roles.size()) {
-            throw new IllegalArgumentException("회원 ID와 권한 개수가 일치하지 않습니다.");
-        }
-
-        int updatedCount = 0;
-
-        for (int i = 0; i < roleUserIds.size(); i++) {
-            String userId = roleUserIds.get(i);
-            String role = roles.get(i);
-            
+        // ADMIN일 때만 role 검증
+        if (isAdmin) {
             validateRole(role);
-
-            UserVO targetUser =  userManageMapper.findByIdIncludeDeleted(userId);
-
-            if (targetUser == null) {
-                throw new IllegalArgumentException("존재하지 않는 회원입니다: " + userId);
-            }
-
-            updatedCount += userManageMapper.updateUserRoleById(userId, role);
         }
 
-        return updatedCount;
-    }
-
-
-    // 유저 정보 변경 -----------------------
-    private int updateUserProfileBulk(
-            List<String> profileUserIds,
-            List<String> names,
-            List<String> emails,
-            List<String> tels,
-            boolean isAdmin,
-            boolean isManager) {
-    
-        if (!isAdmin && !isManager) {
-            throw new IllegalArgumentException("회원 정보 변경 권한이 없습니다.");
-        }
-
-        if (names == null || emails == null || tels == null) {
-            throw new IllegalArgumentException("변경할 회원 정보가 없습니다.");
-        }
-
-        if (profileUserIds.size() != names.size()
-                || profileUserIds.size() != emails.size()
-                || profileUserIds.size() != tels.size()) {
-            throw new IllegalArgumentException("회원 ID, 이름, 이메일, 전화번호 개수가 일치하지 않습니다.");
-        }
-
-        int updatedCount = 0;
-
-        for (int i = 0; i < profileUserIds.size(); i++) {
-            String userId = profileUserIds.get(i);
-            String name = names.get(i);
-            String email = emails.get(i);
-            String tel = tels.get(i);
-
-            validateProfile(name, email, tel);
-
-            UserVO targetUser = userManageMapper.findByIdIncludeDeleted(userId);
-
-            if (targetUser == null) {
-                throw new IllegalArgumentException("존재하지 않는 회원입니다: " + userId);
-            }
-
-            // ADMIN은 전부 가능
-            if (!isAdmin) {
-                // MANAGER도 아니면 불가
-                if (!isManager) {
-                    throw new IllegalArgumentException("회원 정보 변경 권한이 없습니다.");
-                }
-
-                // MANAGER는 일반 회원만 변경 가능
-                if (!"USER".equals(targetUser.getRole())) {
-                    throw new IllegalArgumentException("매니저는 일반 회원의 정보만 변경할 수 있습니다.");
-                }
-            }
-        
         // 이메일 중복 체크
-        
         if (!email.trim().equals(targetUser.getEmail())) {
             int duplicateEmailCount = userMapper.countByEmail(email.trim());
 
@@ -252,16 +146,84 @@ public class UserManageServiceImpl implements UserManageService{
                 throw new IllegalArgumentException("이미 사용 중인 이메일입니다: " + email);
             }
         }
-        
-        updatedCount += userManageMapper.updateUserProfileById(
+
+        updatedCount += userManageMapper.updateUserById(
                 userId,
                 name.trim(),
                 email.trim(),
-                tel.trim()
-        );
+                tel.trim(),
+                status,
+                isDeleted,
+                role,
+                isAdmin
+            );
+        }
+        
+        return updatedCount;
     }
 
-        return updatedCount;
+    // 신규 회원 추가 -----------------------
+    private int insertNewUsersBulk(
+            List<UserVO> newUsers,
+            boolean isAdmin,
+            boolean isManager) {
+
+        if (!isAdmin && !isManager) {
+            throw new IllegalArgumentException("회원 추가 권한이 없습니다.");
+        }
+
+        int insertedCount = 0;
+
+        // 이번 요청 안에서 아이디 중복 방지
+        Set<String> requestUserIds = new HashSet<>();
+        
+        for (UserVO newUser : newUsers) {
+            String userId = newUser.getId();
+            String name = newUser.getName();
+            String email = newUser.getEmail();
+            String tel = newUser.getTel();
+            String role = newUser.getRole();
+            String status = newUser.getStatus();
+
+            validateNewUser(userId, name, email, tel, role, status, isAdmin, isManager);
+
+            // 같은 요청 안에서 중복된 아이디 검사
+            if (!requestUserIds.add(userId.trim())) {
+                throw new IllegalArgumentException("추가하려는 회원 목록에 중복된 아이디가 있습니다: " + userId);
+            }
+            
+            // DB에 존재하는 아이디와 중복 검사
+            UserVO existingUser = userManageMapper.findByIdIncludeDeleted(userId);
+
+            if (existingUser != null) {
+                throw new IllegalArgumentException("이미 사용 중인 아이디입니다: " + userId);
+            }
+
+            // 이메일 중복 검사
+            int duplicateEmailCount = userMapper.countByEmail(email.trim());
+
+            if (duplicateEmailCount > 0) {
+                throw new IllegalArgumentException("이미 사용 중인 이메일입니다: " + email);
+            }
+
+            // 임시 비밀번호 = 전화번호 뒤 4자리
+            String tempPassword = tel.trim().substring(tel.trim().length() - 4);
+            String encodedPassword = passwordEncoder.encode(tempPassword);
+
+            newUser.setId(userId.trim());
+            newUser.setPw(encodedPassword);
+            newUser.setName(name.trim());
+            newUser.setEmail(email.trim());
+            newUser.setTel(tel.trim());
+            newUser.setStatus(status);
+            newUser.setRole(role);
+            newUser.setIsDeleted(0);
+
+            userMapper.insertUser(newUser);
+            insertedCount++;
+        }
+
+        return insertedCount;
     }
 
 
@@ -314,11 +276,7 @@ public class UserManageServiceImpl implements UserManageService{
             throw new IllegalArgumentException("이메일은 영문/숫자 형식이어야 하며 .com으로 끝나야 합니다.");
         }
 
-        if (!email.contains("@")) {
-            throw new IllegalArgumentException("이메일 형식이 올바르지 않습니다.");
-        }
-
-         if (tel == null || tel.trim().isEmpty()) {
+        if (tel == null || tel.trim().isEmpty()) {
             throw new IllegalArgumentException("전화번호는 필수입니다.");
         }
 
@@ -329,6 +287,36 @@ public class UserManageServiceImpl implements UserManageService{
             throw new IllegalArgumentException("전화번호는 숫자 11자리로 입력해야 합니다.");
         }
 
+    }
+
+    // 신규회원 검증
+    private void validateNewUser(
+            String userId,
+            String name,
+            String email,
+            String tel,
+            String role,
+            String status,
+            boolean isAdmin,
+            boolean isManager) {
+
+        if (userId == null || userId.trim().isEmpty()) {
+            throw new IllegalArgumentException("아이디는 필수입니다.");
+        }
+
+        String trimmedUserId = userId.trim();
+
+        if (!trimmedUserId.matches("^[a-zA-Z0-9]{4,20}$")) {
+            throw new IllegalArgumentException("아이디는 영문/숫자 4~20자로 입력해야 합니다.");
+        }
+
+        validateProfile(name, email, tel);
+        validateRole(role);
+        validateStatus(status);
+
+        if (!isAdmin && isManager && !"USER".equals(role)) {
+            throw new IllegalArgumentException("매니저는 일반 회원만 추가할 수 있습니다.");
+        }
     }
 
     @Override

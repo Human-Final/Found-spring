@@ -612,7 +612,7 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
 }
 
 .bulk-stop-btn,
-.bulk-role-btn,
+.bulk-add-btn,
 .bulk-save-btn {
   height: 40px;
   padding: 0 18px;
@@ -639,13 +639,13 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
   background: #fff5f5;
 }
 
-.bulk-role-btn {
+.bulk-add-btn {
   border: 1px solid #b7d3ff;
   background: #ffffff;
   color: #0b63f6;
 }
 
-.bulk-role-btn:hover {
+.bulk-add-btn:hover {
   background: #f0f6ff;
 }
 
@@ -657,7 +657,7 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
 }
 
 .bulk-stop-btn svg,
-.bulk-role-btn svg,
+.bulk-add-btn svg,
 .bulk-save-btn svg {
   width: 17px;
   height: 17px;
@@ -1144,7 +1144,7 @@ body.admin-user-page select {
 /* 검색/초기화 버튼 hover */
 .filter-search-btn:hover,
 .bulk-save-btn:hover,
-.bulk-role-btn:hover {
+.bulk-add-btn:hover {
   filter: brightness(0.96);
 }
 
@@ -1152,4 +1152,25 @@ body.admin-user-page select {
   background: #f8fafc;
   border-color: #b7d3ff;
   color: #0b63f6;
+}
+
+/* 신규 회원 입력 행 */
+.user-manage-table tbody tr.new-user-row td {
+  background-color: #fffdf3;
+}
+
+.user-manage-table tbody tr.new-user-row.applied-new-user td {
+  background-color: #fff8db;
+}
+
+.user-manage-table tbody tr.new-user-row td:first-child {
+  border-left: 4px solid #f59e0b;
+}
+
+.new-user-row .new-email-input {
+  text-align: left;
+}
+
+.new-user-row .new-tel-input {
+  letter-spacing: 0.01em;
 }
