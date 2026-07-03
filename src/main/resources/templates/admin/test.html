@@ -12,44 +12,55 @@
 
 <body class="admin-user-page">
 
+<!-- 헤더 -->
 <header class="admin-header" th:replace="layout/header :: headerFragment">
 </header>
 
 <div class="admin-layout">
 
+  <!-- 사이드바 -->
   <aside class="admin-sidebar">
     <nav class="admin-side-menu">
+
       <a th:href="@{/api/admin/dashboard}">
         <i data-lucide="layout-dashboard"></i>
         <span>대시보드</span>
       </a>
+
       <a th:href="@{/admin/lost}" class="active">
         <i data-lucide="panel-top"></i>
         <span>게시글 관리</span>
       </a>
+
       <a th:href="@{/api/admin/users}" >
         <i data-lucide="user-round"></i>
         <span>회원 관리</span>
       </a>
+
       <a th:href="@{/admin/notices}">
         <i data-lucide="bell"></i>
         <span>공지사항 관리</span>
       </a>
+
       <a th:href="@{/api/admin/stats}">
         <i data-lucide="bar-chart-3"></i>
         <span>통계 관리</span>
       </a>
+
       <a th:href="@{/api/admin/inquiries}">
         <i data-lucide="message-square"></i>
         <span>문의 관리</span>
       </a>
+
       <a th:href="@{/api/admin/settings}">
         <i data-lucide="settings"></i>
         <span>설정</span>
       </a>
+
     </nav>
   </aside>
 
+  <!-- 본문 -->
   <main class="admin-main">
 
     <section class="admin-page-title">
@@ -57,35 +68,37 @@
       <p>분실물/습득물 게시글을 관리할 수 있습니다.</p>
     </section>
 
+    <!-- 탭 -->
     <section class="admin-tabs">
-      <a th:href="@{/admin/lost(page=1)}"
+
+      <a th:href="@{/admin/lost}"
          th:classappend="${boardType == 'lost'} ? ' active'">
         분실물
       </a>
-      <a th:href="@{/admin/found(page=1)}"
+
+      <a th:href="@{/admin/found}"
          th:classappend="${boardType == 'found'} ? ' active'">
         습득물
       </a>
+
     </section>
 
+    <!-- 필터 -->
     <section class="admin-filter-card">
-      <form method="get" 
-            th:action="${boardType == 'found'} ? @{/admin/found} : @{/admin/lost}" 
-            class="admin-filter-form">
+      <form th:action="@{/admin/{type}(type=${boardType})}" method="get" class="admin-filter-form">
 
-        <input type="hidden" name="page" value="1">
 
         <div class="filter-top">
           <div class="filter-search-wrap">
             <input type="text"
                    name="keyword"
-                   th:value="${searchVO.keyword}"
+                   th:value="${param.keyword}"
                    placeholder="제목, 내용, 작성자 검색">
 
             <button type="submit" class="filter-search-btn">검색</button>
           </div>
 
-          <a th:href="${boardType == 'found'} ? @{/admin/found(page=1)} : @{/admin/lost(page=1)}" class="filter-reset-btn">
+          <a th:href="@{/admin/{type}(type=${boardType})}" class="filter-reset-btn">
             <i data-lucide="rotate-cw"></i>
             <span>초기화</span>
           </a>
@@ -93,78 +106,153 @@
 
         <div class="filter-row">
           <div class="filter-label">카테고리</div>
+
           <div class="filter-content">
-            <label class="filter-chip" th:each="cat : ${#strings.arraySplit('지갑,핸드폰,가방,카드,전자기기,의류,귀금속,도서,자동차,기타', ',')}">
-              <input type="checkbox" name="categories" th:value="${cat}"
-                     th:checked="${searchVO.categories != null and searchVO.categories.contains(cat)}">
-              <span th:text="${cat}"></span>
-            </label>
-          </div>
+          <label class="filter-chip">
+            <input type="checkbox" name="categories" value="지갑"
+                   th:checked="${categoryList != null and #lists.contains(categoryList, '지갑')}">
+            <span>지갑</span>
+          </label>
+
+          <label class="filter-chip">
+            <input type="checkbox" name="categories" value="핸드폰"
+                   th:checked="${categoryList  != null and #lists.contains(categoryList, '핸드폰')}">
+            <span>핸드폰</span>
+          </label>
+
+          <label class="filter-chip">
+            <input type="checkbox" name="categories" value="가방"
+                   th:checked="${categoryList  != null and #lists.contains(categoryList, '가방')}">
+            <span>가방</span>
+          </label>
+
+          <label class="filter-chip">
+            <input type="checkbox" name="categories" value="카드"
+                  th:checked="${categoryList != null and #lists.contains(categoryList,'카드')}">
+              <span>카드</span>
+          </label>
+
+          <label class="filter-chip">
+            <input type="checkbox" name="categories" value="전자기기"
+                  th:checked="${categoryList != null and #lists.contains(categoryList,'전자기기')}">
+              <span>전자기기</span>
+          </label>
+
+          <label class="filter-chip">
+            <input type="checkbox" name="categories" value="의류"
+                  th:checked="${categoryList != null and #lists.contains(categoryList,'의류')}">
+              <span>의류</span>
+          </label>
+
+          <label class="filter-chip">
+            <input type="checkbox" name="categories" value="귀금속"
+                  th:checked="${categoryList != null and #lists.contains(categoryList,'귀금속')}">
+              <span>귀금속</span>
+          </label>
+
+          <label class="filter-chip">
+            <input type="checkbox" name="categories" value="도서"
+                  th:checked="${categoryList != null and #lists.contains(categoryList,'도서')}">
+              <span>도서</span>
+          </label>
+
+          <label class="filter-chip">
+            <input type="checkbox" name="categories" value="자동차"
+                  th:checked="${categoryList != null and #lists.contains(categoryList,'자동차')}">
+              <span>자동차</span>
+          </label>
+
+          <label class="filter-chip">
+            <input type="checkbox" name="categories" value="기타"
+                  th:checked="${categoryList != null and #lists.contains(categoryList,'기타')}">
+              <span>기타</span>
+          </label>
+
+        </div>
         </div>
 
         <div class="filter-row">
           <div class="filter-label">상태</div>
+
           <label class="filter-chip">
             <input type="checkbox" name="doneList" value="0"
-                   th:checked="${searchVO.doneList != null and searchVO.doneList.contains(0)}">
+                   th:checked="${doneList != null and #lists.contains(doneList, 0)}">
             <span>진행중</span>
           </label>
+
           <label class="filter-chip">
             <input type="checkbox" name="doneList" value="1"
-                   th:checked="${searchVO.doneList != null and searchVO.doneList.contains(1)}">
+                   th:checked="${doneList != null and #lists.contains(doneList, 1)}">
             <span>완료</span>
           </label>
         </div>
 
         <div class="filter-row">
           <div class="filter-label">등록일</div>
-          <input type="date" name="startDate" class="filter-date" th:value="${searchVO.startDate}">
+
+          <input type="date"
+                 name="startDate"
+                 class="filter-date"
+                 th:value="${param.startDate}">
+
           <span class="date-separator">~</span>
-          <input type="date" name="endDate" class="filter-date" th:value="${searchVO.endDate}">
+
+          <input type="date"
+                 name="endDate"
+                 class="filter-date"
+                 th:value="${param.endDate}">
 
           <div class="date-shortcuts">
             <button type="button" data-range="today">오늘</button>
             <button type="button" data-range="7days">7일</button>
-            <button type="button" data-range="1month">1개월</button>
+            <button type="button" data-range="1month" class="active">1개월</button>
             <button type="button" data-range="3months">3개월</button>
             <button type="button" data-range="all">전체</button>
           </div>
         </div>
 
-        <div class="filter-row">
-          <div class="filter-label">데이터출처</div>
-          <label class="filter-chip">
-              <input type="checkbox" name="dataSources" value="USER"
-                     th:checked="${searchVO.dataSources != null and searchVO.dataSources.contains('USER')}">
-              <span>사용자</span>
-          </label>
-          <label class="filter-chip">
-              <input type="checkbox" name="dataSources" value="POLICE"
-                     th:checked="${searchVO.dataSources != null and searchVO.dataSources.contains('POLICE')}">
-              <span>경찰</span>
-          </label>
-          <label class="filter-chip">
-              <input type="checkbox" name="dataSources" value="ADMIN"
-                     th:checked="${searchVO.dataSources != null and searchVO.dataSources.contains('ADMIN')}">
-              <span>관리자</span>
-          </label>
-        </div>
+          <div class="filter-row">
+            <div class="filter-label">데이터출처</div>
+
+            <label class="filter-chip">
+                <input type="checkbox" name="dataSources" value="user"
+                th:checked="${dataSources != null and #lists.contains(dataSources, 'user')}">
+                <span>사용자</span>
+            </label>
+
+            <label class="filter-chip">
+                <input type="checkbox" name="dataSources" value="police"
+                th:checked="${dataSources != null and #lists.contains(dataSources, 'police')}">
+            <span>경찰</span>
+            </label>
+
+            <label class="filter-chip">
+                <input type="checkbox" name="dataSources" value="portal"
+                th:checked="${dataSources != null and #lists.contains(dataSources, 'portal')}">
+            <span>포털</span>
+            </label>
+          </div>
+
       </form>
     </section>
 
+    <!-- 선택 액션 바 -->
     <section class="admin-bulk-bar">
       <label class="bulk-check">
         <input type="checkbox" id="checkAll">
         <span>전체 선택</span>
       </label>
+
       <div class="bulk-selected-text">
         선택된 게시글 <strong id="selectedCount">0</strong>개
       </div>
+
       <div class="bulk-actions">
         <button type="button" class="bulk-stop-btn" id="bulkBlockBtn">
           <i data-lucide="circle-slash"></i>
           <span>선택 삭제</span>
         </button>
+
         <button type="button" class="bulk-role-btn" id="bulkRoleBtn">
           <i data-lucide="user-cog"></i>
           <span>완료 처리</span>
@@ -172,11 +260,14 @@
       </div>
     </section>
 
+    <!-- 회원 테이블 -->
     <section class="admin-table-card">
       <table class="user-manage-table">
         <thead>
         <tr>
-          <th><input type="checkbox" id="tableCheckAll"></th>
+          <th>
+            <input type="checkbox" id="tableCheckAll">
+          </th>
           <th>번호</th>
           <th>구분</th>
           <th>카테고리</th>
@@ -188,82 +279,107 @@
           <th>관리</th>
         </tr>
         </thead>
-        <tbody>
+
+        
+        <!-- 실제 DB 연결용 -->
+         <tbody>
           <tr th:if="${boardType=='lost' and lostList!=null}" th:each="item : ${lostList}"
-              class="board-row" th:data-url="@{/admin/lost/{id}(id=${item.num})}">
-            <td><input type="checkbox" class="user-check" name="nums" th:value="${item.num}"></td>       
+          class="board-row"
+          th:data-url="@{/admin/lost/{id}(id=${item.num})}">
+          
+            <td>
+            <input type="checkbox"
+                   class="user-check"
+                   name="nums"
+                   th:value="${item.num}">
+            </td>       
             <td th:text="${item.num}">번호</td>
             <td>분실물</td>
-            <td th:text="${item.category != null ? item.category : '-'}">-</td>
-            <td th:text="${item.title}">제목</td>
-            <td th:text="${item.writer != null ? item.writer : (item.depotName != null ? item.depotName : '-')}">-</td>
-            <td th:text="${item.createdAt != null ? #temporals.format(item.createdAt, 'yyyy.MM.dd') : '-'}">-</td>
-            <td>
-              <span class="status-badge active" th:if="${item.status == 'progress'}">진행중</span>
-              <span class="status-badge dormant" th:if="${item.status == 'complete'}">완료</span>
+            <td th:text="${item.prdtClNm !=null ? item.prdtClNm :'-'}">카테고리</td>
+            <td th:text="${item.lstSbjt}">제목</td>
+            <td th:text="${item.id !=null ? item.id :'-'}">작성자</td>
+            <td th:text="${item.createdAt != null ? #temporals.format(item.createdAt, 'yyyy.MM.dd') : '-'}">
+            등록일
             </td>
             <td>
-              <span class="role-badge user" th:if="${item.source == 'user'}">사용자</span>
-              <span class="role-badge police" th:if="${item.source == 'police'}">경찰</span>
-              <span class="role-badge portal" th:if="${item.source == 'portal'}">포털</span>
+              <span class="status-badge active" th:if="${item.done == 0}">진행중</span>
+              <span class="status-badge dormant" th:if="${item.done == 1}">완료</span>
+            </td>
+            <td>
+              <span class="role-badge user"
+                    th:if="${item.dataSource == 'USER'}">사용자</span>
+
+              <span class="role-badge police"
+                    th:if="${item.dataSource == 'POLICE'}">경찰</span>
+            
+            <span class="role-badge portal"
+                  th:if="${item.dataSource == 'portal'}">포털</span>
             </td>
             <td class="table-actions no-row-click">
-              <a th:href="@{/admin/lost/{nums}(nums=${item.num})}" class="detail-btn">상세보기</a>
+              <a th:href="@{/admin/lost/{nums}(nums=${item.num})}"
+               class="detail-btn">상세보기</a>
+              
                <form th:action="@{/admin/lost/delete(nums=${item.num})}" method="post">
                 <button type="submit" class="stop-btn">삭제</button>
                </form> 
             </td>
           </tr>   
 
-          <tr th:if="${boardType=='found' and foundList !=null}" th:each="item : ${foundList}"
-              class="board-row" th:data-url="@{/admin/found/{nums}(nums=${item.num})}">
-            <td><input type="checkbox" class="user-check" name="nums" th:value="${item.num}"></td>
-            <td th:text="${item.num}">번호</td>
-            <td>습득물</td>
-            <td th:text="${item.category != null ? item.category : '-'}">-</td>
-            <td th:text="${item.title}">제목</td>
-            <td th:text="${item.writer != null ? item.writer : (item.depotName != null ? item.depotName : '-')}">-</td>
-            <td th:text="${item.createdAt != null ? #temporals.format(item.createdAt, 'yyyy.MM.dd') : '-'}">-</td>
-            <td>
-              <span class="status-badge active" th:if="${item.status == 'progress'}">진행중</span>
-              <span class="status-badge dormant" th:if="${item.status == 'complete'}">완료</span>
-            </td>
-            <td>
-              <span class="role-badge user" th:if="${item.source == 'user'}">사용자</span>
-              <span class="role-badge police" th:if="${item.source == 'police'}">경찰</span>
-              <span class="role-badge portal" th:if="${item.source == 'portal'}">포털</span>
-            </td>
-            <td class="table-actions no-row-click">
-              <a th:href="@{/admin/found/{nums}(nums=${item.num})}" class="detail-btn">상세보기</a>
-              <form th:action="@{/admin/found/delete(nums=${item.num})}" method="post">
-                <button type="submit" class="stop-btn">삭제</button>
-              </form>
-            </td>
-          </tr>
+          <tr th:if="${boardType=='found' and foundList !=null}"
+          th:each="item : ${foundList}"
+          class="board-row"
+          th:data-url="@{/admin/found/{nums}(nums=${item.num})}">
+          <td>
+            <input type="checkbox" class="user-check" name="nums" th:value="${item.num}">
+          </td>
+          <td th:text="${item.num}">1256</td>
+          <td>습득물</td>
+          <td th:text="${item.prdtClNm != null ? item.prdtClNm : '-'}">지갑</td>
+          <td th:text="${item.fdSbjt}">검정 지갑 습득</td>
+          <td th:text="${item.id != null ? item.id : '-'}">김민수</td>
+          <td th:text="${item.createdAt != null ? #temporals.format(item.createdAt, 'yyyy.MM.dd') : '-'}">2025.06.29</td>
+          <td>
+            <span class="status-badge active" th:if="${item.done == 0}">진행중</span>
+            <span class="status-badge dormant" th:if="${item.done == 1}">완료</span>
+          </td>
+          <td>
+            <span class="role-badge user" th:if="${item.dataSource == 'USER'}">사용자</span>
+            <span class="role-badge police" th:if="${item.dataSource == 'POLICE'}">경찰</span>
+            <span class="role-badge portal" th:if="${item.dataSource == 'portal'}">포털</span>
+          </td>
+          <td class="table-actions no-row-click">
+            <a th:href="@{/admin/found/{nums}(nums=${item.num})}" class="detail-btn">상세보기</a>
+            
+            <form th:action="@{/admin/found/delete(nums=${item.num})}" method=post>
+              <button type="submit" class="stop-btn">삭제</button>
+            </form>
+          </td>
+        </tr>
+              
 
-          <tr th:if="${(boardType == 'lost' and #lists.isEmpty(lostList)) or (boardType == 'found' and #lists.isEmpty(foundList))}">
-            <td colspan="10" style="text-align: center; padding: 25px; color: #999;">조회된 게시글 내역이 없습니다.</td>
-          </tr>
+
+
+        <!-- 임시 화면 확인용: userList 없을 때만 출력 -->
+        <tr th:if="${(boardType == 'lost' and lostList == null) or (boardType == 'found' and foundList == null)}">
+          <td colspan="10" style="text-align: center; padding: 25px; color: #999;">조회된 게시글 내역이 없습니다.</td>
+        </tr>
         </tbody>
       </table>
     </section>
 
-    <section class="admin-pagination" th:if="${searchVO.totalPage > 1}">
-      <a th:if="${searchVO.startPage > 1}"
-         th:href="@{/admin/{type}(type=${boardType}, page=${searchVO.startPage - 1}, keyword=${searchVO.keyword}, categories=${searchVO.categories}, doneList=${searchVO.doneList}, startDate=${searchVO.startDate}, endDate=${searchVO.endDate}, dataSources=${searchVO.dataSources})}" 
-         class="page-btn">
+    <!-- 페이지네이션 -->
+    <section class="admin-pagination">
+      <a th:href="@{/admin/{type}(type=${boardType},page=${searchVO.startPage-1})}" class="page-btn" 
+      th:if="${searchVO.startPage>1}">
         <i data-lucide="chevron-left"></i>
       </a>
-      
-      <a th:each="p : ${#numbers.sequence(searchVO.startPage, searchVO.endPage)}" 
-         th:href="@{/admin/{type}(type=${boardType}, page=${p}, keyword=${searchVO.keyword}, categories=${searchVO.categories}, doneList=${searchVO.doneList}, startDate=${searchVO.startDate}, endDate=${searchVO.endDate}, dataSources=${searchVO.dataSources})}"
-         th:text="${p}" 
-         th:classappend="${p == searchVO.page} ? 'active' : ''"
-         class="page-btn">1</a>
-         
-      <a th:if="${searchVO.endPage < searchVO.totalPage}"
-         th:href="@{/admin/{type}(type=${boardType}, page=${searchVO.endPage + 1}, keyword=${searchVO.keyword}, categories=${searchVO.categories}, doneList=${searchVO.doneList}, startDate=${searchVO.startDate}, endDate=${searchVO.endDate}, dataSources=${searchVO.dataSources})}" 
-         class="page-btn">
+      <a th:each="p:${#numbers.sequence(searchVO.startPage,searchVO.endPage)}" 
+      th:href="@{/admin/{type}(type=${boardType},page=${p},keyword=${param.keyword})}"
+      th:text="${p}" 
+      th:classappend="${p==searchVO.page}?'active':''"
+      class="page-btn">1</a>
+      <a th:href="@{/admin/{type}(type=${boardType},page=${searchVO.endPage+1},keyword=${param.keyword})}" class="page-btn"
+      th:if="${searchVO.endPage<searchVO.totalPage}">
         <i data-lucide="chevron-right"></i>
       </a>
     </section>
@@ -280,50 +396,92 @@
     const tableCheckAll = document.getElementById("tableCheckAll");
     const userChecks = document.querySelectorAll(".user-check");
     const selectedCount = document.getElementById("selectedCount");
-    const bulkDeleteBtn = document.getElementById("bulkBlockBtn");
+
     
+    
+    const bulkDeleteBtn = document.getElementById("bulkBlockBtn") 
+    const bulkCompleteBtn = document.getElementById("bulkRoleBtn") 
+
+    
+    //날짜 관련 요소
     const startDateInput = document.querySelector("input[name='startDate']");
     const endDateInput = document.querySelector("input[name='endDate']");
     const rangeButtons = document.querySelectorAll(".date-shortcuts button");
 
+
+
     function updateSelectedCount() {
       const checkedCount = document.querySelectorAll(".user-check:checked").length;
+
       selectedCount.textContent = checkedCount;
+
       const isAllChecked = userChecks.length > 0 && checkedCount === userChecks.length;
-      if (checkAll) checkAll.checked = isAllChecked;
-      if (tableCheckAll) tableCheckAll.checked = isAllChecked;
+
+      if (checkAll) {
+        checkAll.checked = isAllChecked;
+      }
+
+      if (tableCheckAll) {
+        tableCheckAll.checked = isAllChecked;
+      }
     }
 
     function setAllChecked(checked) {
-      userChecks.forEach(check => { check.checked = checked; });
+      userChecks.forEach(check => {
+        check.checked = checked;
+      });
+
       updateSelectedCount();
     }
 
-    if (checkAll) { checkAll.addEventListener("change", () => { setAllChecked(checkAll.checked); }); }
-    if (tableCheckAll) { tableCheckAll.addEventListener("change", () => { setAllChecked(tableCheckAll.checked); }); }
-    userChecks.forEach(check => { check.addEventListener("change", updateSelectedCount); });
+
+    if (checkAll) {
+      checkAll.addEventListener("change", () => {
+        setAllChecked(checkAll.checked);
+      });
+    }
+
+    if (tableCheckAll) {
+      tableCheckAll.addEventListener("change", () => {
+        setAllChecked(tableCheckAll.checked);
+      });
+    }
+
+    userChecks.forEach(check => {
+      check.addEventListener("change", updateSelectedCount);
+    });
 
     function formatDate(date) {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
+
       return `${year}-${month}-${day}`;
     }
 
     function setDateRange(range) {
-      if (!startDateInput || !endDateInput) return;
+      if (!startDateInput || !endDateInput) {
+        return;
+      }
+
       const today = new Date();
       const startDate = new Date(today);
       const endDate = new Date(today);
 
-      if (range === "7days") startDate.setDate(today.getDate() - 7);
-      else if (range === "1month") startDate.setMonth(today.getMonth() - 1);
-      else if (range === "3months") startDate.setMonth(today.getMonth() - 3);
-      else if (range === "all") {
+      if (range === "today") {
+        // 오늘 그대로
+      } else if (range === "7days") {
+        startDate.setDate(today.getDate() - 7);
+      } else if (range === "1month") {
+        startDate.setMonth(today.getMonth() - 1);
+      } else if (range === "3months") {
+        startDate.setMonth(today.getMonth() - 3);
+      } else if (range === "all") {
         startDateInput.value = "";
         endDateInput.value = "";
         return;
       }
+
       startDateInput.value = formatDate(startDate);
       endDateInput.value = formatDate(endDate);
     }
@@ -332,42 +490,96 @@
       button.addEventListener("click", () => {
         rangeButtons.forEach(btn => btn.classList.remove("active"));
         button.classList.add("active");
+        
         setDateRange(button.dataset.range);
       });
     });
+    document.querySelectorAll(".board-row").forEach(row=>{
+      row.style.cursor="pointer";
 
-    document.querySelectorAll(".board-row").forEach(row => {
-      row.style.cursor = "pointer";
-      row.addEventListener("click", function(e) {
-        if (e.target.closest("input") || e.target.closest("button") || e.target.closest("a") || e.target.closest("form")) return;
-        location.href = this.dataset.url;
+      row.addEventListener("click",function(e){
+        if(
+          e.target.closest("input")||
+          e.target.closest("button")||
+          e.target.closest("a")||
+          e.target.closest("form")
+        ){
+          return;
+        }
+        location.href=this.dataset.url;
       });
-    });
+    })
     
     if (bulkDeleteBtn) {
       bulkDeleteBtn.addEventListener("click", () => {
         const checkedBoxes = document.querySelectorAll(".user-check:checked");
-        if (checkedBoxes.length === 0) { alert("선택된 게시글이 없습니다"); return; }
-        if (!confirm("선택한 게시글을 삭제하시겠습니까?")) return;
-
+        
+        if (checkedBoxes.length===0){
+          alert("선택된 게시글이 없습니다")
+          return;
+        }
+        if(!confirm("선택한 게시글을 삭제하시겠습니까?")){
+          return;
+        }
         const form = document.createElement("form");
-        form.method = "post";
-        const isActiveLost = document.querySelector(".admin-tabs .active").textContent.trim() == "분실물";
-        form.action = "/admin/" + (isActiveLost ? "lost" : "found") + "/delete";
+        form.method="post";
 
-        checkedBoxes.forEach(c => {
+        const boardType=document.querySelector(".admin-tabs .active").textContent.trim()=="분실물"
+        ?"lost"
+        :"found";
+        form.action = "/admin/" + boardType + "/delete";
+
+        checkedBoxes.forEach(c =>{
            const input = document.createElement("input");
-           input.type = "hidden";
-           input.name = "nums";
-           input.value = c.value; 
+           input.type="hidden";
+           input.name="nums";
+           input.value=c.value; 
            form.appendChild(input);
         });
-        document.body.appendChild(form);
+        document.body.appendChild(form)
         form.submit();
       });
     }
+
+    /*if (bulkCompleteBtn) {
+      bulkCompleteBtn.addEventListener("click", () => {
+        const checkedBoxes = document.querySelectorAll(".user-check:checked");
+        
+        if (checkedBoxes.length === 0) {
+          alert("선택된 게시글이 없습니다.");
+          return;
+        }
+
+        const selectedIds = Array.from(checkedBoxes).map(box => box.value);
+
+        if (confirm(`선택한 ${selectedIds.length}개의 게시글을 완료 처리하시겠습니까?`)) {
+          fetch("/api/admin/board/bulk-complete", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ boardIds: selectedIds })
+          })
+          .then(response => {
+            if (response.ok) {
+              alert("완료 처리가 되었습니다.");
+              location.reload();
+            } else {
+              alert("오류 발생! 상태 코드: " + response.status);
+            }
+          })
+          .catch(error => console.error("네트워크 에러:", error));
+        }
+      });
+    }
+*/
+
+
     updateSelectedCount();
   });
+
+
 </script>
+
 </body>
 </html>
