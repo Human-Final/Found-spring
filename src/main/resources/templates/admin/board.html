@@ -236,6 +236,11 @@
       </form>
     </section>
 
+    <!--테스트용으로 넣어봤습니다. 맘에 안드시면 없애도 괜찮습니다-->
+    <div class="search-count" style="padding: 8px;">
+      총 <span th:text="${searchVO.totalCount}">0</span>건의 자료가 검색되었습니다.
+    </div>
+
     <!-- 선택 액션 바 -->
     <section class="admin-bulk-bar">
       <label class="bulk-check">

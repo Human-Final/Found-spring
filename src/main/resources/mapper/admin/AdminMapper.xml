@@ -126,7 +126,12 @@
                 prdt_cl_nm, created_at, updated_at, done, is_deleted,
                 lst_filepath_img, view_count, 'USER' AS data_source
             FROM lost
-            WHERE is_deleted = 0
+            <if test="!includeDeleted">
+                where is_deleted = 1
+            </if>
+            <if test="includeDeleted">
+                where is_deleted = 0
+            </if>
 
             UNION ALL
 
@@ -135,10 +140,15 @@
                 prdt_cl_nm, created_at, updated_at, done, is_deleted,
                 lst_filepath_img, view_count, 'POLICE' AS data_source
             FROM lost_police
-            WHERE is_deleted = 0
+            <if test="!includeDeleted">
+                where is_deleted = 1
+            </if>
+            <if test="includeDeleted">
+                where is_deleted = 0
+            </if>
         ) A
         WHERE 1 = 1
-
+        
         <include refid="lostSearchCondition"/>
 
         ORDER BY created_at DESC
@@ -153,7 +163,12 @@
                 lst_sbjt, lst_prdt_nm, id, prdt_cl_nm, done,
                 created_at, 'USER' AS data_source
             FROM lost
-            WHERE is_deleted = 0
+            <if test="!includeDeleted">
+                where is_deleted = 1
+            </if>
+            <if test="includeDeleted">
+                where is_deleted = 0
+            </if>
 
             UNION ALL
 
@@ -161,7 +176,12 @@
                 lst_sbjt, lst_prdt_nm, id, prdt_cl_nm, done,
                 created_at, 'POLICE' AS data_source
             FROM lost_police
-            WHERE is_deleted = 0
+            <if test="!includeDeleted">
+                where is_deleted = 1
+            </if>
+            <if test="includeDeleted">
+                where is_deleted = 0
+            </if>
         ) A
         WHERE 1 = 1
 
@@ -178,7 +198,12 @@
                 created_at, updated_at, done, is_deleted,
                 'USER' AS data_source
             FROM found
-            WHERE is_deleted = 0
+            <if test="!includeDeleted">
+                where is_deleted = 1
+            </if>
+            <if test="includeDeleted">
+                where is_deleted = 0
+            </if>
 
             UNION ALL
 
@@ -188,7 +213,12 @@
                 created_at, updated_at, done, is_deleted,
                 'POLICE' AS data_source
             FROM found_police
-            WHERE is_deleted = 0
+            <if test="!includeDeleted">
+                where is_deleted = 1
+            </if>
+            <if test="includeDeleted">
+                where is_deleted = 0
+            </if>
         ) A
         WHERE 1 = 1
 
@@ -206,7 +236,12 @@
                 fd_sbjt, fd_prdt_nm, id, prdt_cl_nm, done,
                 created_at, 'USER' AS data_source
             FROM found
-            WHERE is_deleted = 0
+            <if test="!includeDeleted">
+                where is_deleted = 1
+            </if>
+            <if test="includeDeleted">
+                where is_deleted = 0
+            </if>
 
             UNION ALL
 
@@ -214,7 +249,12 @@
                 fd_sbjt, fd_prdt_nm, id, prdt_cl_nm, done,
                 created_at, 'POLICE' AS data_source
             FROM found_police
-            WHERE is_deleted = 0
+            <if test="!includeDeleted">
+                where is_deleted = 1
+            </if>
+            <if test="includeDeleted">
+                where is_deleted = 0
+            </if>
         ) A
         WHERE 1 = 1
 

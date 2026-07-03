@@ -29,4 +29,7 @@ public class AdminSearchVO extends PagingVO {
 
     // 데이터 출처: USER / POLICE / ADMIN
     private List<String> dataSources;
+
+    // 게시글 데이터 삭제 게시글 포함 검색여부 확인
+    private boolean includeDeleted;
 }

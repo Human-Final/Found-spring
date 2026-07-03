@@ -41,4 +41,7 @@ public interface AdminService {
 
     // 관리자 공지사항 검색 결과 개수 조회
     int countSearchNotice(AdminSearchVO searchVO);
+
+    // 검색 조건이 비어있는지 판단하는 메서드
+    public boolean isSearchConditionEmpty(AdminSearchVO searchVO);
 }
