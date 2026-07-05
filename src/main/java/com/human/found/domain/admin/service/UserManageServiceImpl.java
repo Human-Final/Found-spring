@@ -129,29 +129,40 @@ public class UserManageServiceImpl implements UserManageService{
         Integer isDeleted = changedUser.getIsDeleted();
         String role = changedUser.getRole();
 
-        validateProfile(name, email, tel);
+        String trimmedName = name == null ? "" : name.trim();
+        String trimmedEmail = email == null ? "" : email.trim();
+        String trimmedTel = tel == null ? "" : tel.trim();
+
+        boolean profileChanged =
+                !trimmedName.equals(targetUser.getName())
+                || !trimmedEmail.equals(targetUser.getEmail())
+                || !trimmedTel.equals(targetUser.getTel());
+
+        if (profileChanged) {
+            validateProfile(trimmedName, trimmedEmail, trimmedTel);
+        }
+
         validateStatus(status);
         validateIsDeleted(isDeleted);
-
         // ADMIN일 때만 role 검증
         if (isAdmin) {
             validateRole(role);
         }
 
         // 이메일 중복 체크
-        if (!email.trim().equals(targetUser.getEmail())) {
-            int duplicateEmailCount = userMapper.countByEmail(email.trim());
+        if (profileChanged && !trimmedEmail.equals(targetUser.getEmail())) {
+            int duplicateEmailCount = userMapper.countByEmail(trimmedEmail);
 
             if (duplicateEmailCount > 0) {
-                throw new IllegalArgumentException("이미 사용 중인 이메일입니다: " + email);
+                throw new IllegalArgumentException("이미 사용 중인 이메일입니다: " + trimmedEmail);
             }
         }
 
         updatedCount += userManageMapper.updateUserById(
                 userId,
-                name.trim(),
-                email.trim(),
-                tel.trim(),
+                trimmedName,
+                trimmedEmail,
+                trimmedTel,
                 status,
                 isDeleted,
                 role,
@@ -219,7 +230,7 @@ public class UserManageServiceImpl implements UserManageService{
             newUser.setRole(role);
             newUser.setIsDeleted(0);
 
-            userMapper.insertUser(newUser);
+            userManageMapper.insertUserByAdmin(newUser);
             insertedCount++;
         }
 

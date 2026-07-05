@@ -14,14 +14,15 @@
             tel = #{tel},
             status = #{status},
             is_deleted = #{isDeleted},
-            CASE
-                WHEN #{isDeleted} = 1 THEN NOW()
-                WHEN #{isDeleted} = 0 THEN NULL
-                ELSE deleted_at
-            END 
-        <if test="canUpdateRole">
-            , `role` = #{role}
-        </if>
+            deleted_at = 
+                CASE
+                    WHEN #{isDeleted} = 1 THEN NOW()
+                    WHEN #{isDeleted} = 0 THEN NULL
+                    ELSE deleted_at
+                END 
+            <if test="canUpdateRole == true">
+                , `role` = #{role}
+            </if>
 
         WHERE id = #{id}
     </update>
@@ -135,6 +136,32 @@
             END,
             id ASC
     </select>
+
+    <insert id="insertUserByAdmin"
+            parameterType="com.human.found.domain.user.vo.UserVO">
+        INSERT INTO `user` (
+            id,
+            pw,
+            name,
+            email,
+            tel,
+            status,
+            role,
+            sign_up,
+            is_deleted
+        )
+        VALUES (
+            #{id},
+            #{pw},
+            #{name},
+            #{email},
+            #{tel},
+            #{status},
+            #{role},
+            NOW(),
+            0
+        )
+    </insert>
 
     <!-- 회원 관리 페이지 내 검색 공통 where-->
     <sql id="userSearchWhere">

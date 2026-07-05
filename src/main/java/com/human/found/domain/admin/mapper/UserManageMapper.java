@@ -19,7 +19,7 @@ public interface UserManageMapper {
     
     // 유저 정보 변경
     int updateUserById(
-            @Param("userId") String userId,
+            @Param("id") String userId,
             @Param("name") String name,
             @Param("email") String email,
             @Param("tel") String tel,
@@ -34,4 +34,6 @@ public interface UserManageMapper {
     int countUsers(UserSearchConditionDTO conditionDTO);
 
     List<UserVO> userInfoDownload(UserSearchConditionDTO conditionDTO);
+
+    int insertUserByAdmin(UserVO userVO);
 }
