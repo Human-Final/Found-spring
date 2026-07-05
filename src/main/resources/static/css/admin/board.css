@@ -818,3 +818,9 @@ button,
 .bulk-stop-btn {
     transition: .2s;
 }
+
+.filter-right{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
