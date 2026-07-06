@@ -1,17 +1,24 @@
 package com.human.found.domain.chat.controller;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.human.found.domain.chat.service.ChatService;
+import com.human.found.domain.chat.vo.ChatFileVO;
 import com.human.found.domain.chat.vo.ChatMessageVO;
 import com.human.found.domain.chat.vo.ChatRoomVO;
+import com.human.found.infrastructure.file.FileUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class ChatController {
 
     private final ChatService chatService;
+    private final FileUtil fileUtil;
 
     /**
      * 습득 게시글 채팅 버튼
@@ -189,5 +197,53 @@ public class ChatController {
         model.addAttribute("messages", messages);
 
         return "chat/chat";
+    }
+
+    /**
+     * 채팅 첨부파일 업로드
+     * - 파일 메시지를 먼저 chat_message에 저장
+     * - 저장된 message_num으로 chat_file 저장
+     * - 저장된 메시지를 JSON으로 반환
+     */
+    @PostMapping("/chat/file/upload")
+    @ResponseBody
+    public ChatMessageVO uploadChatFile(@RequestParam("chatNum") Long chatNum,
+                                        @RequestParam("senderId") String senderId,
+                                        @RequestParam("file") MultipartFile file) {
+
+        // 1. 채팅 메시지 먼저 저장
+        ChatMessageVO message = new ChatMessageVO();
+        message.setChatNum(chatNum);
+        message.setSenderId(senderId);
+        message.setContent(file.getOriginalFilename());
+
+        chatService.saveMessage(message);
+
+        // 2. 실제 파일 저장
+        MultipartFile[] files = {file};
+
+        List<Map<String, Object>> uploadedFiles =
+                fileUtil.uploadFiles(files, String.valueOf(message.getMessageNum()), "chat");
+
+        Map<String, Object> fileInfo = uploadedFiles.get(0);
+
+        // 3. chat_file 테이블 저장
+        ChatFileVO chatFile = new ChatFileVO();
+        chatFile.setMessageNum(message.getMessageNum());
+        chatFile.setOriginalName((String) fileInfo.get("originalname"));
+        chatFile.setSaveName((String) fileInfo.get("saveFileName"));
+        chatFile.setFileSize((Long) fileInfo.get("fileSize"));
+
+        // 화면에서 접근할 경로
+        chatFile.setFilePath("/images/chat/" + fileInfo.get("saveFileName"));
+
+        chatService.saveChatFile(chatFile);
+
+        // 4. 화면 출력용 fileList 세팅
+        List<ChatFileVO> fileList = new ArrayList<>();
+        fileList.add(chatFile);
+        message.setFileList(fileList);
+
+        return message;
     }
 }
