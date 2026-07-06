@@ -756,18 +756,18 @@ body.admin-user-page input {
 
 
 .role-badge.user {
-  background-color: #e0f2fe;
-  color: #0369a1; /* 파란색 계열 */
+  background-color: #fff7ed;
+  color: #c2410c;; /* 파란색 계열 */
 }
 
 .role-badge.police {
-  background-color: #dcfce7;
-  color: #15803d; /* 초록색 계열 */
+  background-color: #eff6ff;
+  color: #1d4ed8; /* 초록색 계열 */
 }
 
 .role-badge.portal {
-  background-color: #f1f5f9;
-  color: #475569; /* 회색 계열 */
+  background-color: #f5f3ff;
+  color: #6d28d9; /* 회색 계열 */
 }
 
 .user-manage-table tbody tr {
@@ -824,3 +824,41 @@ button,
     align-items:center;
     gap:10px;
 }
+
+.board-title{
+    color: #222;
+    text-decoration: none;
+}
+
+.board-title:hover{
+    color:#2563eb;
+    text-decoration:underline;
+}
+
+/*============================*/
+
+.deleted-row .board-title{
+  color : #999;
+  pointer-events: none;
+}
+
+
+/* ===============================
+   삭제된 게시글
+================================ */
+
+
+
+.deleted-row {
+    background: #fafafa;
+}
+
+.deleted-row td {
+    color: #999;
+}
+
+.deleted-row a{
+  pointer-events: none;
+  color: #999;
+}
+
