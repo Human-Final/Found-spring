@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.human.found.domain.admin.service.AdminService;
+import com.human.found.domain.admin.vo.AdminFoundVO;
 import com.human.found.domain.admin.vo.AdminSearchVO;
 
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class AdminController {
             model.addAttribute("boardType", "lost");
         } else {
             int totalCount = adminService.countSearchLost(searchVO);
+            searchVO.setSize(50);
             searchVO.pageInfo(totalCount);
 
             model.addAttribute("lostList", adminService.searchLostPage(searchVO));
@@ -43,7 +45,7 @@ public class AdminController {
             model.addAttribute("boardType", "lost");
         }
 
-        return "admin/board";
+        return "admin/boardManage";
     }
 
     /**
@@ -81,6 +83,7 @@ public class AdminController {
         } else {
             // 조건이 하나라도 채워져 있다면 사용자가 검색을 시도한 것 -> 정상 DB 조회
             int totalCount = adminService.countSearchFound(searchVO);
+            searchVO.setSize(50);
             searchVO.pageInfo(totalCount);
 
             model.addAttribute("foundList", adminService.searchFoundPage(searchVO));
@@ -88,7 +91,7 @@ public class AdminController {
             model.addAttribute("boardType", "found");
         }
 
-        return "admin/board";
+        return "admin/boardManage";
     }
 
 
@@ -122,6 +125,7 @@ public class AdminController {
         searchVO.setSize(10);
 
         int totalCount = adminService.countSearchNotice(searchVO);
+        searchVO.setSize(50);
         searchVO.pageInfo(totalCount);
 
         model.addAttribute("noticeList", adminService.searchNoticePage(searchVO));

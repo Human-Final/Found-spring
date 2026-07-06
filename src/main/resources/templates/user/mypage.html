@@ -577,14 +577,13 @@
 
       <section class="mypage-layout">
         <aside class="mypage-side">
-            <!-- [수정] user가 null이 아니면 이름의 첫 글자(인덱스 0~1)를 추출, null이면 기본값 '김' -->
+            <!-- user가 null이 아니면 이름의 첫 글자(인덱스 0~1)를 추출, null이면 기본값 '김' -->
             <div class="profile-avatar"
                 th:text="${user != null && user.name != null && !#strings.isEmpty(user.name)} ? ${#strings.substring(user.name, 0, 1)} : '김'">김</div>
             
-            <!-- [수정] 리터럴 대체 기호(|)를 사용하여 안전하게 '님' 부착 -->
+            <!-- 리터럴 대체 기호(|)를 사용하여 안전하게 '님' 부착 -->
             <p class="profile-name" th:text="${user != null} ? |${user.name}님| : '김분실'">김분실</p>
             
-            <!-- [수정] 닫는 작은따옴표(') 누락 오류 해결 및 안전한 이메일 출력 -->
             <p class="profile-email" th:text="${user != null} ? ${user.email} : 'lostuser@email.com'">lostuser@email.com</p>
 
           <nav class="side-menu" aria-label="마이페이지 메뉴">
@@ -1497,8 +1496,6 @@
         };
 
 
-
-
         // 🪟 B. 회원정보 수정창 내 배치된 변경 단추 클릭 시 모달 레이어 제어
         if (btnOpenPwModal) {
             btnOpenPwModal.addEventListener("click", () => passwordModal.style.display = "flex");
@@ -1545,6 +1542,7 @@
                 }
             });
         }
+
         if (profileForm) {
             profileForm.addEventListener("keydown", function(e) {
                 if (e.key === "Enter" || e.keyCode === 13) {
@@ -1581,9 +1579,7 @@
             });
         }
 
-        // 💡 44페이지 맨 아래 '});' 바로 직전에 이 코드를 그대로 붙여넣으세요.
-
-        // 1. 📧 최초 진입 시 타임리프 메일 주소를 해체해서 화면에 분배하는 함수
+        // 1. 최초 진입 시 타임리프 메일 주소를 해체해서 화면에 분배하는 함수
         window.initSplitEmail = function(emailValue) {
             const emailIdInput = document.getElementById("emailId");
             const emailDomainSelect = document.getElementById("emailDomain");
@@ -1619,7 +1615,7 @@
             updateCombinedEmail(false); // 초기 매핑 시에는 변경 감지 이벤트 차단
         };
 
-        // 2. 📧 아이디/도메인이 바뀔 때마다 숨겨진 메일 인풋에 값을 합쳐주는 함수
+        // 2. 아이디/도메인이 바뀔 때마다 숨겨진 메일 인풋에 값을 합쳐주는 함수
         function updateCombinedEmail(trigger = true) {
             const emailIdInput = document.getElementById("emailId");
             const emailDomainSelect = document.getElementById("emailDomain");
@@ -1645,7 +1641,7 @@
             }
         }
 
-        // 3. 📧 각 화면 요소들에 실시간 변경 이벤트 연결
+        // 3. 각 화면 요소들에 실시간 변경 이벤트 연결
         const emailIdInput = document.getElementById("emailId");
         const emailDomainSelect = document.getElementById("emailDomain");
         const emailDomainDirect = document.getElementById("emailDomainDirect");
