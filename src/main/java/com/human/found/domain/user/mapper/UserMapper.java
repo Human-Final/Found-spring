@@ -66,4 +66,7 @@ public interface UserMapper {
     void deleteAllFoundCommentsByUserId(String UserId);
     void deleteAllLostCommentsByUserId(String UserId);
 
+    int insertUser(String trim, String encodedPassword, String trim2, String trim3, String trim4, String status,
+            String role);
+
 }

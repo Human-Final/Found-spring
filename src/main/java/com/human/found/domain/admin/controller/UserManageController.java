@@ -9,9 +9,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.human.found.domain.admin.dto.UserBulkInfoDTO;
 import com.human.found.domain.admin.dto.UserSearchConditionDTO;
 import com.human.found.domain.admin.service.UserManageService;
 import com.human.found.domain.user.vo.UserVO;
@@ -63,41 +63,31 @@ public class UserManageController {
     
 
 
-    // 유저 권한 변경
+    // 유저 정보 변경
     @PostMapping("/test/users/edit")
     public String updateUserBulk(
-                @RequestParam(value = "statusUserIds", required = false) List<String> statusUserIds,
-                @RequestParam(value="statuses", required = false) List<String> statuses,
-                @RequestParam(value = "isDeletedList", required = false) List<Integer> isDeletedList,
-                @RequestParam(value = "roleUserIds", required = false) List<String> roleUserIds,
-                @RequestParam(value="roles", required = false) List<String> roles,
-                @RequestParam(required = false) List<String> profileUserIds,
-                @RequestParam(required = false) List<String> names,
-                @RequestParam(required = false) List<String> emails,
-                @RequestParam(required = false) List<String> tels,
+                @ModelAttribute UserBulkInfoDTO userInfo,
                 RedirectAttributes redirectAttributes,
                 Authentication authentication) {
 
+        try {
+            boolean isAdmin = hasRole(authentication, "ADMIN");
+            boolean isManager = hasRole(authentication, "MANAGER");
 
-        boolean isAdmin = hasRole(authentication, "ADMIN");
-        boolean isManager = hasRole(authentication, "MANAGER");
+            userManageService.updateUserBulk(
+                    userInfo,
+                    isAdmin,
+                    isManager
+            );
 
-        userManageService.updateUserBulk(
-                statusUserIds,
-                statuses, 
-                isDeletedList,
-                roleUserIds,
-                roles,
-                profileUserIds,
-                names,
-                emails,
-                tels,
-                isAdmin,
-                isManager
-        );
-
-        redirectAttributes.addFlashAttribute(
-            "message", "회원 정보가 수정되었습니다.");
+            redirectAttributes.addFlashAttribute(
+                "message", "회원 정보가 수정되었습니다.");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                "회원 정보 수정 중 오류가 발생했습니다.");
+        }
 
         return "redirect:/test/users";
     }

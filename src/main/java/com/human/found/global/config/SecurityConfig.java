@@ -41,7 +41,8 @@ public class SecurityConfig {
                 .ignoringRequestMatchers("/mypage/verify-password",
                                         "/mypage/api/**",
                                         "/api/public/**",
-                                        "/find-id/**"
+                                        "/find-id/**",
+                                        "/ws-stomp/**"
 
                 )
              )
@@ -81,6 +82,7 @@ public class SecurityConfig {
                     "/css/**",
                     "/js/**",
                     "/images/**",
+                    "/ws-stomp/**",
                     "/api/notices/list",
                     "/api/notices/detail",
                     "/lost/**",

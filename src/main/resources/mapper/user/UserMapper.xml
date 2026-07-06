@@ -162,6 +162,7 @@
             name,
             email,
             tel,
+            status,
             role,
             sign_up,
             is_deleted
@@ -172,6 +173,7 @@
             #{name},
             #{email},
             #{tel},
+            'active',
             'USER',
             NOW(),
             0

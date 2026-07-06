@@ -127,10 +127,10 @@
                 lst_filepath_img, view_count, 'USER' AS data_source
             FROM lost
             <if test="!includeDeleted">
-                where is_deleted = 1
+                where is_deleted = 0
             </if>
             <if test="includeDeleted">
-                where is_deleted = 0
+                where is_deleted = 1
             </if>
 
             UNION ALL
@@ -141,10 +141,10 @@
                 lst_filepath_img, view_count, 'POLICE' AS data_source
             FROM lost_police
             <if test="!includeDeleted">
-                where is_deleted = 1
+                where is_deleted = 0
             </if>
             <if test="includeDeleted">
-                where is_deleted = 0
+                where is_deleted = 1
             </if>
         ) A
         WHERE 1 = 1
@@ -164,10 +164,10 @@
                 created_at, 'USER' AS data_source
             FROM lost
             <if test="!includeDeleted">
-                where is_deleted = 1
+                where is_deleted = 0
             </if>
             <if test="includeDeleted">
-                where is_deleted = 0
+                where is_deleted = 1
             </if>
 
             UNION ALL
@@ -177,10 +177,10 @@
                 created_at, 'POLICE' AS data_source
             FROM lost_police
             <if test="!includeDeleted">
-                where is_deleted = 1
+                where is_deleted = 0
             </if>
             <if test="includeDeleted">
-                where is_deleted = 0
+                where is_deleted = 1
             </if>
         ) A
         WHERE 1 = 1
@@ -189,37 +189,89 @@
     </select>
 
     <!-- 관리자 습득물 검색 + 페이징 조회 -->
-    <select id="searchFoundPage" resultMap="AdminFoundResultMap">
+    <select id="searchFoundPage"
+            parameterType="com.human.found.domain.admin.vo.AdminSearchVO"
+            resultMap="AdminFoundResultMap">
+
         SELECT *
         FROM (
             SELECT
-                num, atc_id, id, clr_nm, dep_place, fd_filepath_img,
-                fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm,
-                created_at, updated_at, done, is_deleted,
+                num,
+                atc_id,
+                id,
+                clr_nm,
+                dep_place,
+                fd_filepath_img,
+                fd_prdt_nm,
+                fd_sbjt,
+                fd_ymd,
+                prdt_cl_nm,
+                created_at,
+                updated_at,
+                done,
+                is_deleted,
                 'USER' AS data_source
             FROM found
             <if test="!includeDeleted">
-                where is_deleted = 1
+                WHERE is_deleted = 0
             </if>
             <if test="includeDeleted">
-                where is_deleted = 0
+                WHERE is_deleted = 1
             </if>
 
             UNION ALL
 
             SELECT
-                num, atc_id, id, clr_nm, dep_place, fd_filepath_img,
-                fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm,
-                created_at, updated_at, done, is_deleted,
+                num,
+                atc_id,
+                id,
+                clr_nm,
+                dep_place,
+                fd_filepath_img,
+                fd_prdt_nm,
+                fd_sbjt,
+                fd_ymd,
+                prdt_cl_nm,
+                created_at,
+                updated_at,
+                done,
+                is_deleted,
                 'POLICE' AS data_source
             FROM found_police
             <if test="!includeDeleted">
-                where is_deleted = 1
+                WHERE is_deleted = 0
             </if>
             <if test="includeDeleted">
-                where is_deleted = 0
+                WHERE is_deleted = 1
             </if>
-        ) A
+
+            UNION ALL
+
+            SELECT
+                num,
+                atc_id,
+                id,
+                clr_nm,
+                dep_place,
+                fd_filepath_img,
+                fd_prdt_nm,
+                fd_sbjt,
+                fd_ymd,
+                prdt_cl_nm,
+                created_at,
+                updated_at,
+                done,
+                is_deleted,
+                'PORTAL' AS data_source
+            FROM found_portal
+            <if test="!includeDeleted">
+                WHERE is_deleted = 0
+            </if>
+            <if test="includeDeleted">
+                WHERE is_deleted = 1
+            </if>
+        ) total_found
+
         WHERE 1 = 1
 
         <include refid="foundSearchCondition"/>
@@ -229,33 +281,65 @@
     </select>
 
     <!-- 관리자 습득물 검색 결과 개수 조회 -->
-    <select id="countSearchFound" resultType="int">
+    <select id="countSearchFound"
+            parameterType="com.human.found.domain.admin.vo.AdminSearchVO"
+            resultType="int">
+
         SELECT COUNT(*)
         FROM (
             SELECT
-                fd_sbjt, fd_prdt_nm, id, prdt_cl_nm, done,
-                created_at, 'USER' AS data_source
+                fd_sbjt,
+                fd_prdt_nm,
+                id,
+                prdt_cl_nm,
+                done,
+                created_at,
+                'USER' AS data_source
             FROM found
             <if test="!includeDeleted">
-                where is_deleted = 1
+                WHERE is_deleted = 0
             </if>
             <if test="includeDeleted">
-                where is_deleted = 0
+                WHERE is_deleted = 1
             </if>
 
             UNION ALL
 
             SELECT
-                fd_sbjt, fd_prdt_nm, id, prdt_cl_nm, done,
-                created_at, 'POLICE' AS data_source
+                fd_sbjt,
+                fd_prdt_nm,
+                id,
+                prdt_cl_nm,
+                done,
+                created_at,
+                'POLICE' AS data_source
             FROM found_police
             <if test="!includeDeleted">
-                where is_deleted = 1
+                WHERE is_deleted = 0
             </if>
             <if test="includeDeleted">
-                where is_deleted = 0
+                WHERE is_deleted = 1
             </if>
-        ) A
+
+            UNION ALL
+
+            SELECT
+                fd_sbjt,
+                fd_prdt_nm,
+                id,
+                prdt_cl_nm,
+                done,
+                created_at,
+                'PORTAL' AS data_source
+            FROM found_portal
+            <if test="!includeDeleted">
+                WHERE is_deleted = 0
+            </if>
+            <if test="includeDeleted">
+                WHERE is_deleted = 1
+            </if>
+        ) total_found
+
         WHERE 1 = 1
 
         <include refid="foundSearchCondition"/>
@@ -344,14 +428,22 @@
 
         <if test="categories != null and categories.size() > 0">
             AND prdt_cl_nm IN
-            <foreach collection="categories" item="category" open="(" separator="," close=")">
+            <foreach collection="categories"
+                    item="category"
+                    open="("
+                    separator=","
+                    close=")">
                 #{category}
             </foreach>
         </if>
 
         <if test="doneList != null and doneList.size() > 0">
             AND done IN
-            <foreach collection="doneList" item="done" open="(" separator="," close=")">
+            <foreach collection="doneList"
+                    item="done"
+                    open="("
+                    separator=","
+                    close=")">
                 #{done}
             </foreach>
         </if>
@@ -366,7 +458,11 @@
 
         <if test="dataSources != null and dataSources.size() > 0">
             AND data_source IN
-            <foreach collection="dataSources" item="source" open="(" separator="," close=")">
+            <foreach collection="dataSources"
+                    item="source"
+                    open="("
+                    separator=","
+                    close=")">
                 #{source}
             </foreach>
         </if>

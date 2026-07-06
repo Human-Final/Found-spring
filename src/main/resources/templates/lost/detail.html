@@ -234,6 +234,18 @@
         ← 목록으로
       </a>
 
+      <!-- 문의하기 : 사용자 등록글 + 본인 글이 아닐 때만 -->
+      <form th:if="${#authorization.expression('isAuthenticated()')
+                    and lostVO.dataSource == 'user'}"
+            th:action="@{/chat/lost/{num}(num=${lostVO.num})}"
+            method="post">
+
+        <button type="submit" class="detail-btn chat-btn"
+                th:text="${lostVO.id == #authentication.name ? '채팅목록' : '채팅하기'}">
+          채팅하기
+        </button>
+      </form>
+      
       <!-- 작성자 본인만 수정 가능-->
       <th:block th:if="${#authorization.expression('isAuthenticated()') 
                       and lostVO.dataSource == 'user' 

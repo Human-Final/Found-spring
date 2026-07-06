@@ -90,8 +90,6 @@ public class UserServiceImpl implements UserService {
         return "verified";
     }
 
-    
-
 
     /**
      * 회원가입
@@ -226,10 +224,12 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
+
     @Override
     public java.util.Map<String, Object> getMyPageCounts(String userId) {
         return userMapper.selectMyPageCounts(userId);
     }
+
     
     /**
      * 현재 비밀번호 본인 인증 판정 로직
@@ -265,6 +265,7 @@ public class UserServiceImpl implements UserService {
         return isMatch;
     }
 
+
     /**
      * 마이페이지 메인 화면용 최근 작성글 2개 조회 구현부
      */
@@ -281,6 +282,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.selectMyRecentPostList(userId);
     }
 
+
     /**
      * 마이페이지 메인 화면용 작성글 모두 조회하기 구현부
      */
@@ -292,7 +294,6 @@ public class UserServiceImpl implements UserService {
         }
         return userMapper.selectMyAllPostList(userId);
     }
-
 
 
     /**
@@ -331,6 +332,7 @@ public class UserServiceImpl implements UserService {
         userMapper.updatePasswordOnly(id, encryptedPw);
     }
 
+
     /**
      * 회원 정보 수정
      * - 현재 비밀번호 확인
@@ -362,6 +364,7 @@ public class UserServiceImpl implements UserService {
         userMapper.updateUser(userVO);
     }
 
+    
     /**
      * 마이페이지 뷰를 띄울 때 회원 정보를 안전하게 꺼내오기 위한 메서드
      */

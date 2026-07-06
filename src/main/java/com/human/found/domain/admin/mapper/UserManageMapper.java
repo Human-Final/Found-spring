@@ -17,25 +17,23 @@ public interface UserManageMapper {
     // 유저 전체 조회
     List<UserVO> totalUserList();
     
-    // 유저 상태 변경
-    int updateUserStatusById(@Param("id") String id, 
-                              @Param("status") String status,
-                              @Param("isDeleted") int isDeleted);
-
-    // 유저 권한 변경
-    int updateUserRoleById(@Param("id") String id, 
-                           @Param("role") String role);
-
     // 유저 정보 변경
-    int updateUserProfileById(@Param("id") String id,
-                             @Param("name") String name,
-                             @Param("email") String email,
-                             @Param("tel") String tel);
-
+    int updateUserById(
+            @Param("id") String userId,
+            @Param("name") String name,
+            @Param("email") String email,
+            @Param("tel") String tel,
+            @Param("status") String status,
+            @Param("isDeleted") int isDeleted,
+            @Param("role") String role,
+            @Param("canUpdateRole") boolean canUpdateRole
+);
                             
     List<UserVO> searchUsers(UserSearchConditionDTO conditionDTO);
 
     int countUsers(UserSearchConditionDTO conditionDTO);
 
     List<UserVO> userInfoDownload(UserSearchConditionDTO conditionDTO);
+
+    int insertUserByAdmin(UserVO userVO);
 }

@@ -6,6 +6,9 @@
   <meta charset="UTF-8">
   <title>게시글 관리 | 분실물 센터</title>
 
+  <meta name="_csrf" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:content="${_csrf.headerName}">
+
   <link rel="stylesheet" th:href="@{/css/common/common.css}">
   <link rel="stylesheet" th:href="@{/css/admin/board.css}">
 </head>
@@ -71,12 +74,14 @@
     <!-- 탭 -->
     <section class="admin-tabs">
 
-      <a th:href="@{/admin/lost}"
+      <a href="javascript:void(0);" 
+         onclick="switchTab('lost')"
          th:classappend="${boardType == 'lost'} ? ' active'">
         분실물
       </a>
 
-      <a th:href="@{/admin/found}"
+      <a href="javascript:void(0);"
+         onclick="switchTab('found')"
          th:classappend="${boardType == 'found'} ? ' active'">
         습득물
       </a>
@@ -85,7 +90,8 @@
 
     <!-- 필터 -->
     <section class="admin-filter-card">
-      <form th:action="@{/admin/{type}(type=${boardType})}" method="get" class="admin-filter-form">
+      <form id="filterForm" th:action="@{/admin/{type}(type=${boardType})}" method="get" class="admin-filter-form">
+        <input type="hidden" name="page" th:value="${searchVO.page}">
 
 
         <div class="filter-top">
@@ -98,10 +104,17 @@
             <button type="submit" class="filter-search-btn">검색</button>
           </div>
 
+          <div class="filter-right">
+          <button type="button" id="btnSelectAllFilters" class="filter-reset-btn">
+            <i data-lucide="check-square"></i>
+            <span>필터 전체선택</span>
+          </button>
+
           <a th:href="@{/admin/{type}(type=${boardType})}" class="filter-reset-btn">
             <i data-lucide="rotate-cw"></i>
             <span>초기화</span>
           </a>
+        </div>
         </div>
 
         <div class="filter-row">
@@ -110,61 +123,61 @@
           <div class="filter-content">
           <label class="filter-chip">
             <input type="checkbox" name="categories" value="지갑"
-                   th:checked="${categoryList != null and #lists.contains(categoryList, '지갑')}">
+                   th:checked="${searchVO.categories != null and #lists.contains(searchVO.categories, '지갑')}">
             <span>지갑</span>
           </label>
 
           <label class="filter-chip">
             <input type="checkbox" name="categories" value="핸드폰"
-                   th:checked="${categoryList  != null and #lists.contains(categoryList, '핸드폰')}">
+                   th:checked="${searchVO.categories  != null and #lists.contains(searchVO.categories, '핸드폰')}">
             <span>핸드폰</span>
           </label>
 
           <label class="filter-chip">
             <input type="checkbox" name="categories" value="가방"
-                   th:checked="${categoryList  != null and #lists.contains(categoryList, '가방')}">
+                   th:checked="${searchVO.categories  != null and #lists.contains(searchVO.categories, '가방')}">
             <span>가방</span>
           </label>
 
           <label class="filter-chip">
             <input type="checkbox" name="categories" value="카드"
-                  th:checked="${categoryList != null and #lists.contains(categoryList,'카드')}">
+                  th:checked="${searchVO.categories != null and #lists.contains(searchVO.categories,'카드')}">
               <span>카드</span>
           </label>
 
           <label class="filter-chip">
             <input type="checkbox" name="categories" value="전자기기"
-                  th:checked="${categoryList != null and #lists.contains(categoryList,'전자기기')}">
+                  th:checked="${searchVO.categories != null and #lists.contains(searchVO.categories,'전자기기')}">
               <span>전자기기</span>
           </label>
 
           <label class="filter-chip">
             <input type="checkbox" name="categories" value="의류"
-                  th:checked="${categoryList != null and #lists.contains(categoryList,'의류')}">
+                  th:checked="${searchVO.categories != null and #lists.contains(searchVO.categories,'의류')}">
               <span>의류</span>
           </label>
 
           <label class="filter-chip">
             <input type="checkbox" name="categories" value="귀금속"
-                  th:checked="${categoryList != null and #lists.contains(categoryList,'귀금속')}">
+                  th:checked="${searchVO.categories != null and #lists.contains(searchVO.categories,'귀금속')}">
               <span>귀금속</span>
           </label>
 
           <label class="filter-chip">
             <input type="checkbox" name="categories" value="도서"
-                  th:checked="${categoryList != null and #lists.contains(categoryList,'도서')}">
+                  th:checked="${searchVO.categories != null and #lists.contains(searchVO.categories,'도서')}">
               <span>도서</span>
           </label>
 
           <label class="filter-chip">
             <input type="checkbox" name="categories" value="자동차"
-                  th:checked="${categoryList != null and #lists.contains(categoryList,'자동차')}">
+                  th:checked="${searchVO.categories != null and #lists.contains(searchVO.categories,'자동차')}">
               <span>자동차</span>
           </label>
 
           <label class="filter-chip">
             <input type="checkbox" name="categories" value="기타"
-                  th:checked="${categoryList != null and #lists.contains(categoryList,'기타')}">
+                  th:checked="${searchVO.categories != null and #lists.contains(searchVO.categories,'기타')}">
               <span>기타</span>
           </label>
 
@@ -176,13 +189,13 @@
 
           <label class="filter-chip">
             <input type="checkbox" name="doneList" value="0"
-                   th:checked="${doneList != null and #lists.contains(doneList, 0)}">
+                   th:checked="${searchVO.doneList != null and #lists.contains(searchVO.doneList, 0)}">
             <span>진행중</span>
           </label>
 
           <label class="filter-chip">
             <input type="checkbox" name="doneList" value="1"
-                   th:checked="${doneList != null and #lists.contains(doneList, 1)}">
+                   th:checked="${searchVO.doneList != null and #lists.contains(searchVO.doneList, 1)}">
             <span>완료</span>
           </label>
         </div>
@@ -193,19 +206,19 @@
           <input type="date"
                  name="startDate"
                  class="filter-date"
-                 th:value="${param.startDate}">
+                 th:value="${searchVO.startDate}">
 
           <span class="date-separator">~</span>
 
           <input type="date"
                  name="endDate"
                  class="filter-date"
-                 th:value="${param.endDate}">
+                 th:value="${searchVO.endDate}">
 
           <div class="date-shortcuts">
             <button type="button" data-range="today">오늘</button>
             <button type="button" data-range="7days">7일</button>
-            <button type="button" data-range="1month" class="active">1개월</button>
+            <button type="button" data-range="1month">1개월</button>
             <button type="button" data-range="3months">3개월</button>
             <button type="button" data-range="all">전체</button>
           </div>
@@ -216,20 +229,20 @@
 
             <label class="filter-chip">
                 <input type="checkbox" name="dataSources" value="user"
-                th:checked="${dataSources != null and #lists.contains(dataSources, 'user')}">
+                th:checked="${searchVO.dataSources != null and #lists.contains(searchVO.dataSources, 'user')}">
                 <span>사용자</span>
             </label>
 
             <label class="filter-chip">
                 <input type="checkbox" name="dataSources" value="police"
-                th:checked="${dataSources != null and #lists.contains(dataSources, 'police')}">
-            <span>경찰</span>
+                th:checked="${searchVO.dataSources != null and #lists.contains(searchVO.dataSources, 'police')}">
+            <span>경찰기관</span>
             </label>
 
             <label class="filter-chip">
                 <input type="checkbox" name="dataSources" value="portal"
-                th:checked="${dataSources != null and #lists.contains(dataSources, 'portal')}">
-            <span>포털</span>
+                th:checked="${searchVO.dataSources != null and #lists.contains(searchVO.dataSources, 'portal')}">
+            <span>포털기관</span>
             </label>
           </div>
 
@@ -296,7 +309,8 @@
             <input type="checkbox"
                    class="user-check"
                    name="nums"
-                   th:value="${item.num}">
+                   th:value="${item.num}"
+                   th:data-source="${item.dataSource}">
             </td>       
             <td th:text="${item.num}">번호</td>
             <td>분실물</td>
@@ -329,13 +343,14 @@
                </form> 
             </td>
           </tr>   
-
+          
           <tr th:if="${boardType=='found' and foundList !=null}"
           th:each="item : ${foundList}"
           class="board-row"
           th:data-url="@{/admin/found/{nums}(nums=${item.num})}">
           <td>
-            <input type="checkbox" class="user-check" name="nums" th:value="${item.num}">
+            <input type="checkbox" class="user-check" name="nums" th:value="${item.num}"
+            th:data-source="${item.dataSource}">
           </td>
           <td th:text="${item.num}">1256</td>
           <td>습득물</td>
@@ -374,17 +389,22 @@
 
     <!-- 페이지네이션 -->
     <section class="admin-pagination">
-      <a th:href="@{/admin/{type}(type=${boardType},page=${searchVO.startPage-1})}" class="page-btn" 
-      th:if="${searchVO.startPage>1}">
+      <a href="javascript:void(0);" th:if="${searchVO.startPage>1}" 
+      th:onclick="|fn_goPage(${searchVO.startPage-1})|"
+      class="page-btn" >
         <i data-lucide="chevron-left"></i>
       </a>
-      <a th:each="p:${#numbers.sequence(searchVO.startPage,searchVO.endPage)}" 
-      th:href="@{/admin/{type}(type=${boardType},page=${p},keyword=${param.keyword})}"
+      <a href="javascript:void(0);"
+      th:each="p:${#numbers.sequence(searchVO.startPage,searchVO.endPage)}" 
+      th:onclick="|fn_goPage(${p})|"
       th:text="${p}" 
       th:classappend="${p==searchVO.page}?'active':''"
       class="page-btn">1</a>
-      <a th:href="@{/admin/{type}(type=${boardType},page=${searchVO.endPage+1},keyword=${param.keyword})}" class="page-btn"
-      th:if="${searchVO.endPage<searchVO.totalPage}">
+
+      <a href="javascript:void(0);"
+      th:if="${searchVO.endPage<searchVO.totalPage}" 
+      th:onclick="|fn_goPage(${searchVO.endPage+1})|"
+      class="page-btn">
         <i data-lucide="chevron-right"></i>
       </a>
     </section>
@@ -395,6 +415,35 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>
   lucide.createIcons();
+
+
+
+
+  // 페이징 처리 함수 (form 데이터 유지)
+  function fn_goPage(pageNumber){
+    const form = document.getElementById("filterForm");
+    if(!form) return;
+
+    const pageInput = form.querySelector("input[name='page']");
+    if(pageInput){
+      pageInput.value = pageNumber;
+    }
+    form.submit();
+  }
+
+  //탭 이동 함수 (Form데이터 유지)
+  function switchTab(type){
+    const form = document.getElementById("filterForm");
+    if(!form) return;
+
+    form.action="/admin/"+type;
+
+    const pageInput= form.querySelector("input[name='page']");
+    if(pageInput){
+      pageInput.value="1";// 탭 이동시 1페이지로 리셋
+    }
+    form.submit();
+  }
 
   document.addEventListener("DOMContentLoaded", () => {
     const checkAll = document.getElementById("checkAll");
@@ -413,6 +462,34 @@
     const endDateInput = document.querySelector("input[name='endDate']");
     const rangeButtons = document.querySelectorAll(".date-shortcuts button");
 
+    // 전체 선택
+    const btnSelectAllFilters=document.getElementById("btnSelectAllFilters");
+    
+    if(btnSelectAllFilters){
+      btnSelectAllFilters.addEventListener("click",(e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        // 현재 체크된 개수 파악
+        const AllFilterChecks = document.querySelectorAll(
+          "input[name='categories'],input[name='doneList'],input[name='dataSources']");
+
+        const checkedCount=document.querySelectorAll(
+            "input[name='categories']:checked,input[name='doneList']:checked,input[name='dataSources']:checked"
+          ).length;
+
+
+
+        // 전체가 다 체크되어 있는지 여부 확인
+        const AllChecked = (AllFilterChecks.length === checkedCount);
+
+        // 이미 다 켜져있으면 전체 해제, 하나라도 꺼져있으면 전체 체크
+        AllFilterChecks.forEach(c=>{
+          c.checked=!AllChecked;
+        });
+      });
+    }
+
+    
 
 
     function updateSelectedCount() {
@@ -526,21 +603,42 @@
         if(!confirm("선택한 게시글을 삭제하시겠습니까?")){
           return;
         }
+      
+
+        const activeTab=document.querySelector(".admin-tabs .active").textContent.trim();
+        const boardType=activeTab==="분실물"?"lost":"found";
+
         const form = document.createElement("form");
         form.method="post";
+        form.action=`/admin/${boardType}/delete`;
 
-        const boardType=document.querySelector(".admin-tabs .active").textContent.trim()=="분실물"
-        ?"lost"
-        :"found";
-        form.action = "/admin/" + boardType + "/delete";
-
+        // 3. 선택된 모든 체크박스를 돌면서 번호(nums)와 출처(dataSources)를 매칭해서 폼에 추가
         checkedBoxes.forEach(c =>{
            const input = document.createElement("input");
            input.type="hidden";
            input.name="nums";
            input.value=c.value; 
            form.appendChild(input);
+          // 각 글에 해당하는 데이터 출처(USER, POLICE, portal) hidden input
+           const dataSourceInput=document.createElement("input");
+           dataSourceInput.type="hidden";
+           dataSourceInput.name="dataSource";
+           dataSourceInput.value=c.dataset.source;// HTML의 th:data-source 값을 가져옴
+           form.appendChild(dataSourceInput)
         });
+        
+
+        // csrf 토큰 추가
+
+        const csrfToken = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+        if(csrfToken){
+          const csrfInput = document.createElement("input");
+          csrfInput.type="hidden";
+          csrfInput.name="_csrf";
+          csrfInput.value=csrfToken;
+          form.appendChild(csrfInput)
+        }
+
         document.body.appendChild(form)
         form.submit();
       });
