@@ -40,7 +40,7 @@ public class LostController {
     public String LostRegister(@Valid @ModelAttribute LostVO lostVO,
         BindingResult bindingResult,Model model,
         @RequestParam(value="files",required = false) MultipartFile[]files, Principal principal) {
-        
+            
         if(bindingResult.hasErrors()){
             
             bindingResult.getFieldErrors()

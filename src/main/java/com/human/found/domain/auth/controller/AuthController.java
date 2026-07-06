@@ -32,11 +32,15 @@ public class AuthController {
      * Method : GET
      */
     @GetMapping("/login")
-    public String loginPage( 
+    public String loginPage(
+        @RequestParam(value = "error", required = false) String error, 
         @RequestParam(name = "withdraw", required = false) String withdraw,
         Model model) {
             if(withdraw != null) {
                 model.addAttribute("message", "회원탈퇴가 완료되었습니다.");
+            }
+            if(error != null) {
+                model.addAttribute("loginError", true);
             }
 
         return "user/login";
@@ -73,12 +77,13 @@ public class AuthController {
             model.addAttribute("error", error);
             return "user/join";
         }
+        model.addAttribute("userId", user.getId());
 
         // 회원가입 처리
         userService.join(user);
 
         // 회원가입 완료 후 로그인 페이지 이동
-        return "redirect:/login";
+        return "user/welcome";
     }
 
     /**

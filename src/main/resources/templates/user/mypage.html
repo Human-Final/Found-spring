@@ -724,7 +724,22 @@
                             <span class="form-label">이메일</span>
                             <div style="display: flex; gap: 10px; width: 100%;">
                                 <!-- 기존 이메일 태그에 id="currentEmail" 추가 -->
-                                <input type="email" id="currentEmail" name="email" class="form-input" th:value="${user.email}" required style="flex: 1;">
+                                <input type="text" id="currentEmail" name="email" th:value="${user.email}" required style="display: none;">
+                                <!-- 이메일 아이디 입력창 -->
+                                <input type="text" id="emailId" class="form-input" style="flex: 1; min-width: 80px;" placeholder="이메일 아이디" required>
+                                <span>@</span>
+                                <!-- 이메일 도메인 선택창 -->
+                                <select id="emailDomain" style="flex: 1; min-width: 120px; height: 38px; border: 1px solid #ced4da; border-radius: 4px; padding: 0 10px;">
+                                    <option value="naver.com">naver.com</option>
+                                    <option value="gmail.com">gmail.com</option>
+                                    <option value="daum.net">daum.net</option>
+                                    <option value="hanmail.net">hanmail.net</option>
+                                    <option value="nate.com">nate.com</option>
+                                    <option value="direct">직접입력</option>
+                                </select>
+                                <!--직접 입력 선택하면 도메인입력하는 곳-->
+                                <input type="text" id="emailDomainDirect" class="form-input" style="flex: 1; min-width: 120px; display: none;" placeholder="도메인 입력">
+
                                 <!-- 중복확인 버튼 추가 -->
                                 <button type="button" id="btnCheckEmail" class="primary-button" style="margin-top: 0; white-space: nowrap; background-color: #495057; font-size: 13px; padding: 0 15px;">중복확인</button>
                             </div>
@@ -1192,7 +1207,7 @@
         let isEmailChecked = true; // 중복확인 상태 플래그
 
         let emailTimerInterval = null;  // 타이머 3분 제어할 변수
-        let isEmailAuthVerified = false;  // 6자리 숫자의 읹증통과 여부 변수
+        let isEmailAuthVerified = false;  // 6자리 숫자의 인증통과 여부 변수
         
         // 백엔드 3분 세션 주기에 맞춘 실시간 카운트다운 타이머 함수
         function startEmailTimer(duration) {
@@ -1260,7 +1275,12 @@
                         infoSection.style.display = "block";
                         if (emailInput) {
                             originalEmail = emailInput.value.trim();
-                            isEmailChecked = true; 
+                            isEmailChecked = true;
+                            isEmailAuthVerified = true; // 최초 진입 시 기존 메일 상태이므로 가드 패스
+                            initSplitEmail(originalEmail);
+
+                            // 💡 누락되었던 이메일 분배 함수를 여기서 정확히 격발시켜 줍니다.
+                            initSplitEmail(originalEmail);
                         }
                         setTimeout(() => infoSection.style.opacity = "1", 50);
                     } 
@@ -1560,6 +1580,96 @@
                 }
             });
         }
+
+        // 💡 44페이지 맨 아래 '});' 바로 직전에 이 코드를 그대로 붙여넣으세요.
+
+        // 1. 📧 최초 진입 시 타임리프 메일 주소를 해체해서 화면에 분배하는 함수
+        window.initSplitEmail = function(emailValue) {
+            const emailIdInput = document.getElementById("emailId");
+            const emailDomainSelect = document.getElementById("emailDomain");
+            const emailDomainDirect = document.getElementById("emailDomainDirect");
+
+            if (!emailValue || !emailValue.includes("@")) return;
+
+            const parts = emailValue.split("@");
+            const dbId = parts[0];
+            const dbDomain = parts[1];
+
+            if (emailIdInput) emailIdInput.value = dbId;
+
+            if (emailDomainSelect) {
+                let hasDomain = false;
+                for (let i = 0; i < emailDomainSelect.options.length; i++) {
+                    if (emailDomainSelect.options[i].value === dbDomain) {
+                        emailDomainSelect.value = dbDomain;
+                        hasDomain = true;
+                        break;
+                    }
+                }
+                if (!hasDomain) {
+                    emailDomainSelect.value = "direct";
+                    if (emailDomainDirect) {
+                        emailDomainDirect.style.display = "block";
+                        emailDomainDirect.value = dbDomain;
+                    }
+                } else {
+                    if (emailDomainDirect) emailDomainDirect.style.display = "none";
+                }
+            }
+            updateCombinedEmail(false); // 초기 매핑 시에는 변경 감지 이벤트 차단
+        };
+
+        // 2. 📧 아이디/도메인이 바뀔 때마다 숨겨진 메일 인풋에 값을 합쳐주는 함수
+        function updateCombinedEmail(trigger = true) {
+            const emailIdInput = document.getElementById("emailId");
+            const emailDomainSelect = document.getElementById("emailDomain");
+            const emailDomainDirect = document.getElementById("emailDomainDirect");
+
+            if (!emailIdInput || !emailDomainSelect || !emailInput) return;
+
+            const id = emailIdInput.value.trim();
+            let domain = emailDomainSelect.value;
+
+            if (domain === "direct" && emailDomainDirect) {
+                domain = emailDomainDirect.value.trim();
+            }
+
+            if (id && domain) {
+                emailInput.value = `${id}@${domain}`;
+            } else {
+                emailInput.value = "";
+            }
+
+            if (trigger) {
+                emailInput.dispatchEvent(new Event("input"));
+            }
+        }
+
+        // 3. 📧 각 화면 요소들에 실시간 변경 이벤트 연결
+        const emailIdInput = document.getElementById("emailId");
+        const emailDomainSelect = document.getElementById("emailDomain");
+        const emailDomainDirect = document.getElementById("emailDomainDirect");
+
+        if (emailIdInput) emailIdInput.addEventListener("keyup", () => updateCombinedEmail(true));
+        if (emailDomainDirect) emailDomainDirect.addEventListener("keyup", () => updateCombinedEmail(true));
+        if (emailDomainSelect) {
+            emailDomainSelect.addEventListener("change", function() {
+                if (this.value === "direct") {
+                    if (emailDomainDirect) {
+                        emailDomainDirect.style.display = "block";
+                        emailDomainDirect.value = "";
+                        emailDomainDirect.focus();
+                    }
+                } else {
+                    if (emailDomainDirect) {
+                        emailDomainDirect.style.display = "none";
+                        emailDomainDirect.value = "";
+                    }
+                }
+                updateCombinedEmail(true);
+            });
+        }
+
 
         // E. 다른 탭을 눌러 떠날 때 수정 폼을 다시 숨기고 리셋하는 내부 헬퍼 함수
         window.resetMemberEditAuth = function() {

@@ -19,6 +19,32 @@ public class AdminServiceImpl implements AdminService{
 
     private final AdminMapper adminMapper;
 
+    public boolean isSearchConditionEmpty(AdminSearchVO searchVO) {
+        // 1. 검색어가 있는지 확인
+        boolean hasKeyword = searchVO.getKeyword() != null && !searchVO.getKeyword().trim().isEmpty();
+        
+        // 2. 카테고리가 선택되었는지 확인 (체크박스 다중 선택이면 보통 List나 배열 형태입니다)
+        // 예: searchVO.getCategories() 또는 변수명에 맞게 매칭하세요.
+        boolean hasCategory = searchVO.getCategories() != null && !searchVO.getCategories().isEmpty();
+        
+        // 3. 상태(진행중/완료)가 선택되었는지 확인
+        boolean hasStatus = searchVO.getDoneList() != null && !searchVO.getDoneList().isEmpty();
+        
+        // 4. 데이터출처(사용자/경찰/포털)가 선택되었는지 확인
+        boolean hasSource = searchVO.getDataSources() != null && !searchVO.getDataSources().isEmpty();
+
+        // 5. 등록일 날짜 지정이 되어있는지 확인 (예: startRegDate, endRegDate 등)
+        boolean hasStartDate = searchVO.getStartDate() != null && !searchVO.getStartDate().trim().isEmpty();
+        boolean hasEndDate = searchVO.getEndDate() != null && !searchVO.getEndDate().trim().isEmpty();
+
+        // 6. 삭제 포함 체크박스가 체크 되었는지 확인
+        boolean hasIncludeDeleted = searchVO.isIncludeDeleted();
+
+        // 모든 조건이 다 false(없음)여야 "비어있는 최초 상태"입니다.
+        // 하나라도 true가 있다면 사용자가 검색 조건을 넣은 것이므로 false를 반환합니다.
+        return !(hasKeyword || hasCategory || hasStatus || hasSource || hasStartDate || hasEndDate || hasIncludeDeleted);
+    }
+
     // 사용자 등록 분실물 선택 삭제
     @Override
     @Transactional

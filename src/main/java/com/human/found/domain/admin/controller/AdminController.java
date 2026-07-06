@@ -1,5 +1,6 @@
 package com.human.found.domain.admin.controller;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
@@ -28,15 +29,19 @@ public class AdminController {
      */
     @GetMapping("/lost")
     public String lostList(AdminSearchVO searchVO, Model model) {
-        searchVO.setBoardType("lost");
-        searchVO.setSize(10);
+        if (adminService.isSearchConditionEmpty(searchVO)) {
+            searchVO.pageInfo(0);
+            model.addAttribute("lostList", Collections.emptyList());
+            model.addAttribute("searchVO", searchVO);
+            model.addAttribute("boardType", "lost");
+        } else {
+            int totalCount = adminService.countSearchLost(searchVO);
+            searchVO.pageInfo(totalCount);
 
-        int totalCount = adminService.countSearchLost(searchVO);
-        searchVO.pageInfo(totalCount);
-
-        model.addAttribute("lostList", adminService.searchLostPage(searchVO));
-        model.addAttribute("searchVO", searchVO);
-        model.addAttribute("boardType", "lost");
+            model.addAttribute("lostList", adminService.searchLostPage(searchVO));
+            model.addAttribute("searchVO", searchVO);
+            model.addAttribute("boardType", "lost");
+        }
 
         return "admin/board";
     }
@@ -67,18 +72,25 @@ public class AdminController {
     @GetMapping("/found")
     public String foundList(AdminSearchVO searchVO, Model model) {
 
-        searchVO.setBoardType("found");
-        searchVO.setSize(10);
+        if (adminService.isSearchConditionEmpty(searchVO)) {
+            // 모든 조건이 비어있다면 최초 진입 상태 -> 결과 0건 처리
+            searchVO.pageInfo(0);
+            model.addAttribute("foundList", Collections.emptyList());
+            model.addAttribute("searchVO", searchVO);
+            model.addAttribute("boardType", "found");
+        } else {
+            // 조건이 하나라도 채워져 있다면 사용자가 검색을 시도한 것 -> 정상 DB 조회
+            int totalCount = adminService.countSearchFound(searchVO);
+            searchVO.pageInfo(totalCount);
 
-        int totalCount = adminService.countSearchFound(searchVO);
-        searchVO.pageInfo(totalCount);
-
-        model.addAttribute("foundList", adminService.searchFoundPage(searchVO));
-        model.addAttribute("searchVO", searchVO);
-        model.addAttribute("boardType", "found");
+            model.addAttribute("foundList", adminService.searchFoundPage(searchVO));
+            model.addAttribute("searchVO", searchVO);
+            model.addAttribute("boardType", "found");
+        }
 
         return "admin/board";
     }
+
 
     /**
      * 관리자 습득물 선택 삭제
