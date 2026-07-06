@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>채팅 목록 | 분실물 센터</title>
+
+  <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <link rel="stylesheet" th:href="@{/css/chat/chat-list.css}">
+</head>
+
+<body>
+
+<div th:replace="layout/header :: headerFragment"></div>
+
+<main class="chat-list-page">
+  <section class="chat-list-wrap">
+
+    <div class="chat-list-head">
+      <h2>채팅 목록</h2>
+      <p>이 게시글과 연결된 채팅방입니다.</p>
+    </div>
+
+    <div class="chat-room-list">
+
+      <a th:each="room : ${chatRooms}"
+         th:href="@{/chat/room/{chatNum}(chatNum=${room.chatNum})}"
+         class="chat-room-item">
+
+        <div class="chat-avatar">채</div>
+
+        <div class="chat-room-info">
+          <strong th:text="${room.userIdB}">상대방</strong>
+
+          <span th:text="|채팅방 번호: ${room.chatNum}|">
+            채팅방 번호
+          </span>
+        </div>
+
+      </a>
+
+      <p class="empty-text"
+         th:if="${chatRooms == null or #lists.isEmpty(chatRooms)}">
+        아직 이 게시글에 연결된 채팅방이 없습니다.
+      </p>
+
+    </div>
+
+  </section>
+</main>
+
+</body>
+</html>
