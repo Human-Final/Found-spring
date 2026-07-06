@@ -171,7 +171,7 @@ public class FoundController {
     //====상세보기=====
     @GetMapping("/api/found/detail/{atcId}")
     public String foundgetdetail(@PathVariable("atcId") String atcId, Model model) {
-
+        foundService.viewCountPlus(atcId);
         FoundVO foundVO = foundService.foundgetdetail(atcId);
 
         List<CommentVO> commentList =

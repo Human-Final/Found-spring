@@ -47,7 +47,6 @@ public class LostController {
             .forEach(error -> System.out.println(
                 error.getField() + " = " + error.getDefaultMessage()));
             
-
             model.addAttribute("boardType", "lost");
             return "found/write";
         }
@@ -160,6 +159,7 @@ public class LostController {
     //==상세보기==
     @GetMapping("/api/lost/detail/{atcId}")
     public String lostDetaile(@PathVariable("atcId")String atcId,Model model) {
+        lostService.viewCountPlus(atcId);
         LostVO lostVO=lostService.lostdetail(atcId);
 
         model.addAttribute("lostVO", lostVO);

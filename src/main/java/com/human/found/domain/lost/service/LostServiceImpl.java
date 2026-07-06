@@ -188,6 +188,12 @@ public class LostServiceImpl implements LostService {
         }
         return lostVO;
     }
+
+    // 상세보기 들어가면 조회 수 올리기
+    public void viewCountPlus(String atcId) {
+        lostMapper.viewCountPlus(atcId);
+    }
+    
     
     // 분실물 게시글 댓글
     @Override

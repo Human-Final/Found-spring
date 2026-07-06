@@ -44,7 +44,7 @@ public class LostPoliceServiceImpl implements LostPoliceService{
     
     //스케줄러 메서드
     //매일 새벽 1시에 자동으로 아래 fetchAndSaveLostGoods 메서드 호출하기
-    @Scheduled(cron = "0 24 15 * * *")
+    @Scheduled(cron = "0 0 1 * * *")
     public void ScheduledSavePoliceLost() {
         System.out.println("⏰ [스케줄러 시작] 기존 데이터를 삭제하고 경찰청의 모든 유실물 데이터를 처음부터 끝까지 수집합니다.");
         
