@@ -371,7 +371,7 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
 
 .user-filter-card {
   background: #ffffff;
-  border: 1px solid #e0e7f0;
+  border: 1px solid #d7dee9;
   border-radius: 10px;
   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
   padding: 18px 20px 22px;
@@ -425,7 +425,8 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
   cursor: pointer;
 }
 
-.filter-reset-btn {
+.filter-reset-btn,
+.all-filters-btn {
   height: 42px;
   padding: 0 17px;
   border: 1px solid #d7dee9;
@@ -439,7 +440,8 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
   font-weight: 700;
 }
 
-.filter-reset-btn svg {
+.filter-reset-btn svg,
+.all-filters-btn svg {
   width: 17px;
   height: 17px;
   stroke-width: 2;
@@ -447,8 +449,14 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
 
 .filter-row {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.filter-right{
+    display:flex;
+    align-items:center;
+    gap:10px;
 }
 
 .filter-label {
@@ -572,7 +580,7 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
 .admin-bulk-bar {
   height: 64px;
   background: #ffffff;
-  border: 1px solid #e0e7f0;
+  border: 1px solid #d7dee9;
   border-radius: 10px;
   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
   padding: 0 20px;
@@ -603,7 +611,7 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
 }
 
 .bulk-selected-text {
-  margin-left: 28px;
+  margin-left: 0;
   color: #0f172a;
   font-size: 14px;
   font-weight: 500;
@@ -791,56 +799,56 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
   border-bottom: 0;
 }
 
-.user-manage-table th:nth-child(1),
+/* .user-manage-table th:nth-child(1),
 .user-manage-table td:nth-child(1) {
   width: 44px;
   min-width: 44px;
-  text-align: center;}
+  text-align: center;} */
+
+.user-manage-table th:nth-child(1),
+.user-manage-table td:nth-child(1) {
+  width: 95px;
+}
 
 .user-manage-table th:nth-child(2),
 .user-manage-table td:nth-child(2) {
-  width: 95px;
+  width: 70px;
 }
 
 .user-manage-table th:nth-child(3),
 .user-manage-table td:nth-child(3) {
-  width: 70px;
+  width: 150px;
 }
 
 .user-manage-table th:nth-child(4),
 .user-manage-table td:nth-child(4) {
-  width: 150px;
+  width: 130px;
 }
 
 .user-manage-table th:nth-child(5),
 .user-manage-table td:nth-child(5) {
-  width: 130px;
+  width: 120px;
 }
 
+/* 권한 */
 .user-manage-table th:nth-child(6),
 .user-manage-table td:nth-child(6) {
   width: 120px;
 }
 
-/* 권한 */
+/* 상태 */
 .user-manage-table th:nth-child(7),
 .user-manage-table td:nth-child(7) {
-  width: 120px;
+  width: 84px;
 }
 
-/* 상태 */
 .user-manage-table th:nth-child(8),
 .user-manage-table td:nth-child(8) {
-  width: 84px;
+  width: 160px;
 }
 
 .user-manage-table th:nth-child(9),
 .user-manage-table td:nth-child(9) {
-  width: 160px;
-}
-
-.user-manage-table th:nth-child(10),
-.user-manage-table td:nth-child(10) {
   width: 170px;
 }
 
@@ -1176,11 +1184,6 @@ body.admin-user-page select {
   filter: brightness(0.96);
 }
 
-.filter-reset-btn:hover {
-  background: #f8fafc;
-  border-color: #b7d3ff;
-  color: #0b63f6;
-}
 
 /* ===============================
    New User Row

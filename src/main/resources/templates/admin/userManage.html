@@ -57,24 +57,9 @@
         <span>회원 관리</span>
       </a>
 
-      <a th:href="@{/api/admin/notices}">
-        <i data-lucide="bell"></i>
-        <span>공지사항 관리</span>
-      </a>
-
       <a th:href="@{/api/admin/stats}">
         <i data-lucide="bar-chart-3"></i>
         <span>통계 관리</span>
-      </a>
-
-      <a th:href="@{/api/admin/inquiries}">
-        <i data-lucide="message-square"></i>
-        <span>문의 관리</span>
-      </a>
-
-      <a th:href="@{/api/admin/settings}">
-        <i data-lucide="settings"></i>
-        <span>설정</span>
       </a>
 
     </nav>
@@ -105,6 +90,13 @@
             class="user-filter-form" 
             id="userFilterForm">
 
+          <input type="hidden"
+                 name="dateRange"
+                 id="dateRangeInput"
+                 th:value="${param.dateRange != null ? param.dateRange[0] : ''}">
+
+        <input type="hidden" name="searched" value="true">
+
         <!-- 페이징용 -->
         <input type="hidden" name="page" id="pageInput" th:value="${conditionDTO.page}">
         <input type="hidden" name="size" th:value="${conditionDTO.size}">
@@ -122,11 +114,18 @@
               검색
             </button>
           </div>
+            <div class="filter-right">
 
-          <a th:href="@{/test/users}" class="filter-reset-btn">
-            <i data-lucide="rotate-cw"></i>
-            <span>초기화</span>
-          </a>
+            <button type="button" id="allFiltersBtn" class="all-filters-btn">
+              <i data-lucide="check-square"></i>
+              <span>필터 전체 선택</span>
+            </button>
+
+            <a th:href="@{/test/users}" class="filter-reset-btn">
+              <i data-lucide="rotate-cw"></i>
+              <span>초기화</span>
+            </a>
+          </div>
         </div>
 
         <div class="filter-row">
@@ -232,13 +231,8 @@
 
     <!-- 선택 액션 바 -->
     <section class="admin-bulk-bar">
-      <label class="bulk-check">
-        <input type="checkbox" id="checkAll">
-        <span>전체 선택</span>
-      </label>
-
       <div class="bulk-selected-text">
-        선택된 회원 <strong id="selectedCount">0</strong>명
+        조회된 회원 <strong th:text="${totalUserCount}">0</strong>명
       </div>
 
       <div class="bulk-actions">
@@ -266,33 +260,24 @@
     <section class="admin-table-card">
       <table class="user-manage-table">
         <thead>
-        <tr>
-          <th>
-            <input type="checkbox" id="tableCheckAll">
-          </th>
-          <th>아이디</th>
-          <th>이름</th>
-          <th>이메일</th>
-          <th>전화번호</th>          
-          <th>가입일</th>
-          <th>권한</th>
-          <th>상태</th>
-          <th>탈퇴일</th>
-          <th>관리</th>
-        </tr>
+          <tr>
+            <th>아이디</th>
+            <th>이름</th>
+            <th>이메일</th>
+            <th>전화번호</th>          
+            <th>가입일</th>
+            <th>권한</th>
+            <th>상태</th>
+            <th>탈퇴일</th>
+            <th>관리</th>
+          </tr>
         </thead>
 
         <tbody>
           <!-- 실제 DB 연결용 -->
           <tr th:each="user : ${userList}"
               th:data-user-id="${user.id}">
-            <td>
-              <input type="checkbox"
-                     class="user-check"
-                     name="userIds"
-                     th:value="${user.id}"
-                     th:if="${isAdmin or (isManager and user.role == 'USER')}">
-            </td>
+
 
             <td>
               <span class="view-text" th:text="${user.id}">아이디</span>
@@ -410,12 +395,18 @@
       </table>
     </section>
 
-    <!-- 빈 결과: 테이블 밖에서 출력 -->
+    <!-- 첫 진입 안내 -->
     <section class="admin-empty-card"
-             th:if="${userList == null or #lists.isEmpty(userList)}">
-      <p>조회된 회원이 없습니다.</p>
+            th:if="${!searched}">
+      <p>검색 조건을 선택한 후 검색 버튼을 눌러주세요.</p>
     </section>
 
+    <!-- 검색 결과 없음 -->
+    <section class="admin-empty-card"
+            th:if="${searched and (userList == null or #lists.isEmpty(userList))}">
+      <p>조회된 회원이 없습니다.</p>
+    </section>
+    
     <form id="userBulkUpdateForm"
           th:action="@{/test/users/edit}"
           method="post"
@@ -479,17 +470,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // **변수 선언 ------------
   const pendingUserChanges = new Map();
   const pendingNewUsers = new Map();
-  
-  // 체크박스
-  const checkAll = document.getElementById("checkAll");
-  const tableCheckAll = document.getElementById("tableCheckAll");
-  const userChecks = document.querySelectorAll(".user-check");
-  const selectedCount = document.getElementById("selectedCount");
 
   // 버튼
   const saveChangesBtn = document.getElementById("saveChangeBtn");
   const rangeButtons = document.querySelectorAll(".date-filter button");
   const addUserBtn = document.getElementById("bulkAddBtn");
+  const allFiltersBtn = document.getElementById("allFiltersBtn")
 
   // 입력창
   const userBulkUpdateForm = document.getElementById("userBulkUpdateForm");
@@ -1367,55 +1353,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ** 체크 박스 전체 선택 --------------
-  // 체크된 박스 카운팅
-  function updateSelectedCount() {
-
-    if (!selectedCount) {
-      return;
-    }
-
-    const checkedCount = document.querySelectorAll(".user-check:checked").length;
-    const isAllChecked = userChecks.length > 0 && checkedCount === userChecks.length;
-
-    selectedCount.textContent = checkedCount;
-    
-    if (checkAll) {
-      checkAll.checked = isAllChecked;
-    }
-
-    if (tableCheckAll) {
-      tableCheckAll.checked = isAllChecked;
-    }
-  }
-
-
-  function setAllChecked(checked) {
-    userChecks.forEach(check => {
-      check.checked = checked;
-    });
-
-    updateSelectedCount();
-  }
-
-  if (checkAll) {
-    checkAll.addEventListener("change", () => {
-      setAllChecked(checkAll.checked);
-    });
-  }
-
-  if (tableCheckAll) {
-    tableCheckAll.addEventListener("change", () => {
-      setAllChecked(tableCheckAll.checked);
-    });
-  }
-
-  userChecks.forEach(check => {
-    check.addEventListener("change", updateSelectedCount);
-  });
-
-  updateSelectedCount();
-
 
   // **가입일 기간 버튼----------------
   function formatDate(date) {
@@ -1459,6 +1396,8 @@ document.addEventListener("DOMContentLoaded", () => {
     endDateInput.value = formatDate(endDate);
   }
 
+  const dateRangeInput = document.getElementById("dateRangeInput");
+
   rangeButtons.forEach(button => {
     button.addEventListener("click", () => {
       rangeButtons.forEach(btn => btn.classList.remove("active"));
@@ -1468,6 +1407,76 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  function restoreDateRangeActive() {
+    if (!startDateInput || !endDateInput) {
+      return;
+    }
+
+    const startDate = startDateInput.value.trim();
+    const endDate = endDateInput.value.trim();
+
+    rangeButtons.forEach(button => {
+      button.classList.remove("active");
+    });
+
+    // 날짜 값이 아무것도 없으면 전체 active
+    if (startDate === "" && endDate === "") {
+      rangeButtons.forEach(button => {
+        if (button.dataset.range === "all") {
+          button.classList.add("active");
+        }
+      });
+    }
+  }
+
+  restoreDateRangeActive();
+
+  if (allFiltersBtn) {
+    allFiltersBtn.addEventListener("click", () => {
+      const filterChecks = document.querySelectorAll(
+        "input[name='statuses'], input[name='roles']"
+      );
+
+      const isAllChecked = Array.from(filterChecks)
+        .every(input => input.checked);
+
+      const nextChecked = !isAllChecked;
+
+      filterChecks.forEach(input => {
+        input.checked = nextChecked;
+      });
+
+      if (nextChecked) {
+        setDateRange("all");
+
+        rangeButtons.forEach(button => {
+          button.classList.toggle("active", button.dataset.range === "all");
+        });
+
+        allFiltersBtn.innerHTML =
+          `<i data-lucide="check-square"></i><span>필터 전체 해제</span>`;
+      } else {
+        if (startDateInput) {
+          startDateInput.value = "";
+        }
+
+        if (endDateInput) {
+          endDateInput.value = "";
+        }
+
+        restoreDateRangeActive();
+
+        allFiltersBtn.innerHTML =
+          `<i data-lucide="check-square"></i><span>필터 전체 선택</span>`;
+      }
+
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+
+      setPage(1);
+    });
+  }
 
   // **사이드바 접기----------------
   if (sidebarToggle) {
@@ -1591,5 +1600,15 @@ function setPage(page) {
     return endDate + " 이전";
   }
 </script>
+
+<!-- 오류 시 메시지 띄우기 -->
+<script th:inline="javascript">
+  const errorMessage = /*[[${errorMessage}]]*/ null;
+
+  if (errorMessage) {
+    alert(errorMessage);
+  } 
+</script>
+
 </body>
 </html>

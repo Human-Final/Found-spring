@@ -26,5 +26,5 @@ public class AdminLostVO {
     private String dataSource;
 
     private String lstFilepathImg;
-    private Long viewConut;
+    private Long viewCount;
 }

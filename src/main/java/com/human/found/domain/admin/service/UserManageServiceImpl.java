@@ -68,6 +68,8 @@ public class UserManageServiceImpl implements UserManageService{
         List<UserVO> newUsers =
                 userInfo.getNewUsers() == null ? List.of() : userInfo.getNewUsers();
 
+        
+        
         if (!changedUsers.isEmpty()) {
             totalCount += updateUserChangedBulk(changedUsers, isAdmin, isManager);
         }
@@ -75,6 +77,9 @@ public class UserManageServiceImpl implements UserManageService{
         if (!newUsers.isEmpty()) {
             totalCount += insertNewUsersBulk(newUsers, isAdmin, isManager);
         }
+
+        // 실제 DB 수정 전에 변경 후 최고관리자 수를 예상해서 검증
+        vaildateOneAdmin(changedUsers, newUsers);
 
         return totalCount;
     }
@@ -115,7 +120,6 @@ public class UserManageServiceImpl implements UserManageService{
                     throw new IllegalArgumentException("회원 정보 변경 권한이 없습니다.");
                 }
             
-
                 // 매니저는 유저만 변경 가능
                 if(!"USER".equals(targetUser.getRole())){
                     throw new IllegalArgumentException("매니저는 일반 회원의 상태만 변경할 수 있습니다.");
@@ -144,6 +148,7 @@ public class UserManageServiceImpl implements UserManageService{
 
         validateStatus(status);
         validateIsDeleted(isDeleted);
+        
         // ADMIN일 때만 role 검증
         if (isAdmin) {
             validateRole(role);
@@ -172,6 +177,7 @@ public class UserManageServiceImpl implements UserManageService{
         
         return updatedCount;
     }
+
 
     // 신규 회원 추가 -----------------------
     private int insertNewUsersBulk(
@@ -441,5 +447,74 @@ public class UserManageServiceImpl implements UserManageService{
 
         return status == null ? "" : status;
     }
+
+    private void vaildateOneAdmin(
+            List<UserVO> changedUsers,
+            List<UserVO> newUsers){
+
+        int expectedAdminCount  = userManageMapper.countAdmin();
+
+        for (UserVO changedUser : changedUsers) {
+            if (changedUser == null || changedUser.getId() == null) {
+                continue;
+            }
+
+            UserVO currentUser = userManageMapper.findByIdIncludeDeleted(changedUser.getId());
+
+            if (currentUser == null) {
+                continue;
+            }
+
+            boolean wasAdmin = isAvailableAdmin(
+                    currentUser.getRole(),
+                    currentUser.getStatus(),
+                    currentUser.getIsDeleted()
+            );
+
+            String nextRole =
+                changedUser.getRole() != null ? changedUser.getRole() : currentUser.getRole();
+
+            String nextStatus =
+                    changedUser.getStatus() != null 
+                        ? changedUser.getStatus() 
+                        : currentUser.getStatus();
+
+            int nextIsDeleted = changedUser.getIsDeleted();
+
+            boolean willBeAdmin =  
+                isAvailableAdmin(nextRole, nextStatus, nextIsDeleted);
+
+             if (wasAdmin && !willBeAdmin) {
+                expectedAdminCount--;
+            }
+
+            if (!wasAdmin && willBeAdmin) {
+                expectedAdminCount++;
+            }
+        }
+
+        for (UserVO newUser : newUsers) {
+            if (newUser == null) {
+                continue;
+            }
+
+            int isDeleted =  0;
+
+            if (isAvailableAdmin(newUser.getRole(), newUser.getStatus(), isDeleted)) {
+                expectedAdminCount++;
+            }
+        }
+
+        if(expectedAdminCount  < 1){
+            throw new IllegalArgumentException("최고관리자는 최소 1명 이상 유지되어야 합니다.");
+        }
+    }
+
+    private boolean isAvailableAdmin(String role, String status, int isDeleted) {
+        return "ADMIN".equals(role)
+                && isDeleted == 0
+                && "active".equals(status);
+    }
+
 
 }

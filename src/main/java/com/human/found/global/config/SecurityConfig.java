@@ -112,7 +112,7 @@ public class SecurityConfig {
             // 개발용 로그인 유지
             .rememberMe(remember -> remember
                 .key("found-dev-remember-me-key")
-                .tokenValiditySeconds(60 * 60)
+                .tokenValiditySeconds(60 * 60 * 24 * 7)
                 .rememberMeParameter("remember-me")
             )
 

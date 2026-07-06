@@ -20,7 +20,6 @@ public class UserVO {
     @Email(message = "이메일 형식이 올바르지 않습니다.")
     private String email;
     
-    @NotNull
     @Pattern(
         regexp = "^010[0-9]{8}$",
         message = "전화번호는 010으로 시작하는 숫자 11자리여야 합니다."
