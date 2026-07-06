@@ -1,10 +1,7 @@
 package com.human.found.domain.found.service;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -58,8 +55,8 @@ public class FoundServiceImpl implements FoundService {
             // 파일 경로를 foundVO의 대표이미지 공간에 세팅
             foundVO.setFdFilepathImg("/images/found/" + saveFileName);
 
-            System.out.println("atcId = " + foundVO.getAtcId());
-            System.out.println("대표이미지 = " + foundVO.getFdFilepathImg());
+            // System.out.println("atcId = " + foundVO.getAtcId());
+            // System.out.println("대표이미지 = " + foundVO.getFdFilepathImg());
 
 
             foundMapper.updateThumbnail(foundVO);
@@ -112,7 +109,7 @@ public class FoundServiceImpl implements FoundService {
             endDate = endDate.trim();
         }
 
-        System.out.println("🔄 [습득물 서비스단] 복합 검색 엔진 기동 -> 현재 페이지: " + pagingVO.getPage());
+        // System.out.println("🔄 [습득물 서비스단] 복합 검색 엔진 기동 -> 현재 페이지: " + pagingVO.getPage());
 
         // 매퍼 인터페이스로 모든 인자 토스
         return foundMapper.selectFoundSearchList(category, subCategory, colorSelect, startDate, endDate, author, status, keyword, sort, pagingVO);

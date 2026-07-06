@@ -5,37 +5,29 @@
 
 <mapper namespace="com.human.found.domain.admin.mapper.UserManageMapper">    
     
-    <!-- 유저 상태 변경-->
-    <update id="updateUserStatusById">
+    <!-- 유저 정보 변경-->
+    <update id="updateUserById">
         UPDATE user
         SET 
-            status = #{status},
-            is_deleted = #{isDeleted},
-            deleted_at =
-            CASE
-                WHEN #{isDeleted} = 1 THEN NOW()
-                WHEN #{isDeleted} = 0 THEN NULL
-                ELSE deleted_at
-            END 
-        WHERE id = #{id}
-    </update>
-
-    <!-- 유저 권한 변경 -->
-    <update id="updateUserRoleById">
-        UPDATE user
-        SET role = #{role}
-        WHERE id = #{id}
-    </update>
-
-    <!-- 유저 정보 변경 -->
-    <update id="updateUserProfileById">
-        UPDATE user
-        SET
             name = #{name},
             email = #{email},
-            tel = #{tel}
+            tel = #{tel},
+            status = #{status},
+            is_deleted = #{isDeleted},
+            deleted_at = 
+                CASE
+                    WHEN #{isDeleted} = 1 THEN NOW()
+                    WHEN #{isDeleted} = 0 THEN NULL
+                    ELSE deleted_at
+                END 
+            <if test="canUpdateRole == true">
+                , `role` = #{role}
+            </if>
+
         WHERE id = #{id}
     </update>
+
+
 
     <!-- 유저 전체 리스트 조회(탈퇴회원 포함) -->
     <select id="totalUserList"
@@ -119,7 +111,59 @@
 
     </select>
 
-    <!-- 검색 공통 where-->
+    <select id="userInfoDownload"
+            parameterType="com.human.found.domain.admin.dto.UserSearchConditionDTO"
+            resultType="com.human.found.domain.user.vo.UserVO">
+        SELECT
+            id,
+            name,
+            email,
+            tel,
+            sign_up AS signUp,
+            role,
+            status,
+            is_deleted AS isDeleted,
+            deleted_at As deletedAt
+        FROM user
+
+        <include refid="userSearchWhere"/>
+
+        ORDER BY
+            CASE role
+                WHEN 'ADMIN' THEN 1
+                WHEN 'MANAGER' THEN 2
+                ELSE 3
+            END,
+            id ASC
+    </select>
+
+    <insert id="insertUserByAdmin"
+            parameterType="com.human.found.domain.user.vo.UserVO">
+        INSERT INTO `user` (
+            id,
+            pw,
+            name,
+            email,
+            tel,
+            status,
+            role,
+            sign_up,
+            is_deleted
+        )
+        VALUES (
+            #{id},
+            #{pw},
+            #{name},
+            #{email},
+            #{tel},
+            #{status},
+            #{role},
+            NOW(),
+            0
+        )
+    </insert>
+
+    <!-- 회원 관리 페이지 내 검색 공통 where-->
     <sql id="userSearchWhere">
         WHERE 1 = 1
 
@@ -138,10 +182,10 @@
                         is_deleted = 0
                         AND status IN
                         <foreach collection="statuses"
-                                item="status"
-                                open="("
-                                separator=","
-                                close=")">
+                                 item="status"
+                                 open="("
+                                 separator=","
+                                 close=")">
                             #{status}
                         </foreach>
                     )
@@ -159,10 +203,10 @@
         <if test="roles != null and roles.size() > 0">
             AND role IN
             <foreach collection="roles"
-                    item="role"
-                    open="("
-                    separator=","
-                    close=")">
+                     item="role"
+                     open="("
+                     separator=","
+                     close=")">
                 #{role}
             </foreach>
         </if>
@@ -175,4 +219,6 @@
             AND sign_up &lt;= STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')
         </if>
     </sql>
+
+    
 </mapper>

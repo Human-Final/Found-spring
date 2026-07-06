@@ -24,6 +24,12 @@ body.admin-user-page input {
   font-family: inherit;
 }
 
+body.sidebar-init .admin-sidebar,
+body.sidebar-init .sidebar-toggle-btn,
+body.sidebar-init .admin-side-menu a {
+  transition: none !important;
+}
+
 /* ===============================
    Header
 ================================ */
@@ -496,7 +502,10 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex: 1;
+  min-width: 0;
   margin-left: 4px;
+
 }
 
 .date-shortcuts button {
@@ -515,6 +524,45 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
   background: #e8f1ff;
   color: #0b63f6;
   border-color: #e8f1ff;
+}
+
+.date-filter {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.download {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.download button {
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 8px;
+  border: 1px solid #bae6fd;
+  background-color: #e0f2fe;
+  color: #0369a1;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.download button:hover {
+  background-color: #bae6fd;
+  border-color: #7dd3fc;
+}
+
+.download button:active {
+  background-color: #7dd3fc;
+}
+
+.download-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  transform: translateY(3px);
 }
 
 /* ===============================
@@ -570,7 +618,7 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
 }
 
 .bulk-stop-btn,
-.bulk-role-btn,
+.bulk-add-btn,
 .bulk-save-btn {
   height: 40px;
   padding: 0 18px;
@@ -597,13 +645,13 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
   background: #fff5f5;
 }
 
-.bulk-role-btn {
+.bulk-add-btn {
   border: 1px solid #b7d3ff;
   background: #ffffff;
   color: #0b63f6;
 }
 
-.bulk-role-btn:hover {
+.bulk-add-btn:hover {
   background: #f0f6ff;
 }
 
@@ -615,7 +663,7 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
 }
 
 .bulk-stop-btn svg,
-.bulk-role-btn svg,
+.bulk-add-btn svg,
 .bulk-save-btn svg {
   width: 17px;
   height: 17px;
@@ -678,19 +726,44 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
   background-color: #fff8db;
 }
 
-/* 행 안의 select 배경 */
+/* select는 행 배경과 동일하게 */
 .user-manage-table tbody tr.modified .role-select,
 .user-manage-table tbody tr.modified .status-select,
 .user-manage-table tbody tr.editing .role-select,
-.user-manage-table tbody tr.editing .status-select {
-  background-color: #fff8db;
-  border-color: transparent ;
+.user-manage-table tbody tr.editing .status-select,
+.user-manage-table tbody tr.new-user-row .role-select,
+.user-manage-table tbody tr.new-user-row .status-select {
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
 }
 
-.user-manage-table tbody tr.modified td:first-child {
+/* select 클릭/포커스 시 파란 배경 튀는 것 제거 */
+.user-manage-table tbody tr.modified .role-select:focus,
+.user-manage-table tbody tr.modified .status-select:focus,
+.user-manage-table tbody tr.editing .role-select:focus,
+.user-manage-table tbody tr.editing .status-select:focus,
+.user-manage-table tbody tr.new-user-row .role-select:focus,
+.user-manage-table tbody tr.new-user-row .status-select:focus {
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+
+/* disabled여도 흐려지지 않게 */
+.user-manage-table tbody tr.new-user-row .role-select:disabled,
+.user-manage-table tbody tr.new-user-row .status-select:disabled {
+  opacity: 1;
+}
+
+/* 좌측 강조선 */
+.user-manage-table tbody tr.modified td:first-child,
+.user-manage-table tbody tr.editing td:first-child {
   border-left: 4px solid #f59e0b;
 }
 
+/* 기존 회원 수정 시 적용 버튼 */
 .user-manage-table tbody tr.editing .edit-btn {
   background: #f59e0b;
   border-color: #f59e0b;
@@ -703,6 +776,7 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
   border-color: #d97706;
 }
 
+/* 기존 회원 수정 시 취소 버튼 */
 .user-manage-table tbody tr.editing .detail-btn {
   background: #ffffff;
   border-color: #fbbf24;
@@ -1013,7 +1087,7 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
 }
 
 /* 수정 모드 input focus */
-.user-manage-table tbody tr.editing .edit-input:focus {
+.user-manage-table tbody tr.editing .edit-input:focus{
   background: #ffffff;
   border-color: #f59e0b;
   box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.14);
@@ -1066,11 +1140,7 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
 }
 
 /* ===============================
-   New HTML Patch
-   - bulk save button
-   - inline edit inputs
-   - select controls
-   - checked filter chips
+  Common Interaction Patch
 ================================ */
 
 /* select도 기존 input/button과 같은 폰트 사용 */
@@ -1102,7 +1172,7 @@ body.admin-user-page select {
 /* 검색/초기화 버튼 hover */
 .filter-search-btn:hover,
 .bulk-save-btn:hover,
-.bulk-role-btn:hover {
+.bulk-add-btn:hover {
   filter: brightness(0.96);
 }
 
@@ -1111,3 +1181,146 @@ body.admin-user-page select {
   border-color: #b7d3ff;
   color: #0b63f6;
 }
+
+/* ===============================
+   New User Row
+   - HTML/JS 구조 변경 없이 disabled 상태만 화면상 텍스트처럼 처리
+================================ */
+
+/* 신규 회원 행 배경 */
+.user-manage-table tbody tr.new-user-row td,
+.user-manage-table tbody tr.new-user-row:hover td {
+  background-color: #fff8db;
+}
+
+/* 신규 회원 행 왼쪽 강조선 */
+.user-manage-table tbody tr.new-user-row td:first-child {
+  border-left: 4px solid #f59e0b;
+}
+
+/* 신규 회원 입력 중 input */
+.user-manage-table tbody tr.new-user-row input.edit-input:not(:disabled) {
+  background: #fffef7;
+  border: 1px solid #f6e7ad;
+  color: #0f172a;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+/* 신규 회원 입력 중 input focus */
+.user-manage-table tbody tr.new-user-row input.edit-input:not(:disabled):focus {
+  background: #ffffff;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.14);
+}
+
+/* 적용 완료 후 disabled input을 일반 텍스트처럼 보이게 */
+.user-manage-table tbody tr.new-user-row input.edit-input:disabled {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  color: #0f172a;
+  opacity: 1;
+  cursor: default;
+  font-weight: 500;
+}
+
+/* 이메일 span 2줄로 보이게 */
+.user-manage-table tbody tr.new-user-row .new-email-text {
+  display: block;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  line-height: 1.35;
+  text-align: center;
+}
+
+/* 신규 회원 이메일/전화번호 정렬 */
+.user-manage-table tbody tr.new-user-row .new-email-input {
+  text-align: left;
+}
+
+.user-manage-table tbody tr.new-user-row .new-tel-input {
+  letter-spacing: 0.01em;
+}
+
+/* 적용 전 버튼 = 주황 적용 버튼 */
+.user-manage-table tbody tr.new-user-row:not(.applied-new-user) .apply-new-user-btn {
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: #ffffff;
+  box-shadow: 0 6px 12px rgba(245, 158, 11, 0.18);
+}
+
+.user-manage-table tbody tr.new-user-row:not(.applied-new-user) .apply-new-user-btn:hover {
+  background: #d97706;
+  border-color: #d97706;
+}
+
+/* 적용 전 취소 버튼 */
+.user-manage-table tbody tr.new-user-row:not(.applied-new-user) .cancel-new-user-btn {
+  background: #ffffff;
+  border-color: #fbbf24;
+  color: #92400e;
+}
+
+.user-manage-table tbody tr.new-user-row:not(.applied-new-user) .cancel-new-user-btn:hover {
+  background: #fffbeb;
+}
+
+/* 적용 후 버튼 = 일반 수정 버튼 */
+.user-manage-table tbody tr.new-user-row.applied-new-user .apply-new-user-btn {
+  background: #ffffff;
+  border: 1px solid #b7d3ff;
+  color: #0b63f6;
+  box-shadow: none;
+}
+
+.user-manage-table tbody tr.new-user-row.applied-new-user .apply-new-user-btn:hover {
+  background: #f0f6ff;
+}
+
+/* 적용 후 취소 버튼 = 일반 상세보기 버튼 느낌 */
+.user-manage-table tbody tr.new-user-row.applied-new-user .cancel-new-user-btn {
+  background: #ffffff;
+  border: 1px solid #d7dee9;
+  color: #1e293b;
+}
+
+.user-manage-table tbody tr.new-user-row.applied-new-user .cancel-new-user-btn:hover {
+  background: #f8fafc;
+  border-color: #b7d3ff;
+  color: #0b63f6;
+}
+
+/* 신규 행 select는 input 박스처럼 보이지 않게 */
+.user-manage-table tbody tr.new-user-row .role-select,
+.user-manage-table tbody tr.new-user-row .status-select {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+/* focus 시에도 박스 배경 안 생기게 */
+.user-manage-table tbody tr.new-user-row .role-select:focus,
+.user-manage-table tbody tr.new-user-row .status-select:focus {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+/* Chrome 자동완성 파란 배경 제거 - 입력 중 */
+.user-manage-table tbody tr.new-user-row input.edit-input:-webkit-autofill,
+.user-manage-table tbody tr.new-user-row input.edit-input:-webkit-autofill:hover,
+.user-manage-table tbody tr.new-user-row input.edit-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #fffef7 inset;
+  -webkit-text-fill-color: #0f172a;
+  caret-color: #0f172a;
+}
+
+/* Chrome 자동완성 파란 배경 제거 - 적용 후 */
+.user-manage-table tbody tr.new-user-row input.edit-input:disabled:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #fff8db inset;
+  -webkit-text-fill-color: #0f172a;
+}
+

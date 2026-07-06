@@ -156,7 +156,7 @@
       <label>
         <input type="checkbox" name="dataSources" value="POLICE"
                th:checked="${searchVO.dataSources == null or searchVO.dataSources.contains('POLICE')}">
-        외부 연동
+        경찰청
       </label>
     </div>
 
@@ -230,7 +230,7 @@
         <td><span class="badge red">분실</span></td>
         <td th:text="${lost.prdtClNm}">카테고리</td>
         <td class="title-cell" th:text="${lost.lstSbjt}">제목</td>
-        <td th:text="${lost.id != null ? lost.id : '외부연동'}">작성자</td>
+        <td th:text="${lost.id != null ? lost.id : '경찰청 데이터'}">작성자</td>
         <td th:text="${#temporals.format(lost.createdAt, 'yyyy.MM.dd')}">등록일</td>
         <td>
           <span th:if="${lost.done == 0}" class="badge blue">진행중</span>
@@ -238,7 +238,7 @@
         </td>
         <td>
           <span th:if="${lost.dataSource == 'USER'}">사용자 작성</span>
-          <span th:if="${lost.dataSource == 'POLICE'}">외부 연동</span>
+          <span th:if="${lost.dataSource == 'POLICE'}">경찰청</span>
         </td>
       </tr>
 
@@ -252,7 +252,7 @@
         <td><span class="badge green">습득</span></td>
         <td th:text="${found.prdtClNm}">카테고리</td>
         <td class="title-cell" th:text="${found.fdSbjt}">제목</td>
-        <td th:text="${found.id != null ? found.id : '외부연동'}">작성자</td>
+        <td th:text="${found.id != null ? found.id : '경찰청 데이터'}">작성자</td>
         <td th:text="${#temporals.format(found.createdAt, 'yyyy.MM.dd')}">등록일</td>
         <td>
           <span th:if="${found.done == 0}" class="badge blue">진행중</span>
@@ -260,7 +260,7 @@
         </td>
         <td>
           <span th:if="${found.dataSource == 'USER'}">사용자 작성</span>
-          <span th:if="${found.dataSource == 'POLICE'}">외부 연동</span>
+          <span th:if="${found.dataSource == 'POLICE'}">경찰청 데이터</span>
         </td>
       </tr>
 

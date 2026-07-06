@@ -28,7 +28,6 @@ public class AdminController {
      */
     @GetMapping("/lost")
     public String lostList(AdminSearchVO searchVO, Model model) {
-
         searchVO.setBoardType("lost");
         searchVO.setSize(10);
 
@@ -39,7 +38,7 @@ public class AdminController {
         model.addAttribute("searchVO", searchVO);
         model.addAttribute("boardType", "lost");
 
-        return "admin/adminPage";
+        return "admin/board";
     }
 
     /**
@@ -78,7 +77,7 @@ public class AdminController {
         model.addAttribute("searchVO", searchVO);
         model.addAttribute("boardType", "found");
 
-        return "admin/adminPage";
+        return "admin/board";
     }
 
     /**
