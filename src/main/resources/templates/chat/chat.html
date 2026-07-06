@@ -75,7 +75,7 @@
     let connected = false;
 
     // SockJS 연결
-    const socket = new SockJS("http://192.168.0.79:8080/ws-stomp");
+    const socket = new SockJS("/ws-stomp");
     stompClient = Stomp.over(socket);
 
     // 필요 없으면 로그 끄기
