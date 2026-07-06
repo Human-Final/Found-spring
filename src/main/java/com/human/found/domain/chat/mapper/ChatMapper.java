@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.human.found.domain.chat.vo.ChatFileVO;
 import com.human.found.domain.chat.vo.ChatMessageVO;
 import com.human.found.domain.chat.vo.ChatRoomVO;
 
@@ -49,4 +50,10 @@ public interface ChatMapper {
 
     // 분실 게시글 atcId 조회
     String findLostAtcId(@Param("lostNum") Long lostNum);
+
+    // 채팅 첨부파일 저장
+    void insertChatFile(ChatFileVO chatFile);
+
+    // 메시지 번호로 첨부파일 목록 조회
+    List<ChatFileVO> findFilesByMessageNum(@Param("messageNum") Long messageNum);
 }

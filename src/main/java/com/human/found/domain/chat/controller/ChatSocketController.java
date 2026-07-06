@@ -19,11 +19,16 @@ public class ChatSocketController {
     @MessageMapping("/chat/message")
     public void sendMessage(ChatMessageVO message) {
 
-        // DB 저장
-        chatService.saveMessage(message);
-        
-        // 메시지를 구독하고 있는 클라이언트에게 메시지 전송
-        messagingTemplate.convertAndSend("/sub/chat/room/" + message.getChatNum(), message);
+        // 일반 텍스트 메시지만 DB 저장
+        // 파일 메시지는 /chat/file/upload 에서 이미 저장됨
+        if (message.getMessageNum() == null) {
+            chatService.saveMessage(message);
+        }
+
+        // 구독 중인 클라이언트에게 전송
+        messagingTemplate.convertAndSend(
+            "/sub/chat/room/" + message.getChatNum(),
+            message
+        );
     }
 }
- 

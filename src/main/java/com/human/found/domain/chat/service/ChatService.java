@@ -2,6 +2,7 @@ package com.human.found.domain.chat.service;
 
 import java.util.List;
 
+import com.human.found.domain.chat.vo.ChatFileVO;
 import com.human.found.domain.chat.vo.ChatMessageVO;
 import com.human.found.domain.chat.vo.ChatRoomVO;
 
@@ -39,4 +40,7 @@ public interface ChatService {
 
     // 분실 게시글 atcId 조회
     String getLostAtcId(Long lostNum);
+
+    // 채팅 첨부파일 저장
+    void saveChatFile(ChatFileVO chatFile);
 }
