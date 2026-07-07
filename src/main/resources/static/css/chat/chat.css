@@ -184,3 +184,27 @@
     font-size: 11px;
     color: #94a3b8;
 }
+
+.chat-img {
+    max-width: 220px;
+    max-height: 220px;
+    border-radius: 10px;
+    display: block;
+}
+
+.bubble a {
+    color: inherit;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.date-divider {
+    width: fit-content;
+    margin: 18px auto;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 700;
+}

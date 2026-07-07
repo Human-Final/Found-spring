@@ -1034,29 +1034,46 @@
                   <p class="panel-sub">게시글과 연결된 채팅방을 확인합니다.</p>
                 </div>
                 <a href="#myChats" class="line-button">전체 보기</a>
+                <button type="button"
+                        id="deleteChatRoomsBtn"
+                        class="danger-button">
+                    삭제
+                </button>                
               </div>
 
               <div class="chat-list">
 
                 <article class="chat-item" th:each="chatRoom : ${chatRooms}">
-                  <span class="chat-icon">채팅</span>
+                    <input type="checkbox"
+                            class="delete-chat-check"
+                            th:if="${chatRoom.isDeleted == 1}"
+                            th:value="${chatRoom.chatNum}">
+                    <span class="chat-icon">채팅</span>
 
-                  <div>
-                    <h3 class="item-title"
-                        th:text="${chatRoom.lostNum != null ? '분실물 문의' : '습득물 문의'}">
-                      채팅방
-                    </h3>
+                    <div>
+                        <h3 class="item-title"
+                            th:text="${chatRoom.title}">
+                            게시글 제목
+                        </h3>
 
-                    <p class="item-meta"
-                      th:text="|채팅방 번호: ${chatRoom.chatNum}|">
-                      채팅방 번호
-                    </p>
-                  </div>
+                        <p class="item-meta"
+                          th:text="|상대방: ${chatRoom.userName}|">
+                            상대방
+                        </p>
+                    </div>
 
-                  <a th:href="@{/chat/room/{chatNum}(chatNum=${chatRoom.chatNum})}"
-                    class="primary-button">
-                    입장
-                  </a>
+                    <!-- 게시글이 살아있을 때 -->
+                    <a th:if="${chatRoom.isDeleted == 0}"
+                      th:href="@{/chat/room/{chatNum}(chatNum=${chatRoom.chatNum})}"
+                      class="primary-button">
+                      입장
+                    </a>
+
+                    <!-- 게시글이 삭제됐을 때 -->
+                    <span th:if="${chatRoom.isDeleted == 1}"
+                          class="line-button">
+                      삭제됨
+                    </span>
                 </article>
 
                 <p class="empty-text"

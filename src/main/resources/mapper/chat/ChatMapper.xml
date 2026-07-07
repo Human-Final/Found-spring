@@ -13,6 +13,9 @@
         <result property="userIdA" column="user_id_a"/>
         <result property="userIdB" column="user_id_b"/>
         <result property="createdAt" column="created_at"/>
+        <result property="title" column="title"/>
+        <result property="userName" column="user_name"/>
+        <result property="isDeleted" column="is_deleted"/>
     </resultMap>
 
     <!-- 채팅 메시지 + 첨부파일 ResultMap -->
@@ -101,16 +104,48 @@
     <!-- 내 채팅방 목록 -->
     <select id="findMyChatRooms" resultMap="ChatRoomMap">
         SELECT
-            chat_num,
-            lost_num,
-            found_num,
-            user_id_a,
-            user_id_b,
-            created_at
-        FROM chat_room
-        WHERE user_id_a = #{loginId}
-           OR user_id_b = #{loginId}
-        ORDER BY created_at DESC
+            cr.chat_num,
+            cr.lost_num,
+            cr.found_num,
+            cr.user_id_a,
+            cr.user_id_b,
+            cr.created_at,
+
+            CASE
+                WHEN cr.found_num IS NOT NULL AND IFNULL(f.is_deleted, 1) = 0 THEN f.fd_sbjt
+                WHEN cr.lost_num IS NOT NULL AND IFNULL(l.is_deleted, 1) = 0 THEN l.lst_sbjt
+                ELSE '삭제된 게시글입니다.'
+            END AS title,
+
+            CASE
+                WHEN cr.found_num IS NOT NULL THEN IFNULL(f.is_deleted, 1)
+                WHEN cr.lost_num IS NOT NULL THEN IFNULL(l.is_deleted, 1)
+                ELSE 1
+            END AS is_deleted,
+
+            CASE
+                WHEN cr.user_id_a = #{loginId} THEN ub.name
+                ELSE ua.name
+            END AS user_name
+
+        FROM chat_room cr
+
+        LEFT JOIN found f
+            ON cr.found_num = f.num
+
+        LEFT JOIN lost l
+            ON cr.lost_num = l.num
+
+        LEFT JOIN user ua
+            ON cr.user_id_a = ua.id
+
+        LEFT JOIN user ub
+            ON cr.user_id_b = ub.id
+
+        WHERE cr.user_id_a = #{loginId}
+        OR cr.user_id_b = #{loginId}
+
+        ORDER BY cr.created_at DESC
     </select>
 
     <!-- 메시지 저장 -->
@@ -256,5 +291,19 @@
         WHERE num = #{lostNum}
           AND is_deleted = 0
     </select>
+
+    <!-- 채팅방 삭제 -->
+    <delete id="deleteChatRooms">
+        DELETE
+        FROM chat_room
+        WHERE chat_num IN
+        <foreach collection="list"
+                item="chatNum"
+                open="("
+                separator=","
+                close=")">
+            #{chatNum}
+        </foreach>
+    </delete>    
 
 </mapper>

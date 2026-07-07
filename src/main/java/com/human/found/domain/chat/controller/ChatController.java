@@ -208,8 +208,11 @@ public class ChatController {
     @PostMapping("/chat/file/upload")
     @ResponseBody
     public ChatMessageVO uploadChatFile(@RequestParam("chatNum") Long chatNum,
-                                        @RequestParam("senderId") String senderId,
-                                        @RequestParam("file") MultipartFile file) {
+                                        @RequestParam("file") MultipartFile file,
+                                        Principal principal) {
+
+        // 브라우저에서 개발자도구로 admin 변경되는거 방지
+        String senderId = principal.getName();
 
         // 1. 채팅 메시지 먼저 저장
         ChatMessageVO message = new ChatMessageVO();

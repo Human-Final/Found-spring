@@ -16,10 +16,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
         //습득물
         registry.addResourceHandler("/images/found/**")
-                .addResourceLocations("file:////192.168.0.53/260126/0608/found/file/found/");
+                .addResourceLocations("file:////192.168.0.53/260126/0608/배민선, 박상화, 김태연, 신민철/file/found/");
         
         //분실물
         registry.addResourceHandler("/images/lost/**")
-                .addResourceLocations("file:////192.168.0.53/260126/0608/found/file/lost/");        
+                .addResourceLocations("file:////192.168.0.53/260126/0608/배민선, 박상화, 김태연, 신민철/file/lost/");  
+                
+        // 채팅
+        registry.addResourceHandler("/images/chat/**")
+                .addResourceLocations("file:////192.168.0.53/260126/0608/배민선, 박상화, 김태연, 신민철/file/chat/");
     }
 }
