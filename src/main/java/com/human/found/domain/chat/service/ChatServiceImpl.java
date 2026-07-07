@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.human.found.domain.chat.mapper.ChatMapper;
+import com.human.found.domain.chat.vo.ChatFileVO;
 import com.human.found.domain.chat.vo.ChatMessageVO;
 import com.human.found.domain.chat.vo.ChatRoomVO;
 
@@ -96,5 +97,11 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public String getLostAtcId(Long lostNum) {
         return chatMapper.findLostAtcId(lostNum);
+    }
+
+    // 채팅 첨부파일 저장
+    @Override
+    public void saveChatFile(ChatFileVO chatFile) {
+        chatMapper.insertChatFile(chatFile);
     }
 }

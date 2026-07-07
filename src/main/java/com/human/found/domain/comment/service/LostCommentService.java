@@ -20,5 +20,10 @@ public interface LostCommentService {
 
     // 댓글 삭제
     void deleteComment(Long commentNum);
-    
+
+    // 유저의 이메일 알아내기
+    String findUserEmailByAtcId(String atcId);
+
+    // 유저에게 이메일 보내기
+    void emailNotify(String userEmail, String atcId);
 }

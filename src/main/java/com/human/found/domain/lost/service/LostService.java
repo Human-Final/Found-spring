@@ -16,6 +16,9 @@ public interface LostService {
     
     public LostVO lostdetail(String atcId);
 
+    // 조회 수 올리기
+    void viewCountPlus(String atcId);
+
     // 게시글 번호로 분실물 조회
     LostVO getLostByNum(Long num);
 

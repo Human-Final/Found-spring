@@ -24,4 +24,8 @@ public interface LostCommentMapper {
 
     // 분실물 댓글 1개삭제
     void deleteComment(@Param("commentNum") Long commentNum);
+
+    // 유저 이메일 찾기
+    String findUserEmailByAtcId(String atcId);
+
 }

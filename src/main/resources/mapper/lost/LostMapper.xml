@@ -252,6 +252,7 @@ resultMap="LostDetailResultMap">
                 updated_at,
                 done,
                 is_deleted,
+                view_count,
                 lst_filepath_img,
                 'user' AS dataSource <!--테이블라벨-->
         FROM lost
@@ -273,6 +274,7 @@ resultMap="LostDetailResultMap">
                 updated_at,
                 done,
                 is_deleted,
+                view_count,
                 lst_filepath_img,
                 'police' AS dataSource <!--테이블라벨-->
         FROM lost_police
@@ -280,6 +282,22 @@ resultMap="LostDetailResultMap">
         ) combined_lost LEFT JOIN lost_file f on combined_lost.atc_id=f.atc_id
         ORDER BY f.id ASC
 </select>
+
+    <update id="viewCountPlus" parameterType="string">
+        UPDATE
+        <choose>
+            <!-- U로 시작하면 분실물 일반 유저 테이블 -->
+            <when test="atcId.startsWith('U')">
+                lost
+            </when>
+            <!-- L로 시작하면 분실물 경찰청 테이블 -->
+            <when test="atcId.startsWith('L')">
+                lost_police
+            </when>
+        </choose>
+        SET view_count = view_count + 1
+        WHERE atc_id = #{atcId}
+    </update>
 
 <!-- 경찰청 삭제 -->
  <delete id="PoliceDelete">

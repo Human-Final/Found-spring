@@ -34,6 +34,7 @@ public interface FoundService {
     //게시글 수정
     public void UpdateFound(FoundVO foundVO,MultipartFile files[],List<String>deleteFiles);
 
-    
+    //게시글 조회 수 올리기
+    public void viewCountPlus(String atcId);
 
 }

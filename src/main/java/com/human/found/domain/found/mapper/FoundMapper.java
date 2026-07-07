@@ -44,6 +44,7 @@ public interface FoundMapper {
     public FoundVO selectFoundById(@Param("atcId") String atcId );
     public FoundVO selectDetailatcId(@Param("atcId") String atcId);
     public long countFoundList();
+    public void viewCountPlus(String atcId);
 
     //외부 api
     void PoliceDelete(@Param("atcId") String atcId);
@@ -56,7 +57,6 @@ public interface FoundMapper {
     void updateFound(FoundVO foundVO);
 
     //test
-    
     void updateThumbnail(FoundVO foundVO);
     
 }

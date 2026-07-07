@@ -151,7 +151,14 @@
         
         <include refid="lostSearchCondition"/>
 
-        ORDER BY created_at DESC
+        ORDER BY 
+            created_at DESC, 
+            CASE data_source
+                WHEN 'USER' THEN 1
+                WHEN 'POLICE' THEN 2
+                ELSE 3
+            END,
+            done ASC
         LIMIT #{size} OFFSET #{offset}
     </select>
 
@@ -276,7 +283,14 @@
 
         <include refid="foundSearchCondition"/>
 
-        ORDER BY created_at DESC
+        ORDER BY 
+            created_at DESC, 
+            CASE data_source
+                WHEN 'USER' THEN 1
+                WHEN 'POLICE' THEN 2
+                ELSE 3
+            END,
+            done ASC
         LIMIT #{size} OFFSET #{offset}
     </select>
 
@@ -363,7 +377,14 @@
 
         <include refid="noticeSearchCondition"/>
 
-        ORDER BY created_at DESC
+        ORDER BY 
+            created_at DESC, 
+            CASE data_source
+                WHEN 'USER' THEN 1
+                WHEN 'POLICE' THEN 2
+                ELSE 3,
+            END,
+            done ASC
         LIMIT #{size} OFFSET #{offset}
     </select>
 

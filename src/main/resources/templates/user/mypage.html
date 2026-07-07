@@ -725,7 +725,8 @@
                                 <!-- 기존 이메일 태그에 id="currentEmail" 추가 -->
                                 <input type="text" id="currentEmail" name="email" th:value="${user.email}" required style="display: none;">
                                 <!-- 이메일 아이디 입력창 -->
-                                <input type="text" id="emailId" class="form-input" style="flex: 1; min-width: 80px;" placeholder="이메일 아이디" required>
+                                <input type="text" id="emailId" class="form-input" style="flex: 1; min-width: 80px;" placeholder="이메일 아이디" required
+                                        oninput="this.value = this.value.replace(/[^a-zA-Z0-9._-]/g, '')">
                                 <span>@</span>
                                 <!-- 이메일 도메인 선택창 -->
                                 <select id="emailDomain" style="flex: 1; min-width: 120px; height: 38px; border: 1px solid #ced4da; border-radius: 4px; padding: 0 10px;">

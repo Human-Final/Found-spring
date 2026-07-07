@@ -1,7 +1,6 @@
 package com.human.found.domain.comment.controller;
 
-import java.security.Principal;
-
+import java.security.Principal; 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -37,7 +36,15 @@ public class FoundCommentController {
         if (principal == null) {
             return "redirect:/login";
         }
-
+        
+        // 유저가 작성한 게시글에 댓글 달렸다면 해당 유저에게 이메일 전송해주기
+        if (atcId != null && atcId.startsWith("USER")) {
+            String userEmail=foundCommentService.findUserEmailByAtcId(atcId);
+            foundCommentService.emailNotify(userEmail, atcId);
+            System.out.println(atcId);
+            System.out.println(userEmail);
+        }
+        
         commentVO.setNum(num);
         commentVO.setId(principal.getName());
         commentVO.setDataSource(dataSource);

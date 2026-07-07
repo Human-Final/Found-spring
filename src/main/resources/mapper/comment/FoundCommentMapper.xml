@@ -41,7 +41,16 @@
         )
     </insert>
 
-        <!-- 댓글 단건 조회 -->
+    <!-- 게시글 물건 ID로 유저의 이메일 찾기 -->
+    <select id="findUserEmailByAtcId" parameterType="String"
+            resultType="String">
+        SELECT u.email 
+        FROM user u 
+        INNER JOIN found f ON u.id = f.id
+        WHERE f.atc_id = #{atcId};
+    </select>
+
+    <!-- 댓글 단건 조회 -->
     <select id="selectCommentByCommentNum"
             resultType="com.human.found.domain.comment.vo.CommentVO">
         SELECT

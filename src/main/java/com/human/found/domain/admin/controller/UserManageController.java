@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.human.found.domain.admin.dto.UserBulkInfoDTO;
@@ -30,6 +31,7 @@ public class UserManageController {
     @GetMapping("/test/users")
     public String userManageView(
                 @ModelAttribute("conditionDTO") UserSearchConditionDTO conditionDTO,
+                @RequestParam(defaultValue="false") boolean searched,
                 Model model, 
                 Authentication authentication) {
 
@@ -38,8 +40,29 @@ public class UserManageController {
 
         model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("isManager", isManager);
+        model.addAttribute("searched", searched);
         
         conditionDTO.setSize(50);
+
+        if (!searched) {
+            conditionDTO.pageInfo(0);
+
+            model.addAttribute("userList", List.of());
+            model.addAttribute("paging", conditionDTO);
+            model.addAttribute("totalUserCount", 0);
+
+            return "admin/userManage";
+        }
+
+        if (searched && hasNoCheckedFilter(conditionDTO)) {
+            conditionDTO.pageInfo(0);
+
+            model.addAttribute("userList", List.of());
+            model.addAttribute("paging", conditionDTO);
+            model.addAttribute("totalUserCount", 0);
+
+            return "admin/userManage";
+        }
 
         int totalCount = userManageService.countUsers(conditionDTO);
         conditionDTO.pageInfo(totalCount);
@@ -49,6 +72,9 @@ public class UserManageController {
         model.addAttribute("userList", userList);
         model.addAttribute("conditionDTO", conditionDTO);
         model.addAttribute("paging", conditionDTO);
+        
+        model.addAttribute("totalUserCount", totalCount);
+
         return "admin/userManage";
     }
 
@@ -82,8 +108,10 @@ public class UserManageController {
 
             redirectAttributes.addFlashAttribute(
                 "message", "회원 정보가 수정되었습니다.");
+
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
                 "회원 정보 수정 중 오류가 발생했습니다.");
@@ -91,6 +119,18 @@ public class UserManageController {
 
         return "redirect:/test/users";
     }
+
+    private boolean hasNoCheckedFilter(UserSearchConditionDTO conditionDTO) {
+        boolean noStatus =
+                conditionDTO.getStatuses() == null
+                || conditionDTO.getStatuses().isEmpty();
+
+        boolean noRole =
+                conditionDTO.getRoles() == null
+                || conditionDTO.getRoles().isEmpty();
+
+        return noStatus && noRole;
+    }   
 
     // 권한 설정용 메서드
     private boolean hasRole(Authentication authentication, String role) {

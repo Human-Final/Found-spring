@@ -56,6 +56,15 @@
         )
     </insert>
 
+    <!-- 게시글 물건 ID로 유저의 이메일 찾기 -->
+    <select id="findUserEmailByAtcId" parameterType="String"
+            resultType="String">
+        SELECT u.email 
+        FROM user u 
+        INNER JOIN lost l ON u.id = l.id
+        WHERE l.atc_id = #{atcId};
+    </select>
+
     <update id="updateComment"
             parameterType="com.human.found.domain.comment.vo.CommentVO">
         UPDATE lost_comment

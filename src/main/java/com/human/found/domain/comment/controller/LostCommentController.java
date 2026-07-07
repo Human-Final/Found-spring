@@ -35,6 +35,14 @@ public class LostCommentController {
             return "redirect:/login";
         }
 
+        // 유저가 작성한 게시글에 댓글 달렸다면 해당 유저에게 이메일 전송해주기
+        if (atcId != null && atcId.startsWith("USER")) {
+            String userEmail=lostCommentService.findUserEmailByAtcId(atcId);
+            lostCommentService.emailNotify(userEmail, atcId);
+            System.out.println(num);
+            System.out.println(userEmail);
+        }
+
         commentVO.setNum(num);
         commentVO.setId(principal.getName());
         commentVO.setDataSource(dataSource);

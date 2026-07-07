@@ -27,8 +27,6 @@
         WHERE id = #{id}
     </update>
 
-
-
     <!-- 유저 전체 리스트 조회(탈퇴회원 포함) -->
     <select id="totalUserList"
             resultType="com.human.found.domain.user.vo.UserVO">
@@ -49,7 +47,7 @@
                 WHEN 'MANAGER' THEN 2
                 ELSE 3
             END,
-            id ASC
+            sign_up DESC
     </select>
 
     <!-- 유저 1명 조회(탈퇴회원 포함) -->
@@ -69,6 +67,7 @@
         WHERE id = #{id}
     </select>
 
+    <!-- 회원 검색(조회)용 -->
     <select id="searchUsers"
             parameterType="com.human.found.domain.admin.dto.UserSearchConditionDTO"
             resultType="com.human.found.domain.user.vo.UserVO">
@@ -93,12 +92,13 @@
                 WHEN 'MANAGER' THEN 2
                 ELSE 3
             END,
-            id ASC
+            sign_up DESC
         LIMIT #{size}
         OFFSET #{offset}
 
     </select>
 
+    <!-- 검색(조회)된 회원 수 카운트 -->
     <select id="countUsers"
         parameterType="com.human.found.domain.admin.dto.UserSearchConditionDTO"
         resultType="int">
@@ -111,6 +111,7 @@
 
     </select>
 
+    <!-- 조회된 회원 다운로드 : limit/offset(페이징) 없음 -->
     <select id="userInfoDownload"
             parameterType="com.human.found.domain.admin.dto.UserSearchConditionDTO"
             resultType="com.human.found.domain.user.vo.UserVO">
@@ -134,9 +135,10 @@
                 WHEN 'MANAGER' THEN 2
                 ELSE 3
             END,
-            id ASC
+            sign_up DESC
     </select>
 
+    <!-- 관리자페이지에서 회원 추가 -->
     <insert id="insertUserByAdmin"
             parameterType="com.human.found.domain.user.vo.UserVO">
         INSERT INTO `user` (
@@ -162,6 +164,16 @@
             0
         )
     </insert>
+
+    <!-- 최고 관리자 1명 이상 보장 -->
+    <select id="countAdmin"
+            resultType="int">
+        SELECT COUNT(*) 
+        FROM user
+        WHERE role='ADMIN'
+            AND is_deleted = 0
+            AND status = 'active';
+    </select>
 
     <!-- 회원 관리 페이지 내 검색 공통 where-->
     <sql id="userSearchWhere">
