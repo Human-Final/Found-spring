@@ -5,19 +5,18 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.human.found.domain.admin.mapper.AdminMapper;
+import com.human.found.domain.admin.mapper.BoardManageMapper;
 import com.human.found.domain.admin.vo.AdminFoundVO;
 import com.human.found.domain.admin.vo.AdminLostVO;
-import com.human.found.domain.admin.vo.AdminNoticeVO;
 import com.human.found.domain.admin.vo.AdminSearchVO;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class AdminServiceImpl implements AdminService{
+public class BoardManageServiceImpl implements BoardManageService{
 
-    private final AdminMapper adminMapper;
+    private final BoardManageMapper boardManageMapper;
 
     public boolean isSearchConditionEmpty(AdminSearchVO searchVO) {
         // 1. 검색어가 있는지 확인
@@ -45,111 +44,83 @@ public class AdminServiceImpl implements AdminService{
         return !(hasKeyword || hasCategory || hasStatus || hasSource || hasStartDate || hasEndDate || hasIncludeDeleted);
     }
 
-    // 사용자 등록 분실물 선택 삭제
+    // 관리자 모드 분실물 선택 삭제
     @Override
     @Transactional
-    public void deleteLostList(List<Long> nums) {
+    public void deleteLostList(List<String> atcId) {
 
-        if(nums == null || nums.isEmpty()) {
-            return;
-        }
-
-        adminMapper.deleteLostList(nums);
+        boardManageMapper.deleteLostList(atcId);
     }
 
-    // 경찰청 API 분실물 선택 삭제
+    // 관리자 모드 습득물 선택 삭제
     @Override
     @Transactional
-    public void deletePoliceLostList(List<Long> nums) {
-
-        if(nums == null || nums.isEmpty()) {
-            return;
+    public void deleteFoundList(List<String> atcId) {
+        for(String id:atcId){
+            if(id.startsWith("U")){
+                boardManageMapper.deleteFoundList(id);
+            }
+            else if(id.startsWith("F")){
+                boardManageMapper.deleteFoundPoliceList(id);
+            }
+            else{
+                boardManageMapper.deleteFoundPortalList(id);
+            }
         }
-
-        adminMapper.deletePoliceLostList(nums);
     }
 
-    /**
-     * 사용자 등록 습득물 게시글 선택 삭제
-     * - 체크박스로 선택한 게시글들을 논리 삭제
-     */
+    // 관리자 분실물 완료 처리
     @Override
-    @Transactional
-    public void deleteFoundList(List<Long> nums) {
-
-        // 선택된 게시글이 없는 경우 종료
-        if (nums == null || nums.isEmpty()) {
-            return;
+    public void completeLostList(List<String> atcId){
+        for(String id:atcId){
+            if(id.startsWith("U")){
+                boardManageMapper.completeLostList(id);
+            }
+            else{
+                boardManageMapper.completeLostPoliceList(id);
+            }
         }
-
-        // 선택된 게시글 논리 삭제
-        adminMapper.deleteFoundList(nums);
     }
 
-    /**
-     * 경찰청 API 습득물 게시글 선택 삭제
-     * - 체크박스로 선택한 게시글들을 논리 삭제
-     */
+    // 관리자 습득물 완료 처리
     @Override
-    @Transactional
-    public void deletePoliceFoundList(List<Long> nums) {
-
-        // 선택된 게시글이 없는 경우 종료
-        if (nums == null || nums.isEmpty()) {
-            return;
+    public void completeFoundList(List<String> atcId){
+        for(String id:atcId){
+            if(id.startsWith("U")){
+                boardManageMapper.completeFoundList(id);
+            }
+            else if(id.startsWith("F")){
+                boardManageMapper.completeFoundPoliceList(id);
+            }
+            else{
+                boardManageMapper.completeFoundPortalList(id);
+            }
         }
-
-        // 선택된 게시글 논리 삭제
-        adminMapper.deletePoliceFoundList(nums);
     }
 
-    // 관리자 등록 공지사항 선택 삭제
-    @Override
-    @Transactional
-    public void deleteNoticeList(List<Long> nums) {
-
-        // 선택된 공지사항이 없는 경우 종료
-        if (nums == null || nums.isEmpty()) {
-            return;
-        }
-
-        // 선택된 공지사항 논리 삭제
-        adminMapper.deleteNoticeList(nums);
-    }
 
     // 관리자 분실물 검색 + 페이징 조회
     @Override
     public List<AdminLostVO> searchLostPage(AdminSearchVO searchVO) {
-        return adminMapper.searchLostPage(searchVO);
+        return boardManageMapper.searchLostPage(searchVO);
     }
 
     // 관리자 분실물 검색 결과 개수 조회
     @Override
     public int countSearchLost(AdminSearchVO searchVO) {
-        return adminMapper.countSearchLost(searchVO);
+        return boardManageMapper.countSearchLost(searchVO);
     }
 
     // 관리자 습득물 검색 + 페이징 조회
     @Override
     public List<AdminFoundVO> searchFoundPage(AdminSearchVO searchVO) {
-        return adminMapper.searchFoundPage(searchVO);
+        return boardManageMapper.searchFoundPage(searchVO);
     }
 
     // 관리자 습득물 검색 결과 개수 조회
     @Override
     public int countSearchFound(AdminSearchVO searchVO) {
-        return adminMapper.countSearchFound(searchVO);
+        return boardManageMapper.countSearchFound(searchVO);
     }
 
-    // 관리자 공지사항 검색 + 페이징 조회
-    @Override
-    public List<AdminNoticeVO> searchNoticePage(AdminSearchVO searchVO) {
-        return adminMapper.searchNoticePage(searchVO);
-    }
-
-    // 관리자 공지사항 검색 결과 개수 조회
-    @Override
-    public int countSearchNotice(AdminSearchVO searchVO) {
-        return adminMapper.countSearchNotice(searchVO);
-    }
 }

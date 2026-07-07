@@ -298,7 +298,7 @@ public class UserController {
             // 각각 분리해서 만든 습득물 전용 삭제 서비스 호출
             userService.removeFoundPost(atcId); 
         }
-        return "redirect:/mypage"; 
+        return "redirect:/mypage#myPosts"; 
     }
 
     @PostMapping("/api/lost/delete/{atcId}")
@@ -307,7 +307,7 @@ public class UserController {
             // 각각 분리해서 만든 분실물 전용 삭제 서비스 호출
             userService.removeLostPost(atcId);
         }
-        return "redirect:/mypage"; 
+        return "redirect:/mypage#myPosts"; 
     }
 
     // 1. 습득물 댓글 비동기 삭제 API -> 동기 리다이렉트 구조로 최종 변경
