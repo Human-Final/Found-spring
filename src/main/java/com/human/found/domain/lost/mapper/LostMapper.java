@@ -17,7 +17,11 @@ public interface LostMapper {
     //게시글 삭제
     public void lostupdateDelte(@Param("atcId")String atcId);
 
+    //게시글 상세보기
     public LostVO selectDetailAtcId(@Param("atcId") String atcId);
+
+    //게시글 조회수 올리기
+    public void viewCountPlus(String atcId);
 
     // 외부 api 삭제
     public void PoliceDelete(@Param("atcId") String atcId);

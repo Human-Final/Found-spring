@@ -92,6 +92,7 @@
             updated_at,
             done,
             is_deleted,
+            view_count,
             'user' AS dataSource
         FROM found
         WHERE 
@@ -114,6 +115,7 @@
             updated_at,
             done,
             is_deleted,
+            view_count,
             'police' AS dataSource
         FROM found_police
         WHERE 
@@ -136,6 +138,7 @@
             updated_at,
             done,
             is_deleted,
+            view_count,
             'portal' AS dataSource
         FROM found_portal
         WHERE 
@@ -157,7 +160,7 @@
             ) AS commentCount
         FROM (
                 /* 1) 유저 습득물 데이터 */
-                SELECT num, atc_id, id, clr_nm, dep_place, fd_filepath_img, fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm, created_at, updated_at, done, is_deleted, 'user' AS dataSource FROM found WHERE is_deleted = 0
+                SELECT num, atc_id, id, clr_nm, dep_place, fd_filepath_img, fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm, created_at, updated_at, done, is_deleted, view_count, 'user' AS dataSource FROM found WHERE is_deleted = 0
                 <if test="category != null and category.size() > 0">AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach></if>
                 <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
                 <if test="colorSelect != null and colorSelect != ''">AND clr_nm LIKE CONCAT('%', #{colorSelect}, '%')</if>
@@ -170,7 +173,7 @@
                 UNION ALL
 
                 /* 2) 경찰청 습득물 데이터 */
-                SELECT num, atc_id, id, clr_nm, dep_place, fd_filepath_img, fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm, created_at, updated_at, done, is_deleted, 'police' AS dataSource FROM found_police WHERE is_deleted = 0
+                SELECT num, atc_id, id, clr_nm, dep_place, fd_filepath_img, fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm, created_at, updated_at, done, is_deleted, view_count, 'police' AS dataSource FROM found_police WHERE is_deleted = 0
                 <if test="category != null and category.size() > 0">AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach></if>
                 <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
                 <if test="colorSelect != null and colorSelect != ''">AND clr_nm LIKE CONCAT('%', #{colorSelect}, '%')</if>
@@ -183,7 +186,7 @@
                 UNION ALL
 
                 /* 3) 포털 습득물 데이터 */
-                SELECT num, atc_id, id, clr_nm, dep_place, fd_filepath_img, fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm, created_at, updated_at, done, is_deleted, 'portal' AS dataSource FROM found_portal WHERE is_deleted = 0
+                SELECT num, atc_id, id, clr_nm, dep_place, fd_filepath_img, fd_prdt_nm, fd_sbjt, fd_ymd, prdt_cl_nm, created_at, updated_at, done, is_deleted, view_count, 'portal' AS dataSource FROM found_portal WHERE is_deleted = 0
                 <if test="category != null and category.size() > 0">AND prdt_cl_nm IN <foreach collection="category" item="item" open="(" separator="," close=")">#{item}</foreach></if>
                 <if test="subCategory != null and subCategory != ''">AND fd_prdt_nm LIKE CONCAT('%', #{subCategory}, '%')</if>
                 <if test="colorSelect != null and colorSelect != ''">AND clr_nm LIKE CONCAT('%', #{colorSelect}, '%')</if>
@@ -302,6 +305,7 @@
                 updated_at, 
                 done, 
                 is_deleted, 
+                view_count,
                 'user' AS dataSource <!--테이블라벨-->
             FROM found
             WHERE is_deleted = 0 And atc_id = #{atcId}
@@ -321,7 +325,7 @@
                 clr_nm, 
                 created_at, 
                 updated_at, 
-                done, is_deleted, 
+                done, is_deleted, view_count,
                 'police' AS dataSource <!--테이블라벨-->
             FROM found_police
             WHERE is_deleted = 0 And atc_id = #{atcId}
@@ -341,7 +345,7 @@
                 clr_nm, 
                 created_at, 
                 updated_at, 
-                done, is_deleted, 
+                done, is_deleted, view_count,
                 'portal' AS dataSource <!--테이블라벨-->
             FROM found_portal
             WHERE is_deleted = 0 And atc_id = #{atcId}            
@@ -349,102 +353,125 @@
         ORDER BY f.id ASC
     </select>
 
-<select id="countFoundList"
-            resultType="long">
-    select sum(cnt)
-    from (
-        select count(*) cnt
-        from found
-        where is_deleted = 0
+    <update id="viewCountPlus" parameterType="string">
+        UPDATE
+        <choose>
+            <!-- U로 시작하면 일반 유저 테이블 -->
+            <when test="atcId.startsWith('U')">
+                found
+            </when>
+            <!-- V로 시작하면 포털 테이블 -->
+            <when test="atcId.startsWith('V')">
+                found_portal
+            </when>
+            <!-- F로 시작하면 경찰청 테이블 -->
+            <when test="atcId.startsWith('F')">
+                found_police
+            </when>
+            <!-- 혹시 모를 예외 상황을 위한 기본 테이블 지정 -->
+            <otherwise>
+                found
+            </otherwise>
+        </choose>
+        SET view_count = view_count + 1
+        WHERE atc_id = #{atcId}
+    </update>
 
-        union all
+    <select id="countFoundList"
+                resultType="long">
+        select sum(cnt)
+        from (
+            select count(*) cnt
+            from found
+            where is_deleted = 0
 
-        select count(*) cnt
-        from found_police
-        where is_deleted = 0
+            union all
 
-        union all
+            select count(*) cnt
+            from found_police
+            where is_deleted = 0
 
-        select count(*) cnt
-        from found_portal
-        where is_deleted = 0
-    ) as total_found
+            union all
 
-</select>
+            select count(*) cnt
+            from found_portal
+            where is_deleted = 0
+        ) as total_found
+    </select>
 
 
-<!-- 경찰청 삭제-->
- <delete id="PoliceDelete">
-    DELETE 
-    FROM found_police
-    WHERE atc_id=#{atcId}
- </delete>
+    <!-- 경찰청 삭제-->
+    <delete id="PoliceDelete">
+        DELETE 
+        FROM found_police
+        WHERE atc_id=#{atcId}
+    </delete>
 
- <!-- 포털 삭제 -->
-  <delete id="PortalDelete">
-    DELETE
-    FROM found_portal
-    WHERE atc_id=#{atcId}
-  </delete>
+    <!-- 포털 삭제 -->
+    <delete id="PortalDelete">
+        DELETE
+        FROM found_portal
+        WHERE atc_id=#{atcId}
+    </delete>
 
-<!-- 댓글-->
-<select id="getFoundByNum"
-        parameterType="long"
-        resultType="com.human.found.domain.found.vo.FoundVO">
-    SELECT
-        num,
-        atc_id AS atcId,
-        id,
-        clr_nm AS clrNm,
-        dep_place AS depPlace,
-        fd_filepath_img AS fdFilepathImg,
-        fd_prdt_nm AS fdPrdtNm,
-        fd_sbjt AS fdSbjt,
-        fd_ymd AS fdYmd,
-        prdt_cl_nm AS prdtClNm,
-        created_at AS createdAt,
-        updated_at AS updatedAt,
-        done,
-        is_deleted AS isDeleted
-    FROM found
-    WHERE num = #{num}
-      AND is_deleted = 0
-</select>
+    <!-- 댓글-->
+    <select id="getFoundByNum"
+            parameterType="long"
+            resultType="com.human.found.domain.found.vo.FoundVO">
+        SELECT
+            num,
+            atc_id AS atcId,
+            id,
+            clr_nm AS clrNm,
+            dep_place AS depPlace,
+            fd_filepath_img AS fdFilepathImg,
+            fd_prdt_nm AS fdPrdtNm,
+            fd_sbjt AS fdSbjt,
+            fd_ymd AS fdYmd,
+            prdt_cl_nm AS prdtClNm,
+            created_at AS createdAt,
+            updated_at AS updatedAt,
+            done,
+            is_deleted AS isDeleted
+        FROM found
+        WHERE num = #{num}
+        AND is_deleted = 0
+    </select>
 
-<update id="updateFound"
-parameterType="com.human.found.domain.found.vo.FoundVO">
-UPDATE found
-SET
-    clr_nm = #{clrNm},
-    dep_place =#{depPlace},
-    fd_filepath_img = #{fdFilepathImg},
-    fd_prdt_nm      = #{fdPrdtNm},
-    fd_sbjt         = #{fdSbjt},
-    fd_ymd          = #{fdYmd},
-    prdt_cl_nm      = #{prdtClNm},
-    done            = #{done},
-    is_deleted      = #{isDeleted}
-    WHERE
-        atc_id=#{atcId}
+    <update id="updateFound"
+    parameterType="com.human.found.domain.found.vo.FoundVO">
+    UPDATE found
+    SET
+        clr_nm = #{clrNm},
+        dep_place =#{depPlace},
+        fd_filepath_img = #{fdFilepathImg},
+        fd_prdt_nm      = #{fdPrdtNm},
+        fd_sbjt         = #{fdSbjt},
+        fd_ymd          = #{fdYmd},
+        prdt_cl_nm      = #{prdtClNm},
+        done            = #{done},
+        is_deleted      = #{isDeleted}
+        WHERE
+            atc_id=#{atcId}
 
-</update>
+    </update>
 
-<update id="updateThumbnail"
-parameterType="com.human.found.domain.found.vo.FoundVO">
-UPDATE found
-SET
-fd_filepath_img = #{fdFilepathImg}
-WHERE atc_id = #{atcId}    
+    <update id="updateThumbnail"
+    parameterType="com.human.found.domain.found.vo.FoundVO">
+    UPDATE found
+    SET
+    fd_filepath_img = #{fdFilepathImg}
+    WHERE atc_id = #{atcId}    
 
-</update>
+    </update>
 
-<!-- 사용자 등록 습득물 -->
-<select id="selectFoundPage" resultType="FoundVO">
-    SELECT *
-    FROM found
-    WHERE is_deleted = 0
-    ORDER BY created_at DESC
-    LIMIT #{size} OFFSET #{offset}
-</select>
+    <!-- 사용자 등록 습득물 -->
+    <select id="selectFoundPage" resultType="FoundVO">
+        SELECT *
+        FROM found
+        WHERE is_deleted = 0
+        ORDER BY created_at DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
 
 </mapper>

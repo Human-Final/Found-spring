@@ -260,7 +260,6 @@
       </form>
     </section>
 
-    <!--테스트용으로 넣어봤습니다. 맘에 안드시면 없애도 괜찮습니다-->
     <div class="search-count" style="padding: 8px;">
       총 <span th:text="${searchVO.totalCount}">0</span>건의 자료가 검색되었습니다.
     </div>
@@ -412,9 +411,6 @@
             </form>
           </td>
         </tr>
-              
-
-
 
         <!-- 임시 화면 확인용: userList 없을 때만 출력 -->
         <tr th:if="${(boardType == 'lost' and lostList == null) or (boardType == 'found' and foundList == null)}">
@@ -422,6 +418,10 @@
         </tr>
         </tbody>
       </table>
+      <div class="no-result" style="padding: 8px; text-align: center;"
+          th:if="${searchVO.totalCount==0}">
+          검색된 결과가 없습니다.
+      </div>
     </section>
 
     <!-- 페이지네이션 -->
@@ -453,9 +453,6 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>
   lucide.createIcons();
-
-
-
 
   // 페이징 처리 함수 (form 데이터 유지)
   function fn_goPage(pageNumber){
@@ -526,9 +523,6 @@
         });
       });
     }
-
-    
-
 
     function updateSelectedCount() {
       const checkedCount = document.querySelectorAll(".user-check:checked").length;
@@ -649,8 +643,7 @@
         if(!confirm("선택한 게시글을 삭제하시겠습니까?")){
           return;
         }
-      
-
+        
         const activeTab=document.querySelector(".admin-tabs .active").textContent.trim();
         const boardType=activeTab==="분실물"?"lost":"found";
 
@@ -735,7 +728,6 @@
         form.submit();
       });
     }
-
 
 
     updateSelectedCount();

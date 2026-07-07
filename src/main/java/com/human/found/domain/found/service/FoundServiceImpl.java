@@ -88,6 +88,12 @@ public class FoundServiceImpl implements FoundService {
         return foundMapper.selectFoundList(pagingVO);
     }
 
+    // 조회 수 올리기
+    @Override
+    public void viewCountPlus(String atcId) {
+        foundMapper.viewCountPlus(atcId);
+    }
+
     // 검색
     @Override
     public List<FoundVO> searchFoundItems(List<String> category, String subCategory, String colorSelect, String startDate, String endDate, String author, String status, String keyword, String sort, PagingVO pagingVO) {

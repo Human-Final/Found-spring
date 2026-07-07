@@ -102,7 +102,7 @@
 
             <div class="info-row">
               <span class="info-label">조회수</span>
-              <span class="info-value">0</span>
+              <span th:text="${foundVO.viewCount!=0 ? foundVO.viewCount : 0}">0</span>
             </div>
 
             <div class="info-row">
