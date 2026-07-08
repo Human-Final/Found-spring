@@ -41,7 +41,7 @@ public class LostPoliceServiceImpl implements LostPoliceService{
 
     @Value("${police.api.key}")
     private String serviceKey;
-    
+    //initialDelay = 5000 5초뒤에 경찰청 분실물 API자료 갖고오는 테스트용 코드
     //스케줄러 메서드
     //매일 새벽 1시에 자동으로 아래 fetchAndSaveLostGoods 메서드 호출하기
     @Scheduled(cron = "0 0 1 * * *")

@@ -3,7 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.human.found.domain.admin.mapper.AdminMapper">
+<mapper namespace="com.human.found.domain.admin.mapper.BoardManageMapper">
 
     <!-- 관리자 분실물 게시글 조회 결과 매핑 -->
     <resultMap id="AdminLostResultMap"
@@ -49,72 +49,93 @@
         <result property="dataSource" column="data_source"/>
     </resultMap>
 
-    <!-- 관리자 공지사항 조회 결과 매핑 -->
-    <resultMap id="AdminNoticeResultMap"
-               type="com.human.found.domain.admin.vo.AdminNoticeVO">
-
-        <id property="num" column="num"/>
-
-        <result property="id" column="id"/>
-        <result property="title" column="title"/>
-        <result property="content" column="content"/>
-        <result property="viewCount" column="view_count"/>
-        <result property="isPlanned" column="is_planned"/>
-        <result property="isImportant" column="is_important"/>
-        <result property="createdAt" column="created_at"/>
-        <result property="updatedAt" column="updated_at"/>
-        <result property="isDeleted" column="is_deleted"/>
-        <result property="dataSource" column="data_source"/>
-    </resultMap>
-
     <!-- 사용자 등록 분실물 선택 삭제 -->
-    <update id="deleteLostList">
-        UPDATE lost
-        SET is_deleted = 1
-        WHERE num IN
-        <foreach collection="nums" item="num" open="(" separator="," close=")">
-            #{num}
-        </foreach>
+    <update id="deleteLostList" parameterType="list">
+        UPDATE lost l, lost_police lp
+        SET 
+            l.is_deleted = 1,
+            lp.is_deleted = 1
+        WHERE l.atc_id IN (
+            SELECT atc_id FROM (
+                SELECT atc_id FROM lost WHERE atc_id IN 
+                <foreach collection="atcId" item="atcId" open="(" separator="," close=")">
+                    #{atcId}
+                </foreach>
+                UNION
+                SELECT atc_id FROM lost_police WHERE atc_id IN 
+                <foreach collection="atcId" item="atcId" open="(" separator="," close=")">
+                    #{atcId}
+                </foreach>
+            ) AS tmp
+        ) OR lp.atc_id IN (
+            SELECT atc_id FROM (
+                SELECT atc_id FROM lost WHERE atc_id IN 
+                <foreach collection="atcId" item="atcId" open="(" separator="," close=")">
+                    #{atcId}
+                </foreach>
+                UNION
+                SELECT atc_id FROM lost_police WHERE atc_id IN 
+                <foreach collection="atcId" item="atcId" open="(" separator="," close=")">
+                    #{atcId}
+                </foreach>
+            ) AS tmp
+        )
     </update>
 
-    <!-- 경찰청 API 분실물 선택 삭제 -->
-    <update id="deletePoliceLostList">
-        UPDATE lost_police
-        SET is_deleted = 1
-        WHERE num IN
-        <foreach collection="nums" item="num" open="(" separator="," close=")">
-            #{num}
-        </foreach>
+    <!-- 사용자 분실물 완료처리 -->
+    <update id="completeLostList">
+        update lost
+        set done=1
+        where atc_id=#{atcId}
     </update>
 
-    <!-- 사용자 등록 습득물 선택 삭제 -->
+    <!-- 경찰청 분실물 완료처리 -->
+    <update id="completeLostPoliceList">
+        update lost_police
+        set done=1
+        where atc_id=#{atcId}
+    </update>
+
+    <!-- 1. 사용자 습득물 삭제 -->
     <update id="deleteFoundList">
         UPDATE found
         SET is_deleted = 1
-        WHERE num IN
-        <foreach collection="nums" item="num" open="(" separator="," close=")">
-            #{num}
-        </foreach>
+        WHERE atc_id = #{atcId}
     </update>
 
-    <!-- 경찰청 API 습득물 선택 삭제 -->
-    <update id="deletePoliceFoundList">
+    <!-- 2. 경찰 습득물 삭제 -->
+    <update id="deleteFoundPoliceList">
         UPDATE found_police
         SET is_deleted = 1
-        WHERE num IN
-        <foreach collection="nums" item="num" open="(" separator="," close=")">
-            #{num}
-        </foreach>
+        WHERE atc_id = #{atcId}
     </update>
 
-    <!-- 관리자 등록 공지사항 선택 삭제 -->
-    <update id="deleteNoticeList">
-        UPDATE notice
+    <!-- 3. 포털 습득물 삭제 -->
+    <update id="deleteFoundPortalList">
+        UPDATE found_portal
         SET is_deleted = 1
-        WHERE num IN
-        <foreach collection="nums" item="num" open="(" separator="," close=")">
-            #{num}
-        </foreach>
+        WHERE atc_id = #{atcId}
+    </update>
+
+    <!-- 사용자 습득물 완료처리 -->
+    <update id="completeFoundList">
+        update found
+        set done=1
+        where atc_id=#{atcId}
+    </update>
+
+    <!-- 경찰청 습득물 완료처리 -->
+    <update id="completeFoundPoliceList">
+        update found_police
+        set done=1
+        where atc_id=#{atcId}
+    </update>
+
+    <!-- 포털 습득물 완료처리 -->
+    <update id="completeFoundPortalList">
+        update found_portal
+        set done=1
+        where atc_id=#{atcId}
     </update>
 
     <!-- 관리자 분실물 검색 + 페이징 조회 -->
@@ -359,44 +380,6 @@
         <include refid="foundSearchCondition"/>
     </select>
 
-    <!-- 관리자 공지사항 검색 + 페이징 조회 -->
-    <select id="searchNoticePage" resultMap="AdminNoticeResultMap">
-        SELECT
-            num,
-            id,
-            title,
-            content,
-            view_count,
-            is_planned,
-            is_important,
-            created_at,
-            updated_at,
-            is_deleted
-        FROM notice
-        WHERE is_deleted = 0
-
-        <include refid="noticeSearchCondition"/>
-
-        ORDER BY 
-            created_at DESC, 
-            CASE data_source
-                WHEN 'USER' THEN 1
-                WHEN 'POLICE' THEN 2
-                ELSE 3,
-            END,
-            done ASC
-        LIMIT #{size} OFFSET #{offset}
-    </select>
-
-    <!-- 관리자 공지사항 검색 결과 개수 조회 -->
-    <select id="countSearchNotice" resultType="int">
-        SELECT COUNT(*)
-        FROM notice
-        WHERE is_deleted = 0
-
-        <include refid="noticeSearchCondition"/>
-    </select>
-
     <!-- 분실물 검색 조건 -->
     <sql id="lostSearchCondition">
         <if test="keyword != null and keyword != ''">
@@ -486,25 +469,6 @@
                     close=")">
                 #{source}
             </foreach>
-        </if>
-    </sql>
-
-    <!-- 공지사항 검색 조건 -->
-    <sql id="noticeSearchCondition">
-        <if test="keyword != null and keyword != ''">
-            AND (
-                title LIKE CONCAT('%', #{keyword}, '%')
-                OR content LIKE CONCAT('%', #{keyword}, '%')
-                OR id LIKE CONCAT('%', #{keyword}, '%')
-            )
-        </if>
-
-        <if test="startDate != null and startDate != ''">
-            AND DATE(created_at) &gt;= #{startDate}
-        </if>
-
-        <if test="endDate != null and endDate != ''">
-            AND DATE(created_at) &lt;= #{endDate}
         </if>
     </sql>
 
