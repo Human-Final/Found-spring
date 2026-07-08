@@ -472,4 +472,199 @@
         </if>
     </sql>
 
+    <!-- 습들물 분실물 삭제된 게시글 미리보기 관련-->
+
+    <resultMap id="LostDetailResultMap" type="com.human.found.domain.lost.vo.LostVO">
+        <id property="atcId" column="atc_id"/>
+        <result property="num" column="num"/>
+        <result property="id" column="id"/>
+        <result property="lstPlace" column="lst_place"/>
+        <result property="lstPrdtNm" column="lst_prdt_nm"/>
+        <result property="lstSbjt" column="lst_sbjt"/>
+        <result property="lstYmd" column="lst_ymd"/>
+        <result property="prdtClNm" column="prdt_cl_nm"/>
+        <result property="prdtCategory" column="prdt_category"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="done" column="done"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="lstFilepathImg" column="lst_filepath_img"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="dataSource" column="dataSource"/>
+        <result property="commentCount" column="commentCount"/>
+
+        <collection property="fileList" javaType="ArrayList" ofType="com.human.found.domain.lost.vo.LostFileVO">
+                <id property="id" column="file_id"/>
+                <result property="lstFilepathImg" column="lst_filepath_img"/>
+                <result property="atcId" column="atc_id"/>
+                <result property="saveName" column="save_name"/>
+                <result property="fileSize" column="file_size"/>
+                <result property="filePath" column="file_path"/>
+
+        </collection>
+        
+    </resultMap>
+
+
+    <resultMap id="FoundDetailResultMap" type="com.human.found.domain.found.vo.FoundVO">
+        <id property="atcId" column="atc_id"/>
+
+        <result property="fdFilepathImg" column="fd_filepath_img"/>
+        <result property="num" column="num"/>
+        <result property="id" column="id"/>
+        <result property="clrNm" column="clr_nm"/>
+        <result property="depPlace" column="dep_place"/>
+        <result property="fdPrdtNm" column="fd_prdt_nm"/>
+        <result property="fdSbjt" column="fd_sbjt"/>
+        <result property="fdYmd" column="fd_ymd"/>
+        <result property="prdtClNm" column="prdt_cl_nm"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt"  column="updated_at"/>
+        <result property="done" column="done"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="dataSource" column="dataSource"/>
+        <result property="commentCount" column="commentCount"/>
+
+        <collection property="fileList"  javaType="ArrayList" ofType="com.human.found.domain.found.vo.FoundFileVO">
+            <id property="id" column="file_id"/>
+            <result property="fdFilepathImg" column="file_filepath_img"/>
+            <result property="atcId" column="atc_id"/>
+            <result property="saveName" column="save_name"/>
+            <result property="fileSize" column="file_size"/>
+            <result property="filePath" column="file_path"/>
+        </collection>
+            
+    </resultMap>
+
+    <!--분실물 삭제 미리보기-->
+    <select id="selectAdminlostDetailAtcId"
+    parameterType="string"
+    resultMap="LostDetailResultMap">
+            SELECT combined_lost.*,
+            combined_lost.dataSource,
+            f.id AS file_id,
+            f.atc_id AS file_atc_id,
+            f.lst_filepath_img AS lst_filepath_img,
+            f.save_name,
+            f.file_size,
+            f.file_path
+            FROM(
+            SELECT
+                    num,
+                    atc_id,
+                    id,
+                    lst_place,
+                    lst_prdt_nm,
+                    lst_sbjt,
+                    lst_ymd,
+                    prdt_cl_nm,
+                    prdt_category,
+                    created_at,
+                    updated_at,
+                    done,
+                    is_deleted,
+                    view_count,
+                    lst_filepath_img,
+                    'user' AS dataSource <!--테이블라벨-->
+            FROM lost
+            WHERE atc_id = #{atcId}
+
+            UNION ALL
+
+            SELECT
+                    num,
+                    atc_id,
+                    id,
+                    lst_place,
+                    lst_prdt_nm,
+                    lst_sbjt,
+                    lst_ymd,
+                    prdt_cl_nm,
+                    prdt_category,
+                    created_at,
+                    updated_at,
+                    done,
+                    is_deleted,
+                    view_count,
+                    lst_filepath_img,
+                    'police' AS dataSource <!--테이블라벨-->
+            FROM lost_police
+            WHERE atc_id = #{atcId}
+            ) combined_lost LEFT JOIN lost_file f on combined_lost.atc_id=f.atc_id
+            ORDER BY f.id ASC
+    </select>    
+
+    <select id="selectAdminfoundDetailAtcId" parameterType="string" resultMap="FoundDetailResultMap">
+            SELECT combined_found.*, 
+            combined_found.dataSource,
+            f.id AS file_id,
+            f.atc_id AS file_atc_id, 
+            f.fd_filepath_img AS file_filepath_img,
+            f.save_name, 
+            f.file_size,
+            f.file_path FROM (
+                SELECT 
+                    num, 
+                    atc_id, 
+                    id, 
+                    dep_place, 
+                    fd_filepath_img,
+                    fd_prdt_nm, 
+                    fd_sbjt, 
+                    fd_ymd, 
+                    prdt_cl_nm, 
+                    clr_nm, 
+                    created_at, 
+                    updated_at, 
+                    done, 
+                    is_deleted, 
+                    view_count,
+                    'user' AS dataSource <!--테이블라벨-->
+                FROM found
+                WHERE atc_id = #{atcId}
+                
+                UNION ALL
+                
+                SELECT 
+                    num, 
+                    atc_id, 
+                    id, 
+                    dep_place, 
+                    fd_filepath_img,
+                    fd_prdt_nm, 
+                    fd_sbjt, 
+                    fd_ymd, 
+                    prdt_cl_nm, 
+                    clr_nm, 
+                    created_at, 
+                    updated_at, 
+                    done, is_deleted, view_count,
+                    'police' AS dataSource <!--테이블라벨-->
+                FROM found_police
+                WHERE atc_id = #{atcId}
+                
+                UNION ALL
+                
+                SELECT 
+                    num, 
+                    atc_id, 
+                    id, 
+                    dep_place, 
+                    fd_filepath_img,
+                    fd_prdt_nm, 
+                    fd_sbjt, 
+                    fd_ymd, 
+                    prdt_cl_nm, 
+                    clr_nm, 
+                    created_at, 
+                    updated_at, 
+                    done, is_deleted, view_count,
+                    'portal' AS dataSource <!--테이블라벨-->
+                FROM found_portal
+                WHERE  atc_id = #{atcId}            
+            ) combined_found LEFT JOIN found_file f on combined_found.atc_id=f.atc_id
+            ORDER BY f.id ASC
+        </select>
+
 </mapper>

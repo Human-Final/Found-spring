@@ -258,7 +258,7 @@
             <span>경찰기관</span>
             </label>
 
-            <label class="filter-chip" th:if="${boardType=='found'}">
+            <label class="filter-chip" th:classappend="${boardType=='lost'}?'is-hidden'">
                 <input type="checkbox" name="dataSources" value="PORTAL"
                 th:checked="${searchVO.dataSources != null and #lists.contains(searchVO.dataSources, 'PORTAL')}">
             <span>포털기관</span>
@@ -340,7 +340,10 @@
             
 
             <td>
-              <a th:href="@{/api/lost/detail/{atcId}(atcId=${item.atcId})}"
+              <a th:href="${item.isDeleted==1}
+                  ? @{/admin/lost/preview/{atcId}(atcId=${item.atcId})}
+                  : @{/api/lost/detail/{atcId}(atcId=${item.atcId})}"
+                  th:target="${item.isDeleted==1}?'_blank':null"
                  class="board-title"
                  th:text="${item.lstPrdtNm}">
                  제목
@@ -396,7 +399,10 @@
           
 
           <td>
-            <a th:href="@{/api/found/detail/{atcId}(atcId=${item.atcId})}"
+            <a th:href="${item.isDeleted==1}
+            ? @{/admin/found/preview/{atcId}(atcId=${item.atcId})}
+            : @{/api/found/detail/{atcId}(atcId=${item.atcId})}"
+            th:target="${item.isDeleted==1} ? '_blank':null"
             class="board-title"
             th:text="${item.fdPrdtNm}">제목
             </a>
@@ -531,8 +537,27 @@
       });
     }
 
+    //전체선택 카테고리
+    if(btnSelectAllFilters){
+      btnSelectAllFilters.addEventListener("click",(e)=>{
+        e.preventDefault();
+        // 화면에 숨겨진(is-hidden) 포털기관을 포함하여 데이터 소스 내 모든 체크박스를 가져옵니다.
+        const filterChecks=document.querySelectorAll(
+          ".filter-row input[type='checkbox']"
+        );
+        //현재 체크된 개수 파악
+        const checkedFilters=Array.from(filterChecks).filter(c=>c.checked);
+        // 하나라도 체크 안 된 게 있다면 전체 체크(숨겨진 포털기관 포함), 이미 전부 체크되어 있다면 전체 해제
+        const isAllChecked=filterChecks.length === checkedFilters.length;
+        filterChecks.forEach(c=>{
+          c.checked=!isAllChecked;
+        });
+      });
+    }
 
-    
+
+    /*
+    //전체선택
     if(btnSelectAllFilters){
       btnSelectAllFilters.addEventListener("click",(e)=>{
         e.preventDefault();
@@ -544,7 +569,7 @@
         const checkedCount=document.querySelectorAll(
             "input[name='categories']:checked,input[name='doneList']:checked,input[name='dataSources']:checked"
           ).length;
-
+       
 
 
         // 전체가 다 체크되어 있는지 여부 확인
@@ -556,7 +581,7 @@
         });
       });
     }
-
+    */
     function updateSelectedCount() {
       const checkedCount = document.querySelectorAll(".user-check:checked").length;
 
@@ -768,7 +793,7 @@
           form.appendChild(input);
         })
         //csrf 토큰 추가
-        const csrfToken=document.querySelector('meta[name="_csrf"]').content;
+        const csrfToken=document.querySelector('meta[name="_csrf"]')?.getAttribute("content");
         
         const csrfInput=document.createElement("input")
         csrfInput.type="hidden";

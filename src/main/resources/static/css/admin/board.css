@@ -675,6 +675,7 @@ body.admin-user-page input {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  height: 100%;
 }
 
 .table-actions form {
@@ -827,6 +828,11 @@ button,
 }
 
 .board-title{
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     color: #222;
     text-decoration: none;
     cursor: pointer;
@@ -859,6 +865,7 @@ button,
     color: #999;
 }
 
+/*
 .deleted-row a{
   pointer-events: none;
   color: #999;
@@ -870,7 +877,7 @@ button,
     color: #999;
     cursor: default;
 }
-
+*/
 
 /*사이드바 */
 .sidebar-toggle-btn::after {
@@ -975,3 +982,26 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
   height: 21px;
   flex-shrink: 0;
 }
+
+
+.deleted-row .board-title{
+    pointer-events:auto;
+    color:#666;
+    cursor:pointer;
+}
+
+.deleted-row .board-title:hover{
+    text-decoration:underline;
+}
+
+
+/* 상세보기 버튼은 계속 비활성화 */
+.deleted-row .detail-btn{
+    pointer-events:none;
+    opacity:.5;
+}
+
+.is-hidden { display: none !important; }
+
+
+
