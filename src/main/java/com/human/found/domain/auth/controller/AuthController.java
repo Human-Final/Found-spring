@@ -2,8 +2,8 @@ package com.human.found.domain.auth.controller;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
     private final UserService userService;
 
     /**
@@ -40,7 +39,7 @@ public class AuthController {
                 model.addAttribute("message", "회원탈퇴가 완료되었습니다.");
             }
             if(error != null) {
-                model.addAttribute("loginError", true);
+                model.addAttribute("errorMessage", "로그인에 실패했습니다. 아이디 또는 비밀번호를 확인해주세요.");
             }
 
         return "user/login";
@@ -192,5 +191,40 @@ public class AuthController {
         userService.updateUserPassword(userId, newPassword);
         return "SUCCESS";
     }
+
+    @ResponseBody
+    @PostMapping("/api/verify-dormant-email-code")
+    public String verifyDormantEmailCode(
+            @RequestParam("code") String code,
+            HttpSession session) {
+
+        String sessionCode = (String) session.getAttribute("dormantAuthCode");
+        String userId = (String) session.getAttribute("dormantAuthUserId");
+        Long expiresAt = (Long) session.getAttribute("dormantAuthExpires");
+
+        if(sessionCode == null || userId == null || expiresAt == null){
+            return "no_request";
+        }
+
+        if(System.currentTimeMillis() > expiresAt){
+            session.removeAttribute("dormantAuthCode");
+            session.removeAttribute("dormantAuthUserId");
+            session.removeAttribute("dormantAuthExpires");
+            return "timeout";
+        }
+
+        if(!sessionCode.equals(code)){
+            return "wrong_code";
+        }
+
+        userService.dormantReActive(userId);
+
+        session.removeAttribute("dormantAuthCode");
+        session.removeAttribute("dormantAuthUserId");
+        session.removeAttribute("dormantAuthExpires");
+
+        return "verified";
+    }
+    
 
 }

@@ -25,5 +25,5 @@ public interface LostCommentService {
     String findUserEmailByAtcId(String atcId);
 
     // 유저에게 이메일 보내기
-    void emailNotify(String userEmail, String atcId);
+    String emailNotify(String userEmail, String atcId);
 }

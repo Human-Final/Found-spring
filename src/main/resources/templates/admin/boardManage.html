@@ -255,6 +255,24 @@
                 th:checked="${searchVO.dataSources != null and #lists.contains(searchVO.dataSources, 'portal')}">
             <span>포털기관</span>
             </label>
+
+            <div class="download">
+              <button type="button" id="downloadBtn" class="download-btn">
+                <svg class="download-icon"
+                     xmlns="http://www.w3.org/2000/svg"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="2"
+                     stroke-linecap="round"
+                     stroke-linejoin="round">
+                  <path d="M12 3v12"></path>
+                  <path d="m7 10 5 5 5-5"></path>
+                  <path d="M5 21h14"></path>
+                </svg>
+                <span>다운로드</span>
+              </button>
+            </div>
           </div>
 
       </form>

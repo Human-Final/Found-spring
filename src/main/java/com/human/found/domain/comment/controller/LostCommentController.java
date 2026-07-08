@@ -35,19 +35,24 @@ public class LostCommentController {
             return "redirect:/login";
         }
 
-        // 유저가 작성한 게시글에 댓글 달렸다면 해당 유저에게 이메일 전송해주기
-        if (atcId != null && atcId.startsWith("USER")) {
-            String userEmail=lostCommentService.findUserEmailByAtcId(atcId);
-            lostCommentService.emailNotify(userEmail, atcId);
-            System.out.println(num);
-            System.out.println(userEmail);
-        }
-
         commentVO.setNum(num);
         commentVO.setId(principal.getName());
         commentVO.setDataSource(dataSource);
 
         lostCommentService.addComment(commentVO);
+
+        // 유저가 작성한 게시글에 댓글 달렸다면 해당 유저에게 이메일 전송해주기
+        if (atcId != null && atcId.startsWith("USER")) {
+            String userEmail=lostCommentService.findUserEmailByAtcId(atcId);
+            String mailErrorMessage = lostCommentService.emailNotify(userEmail, atcId);
+            
+            if (mailErrorMessage != null) {
+                rttr.addFlashAttribute("errorMessage", mailErrorMessage);
+            }
+                        
+            // System.out.println(num);
+            // System.out.println(userEmail);
+        }
 
         return "redirect:/api/lost/detail/" + atcId;
     }
@@ -69,12 +74,12 @@ public class LostCommentController {
                 lostCommentService.getCommentByCommentNum(commentNum);
 
         if (savedComment == null) {
-            rttr.addFlashAttribute("error", "존재하지 않는 댓글입니다.");
+            rttr.addFlashAttribute("errorMessage", "존재하지 않는 댓글입니다.");
             return "redirect:/api/lost";
         }
 
         if (!savedComment.getId().equals(principal.getName())) {
-            rttr.addFlashAttribute("error", "댓글 수정 권한이 없습니다.");
+            rttr.addFlashAttribute("errorMessage", "댓글 수정 권한이 없습니다.");
             return "redirect:/api/lost/detail/" + atcId;
         }
 
@@ -102,7 +107,7 @@ public class LostCommentController {
                 lostCommentService.getCommentByCommentNum(commentNum);
 
         if (savedComment == null) {
-            rttr.addFlashAttribute("error", "존재하지 않는 댓글입니다.");
+            rttr.addFlashAttribute("errorMessage", "존재하지 않는 댓글입니다.");
             return "redirect:/api/lost";
         }
 
@@ -119,7 +124,7 @@ public class LostCommentController {
                              || auth.getAuthority().equals("ROLE_MANAGER"));
 
         if (!isOwner && !isAdmin) {
-            rttr.addFlashAttribute("error", "댓글 삭제 권한이 없습니다.");
+            rttr.addFlashAttribute("errorMessage", "댓글 삭제 권한이 없습니다.");
             return "redirect:/api/lost/detail/" + atcId;
         }
 

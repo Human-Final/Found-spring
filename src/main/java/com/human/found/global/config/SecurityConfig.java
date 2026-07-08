@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import com.human.found.domain.auth.handler.LoginSuccessHandler;
 import com.human.found.domain.auth.service.CustomUserDetailsService;
 
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
+    private final LoginSuccessHandler loginSuccessHandler;
 
     /**
      * 비밀번호 암호화
@@ -42,8 +44,8 @@ public class SecurityConfig {
                                         "/mypage/api/**",
                                         "/api/public/**",
                                         "/find-id/**",
-                                        "/ws-stomp/**"
-
+                                        "/ws-stomp/**",
+                                        "/api/verify-dormant-email-code"
                 )
              )
              
@@ -51,9 +53,9 @@ public class SecurityConfig {
 
                 // 공지사항 작성/수정/삭제는 관리자 + 담당자만
                 .requestMatchers(
-                    "api/notices/write",
-                    "api/notices/edit",
-                    "api/notices/delete"
+                    "/api/notices/write",
+                    "/api/notices/edit",
+                    "/api/notices/delete"
                 ).hasAnyRole("MANAGER", "ADMIN")
 
                 // 게시글 작성/수정/삭제/마이페이지는 로그인 사용자만
@@ -65,7 +67,7 @@ public class SecurityConfig {
                     "/found/*/delete",
                     "/api/found/delete/**",
                     "/api/lost/delete/**",
-                    "/mypage/**"
+                    "/mypage/**" 
                 ).authenticated()
 
                 // 채팅은 로그인 사용자만
@@ -90,12 +92,19 @@ public class SecurityConfig {
                     "/check-email",
                     "/api/public/send-auth-email", 
                     "/api/public/verify-email-code",
-                    "/test/**",
-                    "/user/welcome"
+                    "/user/welcome",
+                    "/api/verify-dormant-email-code"
                 ).permitAll()
 
                 // 나머지는 모두 허용
                 .anyRequest().permitAll()
+            )
+
+            .exceptionHandling(exception -> exception
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    request.getSession().setAttribute("errorMessage", "관리자 권한이 아닙니다.");
+                    response.sendRedirect(request.getContextPath() + "/");
+                })
             )
 
             // 로그인 설정
@@ -104,7 +113,7 @@ public class SecurityConfig {
                 .loginProcessingUrl("/login")
                 .usernameParameter("id")
                 .passwordParameter("pw")
-                .defaultSuccessUrl("/", false)
+                .successHandler(loginSuccessHandler)
                 .failureUrl("/login?error=true")
                 .permitAll()
             )
