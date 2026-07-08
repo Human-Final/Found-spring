@@ -955,7 +955,7 @@
               <article class="post-item" th:each="comment : ${allComments}"
               th:data-board-type="${comment.boardType}"
               th:data-atc-id="${comment.atcId}"
-              th:onclick="${comment.postTitle == null} ? 
+              th:onclick="${comment.postTitle == null or comment.postDeleted == 1} ? 
                           'alert(\'원본 게시글이 삭제되어 이동할 수 없습니다.\'); return false;' : 
                           'location.href = (this.getAttribute(\'data-board-type\') == \'습득\' ? \'/api/found/detail/\' : \'/api/lost/detail/\') + this.getAttribute(\'data-atc-id\');'"
               style="cursor: pointer;">
@@ -974,14 +974,14 @@
                   
                   <!-- 2. 아래쪽 메타 정보: 실제 게시글 제목(물품명) 매핑 -->
                   <p class="item-meta" style="font-size: 13px; color: #868e96; margin: 0;">
-                    <span th:text="${comment.postTitle != null ? '게시글: ' + comment.postTitle : '게시글이 삭제되었습니다'}">[원문: 게시글 제목]</span>
+                    <span th:text="${comment.postTitle != null and comment.postDeleted != 1 ? '게시글: ' + comment.postTitle : '게시글이 삭제되었습니다'}">[원문: 게시글 제목]</span>
                     <span>&nbsp;&nbsp;</span>
                     <span th:text="${comment.createdAt != null ? #temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm') : ''}">2026-06-24 10:30</span>
                   </p>
                 </div>
 
                 <div class="post-actions" style="display: flex; align-items: center; gap: 8px;">
-                    <!-- 🌟 [동기식 전송 가드 탑재]: 버튼을 누르면 즉석에서 가상 Form을 생성해 세션 끊김 오류 없이 안전하게 POST를 보냅니다 -->
+                    <!-- [동기식 전송 가드 탑재]: 버튼을 누르면 즉석에서 가상 Form을 생성해 세션 끊김 오류 없이 안전하게 POST를 보냅니다 -->
                     <button type="button" 
                             th:data-comment-num="${comment.commentNum}"
                             th:data-board-type="${comment.boardType}"

@@ -277,7 +277,8 @@
             fc.is_deleted AS isDeleted,
             f.fd_prdt_nm AS postTitle, 
             f.atc_id AS atcId,
-            '습득' AS boardType
+            '습득' AS boardType,
+            IFNULL(f.is_deleted, 1) AS postDeleted
         FROM found_comment fc
         LEFT JOIN found f ON fc.num = f.num 
         WHERE fc.id = #{userId} AND fc.is_deleted = 0
@@ -295,7 +296,8 @@
             lc.is_deleted AS isDeleted,
             l.lst_prdt_nm AS postTitle, 
             l.atc_id AS atcId,
-            '분실' AS boardType
+            '분실' AS boardType,
+            IFNULL(l.is_deleted, 1) AS postDeleted
         FROM lost_comment lc
         LEFT JOIN lost l ON lc.num = l.num
         WHERE lc.id = #{userId} AND lc.is_deleted = 0
