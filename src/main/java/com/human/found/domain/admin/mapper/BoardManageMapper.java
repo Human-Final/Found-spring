@@ -7,26 +7,37 @@ import org.apache.ibatis.annotations.Param;
 
 import com.human.found.domain.admin.vo.AdminFoundVO;
 import com.human.found.domain.admin.vo.AdminLostVO;
-import com.human.found.domain.admin.vo.AdminNoticeVO;
 import com.human.found.domain.admin.vo.AdminSearchVO;
 
 @Mapper
-public interface AdminMapper {
+public interface BoardManageMapper {
 
     // 사용자 등록 분실물 선택 삭제
-    int deleteLostList(@Param("nums") List<Long> nums);
-
-    // 경찰청 API 분실물 선택 삭제
-    int deletePoliceLostList(@Param("nums") List<Long> nums);
+    void deleteLostList(@Param("atcId") List<String> atcId);
 
     // 사용자 등록 습득물 선택 삭제
-    int deleteFoundList(@Param("nums") List<Long> nums);
+    void deleteFoundList(String atcId);
 
-    // 경찰청 API 습득물 선택 삭제
-    int deletePoliceFoundList(@Param("nums") List<Long> nums);
+    // 경찰청 습득물 삭제
+    void deleteFoundPoliceList(String atcId);
 
-    // 관리자 등록 공지사항 선택 삭제
-    int deleteNoticeList(@Param("nums") List<Long> nums);
+    // 포털 습득물 삭제
+    void deleteFoundPortalList(String atcId);
+
+    // 사용자 등록 분실물 완료 처리
+    void completeLostList(String atcId);
+
+    // 경찰청 분실물 완료 처리
+    void completeLostPoliceList( String atcId);
+
+    // 사용자 등록 습득물 완료 처리
+    void completeFoundList(String atcId);
+
+    // 경찰청 습득물 완료 처리
+    void completeFoundPoliceList(String atcId);
+
+    // 포털 습득물 완료 처리
+    void completeFoundPortalList(String atcId);
 
     // 관리자 분실물 검색 + 페이징 조회
     List<AdminLostVO> searchLostPage(AdminSearchVO searchVO);
@@ -40,9 +51,4 @@ public interface AdminMapper {
     // 관리자 습득물 검색 결과 개수 조회
     int countSearchFound(AdminSearchVO searchVO);
 
-    // 관리자 공지사항 검색 + 페이징 조회
-    List<AdminNoticeVO> searchNoticePage(AdminSearchVO searchVO);
-
-    // 관리자 공지사항 검색 결과 개수 조회
-    int countSearchNotice(AdminSearchVO searchVO);
 }

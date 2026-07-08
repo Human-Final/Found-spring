@@ -502,10 +502,9 @@
     const userChecks = document.querySelectorAll(".user-check");
     const selectedCount = document.getElementById("selectedCount");
 
-    
-    
-    const bulkDeleteBtn = document.getElementById("bulkBlockBtn") 
-    const bulkCompleteBtn = document.getElementById("bulkRoleBtn") 
+
+    const bulkDeleteBtn = document.getElementById("bulkBlockBtn")
+    const bulkCompleteBtn = document.getElementById("bulkRoleBtn")
 
     
     //날짜 관련 요소
@@ -748,7 +747,6 @@
           return;
         }
 
-        
         if (!confirm(`선택한 ${checkedBoxes.length}개의 게시글을 완료 처리하시겠습니까?`)) {
           return;
         }
