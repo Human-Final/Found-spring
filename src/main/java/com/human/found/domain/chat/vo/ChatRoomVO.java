@@ -19,4 +19,7 @@ public class ChatRoomVO {
 
     private String title;
     private String userName;
+
+    private Long userALastRead;
+    private Long userBLastRead;
 }

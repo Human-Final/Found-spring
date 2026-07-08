@@ -19,6 +19,7 @@ import com.human.found.domain.chat.vo.ChatFileVO;
 import com.human.found.domain.chat.vo.ChatMessageVO;
 import com.human.found.domain.chat.vo.ChatRoomVO;
 import com.human.found.infrastructure.file.FileUtil;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +29,7 @@ public class ChatController {
 
     private final ChatService chatService;
     private final FileUtil fileUtil;
+    private final SimpMessagingTemplate messagingTemplate;
 
     /**
      * 습득 게시글 채팅 버튼
@@ -248,5 +250,31 @@ public class ChatController {
         message.setFileList(fileList);
 
         return message;
+    }
+
+    // 게시글 삭제 시 채팅방 삭제
+    @PostMapping("/mypage/chat/delete")
+    public String deleteChatRooms(@RequestParam List<Long> chatNums) {
+        chatService.deleteChatRooms(chatNums);
+
+        return "redirect:/mypage#myChats";
+
+    }
+
+    // 채팅방 입장 시 마지막 메시지까지 읽음 처리
+    @PostMapping("/chat/room/{chatNum}/read")
+    @ResponseBody
+    public void readChatRoom(@PathVariable Long chatNum,
+                            Principal principal) {
+
+        String loginId = principal.getName();
+
+        chatService.readChatRoom(chatNum, loginId);
+
+        // 같은 방 구독자들에게 "이 사람이 읽었다" 알림 전송
+        messagingTemplate.convertAndSend(
+                "/sub/chat/room/" + chatNum + "/read",
+                loginId
+        );
     }
 }

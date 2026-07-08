@@ -43,4 +43,10 @@ public interface ChatService {
 
     // 채팅 첨부파일 저장
     void saveChatFile(ChatFileVO chatFile);
+
+    // 채팅방 삭제
+    void deleteChatRooms(List<Long> chatNums);
+
+    // 채팅방 읽음 처리
+    void readChatRoom(Long chatNum, String loginId);
 }

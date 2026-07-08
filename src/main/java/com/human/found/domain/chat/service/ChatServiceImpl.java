@@ -104,4 +104,28 @@ public class ChatServiceImpl implements ChatService {
     public void saveChatFile(ChatFileVO chatFile) {
         chatMapper.insertChatFile(chatFile);
     }
+
+    // 채팅방 삭제
+    @Override
+    @Transactional
+    public void deleteChatRooms(List<Long> chatNums) {
+        chatMapper.deleteChatRooms(chatNums);
+    }
+
+    // 채팅방 입장 시 마지막 메시지까지 읽음 처리
+    @Override
+    @Transactional
+    public void readChatRoom(Long chatNum, String loginId) {
+
+        // 1. 해당 채팅방의 마지막 메시지 번호 조회
+        Long lastMessageNum = chatMapper.findLastMessageNum(chatNum);
+
+        // 2. 메시지가 하나도 없으면 0으로 처리
+        if (lastMessageNum == null) {
+            lastMessageNum = 0L;
+        }
+
+        // 3. 로그인한 사용자가 읽은 마지막 메시지 번호 업데이트
+        chatMapper.updateLastReadMessage(chatNum, loginId, lastMessageNum);
+    }
 }

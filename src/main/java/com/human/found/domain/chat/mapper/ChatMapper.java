@@ -56,4 +56,15 @@ public interface ChatMapper {
 
     // 메시지 번호로 첨부파일 목록 조회
     List<ChatFileVO> findFilesByMessageNum(@Param("messageNum") Long messageNum);
+
+    // 채팅방 삭제
+    void deleteChatRooms(@Param("chatNums") List<Long> chatNums);
+
+    // 채팅방 입장 시 읽음 처리
+    void updateLastReadMessage(@Param("chatNum") Long chatNum,
+                               @Param("userId") String loginId,
+                               @Param("lastMessageNum") Long lastMessageNum);
+
+    // 마지막 메시지 번호
+    Long findLastMessageNum(@Param("chatNum") Long chatNum);
 }
