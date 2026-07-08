@@ -15,6 +15,19 @@
 
 <body class="admin-user-page">
 
+<script>
+  (function(){
+    const savedSidebarState = localStorage.getItem("adminSidebarCollapsed");
+
+    if (savedSidebarState === null || savedSidebarState === "true"){
+      document.body.classList.add("sidebar-collapsed")
+    }
+
+    document.body.classList.add("sidebar-init");
+  })();
+</script>
+
+
 <!-- 헤더 -->
 <header class="admin-header" th:replace="layout/header :: headerFragment">
 </header>
@@ -23,13 +36,18 @@
 
   <!-- 사이드바 -->
   <aside class="admin-sidebar">
+
+    <button type="button" class="sidebar-toggle-btn" id="sidebarToggle">
+      <svg class="sidebar-toggle-icon" viewBox="0 0 24 24" fill="none">
+        <path d="M4 6h16M4 12h16M4 18h16"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"/>
+      </svg>
+    </button>
+
+
     <nav class="admin-side-menu">
-
-      <a th:href="@{/api/admin/dashboard}">
-        <i data-lucide="layout-dashboard"></i>
-        <span>대시보드</span>
-      </a>
-
       <a th:href="@{/admin/lost}" class="active">
         <i data-lucide="panel-top"></i>
         <span>게시글 관리</span>
@@ -40,25 +58,15 @@
         <span>회원 관리</span>
       </a>
 
-      <a th:href="@{/admin/notices}">
-        <i data-lucide="bell"></i>
-        <span>공지사항 관리</span>
-      </a>
+
 
       <a th:href="@{/api/admin/stats}">
         <i data-lucide="bar-chart-3"></i>
         <span>통계 관리</span>
       </a>
 
-      <a th:href="@{/api/admin/inquiries}">
-        <i data-lucide="message-square"></i>
-        <span>문의 관리</span>
-      </a>
 
-      <a th:href="@{/api/admin/settings}">
-        <i data-lucide="settings"></i>
-        <span>설정</span>
-      </a>
+   
 
     </nav>
   </aside>
@@ -239,20 +247,20 @@
             <div class="filter-label">데이터출처</div>
 
             <label class="filter-chip">
-                <input type="checkbox" name="dataSources" value="user"
-                th:checked="${searchVO.dataSources != null and #lists.contains(searchVO.dataSources, 'user')}">
+                <input type="checkbox" name="dataSources" value="USER"
+                th:checked="${searchVO.dataSources != null and #lists.contains(searchVO.dataSources, 'USER')}">
                 <span>사용자</span>
             </label>
 
             <label class="filter-chip">
-                <input type="checkbox" name="dataSources" value="police"
-                th:checked="${searchVO.dataSources != null and #lists.contains(searchVO.dataSources, 'police')}">
+                <input type="checkbox" name="dataSources" value="POLICE"
+                th:checked="${searchVO.dataSources != null and #lists.contains(searchVO.dataSources, 'POLICE')}">
             <span>경찰기관</span>
             </label>
 
             <label class="filter-chip" th:if="${boardType=='found'}">
-                <input type="checkbox" name="dataSources" value="portal"
-                th:checked="${searchVO.dataSources != null and #lists.contains(searchVO.dataSources, 'portal')}">
+                <input type="checkbox" name="dataSources" value="PORTAL"
+                th:checked="${searchVO.dataSources != null and #lists.contains(searchVO.dataSources, 'PORTAL')}">
             <span>포털기관</span>
             </label>
           </div>
@@ -356,14 +364,16 @@
                     th:if="${item.dataSource == 'POLICE'}">경찰</span>
             
             <span class="role-badge portal"
-                  th:if="${boardType=='found' and item.dataSource == 'portal'}">포털</span>
+                  th:if="${item.dataSource == 'PORTAL'}">포털</span>
             </td>
             <td class="table-actions no-row-click">
               <a th:href="@{/api/lost/detail/{atcId}(atcId=${item.atcId})}"
                class="detail-btn">상세보기</a>
               
-               <form th:action="@{/admin/lost/delete(atcId=${item.atcId})}" method="post">
-                <button id="delBtn" type="submit" class="stop-btn">삭제</button>
+               <form th:action="@{/admin/lost/delete(atcId=${item.atcId})}" method="post" class="single-delete-form">
+                <input type="hidden" name="atcId" th:value="${item.atcId}">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" class="stop-btn">삭제</button>
                </form> 
             </td>
           </tr>   
@@ -406,16 +416,21 @@
           <td class="table-actions no-row-click">
             <a th:href="@{/api/found/detail/{atcId}(atcId=${item.atcId})}" class="detail-btn">상세보기</a>
             
-            <form th:action="@{/admin/found/delete(atcId=${item.atcId})}" method="post">
+            <form th:action="@{/admin/found/delete(atcId=${item.atcId})}" method="post" class="single-delete-form">
+              <input type="hidden" name="atcId" th:value="${item.atcId}">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
               <button type="submit" class="stop-btn">삭제</button>
             </form>
           </td>
         </tr>
 
         <!-- 임시 화면 확인용: userList 없을 때만 출력 -->
-        <tr th:if="${(boardType == 'lost' and lostList == null) or (boardType == 'found' and foundList == null)}">
+        <tr th:if="${(boardType=='lost' and(lostList ==null or #lists.isEmpty(lostList)))or
+                      (boardType=='found' and(foundList ==null or #lists.isEmpty(foundList)))}">
           <td colspan="10" style="text-align: center; padding: 25px; color: #999;">조회된 게시글 내역이 없습니다.</td>
         </tr>
+
         </tbody>
       </table>
       <div class="no-result" style="padding: 8px; text-align: center;"
@@ -454,7 +469,7 @@
 <script>
   lucide.createIcons();
 
-  // 페이징 처리 함수 (form 데이터 유지)
+  
   function fn_goPage(pageNumber){
     const form = document.getElementById("filterForm");
     if(!form) return;
@@ -463,6 +478,7 @@
     if(pageInput){
       pageInput.value = pageNumber;
     }
+    form.dataset.isPaging="true";
     form.submit();
   }
 
@@ -498,6 +514,24 @@
 
     // 전체 선택
     const btnSelectAllFilters=document.getElementById("btnSelectAllFilters");
+    const sidebarToggle = document.getElementById("sidebarToggle");
+    const filterForm = document.getElementById("filterForm");
+    
+    //순수 검색/필터링 시 1페이지로 리셋하는 이벤트 리스너
+    if(filterForm){
+      filterForm.addEventListener("submit",(e)=>{
+        // fn_goPage를 통한 페이징 이동이 '아닌' 모든 검색/엔터 처리일 때
+        if(filterForm.dataset.isPaging !=="true"){
+          const pageInput=filterForm.querySelector("input[name='page']");
+          if(pageInput){
+            pageInput.value="1";
+          }
+        }
+        delete filterForm.dataset.isPaging;
+      });
+    }
+
+
     
     if(btnSelectAllFilters){
       btnSelectAllFilters.addEventListener("click",(e)=>{
@@ -608,28 +642,38 @@
       });
     });
 
-    
-    document.querySelectorAll(".board-row").forEach(row=>{
-      row.style.cursor="pointer";
+    function restoreDateRangeActive(){
+      if(!startDateInput||!endDateInput){
+        return;
+      }
+      const startDate=startDateInput.value.trim();
+      const endDate=endDateInput.value.trim();
 
-      row.addEventListener("click",function(e){
-
-        //삭제된글 막기
-        if(this.dataset.deleted==="1"){
-          return;
-        }
-        if(
-          e.target.closest("input")||
-          e.target.closest("button")||
-          e.target.closest("a")||
-          e.target.closest("form")
-        ){
-          return;
-        }
-        location.href=this.dataset.url;
+      rangeButtons.forEach(button=>{
+        button.classList.remove("active");
       });
-    })
-      
+
+      if(startDate===""&&endDate===""){
+        rangeButtons.forEach(button=>{
+          if(button.dataset.range==="all"){
+            button.classList.add("active");
+          }
+        });
+      }
+    }
+    restoreDateRangeActive();
+
+    /*사이드바*/
+    if(sidebarToggle){
+      sidebarToggle.addEventListener("click", function (){
+        document.body.classList.toggle("sidebar-collapsed");
+        const isCollapsed = document.body.classList.contains("sidebar-collapsed");
+        localStorage.setItem("adminSidebarCollapsed", isCollapsed);
+      });
+      requestAnimationFrame(()=>{
+        document.body.classList.remove("sidebar-init");
+      });
+    }
     
     if (bulkDeleteBtn) {
       bulkDeleteBtn.addEventListener("click", () => {
@@ -681,6 +725,17 @@
         form.submit();
       });
     }
+    
+      const singleDeleteForms= document.querySelectorAll(".single-delete-form");
+      singleDeleteForms.forEach(form=>{
+      form.addEventListener("submit",(e)=>{
+        // confirm 창에서 '취소'를 누르면 폼 제출(삭제)막음
+        if(!confirm("선택한 게시글을 삭제하시겠습니까")){
+          e.preventDefault();
+        }
+      });
+     });
+    
 
     if (bulkCompleteBtn) {
       bulkCompleteBtn.addEventListener("click", () => {
@@ -726,7 +781,6 @@
         form.submit();
       });
     }
-
 
     updateSelectedCount();
   });
