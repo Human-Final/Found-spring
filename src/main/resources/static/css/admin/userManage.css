@@ -1238,6 +1238,12 @@ body.admin-user-page select {
   text-align: center;
 }
 
+/* 이메일은 두 줄 적용을 위해 input이 아닌 span 처리 -> 수정 눌렀을 때 
+   span이 남아 기존 값 사라지지 않음 -> 히든 처리 */
+.user-manage-table tbody tr.new-user-row .new-email-text[hidden] {
+  display: none;
+}
+
 /* 신규 회원 이메일/전화번호 정렬 */
 .user-manage-table tbody tr.new-user-row .new-email-input {
   text-align: left;

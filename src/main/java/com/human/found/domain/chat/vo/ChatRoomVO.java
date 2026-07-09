@@ -15,4 +15,11 @@ public class ChatRoomVO {
     private String userIdB;
 
     private LocalDateTime createdAt;
+    private int isDeleted;
+
+    private String title;
+    private String userName;
+
+    private Long userALastRead;
+    private Long userBLastRead;
 }

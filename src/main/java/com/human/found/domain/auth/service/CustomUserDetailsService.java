@@ -1,5 +1,6 @@
 package com.human.found.domain.auth.service;
 
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -23,9 +24,9 @@ public class CustomUserDetailsService implements UserDetailsService{
         UserVO user = userMapper.findById(id);
 
         if(user == null) {
-            throw new UsernameNotFoundException("회원없음");
+            throw new UsernameNotFoundException("존재하지 않는 회원입니다.");
         }
-
+        
         return User.builder()
                 .username(user.getId())
                 .password(user.getPw())
@@ -33,7 +34,5 @@ public class CustomUserDetailsService implements UserDetailsService{
                 .build();
     }
 
-
-    
 }
 

@@ -28,7 +28,7 @@ public class UserManageController {
     private final UserManageService userManageService;
 
     // 회원 목록 조회 + 필터 + 페이징
-    @GetMapping("/test/users")
+    @GetMapping("/admin/users")
     public String userManageView(
                 @ModelAttribute("conditionDTO") UserSearchConditionDTO conditionDTO,
                 @RequestParam(defaultValue="false") boolean searched,
@@ -78,7 +78,9 @@ public class UserManageController {
         return "admin/userManage";
     }
 
-    @GetMapping("/api/test/users/download")
+
+    // 회원 정보 엑셀로 다운로드
+    @GetMapping("/api/admin/users/download")
     public void downloadUsers(
             @ModelAttribute UserSearchConditionDTO conditionDTO,
             HttpServletResponse response
@@ -88,11 +90,11 @@ public class UserManageController {
     }
     
 
-
     // 유저 정보 변경
-    @PostMapping("/test/users/edit")
+    @PostMapping("/admin/users/edit")
     public String updateUserBulk(
                 @ModelAttribute UserBulkInfoDTO userInfo,
+                @RequestParam(required = false) String returnQuery,
                 RedirectAttributes redirectAttributes,
                 Authentication authentication) {
 
@@ -107,20 +109,30 @@ public class UserManageController {
             );
 
             redirectAttributes.addFlashAttribute(
-                "message", "회원 정보가 수정되었습니다.");
+                "message", "회원 정보가 성공적으로 저장되었습니다.");
 
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",
-                "회원 정보 수정 중 오류가 발생했습니다.");
+                "회원 정보 저장 중 오류가 발생했습니다.");
         }
 
-        return "redirect:/test/users";
+        if(returnQuery != null && !returnQuery.isBlank()){
+            return "redirect:/admin/users?" + returnQuery;
+        }
+
+        return "redirect:/admin/users?searched=true";
     }
 
+    // 검색어만 입력하면 검색어 + 전체 필터
+    // 검색어 없이 필터만 선택하면 선택된 필터만 검색하기 위한 메서드
     private boolean hasNoCheckedFilter(UserSearchConditionDTO conditionDTO) {
+        boolean noKeyword = 
+                conditionDTO.getKeyword() == null
+                || conditionDTO.getKeyword().trim().isEmpty();            
+        
         boolean noStatus =
                 conditionDTO.getStatuses() == null
                 || conditionDTO.getStatuses().isEmpty();
@@ -129,7 +141,13 @@ public class UserManageController {
                 conditionDTO.getRoles() == null
                 || conditionDTO.getRoles().isEmpty();
 
-        return noStatus && noRole;
+        boolean noStartDate = 
+                conditionDTO.getStartDate() == null;
+
+        boolean noEndDate = 
+                conditionDTO.getEndDate() == null;
+
+        return noKeyword && noStatus && noRole && noStartDate && noEndDate;
     }   
 
     // 권한 설정용 메서드

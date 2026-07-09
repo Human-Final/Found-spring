@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.human.found.domain.notice.service.NoticeService;
 import com.human.found.domain.notice.vo.NoticeVO;
@@ -14,7 +15,7 @@ import com.human.found.global.common.paging.PagingVO;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
-@RequestMapping("api/notices")
+@RequestMapping("/api/notices")
 public class NoticeController {
 
     private final NoticeService noticeService;
@@ -48,18 +49,32 @@ public class NoticeController {
 
     // 4. 작성 처리 (관리자 전용)
     @PostMapping("/write")
-    public String write(NoticeVO notice, java.security.Principal principal) {
+    public String write(NoticeVO notice, 
+            java.security.Principal principal,
+            RedirectAttributes rttr) {
         
         // 시큐리티 로그인 금고에서 현재 로그인한 유저의 ID를 직접 꺼내 세팅합니다 (null 방지)
         if (principal != null) {
             notice.setId(principal.getName()); 
         }
-
+        
         if (notice.getIsPlanned() == null) notice.setIsPlanned(0);
         if (notice.getIsImportant() == null) notice.setIsImportant(0);
 
-        noticeService.registerNotice(notice);
-        return "redirect:/api/notices/list";
+        try {
+            noticeService.registerNotice(notice);
+            rttr.addFlashAttribute("message", "공지사항이 등록되었습니다.");
+            return "redirect:/api/notices/list";
+
+        } catch (IllegalStateException e) {
+            rttr.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/api/notices/write";
+
+        } catch (Exception e) {
+            rttr.addFlashAttribute("errorMessage", "공지사항 등록 중 문제가 발생했습니다.");
+            return "redirect:/api/notices/write";
+        }
+
     }
 
     // 5. 수정할 기존 공지사항 갖고오기 (MANAGER, ADMIN 전용)
@@ -74,30 +89,52 @@ public class NoticeController {
 
     // 해당 공지사항 수정해서 POST로 보내기 매핑
     @PostMapping("/edit")
-    public String edit(NoticeVO notice, HttpSession session) {
+    public String edit(NoticeVO notice, RedirectAttributes rttr) {
 
         // 작성 양식에서 체크박스를 해제하고 전송하면 null이 넘어오므로 0으로 확실히 보정
         if (notice.getIsPlanned() == null) notice.setIsPlanned(0);
         if (notice.getIsImportant() == null) notice.setIsImportant(0);
 
-        // 서비스단을 통해 파일 업데이트 및 DB UPDATE 쿼리(updated_at 반영) 수행
-        noticeService.modifyNotice(notice);
-        
-        // 수정한 글의 상세 보기 페이지로 리다이렉트 처리
-        return "redirect:/api/notices/detail?num=" + notice.getNum();
-    }
+        try {
+            // 서비스단을 통해 파일 업데이트 및 DB UPDATE 쿼리(updated_at 반영) 수행
+            noticeService.modifyNotice(notice);
 
+            rttr.addFlashAttribute("message", "공지사항이 수정되었습니다.");
+            return "redirect:/api/notices/detail?num=" + notice.getNum();
+        } catch (IllegalStateException e) {
+            rttr.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/api/notices/edit?num=" + notice.getNum();
+        } catch (Exception e) {
+            rttr.addFlashAttribute("errorMessage", "공지사항 수정 중 문제가 발생했습니다.");
+            return "redirect:/api/notices/edit?num=" + notice.getNum();
+        }
+    }
+        
     // 5. 삭제 처리 (관리자 전용)
     @GetMapping("/delete")
-    public String delete(@RequestParam("num") Long num, HttpSession session) {
-        String image_path=noticeService.getNoticeForEditandDelete(num).getImagePath();
-        noticeService.removeNotice(num, image_path);
-        return "redirect:/api/notices/list";
-    }
+    public String delete(@RequestParam("num") Long num, RedirectAttributes rttr) {
+        try {
+            NoticeVO notice = noticeService.getNoticeForEditandDelete(num);
 
-    // 세션 권한 체크 내부 메서드 (로그인 아이디가 'admin'이거나 별도 관리자 등급 확인)
-    private boolean isAdmin(HttpSession session) {
-        String role = (String) session.getAttribute("userRole"); 
-        return "ADMIN".equals(role); 
+            if (notice == null) {
+                rttr.addFlashAttribute("errorMessage", "존재하지 않는 공지사항입니다.");
+                return "redirect:/api/notices/list";
+            }
+
+            String imagePath = notice.getImagePath();
+
+            noticeService.removeNotice(num, imagePath);
+
+            rttr.addFlashAttribute("message", "공지사항이 삭제되었습니다.");
+            return "redirect:/api/notices/list";
+
+        } catch (IllegalStateException e) {
+            rttr.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/api/notices/list";
+
+        } catch (Exception e) {
+            rttr.addFlashAttribute("errorMessage", "공지사항 삭제 중 문제가 발생했습니다.");
+            return "redirect:/api/notices/list";
+        }
     }
 }
