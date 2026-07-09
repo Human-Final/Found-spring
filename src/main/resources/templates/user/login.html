@@ -92,12 +92,17 @@
         휴면 계정입니다.<br>
         등록된 이메일로 발송된 인증번호를 입력해주세요.
       </p>
+      
+      <div class="dormant-code-wrap">
+        <input type="text"
+              id="dormantCode"
+              maxlength="6"
+              inputmode="numeric"
+              placeholder="인증번호 6자리"
+              class="dormant-code-input">
 
-      <input type="text"
-             id="dormantCode"
-             maxlength="6"
-             placeholder="인증번호 6자리"
-             class="dormant-code-input">
+        <span id="dormantTimer" class="dormant-timer">03:00</span>
+      </div>       
 
       <button type="button"
               class="dormant-submit-btn"
@@ -115,12 +120,27 @@
 <div th:replace="layout/footer :: footerFragment"></div>
 
 <script>
+let dormantCodeExpired = false;
+
+// 휴면 인증번호 검증
 function verifyDormantCode() {
     const codeInput = document.getElementById("dormantCode");
     const code = codeInput.value.trim();
 
+    if (dormantCodeExpired) {
+        alert("인증번호가 만료되었습니다. 다시 로그인하여 인증번호를 재발급해주세요.");
+        location.href = "/login";
+        return;
+    }
+
     if (!code) {
         alert("인증번호를 입력해주세요.");
+        codeInput.focus();
+        return;
+    }
+
+    if (!/^[0-9]{6}$/.test(code)) {
+        alert("인증번호 6자리를 입력해주세요.");
         codeInput.focus();
         return;
     }
@@ -131,12 +151,12 @@ function verifyDormantCode() {
     const formData = new URLSearchParams();
     formData.append("code", code);
 
-
     fetch("/api/verify-dormant-email-code", {
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
-            [csrfHeader]: csrfToken        },
+            [csrfHeader]: csrfToken
+        },
         body: formData
     })
     .then(response => response.text())
@@ -164,7 +184,48 @@ function verifyDormantCode() {
         alert("인증 처리 중 오류가 발생했습니다.");
     });
 }
+
+// 타이머
+document.addEventListener("DOMContentLoaded", function () {
+    const timerEl = document.getElementById("dormantTimer");
+    const codeInput = document.getElementById("dormantCode");
+    const submitBtn = document.querySelector(".dormant-submit-btn");
+
+    if (!timerEl || !codeInput || !submitBtn) {
+        return;
+    }
+
+    let remainingSeconds = 180;
+
+    const timer = setInterval(function () {
+        const minutes = String(Math.floor(remainingSeconds / 60)).padStart(2, "0");
+        const seconds = String(remainingSeconds % 60).padStart(2, "0");
+
+        timerEl.textContent = `${minutes}:${seconds}`;
+
+        if (remainingSeconds <= 0) {
+            clearInterval(timer);
+
+            dormantCodeExpired = true;
+
+            timerEl.textContent = "만료";
+            timerEl.classList.add("expired");
+
+            codeInput.disabled = true;
+            submitBtn.disabled = true;
+
+            return;
+        }
+
+        remainingSeconds--;
+    }, 1000);
+
+    codeInput.addEventListener("input", function () {
+        this.value = this.value.replace(/[^0-9]/g, "").slice(0, 6);
+    });
+});
 </script>
+
 
 </body>
 </html>

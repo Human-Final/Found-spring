@@ -1,11 +1,13 @@
 package com.human.found.domain.admin.controller;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +20,7 @@ import com.human.found.domain.admin.service.UserManageService;
 import com.human.found.domain.user.vo.UserVO;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 
@@ -34,6 +37,8 @@ public class UserManageController {
                 @RequestParam(defaultValue="false") boolean searched,
                 Model model, 
                 Authentication authentication) {
+
+        model.addAttribute(("today"), LocalDate.now());
 
         boolean isAdmin = hasRole(authentication, "ADMIN");
         boolean isManager = hasRole(authentication, "MANAGER");
@@ -93,12 +98,24 @@ public class UserManageController {
     // 유저 정보 변경
     @PostMapping("/admin/users/edit")
     public String updateUserBulk(
-                @ModelAttribute UserBulkInfoDTO userInfo,
+                @Valid @ModelAttribute UserBulkInfoDTO userInfo,
+                BindingResult bindingResult,
                 @RequestParam(required = false) String returnQuery,
                 RedirectAttributes redirectAttributes,
                 Authentication authentication) {
 
         try {
+
+            if (bindingResult.hasErrors()) {
+                String errorMessage = bindingResult.getFieldErrors()
+                        .stream()
+                        .findFirst()
+                        .map(error -> error.getDefaultMessage())
+                        .orElse("입력값이 올바르지 않습니다.");
+
+                redirectAttributes.addFlashAttribute("errorMessage", errorMessage);
+                return "redirect:/admin/users";
+            }
             boolean isAdmin = hasRole(authentication, "ADMIN");
             boolean isManager = hasRole(authentication, "MANAGER");
 

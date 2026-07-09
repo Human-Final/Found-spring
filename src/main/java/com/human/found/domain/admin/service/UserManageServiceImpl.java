@@ -1,5 +1,7 @@
 package com.human.found.domain.admin.service;
 
+import static com.human.found.global.common.validation.UserValidationRules.*; 
+
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -67,6 +69,9 @@ public class UserManageServiceImpl implements UserManageService{
 
         List<UserVO> newUsers =
                 userInfo.getNewUsers() == null ? List.of() : userInfo.getNewUsers();
+
+        // 실제 DB 수정 전에 변경 후 최고관리자 수를 예상해서 검증
+        vaildateOneAdmin(changedUsers, newUsers);                
         
         if (!changedUsers.isEmpty()) {
             totalCount += updateUserChangedBulk(changedUsers, isAdmin, isManager);
@@ -75,9 +80,6 @@ public class UserManageServiceImpl implements UserManageService{
         if (!newUsers.isEmpty()) {
             totalCount += insertNewUsersBulk(newUsers, isAdmin, isManager);
         }
-
-        // 실제 DB 수정 전에 변경 후 최고관리자 수를 예상해서 검증
-        vaildateOneAdmin(changedUsers, newUsers);
 
         return totalCount;
     }
@@ -139,10 +141,6 @@ public class UserManageServiceImpl implements UserManageService{
                 !trimmedName.equals(targetUser.getName())
                 || !trimmedEmail.equals(targetUser.getEmail())
                 || !trimmedTel.equals(targetUser.getTel());
-
-        if (profileChanged) {
-            validateProfile(trimmedName, trimmedEmail, trimmedTel);
-        }
 
         validateStatus(status);
         validateIsDeleted(isDeleted);
@@ -265,44 +263,44 @@ public class UserManageServiceImpl implements UserManageService{
     }
 
     // 이름 / 이메일 / 전화번호 검증
-    private void validateProfile(String name, String email, String tel) {
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("이름은 필수입니다.");
-        }
+    // private void validateProfile(String name, String email, String tel) {
+    //     if (name == null || name.trim().isEmpty()) {
+    //         throw new IllegalArgumentException("이름은 필수입니다.");
+    //     }
 
-         String trimmedName = name.trim();
+    //      String trimmedName = name.trim();
 
-        // 한글 완성형(가-힣), 영문 대소문자만 허용
-        // ㅁㄴㅇㄹ 같은 한글 자음/모음 단독 입력은 막힘
-        if (!trimmedName.matches("^[가-힣a-zA-Z]{2,20}$")) {
-            throw new IllegalArgumentException("이름은 한글 또는 영문 2~20자로 입력해야 합니다.");
-        }
+    //     // 한글 완성형(가-힣), 영문 대소문자만 허용
+    //     // ㅁㄴㅇㄹ 같은 한글 자음/모음 단독 입력은 막힘
+    //     if (!trimmedName.matches("^[가-힣a-zA-Z]{2,20}$")) {
+    //         throw new IllegalArgumentException("이름은 한글 또는 영문 2~20자로 입력해야 합니다.");
+    //     }
 
-        if (email == null || email.trim().isEmpty()) {
-            throw new IllegalArgumentException("이메일은 필수입니다.");
-        }
+    //     if (email == null || email.trim().isEmpty()) {
+    //         throw new IllegalArgumentException("이메일은 필수입니다.");
+    //     }
 
-        String trimmedEmail = email.trim();
+    //     String trimmedEmail = email.trim();
 
-        // 영문, 숫자, 일부 특수문자만 허용
-        // 한글 포함 불가
-        // 반드시 .com으로 끝나야 함
-        if (!trimmedEmail.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.com$")) {
-            throw new IllegalArgumentException("이메일은 영문/숫자 형식이어야 하며 .com으로 끝나야 합니다.");
-        }
+    //     // 영문, 숫자, 일부 특수문자만 허용
+    //     // 한글 포함 불가
+    //     // 반드시 .com으로 끝나야 함
+    //     if (!trimmedEmail.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.com$")) {
+    //         throw new IllegalArgumentException("이메일은 영문/숫자 형식이어야 하며 .com으로 끝나야 합니다.");
+    //     }
 
-        if (tel == null || tel.trim().isEmpty()) {
-            throw new IllegalArgumentException("전화번호는 필수입니다.");
-        }
+    //     if (tel == null || tel.trim().isEmpty()) {
+    //         throw new IllegalArgumentException("전화번호는 필수입니다.");
+    //     }
 
-        String trimmedTel = tel.trim();
+    //     String trimmedTel = tel.trim();
 
-        // 숫자만 11자리
-        if (!trimmedTel.matches("^010[0-9]{8}$")) {
-            throw new IllegalArgumentException("전화번호는 숫자 11자리로 입력해야 합니다.");
-        }
+    //     // 숫자만 11자리
+    //     if (!trimmedTel.matches("^010[0-9]{8}$")) {
+    //         throw new IllegalArgumentException("전화번호는 숫자 11자리로 입력해야 합니다.");
+    //     }
 
-    }
+    // }
 
     // 신규회원 검증
     private void validateNewUser(
@@ -321,11 +319,11 @@ public class UserManageServiceImpl implements UserManageService{
 
         String trimmedUserId = userId.trim();
 
-        if (!trimmedUserId.matches("^[a-zA-Z0-9]{4,20}$")) {
-            throw new IllegalArgumentException("아이디는 영문/숫자 4~20자로 입력해야 합니다.");
+        if (!trimmedUserId.matches(USER_ID_REGEX)) {
+            throw new IllegalArgumentException(USER_ID_MESSAGE);
         }
 
-        validateProfile(name, email, tel);
+        // validateProfile(name, email, tel);
         validateRole(role);
         validateStatus(status);
 
@@ -446,6 +444,7 @@ public class UserManageServiceImpl implements UserManageService{
         return status == null ? "" : status;
     }
 
+    // 최고관리자 1명 보장 로직
     private void vaildateOneAdmin(
             List<UserVO> changedUsers,
             List<UserVO> newUsers){
@@ -508,6 +507,7 @@ public class UserManageServiceImpl implements UserManageService{
         }
     }
 
+    // 활성 상태인 최고 관리자 유무 검증
     private boolean isAvailableAdmin(String role, String status, int isDeleted) {
         return "ADMIN".equals(role)
                 && isDeleted == 0
