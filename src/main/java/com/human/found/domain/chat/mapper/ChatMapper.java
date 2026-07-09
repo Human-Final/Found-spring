@@ -62,7 +62,7 @@ public interface ChatMapper {
 
     // 채팅방 입장 시 읽음 처리
     void updateLastReadMessage(@Param("chatNum") Long chatNum,
-                               @Param("userId") String loginId,
+                               @Param("loginId") String loginId,
                                @Param("lastMessageNum") Long lastMessageNum);
 
     // 마지막 메시지 번호
