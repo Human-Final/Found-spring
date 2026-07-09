@@ -144,16 +144,15 @@
 
     function connectWebSocket() {
 
-        const socket = new SockJS("/ws-stomp");
+        const socket = new SockJS("http://192.168.0.79:8080/ws-stomp");
         stompClient = Stomp.over(socket);
 
         stompClient.debug = null;
 
         stompClient.connect({}, function () {
 
-            connected = true;
-
-            console.log("웹소켓 연결 성공");
+            // 방 입장시 즉시 읽음처리
+            readChatRoom();
 
             const messageInput = document.getElementById("messageInput");
             messageInput.disabled = false;
