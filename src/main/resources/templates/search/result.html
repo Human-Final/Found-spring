@@ -66,6 +66,53 @@
         </div>
       </div>
     </div>
+
+    <div class="filter-section ai-tags-section" 
+          th:if="${conditionDTO != null and conditionDTO.coreKeywords != null and !conditionDTO.coreKeywords.isEmpty()}"
+          style="margin-top: 16px; width: 100%; clear: both;">
+          
+      <span class="filter-label" style="color: #007bff; font-weight: bold;">검색어 태그 분석 - </span>
+      
+      <div class="chip-group ai-detected-chips">
+        <!-- 자동으로 감지된 AI 매칭 게시판 태그 -->
+        <button type="button" class="chip ai-chip" style="border-color: #007bff; background-color: #e6f0ff; color: #007bff; cursor: default;">
+          🎯 [[${conditionDTO.boardType == 'found' ? '습득물 검색' : (conditionDTO.boardType == 'lost' ? '분실물 검색' : '전체 검색')}]]
+        </button>
+
+        <!-- 추출된 카테고리 태그 -->
+        <button type="button" class="chip ai-chip" th:if="${conditionDTO.category != null}" style="border-color: #6c757d; background-color: #f8f9fa; color: #495057; cursor: default;">
+          📦 [[${conditionDTO.category}]]
+        </button>
+
+        <!-- 추출된 장소 태그 -->
+        <button type="button" class="chip ai-chip" th:if="${conditionDTO.place != null}" style="border-color: #198754; background-color: #e8f5e9; color: #198754; cursor: default;">
+          📍 [[${conditionDTO.place}]]
+        </button>
+
+        <!-- 추출된 색상 태그 -->
+        <button type="button" class="chip ai-chip" th:if="${conditionDTO.color != null}" style="border-color: #ffc107; background-color: #fffde7; color: #ff9800; cursor: default;">
+          🎨 [[${conditionDTO.color}]]
+        </button>
+
+        <!-- 추출된 핵심 명사 키워드 리스트 반복 출력 -->
+        <button type="button" class="chip ai-chip" th:each="keyword : ${conditionDTO.coreKeywords}" style="border-color: #0dcaf0; background-color: #e0f7fa; color: #00838f; cursor: default;">
+          🔑 [[${keyword}]]
+        </button>
+      </div>
+    </div>
+
+    <div class="filter-section ai-error-section" 
+          th:if="${conditionDTO != null and (conditionDTO.coreKeywords == null || conditionDTO.coreKeywords.isEmpty()) and conditionDTO.keyword != null and !conditionDTO.keyword.blank}" 
+          style="width: 100%; margin-top: 16px; clear: both;">
+          
+      <div style="display: inline-flex; align-items: center; gap: 6px; background-color: #fff3cd; border: 1px solid #ffe69c; color: #664d03; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <span style="font-size: 1rem; line-height: 1;">⚠️</span>
+        <span><strong style="color: #b91c1c;">ai 검색 미실시</strong> : 검색어를 확인해주세요. (일반 검색 결과로 대체 출력합니다.)</span>
+      </div>
+      
+    </div>
+
+
   </section>
 
   <div class="search-count-sort">
@@ -122,6 +169,13 @@
             </span>
           </div>
 
+          <span class="color-tag"
+                  th:if="${item.boardType == 'found' and item.color != null and item.color != ''}"
+                  th:text="${item.color}"
+                  style="background-color: #fffde7; border: 1px solid #ffc107; color: #ff9800; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 2px;">
+              색상
+          </span>
+
           <span class="status-tag"
                 th:classappend="${item.done == 1} ? ' status-tag-done' : ' status-tag-progress'"
                 th:text="${item.done == 1} ? '✓ 완료' : '○ 진행중'">
@@ -144,6 +198,11 @@
           <div class="result-info-item">
             <strong>분류</strong>
             <p th:text="${item.category != null ? item.category : '기타'}">지갑</p>
+          </div>
+
+          <div class="result-info-item" th:if="${item.boardType == 'found' and item.color != null and item.color != ''}">
+            <strong>색상</strong>
+            <p th:text="${item.color}">색상명</p>
           </div>
 
           <div class="result-info-item">

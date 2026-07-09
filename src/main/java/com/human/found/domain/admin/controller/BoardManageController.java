@@ -7,21 +7,24 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.human.found.domain.admin.service.AdminService;
+import com.human.found.domain.admin.service.BoardManageService;
 import com.human.found.domain.admin.vo.AdminFoundVO;
 import com.human.found.domain.admin.vo.AdminSearchVO;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 @Controller
 @RequestMapping("/admin")
 @RequiredArgsConstructor
-public class AdminController {
+public class BoardManageController {
 
-    private final AdminService adminService;
+    private final BoardManageService boardManagerService;
 
     /**
      * 관리자 분실물 게시글 목록
@@ -30,17 +33,17 @@ public class AdminController {
      */
     @GetMapping("/lost")
     public String lostList(AdminSearchVO searchVO, Model model) {
-        if (adminService.isSearchConditionEmpty(searchVO)) {
+        if (boardManagerService.isSearchConditionEmpty(searchVO)) {
             searchVO.pageInfo(0);
             model.addAttribute("lostList", Collections.emptyList());
             model.addAttribute("searchVO", searchVO);
             model.addAttribute("boardType", "lost");
         } else {
-            int totalCount = adminService.countSearchLost(searchVO);
+            int totalCount = boardManagerService.countSearchLost(searchVO);
             searchVO.setSize(50);
             searchVO.pageInfo(totalCount);
 
-            model.addAttribute("lostList", adminService.searchLostPage(searchVO));
+            model.addAttribute("lostList", boardManagerService.searchLostPage(searchVO));
             model.addAttribute("searchVO", searchVO);
             model.addAttribute("boardType", "lost");
         }
@@ -53,17 +56,35 @@ public class AdminController {
      * - dataSource 값에 따라 lost / lost_police 테이블 논리 삭제
      */
     @PostMapping("/lost/delete")
-    public String deleteLostList(
-            @RequestParam(value = "dataSource", required = false, defaultValue = "USER") String dataSource,
-            @RequestParam(value = "nums", required = false) List<Long> nums) {
-
-        if ("POLICE".equals(dataSource)) {
-            adminService.deletePoliceLostList(nums);
-            return "redirect:/admin/lost?dataSources=POLICE";
+    public String deleteLost(
+            @RequestParam("atcId") List<String> atcIds, 
+            @RequestHeader(value = "Referer", required = false) String referer) {
+        
+        if (atcIds != null && !atcIds.isEmpty()) {
+            boardManagerService.deleteLostList(atcIds);
         }
+        
+        if (referer != null && !referer.isEmpty()) {
+            return "redirect:" + referer;
+        }
+        return "redirect:/admin/lost";
+    }
 
-        adminService.deleteLostList(nums);
-        return "redirect:/admin/lost?dataSources=USER";
+    // 관리자 분실물 게시글 완료처리
+    @PostMapping("/lost/complete")
+    public String completeLost(
+            @RequestParam("atcId") List<String> atcIds,
+            @RequestHeader(value = "Referer", required = false) String referer) {
+        
+                if (atcIds != null && !atcIds.isEmpty()) {
+            boardManagerService.completeLostList(atcIds);
+        }
+        
+        if (referer != null && !referer.isEmpty()) {
+            return "redirect:" + referer;
+        }
+        
+        return "redirect:/admin/lost";
     }
 
     /**
@@ -74,7 +95,7 @@ public class AdminController {
     @GetMapping("/found")
     public String foundList(AdminSearchVO searchVO, Model model) {
 
-        if (adminService.isSearchConditionEmpty(searchVO)) {
+        if (boardManagerService.isSearchConditionEmpty(searchVO)) {
             // 모든 조건이 비어있다면 최초 진입 상태 -> 결과 0건 처리
             searchVO.pageInfo(0);
             model.addAttribute("foundList", Collections.emptyList());
@@ -82,11 +103,11 @@ public class AdminController {
             model.addAttribute("boardType", "found");
         } else {
             // 조건이 하나라도 채워져 있다면 사용자가 검색을 시도한 것 -> 정상 DB 조회
-            int totalCount = adminService.countSearchFound(searchVO);
+            int totalCount = boardManagerService.countSearchFound(searchVO);
             searchVO.setSize(50);
             searchVO.pageInfo(totalCount);
 
-            model.addAttribute("foundList", adminService.searchFoundPage(searchVO));
+            model.addAttribute("foundList", boardManagerService.searchFoundPage(searchVO));
             model.addAttribute("searchVO", searchVO);
             model.addAttribute("boardType", "found");
         }
@@ -94,56 +115,39 @@ public class AdminController {
         return "admin/boardManage";
     }
 
-
     /**
      * 관리자 습득물 선택 삭제
      * - dataSource 값에 따라 found / found_police 테이블 논리 삭제
      */
     @PostMapping("/found/delete")
-    public String deleteFoundList(
-            @RequestParam(value = "dataSource", required = false, defaultValue = "USER") String dataSource,
-            @RequestParam(value = "nums", required = false) List<Long> nums) {
-
-        if ("POLICE".equals(dataSource)) {
-            adminService.deletePoliceFoundList(nums);
-            return "redirect:/admin/found?dataSources=POLICE";
+    public String deleteFound(
+            @RequestParam("atcId") List<String> atcIds, 
+            @RequestHeader(value = "Referer", required = false) String referer) {
+        
+        if (atcIds != null && !atcIds.isEmpty()) {
+            boardManagerService.deleteFoundList(atcIds);
         }
-
-        adminService.deleteFoundList(nums);
-        return "redirect:/admin/found?dataSources=USER";
+        
+        if (referer != null && !referer.isEmpty()) {
+            return "redirect:" + referer;
+        }
+        return "redirect:/admin/found";
     }
 
-    /**
-     * 관리자 공지사항 목록
-     * - 검색 조건에 따라 관리자 작성 공지사항 목록 조회
-     * - PagingVO를 상속받은 AdminSearchVO를 이용하여 한 화면에 10개씩 페이징 처리
-     */
-    @GetMapping("/notice")
-    public String noticeList(AdminSearchVO searchVO, Model model) {
-
-        searchVO.setBoardType("notice");
-        searchVO.setSize(10);
-
-        int totalCount = adminService.countSearchNotice(searchVO);
-        searchVO.setSize(50);
-        searchVO.pageInfo(totalCount);
-
-        model.addAttribute("noticeList", adminService.searchNoticePage(searchVO));
-        model.addAttribute("searchVO", searchVO);
-        model.addAttribute("boardType", "notice");
-
-        return "admin/adminPage";
-    }
-
-    /**
-     * 관리자 공지사항 선택 삭제
-     */
-    @PostMapping("/notice/delete")
-    public String deleteNoticeList(
-            @RequestParam(value = "nums", required = false) List<Long> nums) {
-
-        adminService.deleteNoticeList(nums);
-
-        return "redirect:/admin/notice";
+    // 관리자 분실물 게시글 완료처리
+    @PostMapping("/found/complete")
+    public String completeFound(
+            @RequestParam("atcId") List<String> atcIds,
+            @RequestHeader(value = "Referer", required = false) String referer) {
+        
+                if (atcIds != null && !atcIds.isEmpty()) {
+            boardManagerService.completeFoundList(atcIds);
+        }
+        
+        if (referer != null && !referer.isEmpty()) {
+            return "redirect:" + referer;
+        }
+        
+        return "redirect:/admin/found";
     }
 }

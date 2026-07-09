@@ -200,7 +200,7 @@ public class LostController {
     public String LostUpdate(@Valid @ModelAttribute("lostVO")LostVO lostVO,
             BindingResult bindingResult,Model model,
             @RequestParam(value = "files",required = false) MultipartFile[]files,
-            @RequestParam(value = "deleteFiles",required = false)List<String>deleteFiles) {
+            @RequestParam(value = "deleteFiles",required = false)List<String> deleteFiles) {
 
         //[입력값 유지 및 임시저장 기능] 검증 에러 발생 시 작성하던 내용 그대로 다시 폼으로 백!
         if(bindingResult.hasErrors()){
