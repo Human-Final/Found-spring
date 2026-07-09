@@ -67,8 +67,6 @@ public class UserManageServiceImpl implements UserManageService{
 
         List<UserVO> newUsers =
                 userInfo.getNewUsers() == null ? List.of() : userInfo.getNewUsers();
-
-        
         
         if (!changedUsers.isEmpty()) {
             totalCount += updateUserChangedBulk(changedUsers, isAdmin, isManager);

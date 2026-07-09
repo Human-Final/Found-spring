@@ -68,5 +68,15 @@ public interface UserMapper {
 
     int insertUser(String trim, String encodedPassword, String trim2, String trim3, String trim4, String status,
             String role);
+    
+    // 마지막 로그인 시간 업데이트
+    void updateLastLoginAt(String id);
+
+    // 휴면 계정 상태 전환
+    int updateDormant();
+
+    // 휴면 계정 해제
+    void updateReActive(String id);
+
 
 }

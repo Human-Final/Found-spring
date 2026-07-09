@@ -444,6 +444,13 @@ public class UserServiceImpl implements UserService {
         }
 
         // 회원탈퇴 처리
+        
         userMapper.withdrawUser(id);
     }
+
+    // 휴면 계정 해제
+    public void dormantReActive(String id){
+        userMapper.updateReActive(id);
+    }
+
 }

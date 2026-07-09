@@ -8,6 +8,8 @@ import org.apache.ibatis.annotations.Param;
 import com.human.found.domain.admin.vo.AdminFoundVO;
 import com.human.found.domain.admin.vo.AdminLostVO;
 import com.human.found.domain.admin.vo.AdminSearchVO;
+import com.human.found.domain.found.vo.FoundVO;
+import com.human.found.domain.lost.vo.LostVO;
 
 @Mapper
 public interface BoardManageMapper {
@@ -50,5 +52,11 @@ public interface BoardManageMapper {
 
     // 관리자 습득물 검색 결과 개수 조회
     int countSearchFound(AdminSearchVO searchVO);
+
+    // 관리자 분실물 삭제된 게시글 미리보기
+    LostVO selectAdminlostDetailAtcId(@Param("atcId") String atcId);  
+
+    // 관리자 습득물 삭제된 게시글 미리보기
+    FoundVO selectAdminfoundDetailAtcId(@Param("atcId") String atcId); 
 
 }

@@ -6,17 +6,16 @@ import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.human.found.domain.admin.service.BoardManageService;
-import com.human.found.domain.admin.vo.AdminFoundVO;
 import com.human.found.domain.admin.vo.AdminSearchVO;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestBody;
 
 
 @Controller
@@ -150,4 +149,31 @@ public class BoardManageController {
         
         return "redirect:/admin/found";
     }
+
+    // 관리자 분실물 삭제된 게시글 미리보기
+
+    @GetMapping("lost/preview/{atcId}")
+    public String previewlost(@PathVariable String atcId,Model model) {
+        model.addAttribute("lostVO", boardManagerService.adminLostDetail(atcId));
+        model.addAttribute("boardType", "lost");
+        
+        return "admin/boardPreview";
+    }
+
+    // 관리자 습득물 삭제된 게시글 미리보기
+
+    @GetMapping("/found/preview/{atcId}")
+    public String previewfound(@PathVariable String atcId,Model model) {
+
+        model.addAttribute("foundVO", boardManagerService.adminFoundDetail(atcId));
+        model.addAttribute("boardType", "found");
+
+
+        return "admin/boardPreview";
+    }
+    
+    
+
+
+
 }

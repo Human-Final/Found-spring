@@ -2,6 +2,8 @@ package com.human.found.domain.admin.service;
 
 import java.util.List;
 
+import javax.management.RuntimeErrorException;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,6 +11,10 @@ import com.human.found.domain.admin.mapper.BoardManageMapper;
 import com.human.found.domain.admin.vo.AdminFoundVO;
 import com.human.found.domain.admin.vo.AdminLostVO;
 import com.human.found.domain.admin.vo.AdminSearchVO;
+import com.human.found.domain.found.mapper.FoundFileMapper;
+import com.human.found.domain.found.vo.FoundVO;
+import com.human.found.domain.lost.mapper.LostFileMapper;
+import com.human.found.domain.lost.vo.LostVO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,6 +23,8 @@ import lombok.RequiredArgsConstructor;
 public class BoardManageServiceImpl implements BoardManageService{
 
     private final BoardManageMapper boardManageMapper;
+    private final LostFileMapper lostFileMapper;
+    private final FoundFileMapper foundFileMapper;
 
     public boolean isSearchConditionEmpty(AdminSearchVO searchVO) {
         // 1. 검색어가 있는지 확인
@@ -121,6 +129,41 @@ public class BoardManageServiceImpl implements BoardManageService{
     @Override
     public int countSearchFound(AdminSearchVO searchVO) {
         return boardManageMapper.countSearchFound(searchVO);
+    }
+
+
+    // 관리자 게시글 분실물 삭제 미리보기
+    @Override
+    public LostVO adminLostDetail(String atcId) {
+        
+        LostVO lostVO = boardManageMapper.selectAdminlostDetailAtcId(atcId);
+
+        if(lostVO == null){
+            throw new RuntimeException("게시글이 존재하지 않습니다.");
+        }
+
+        if("user".equals(lostVO.getDataSource())){
+            lostVO.setFileList(
+                lostFileMapper.findById(lostVO.getAtcId())
+            );
+        }
+        return lostVO;
+    }
+
+    @Override
+    public FoundVO adminFoundDetail(String atcId) {
+        
+        FoundVO foundVO=boardManageMapper.selectAdminfoundDetailAtcId(atcId);
+
+        if(foundVO == null){
+            throw new RuntimeException("게시글이 존재하지 않습니다.");
+        }
+
+        if("user".equals(foundVO.getDataSource())){
+            foundVO.setFileList(
+                foundFileMapper.findById(atcId));
+        }
+        return foundVO;
     }
 
 }
