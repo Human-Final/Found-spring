@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 미리보기</title>
+
+    <link rel="stylesheet" th:href="@{/css/common/common.css}">
+    <link rel="stylesheet" th:href="@{/css/admin/boardPreview.css}">
+</head>
+
+<body>
+
+<div class="preview-wrap">
+
+    <div class="preview-header">
+        <h2>게시글 미리보기</h2>
+        <span class="preview-badge">읽기 전용</span>
+    </div>
+
+    <!-- 분실물 -->
+    <div th:if="${boardType=='lost'}">
+
+        <table class="preview-table">
+            <tr>
+                <th>제목</th>
+                <td th:text="${lostVO.lstPrdtNm}"></td>
+            </tr>
+
+            <tr>
+                <th>작성자</th>
+                <td th:text="${lostVO.id}"></td>
+            </tr>
+
+            <tr>
+                <th>카테고리</th>
+                <td th:text="${lostVO.prdtClNm}"></td>
+            </tr>
+
+            <tr>
+                <th>장소</th>
+                <td th:text="${lostVO.lstPlace}"></td>
+            </tr>
+
+            <tr>
+                <th>등록일</th>
+                <td th:text="${#temporals.format(lostVO.createdAt,'yyyy.MM.dd HH:mm')}"></td>
+            </tr>
+
+            <tr>
+                <th>상태</th>
+                <td>
+                    <span th:if="${lostVO.done==0}" class="badge progress">진행중</span>
+                    <span th:if="${lostVO.done==1}" class="badge complete">완료</span>
+                </td>
+            </tr>
+
+            <tr>
+                <th>데이터 출처</th>
+                <td th:text="${lostVO.dataSource}"></td>
+            </tr>
+        </table>
+
+        <div class="content-box">
+            <h3>내용</h3>
+            <p th:text="${lostVO.lstSbjt}"></p>
+        </div>
+
+        <div class="image-box"
+             th:if="${lostVO.fileList!=null and !#lists.isEmpty(lostVO.fileList)}">
+
+            <h3>첨부사진</h3>
+
+            <div class="image-list">
+
+                <img th:each="file:${lostVO.fileList}"
+                     th:src="@{'/images/lost/'+${file.saveName}}">
+                
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- 습득물 -->
+
+    <div th:if="${boardType=='found'}">
+
+        <table class="preview-table">
+
+            <tr>
+                <th>제목</th>
+                <td th:text="${foundVO.fdPrdtNm}"></td>
+            </tr>
+
+            <tr>
+                <th>작성자</th>
+                <td th:text="${foundVO.id}"></td>
+            </tr>
+
+            <tr>
+                <th>카테고리</th>
+                <td th:text="${foundVO.prdtClNm}"></td>
+            </tr>
+
+            <tr>
+                <th>보관장소</th>
+                <td th:text="${foundVO.depPlace}"></td>
+            </tr>
+
+            <tr>
+                <th>등록일</th>
+                <td th:text="${#temporals.format(foundVO.createdAt,'yyyy.MM.dd HH:mm')}"></td>
+            </tr>
+
+            <tr>
+                <th>상태</th>
+                <td>
+                    <span th:if="${foundVO.done==0}" class="badge progress">진행중</span>
+                    <span th:if="${foundVO.done==1}" class="badge complete">완료</span>
+                </td>
+            </tr>
+
+            <tr>
+                <th>데이터 출처</th>
+                <td th:text="${foundVO.dataSource}"></td>
+            </tr>
+
+        </table>
+
+        <div class="content-box">
+
+            <h3>내용</h3>
+
+            <p th:text="${foundVO.fdSbjt}"></p>
+
+        </div>
+
+        <div class="image-box"
+             th:if="${foundVO.fileList!=null and !#lists.isEmpty(foundVO.fileList)}">
+
+            <h3>첨부사진</h3>
+
+            <div class="image-list">
+
+                <img th:each="file:${foundVO.fileList}"
+                     th:src="@{'/images/found/'+${file.saveName}}">
+
+                     
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="btn-area">
+        <button onclick="window.close()">닫기</button>
+    </div>
+
+</div>
+
+</body>
+</html>

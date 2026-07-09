@@ -5,6 +5,8 @@ import java.util.List;
 import com.human.found.domain.admin.vo.AdminFoundVO;
 import com.human.found.domain.admin.vo.AdminLostVO;
 import com.human.found.domain.admin.vo.AdminSearchVO;
+import com.human.found.domain.found.vo.FoundVO;
+import com.human.found.domain.lost.vo.LostVO;
 
 public interface BoardManageService {
 
@@ -34,5 +36,11 @@ public interface BoardManageService {
 
     // 관리자 유실물 완료처리
     public void completeFoundList(List<String> atcId);
+
+    // 관리자 분실물 삭제된 게시글 미리보기
+    LostVO adminLostDetail(String atcId);
+
+    // 관리자 습득물 삭제된 게시글 미리보기
+    FoundVO adminFoundDetail(String atcId);
 
 }
