@@ -85,7 +85,7 @@
 
     <!-- 필터 -->
     <section class="user-filter-card">
-      <form th:action="@{/test/users}" 
+      <form th:action="@{/admin/users}" 
             method="get" 
             class="user-filter-form" 
             id="userFilterForm">
@@ -121,7 +121,7 @@
               <span>필터 전체 선택</span>
             </button>
 
-            <a th:href="@{/test/users}" class="filter-reset-btn">
+            <a th:href="@{/admin/users}" class="filter-reset-btn">
               <i data-lucide="rotate-cw"></i>
               <span>초기화</span>
             </a>
@@ -384,9 +384,9 @@
                 수정
               </button>           
 
-              <a th:href="@{/test/users/detail/{id}(id=${user.id})}"
+              <a th:href="@{/admin/users/detail/{id}(id=${user.id})}"
                  class="detail-btn"
-                 th:data-detail-url="@{/test/users/detail/{id}(id=${user.id})}">
+                 th:data-detail-url="@{/admin/users/detail/{id}(id=${user.id})}">
                 상세보기
               </a>
             </td>
@@ -408,7 +408,7 @@
     </section>
     
     <form id="userBulkUpdateForm"
-          th:action="@{/test/users/edit}"
+          th:action="@{/admin/users/edit}"
           method="post"
           style="display:none;">
 
@@ -725,12 +725,6 @@ document.addEventListener("DOMContentLoaded", () => {
     input.setCustomValidity("");
   }
 
-  // 현재 화면에 이미 있는 기존 회원 ID인지 확인
-  function isExistingUserId(id) {
-    return Array.from(document.querySelectorAll(".user-manage-table tbody tr[data-user-id]"))
-      .some(row => row.dataset.userId === id);
-  }
-
   // 새로 추가 중인 행들끼리 ID 중복인지 확인
   function isDuplicateNewUserId(currentRow, id) {
     return Array.from(document.querySelectorAll(".new-user-row"))
@@ -747,6 +741,54 @@ document.addEventListener("DOMContentLoaded", () => {
 
         return idInput.value.trim() === id;
       });
+  }
+
+  function normalizeEmail(value) {
+    return value.trim().toLowerCase();
+  }
+
+  // 새로 추가 중인 행들끼리 이메일 중복인지 확인
+  function isDuplicateNewUserEmail(currentRow, email) {
+    const normalizedEmail = normalizeEmail(email);
+
+    return Array.from(document.querySelectorAll(".new-user-row"))
+      .some(row => {
+        if (row === currentRow) {
+          return false;
+        }
+
+        const emailInput = row.querySelector(".new-email-input");
+
+        if (!emailInput) {
+          return false;
+        }
+
+        return normalizeEmail(emailInput.value) === normalizedEmail;
+      });
+  }
+
+  // DB 전체 아이디 중복 확인
+  async function isDuplicatedIdFromServer(id) {
+    const response = await fetch("/check-id?id=" + encodeURIComponent(id));
+
+    if (!response.ok) {
+      throw new Error("아이디 중복 확인 요청 실패");
+    }
+
+    const result = await response.text();
+    return result.trim() === "duplicated";
+  }
+
+  // DB 전체 이메일 중복 확인
+  async function isDuplicatedEmailFromServer(email) {
+    const response = await fetch("/check-email?email=" + encodeURIComponent(email));
+
+    if (!response.ok) {
+      throw new Error("이메일 중복 확인 요청 실패");
+    }
+
+    const result = await response.text();
+    return result.trim() === "duplicated";
   }
 
   function applyRowChange(row){
@@ -905,10 +947,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     row.innerHTML = ` 
       <td>
-        <input type="checkbox" disabled>
-      </td>
-
-      <td>
         <input type="text"
                class="edit-input new-id-input"
                placeholder="아이디">
@@ -997,13 +1035,13 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-    row.querySelector(".apply-new-user-btn").addEventListener("click", () => {
+    row.querySelector(".apply-new-user-btn").addEventListener("click", async () => {
       if(row.classList.contains("applied-new-user")){
         editAppliedNewUserRow(row);
         return;
       }
 
-      applyNewUserRow(row);
+      await applyNewUserRow(row);
     });
 
     row.querySelector(".cancel-new-user-btn").addEventListener("click", ()=> {
@@ -1012,7 +1050,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // 추가 회원 입력한 정보값 적용하기
-  function applyNewUserRow(row){
+  async function applyNewUserRow(row){
     const tempKey = row.dataset.tempKey;
 
     const idInput = row.querySelector(".new-id-input");
@@ -1044,17 +1082,23 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // 현재 화면에 있는 기존 회원과 중복
-    if (isExistingUserId(id)) {
-      showInputError(idInput, "이미 사용 중인 아이디입니다.");
-      return;
-    }
-
     // 새로 추가 중인 회원 행끼리 중복
     if (isDuplicateNewUserId(row, id)) {
       showInputError(idInput, "추가하려는 회원 목록에 중복된 아이디가 있습니다.");
       return;
     }
+
+      try {
+        const duplicatedId = await isDuplicatedIdFromServer(id);
+
+        if (duplicatedId) {
+          showInputError(idInput, "이미 사용 중인 아이디입니다.");
+          return;
+        }
+      } catch (e) {
+          alert("아이디 중복 확인 중 오류가 발생했습니다.");
+        return;
+      }
 
     if (!namePattern.test(name)) {
       showInputError(nameInput, "이름은 한글 또는 영문 2~20자로 입력해야 합니다.");
@@ -1063,6 +1107,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!emailPattern.test(email)) {
       showInputError(emailInput, "이메일은 영문/숫자 형식이어야 하며 .com으로 끝나야 합니다.");
+      return;
+    }
+
+    // 새로 추가 중인 회원 행끼리 이메일 중복
+    if (isDuplicateNewUserEmail(row, email)) {
+      showInputError(emailInput, "추가하려는 회원 목록에 중복된 이메일이 있습니다.");
+      return;
+    }
+
+    try {
+      const duplicatedEmail = await isDuplicatedEmailFromServer(email);
+
+      if (duplicatedEmail) {
+        showInputError(emailInput, "이미 사용 중인 이메일입니다.");
+        return;
+      }
+    } catch (e) {
+        alert("이메일 중복 확인 중 오류가 발생했습니다.");
       return;
     }
 
@@ -1089,10 +1151,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     row.classList.add("applied-new-user", "modified");
 
-    row.querySelectorAll(".new-id-input, .new-name-input, .new-tel-input").forEach(el => {
+    row.querySelectorAll(".new-id-input, .new-name-input, .new-email-input, .new-tel-input").forEach(el => {
       el.disabled = true;
     });
-
+    
+    
     const applyBtn = row.querySelector(".apply-new-user-btn");
     applyBtn.textContent = "수정";
   }
@@ -1312,10 +1375,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const payload = collectBulkPayload();
 
-      console.log("저장 버튼 클릭됨");
-      console.log("payload", payload);
-      console.log("changedUsers", payload.changedUsers);
-      console.log("newUsers", payload.newUsers);
 
       if (payload.changedUsers.length === 0 && payload.newUsers.length === 0) {
         alert("변경된 사항이 없습니다.");
@@ -1328,13 +1387,34 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      // 기존 히든 제거
       removeOldDynamicInputs();
 
+      // 돌아갈 검색 조건 추가
+      appendCurrentFilterQuery();
+
+      // 수정 회원 목록 추가 + 신규 회원 목록 추가
       appendUsersToForm("changedUsers", payload.changedUsers, true);
       appendUsersToForm("newUsers", payload.newUsers, false);
 
       userBulkUpdateForm.submit();
     });
+  }
+
+  // 전송할 때 현재 검색 조건 같이 보내기
+  function appendCurrentFilterQuery(){
+    const filterForm = document.getElementById("userFilterForm");
+
+    if(!filterForm){
+      return;
+    }
+
+    const params = new URLSearchParams(new FormData(filterForm));
+
+    // 수정 후에 검색 결과 화면으로
+    params.set("searched", "true");
+
+    appendHiddenInput("returnQuery", params.toString());
   }
 
   // 전송할 때 한번에 전송
@@ -1567,9 +1647,9 @@ function setPage(page) {
       const queryString = params.toString();
 
       if (queryString) {
-        location.href = "/api/test/users/download?" + queryString;
+        location.href = "/api/admin/users/download?" + queryString;
       } else {
-        location.href = "/api/test/users/download";
+        location.href = "/api/admin/users/download";
       }
     });
   });
@@ -1599,15 +1679,6 @@ function setPage(page) {
 
     return endDate + " 이전";
   }
-</script>
-
-<!-- 오류 시 메시지 띄우기 -->
-<script th:inline="javascript">
-  const errorMessage = /*[[${errorMessage}]]*/ null;
-
-  if (errorMessage) {
-    alert(errorMessage);
-  } 
 </script>
 
 </body>

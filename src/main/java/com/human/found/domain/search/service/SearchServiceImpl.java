@@ -67,6 +67,13 @@ public class SearchServiceImpl implements SearchService{
         System.out.println("LLM startDate = " + llmCondition.getStartDate());
         System.out.println("LLM endDate = " + llmCondition.getEndDate());
 
+        // 사용자 화면에 검색 태그를 띄우기 위한 세터
+        conditionDTO.setBoardType(llmCondition.getBoardType());
+        conditionDTO.setCategory(llmCondition.getCategory());
+        conditionDTO.setColor(llmCondition.getColor());
+        conditionDTO.setPlace(llmCondition.getPlace());
+        conditionDTO.setCoreKeywords(llmCondition.getCoreKeywords());
+
         // LLM 기반 검색
         List<SearchResultVO> llmList = List.of();
 

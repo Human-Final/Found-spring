@@ -1005,3 +1005,36 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
 
 
 
+
+.download {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.download button {
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 8px;
+  border: 1px solid #bae6fd;
+  background-color: #e0f2fe;
+  color: #0369a1;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.download button:hover {
+  background-color: #bae6fd;
+  border-color: #7dd3fc;
+}
+
+.download button:active {
+  background-color: #7dd3fc;
+}
+
+.download-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  transform: translateY(3px);
+}

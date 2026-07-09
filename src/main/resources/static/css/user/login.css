@@ -161,3 +161,93 @@
   color: #ccc;
   font-size: 12px;
 }
+
+/* 휴면 계정 해제 모달*/
+.dormant-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.dormant-modal {
+  width: 420px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.dormant-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #eee;
+}
+
+.dormant-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.dormant-close-btn {
+  font-size: 28px;
+  line-height: 1;
+  color: #999;
+  text-decoration: none;
+}
+
+.dormant-modal-body {
+  padding: 24px;
+}
+
+.dormant-message {
+  margin: 0 0 18px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.dormant-code-input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.dormant-code-input:focus {
+  outline: none;
+  border-color: #4f7cff;
+}
+
+.dormant-submit-btn {
+  width: 100%;
+  height: 48px;
+  margin-top: 14px;
+  border: none;
+  border-radius: 8px;
+  background: #222;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dormant-submit-btn:hover {
+  background: #111;
+}
+
+.dormant-sub-text {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #777;
+}

@@ -116,7 +116,8 @@ public interface UserService {
     void withdrawUser(String id, String password);
 
     
-
+    // 휴면 계정 해제
+    void dormantReActive(String id);
 
 
 }

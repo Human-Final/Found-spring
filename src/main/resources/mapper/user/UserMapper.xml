@@ -277,7 +277,8 @@
             fc.is_deleted AS isDeleted,
             f.fd_prdt_nm AS postTitle, 
             f.atc_id AS atcId,
-            '습득' AS boardType
+            '습득' AS boardType,
+            IFNULL(f.is_deleted, 1) AS postDeleted
         FROM found_comment fc
         LEFT JOIN found f ON fc.num = f.num 
         WHERE fc.id = #{userId} AND fc.is_deleted = 0
@@ -295,7 +296,8 @@
             lc.is_deleted AS isDeleted,
             l.lst_prdt_nm AS postTitle, 
             l.atc_id AS atcId,
-            '분실' AS boardType
+            '분실' AS boardType,
+            IFNULL(l.is_deleted, 1) AS postDeleted
         FROM lost_comment lc
         LEFT JOIN lost l ON lc.num = l.num
         WHERE lc.id = #{userId} AND lc.is_deleted = 0
@@ -316,6 +318,36 @@
         SET is_deleted = 1,
             deleted_at = NOW()
         WHERE id = #{userId} AND is_deleted = 0
+    </update>
+
+    <!-- 로그인 할 때 마지막 로그인 시간 업데이트-->
+    <update id="updateLastLoginAt"
+            parameterType="string">
+        UPDATE user
+        SET last_login_at = NOW()
+        WHERE id=#{id}
+    </update>
+
+    <!-- 마지막 로그인 시간에서 일정 시간이 지나면 휴면 상태로 전환 -->
+    <update id="updateDormant">
+        UPDATE user
+        SET status = 'dormant'
+        WHERE is_deleted =0
+            AND status = 'active'
+            AND role NOT IN ('ADMIN', 'MANAGER')
+            AND COALESCE(last_login_at, sign_up) 
+                <![CDATA[<=]]> DATE_SUB(NOW(), INTERVAL 1 MINUTE)
+    </update>
+
+    <!-- 휴면 계정 해제 -->
+    <update id="updateReActive"
+            parameterType="string">
+        UPDATE user
+        SET status = 'active',
+            last_login_at = NOW()
+        WHERE is_deleted = 0
+            AND status = 'dormant'
+            AND id=#{id}
     </update>
 
 </mapper>

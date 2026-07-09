@@ -25,5 +25,7 @@ public class CommentVO {
     private String postTitle;
     //추가 : 댓글의 주소 게시글의 atcId를 저장
     private String atcId;
+    //추가 : 댓글을 단 게시글의 삭제 여부
+    private Integer postDeleted;
 
 }

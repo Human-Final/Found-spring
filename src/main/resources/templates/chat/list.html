@@ -17,7 +17,7 @@
 
     <div class="chat-list-head">
       <h2>채팅 목록</h2>
-      <p>이 게시글과 연결된 채팅방입니다.</p>
+      <p>내가 참여 중인 채팅방입니다.</p>
     </div>
 
     <div class="chat-room-list">
@@ -29,10 +29,10 @@
         <div class="chat-avatar">채</div>
 
         <div class="chat-room-info">
-          <strong th:text="${room.userIdB}">상대방</strong>
+          <strong th:text="${room.title}">게시글 제목</strong>
 
-          <span th:text="|채팅방 번호: ${room.chatNum}|">
-            채팅방 번호
+          <span th:text="|상대방: ${room.userIdB}|">
+            상대방
           </span>
         </div>
 
@@ -40,7 +40,7 @@
 
       <p class="empty-text"
          th:if="${chatRooms == null or #lists.isEmpty(chatRooms)}">
-        아직 이 게시글에 연결된 채팅방이 없습니다.
+        아직 참여 중인 채팅방이 없습니다.
       </p>
 
     </div>
