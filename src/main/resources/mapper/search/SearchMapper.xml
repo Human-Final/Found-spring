@@ -284,6 +284,14 @@
             </choose>
         </if>
 
+        <if test="startDate != null and startDate != ''">
+            AND eventDate &gt;= #{startDate}
+        </if>
+
+        <if test="endDate != null and endDate != ''">
+            AND eventDate &lt;= #{endDate}
+        </if>
+
         <!-- LIKE 후보 조건: 원문 keyword + 공백 제거 keyword + LLM coreKeywords를 모두 OR로 넓게 검색 -->
         <if test="
             (keyword != null and keyword != '')

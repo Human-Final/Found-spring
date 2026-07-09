@@ -144,32 +144,35 @@
 
     function connectWebSocket() {
 
-        const socket = new SockJS("/ws-stomp");
+        const socket = new SockJS("http://192.168.0.79:8080/ws-stomp");
         stompClient = Stomp.over(socket);
-
         stompClient.debug = null;
 
         stompClient.connect({}, function () {
 
             connected = true;
 
-            console.log("웹소켓 연결 성공");
+            // 채팅방 입장 즉시 읽음 처리
+            readChatRoom();
 
             const messageInput = document.getElementById("messageInput");
             messageInput.disabled = false;
             messageInput.placeholder = "메시지를 입력하세요.";
 
+            // 1. 채팅 메시지 구독
             stompClient.subscribe("/sub/chat/room/" + chatNum, function (message) {
 
                 const msg = JSON.parse(message.body);
 
                 appendMessage(msg);
 
-                // 내가 아닌 상대방 메시지를 받으면 즉시 읽음 처리
+                // 상대방 메시지를 받으면 즉시 읽음 처리
                 if (String(msg.senderId) !== String(loginId)) {
                     readChatRoom();
                 }
-            
+            });
+
+            // 2. 읽음 알림 구독
             stompClient.subscribe("/sub/chat/room/" + chatNum + "/read", function (message) {
 
                 const readerId = message.body;
@@ -183,13 +186,7 @@
                 document.querySelectorAll(".read-status").forEach(function (el) {
                     el.remove();
                 });
-
-            });         
-
             });
-
-            // 채팅방 입장 성공 시 기존 메시지 읽음 처리
-            readChatRoom();
 
         }, function (error) {
 
@@ -202,12 +199,9 @@
             messageInput.placeholder = "채팅 서버와 연결이 끊어졌습니다. 자동 재연결 중...";
 
             setTimeout(connectWebSocket, 5000);
-
         });
-
     }
 
-    // 채팅방 읽음 처리
     function readChatRoom() {
 
         fetch("/chat/room/" + chatNum + "/read", {
@@ -219,7 +213,6 @@
         .catch(function (error) {
             console.error("읽음 처리 실패:", error);
         });
-
     }
 
     function sendMessage() {
@@ -326,7 +319,6 @@
                     link.textContent = "📎 " + file.originalName;
                     bubble.appendChild(link);
                 }
-
             });
 
         } else {
@@ -342,7 +334,6 @@
 
         if (String(msg.senderId) === String(loginId)) {
 
-            // 내가 새 메시지를 보내면 기존 안읽음 제거 후 마지막 내 메시지에만 표시
             document.querySelectorAll(".read-status").forEach(function (el) {
                 el.remove();
             });
@@ -354,7 +345,6 @@
 
         } else {
 
-            // 상대방이 메시지를 보내면 내 이전 메시지는 읽은 것으로 보고 안읽음 제거
             document.querySelectorAll(".read-status").forEach(function (el) {
                 el.remove();
             });
@@ -418,7 +408,6 @@
 
     window.addEventListener("load", function () {
 
-        // 웹소켓 실행
         connectWebSocket();
 
         const chatBox = document.getElementById("chatBox");

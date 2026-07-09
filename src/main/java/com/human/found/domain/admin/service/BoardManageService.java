@@ -1,5 +1,6 @@
 package com.human.found.domain.admin.service;
 
+import java.io.OutputStream;
 import java.util.List;
 
 import com.human.found.domain.admin.vo.AdminFoundVO;
@@ -42,5 +43,12 @@ public interface BoardManageService {
 
     // 관리자 습득물 삭제된 게시글 미리보기
     FoundVO adminFoundDetail(String atcId);
+
+    // 관리자 분실물 게시글 엑셀 다운로드
+    public void generateLostExcel(AdminSearchVO searchVO, OutputStream outputStream);
+
+    // 관리자 습득물 게시글 엑셀 다운로드
+    public void generateFoundExcel(AdminSearchVO searchVO, OutputStream outputStream);
+
 
 }

@@ -24,8 +24,11 @@ import com.human.found.domain.lost.vo.LostVO;
 import com.human.found.global.common.paging.PagingVO;
 import com.human.found.infrastructure.map.KakaoMapConfig;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import jakarta.servlet.http.Cookie;
 
 
 
@@ -170,21 +173,56 @@ public class FoundController {
     
     //====상세보기=====
     @GetMapping("/api/found/detail/{atcId}")
-    public String foundgetdetail(@PathVariable("atcId") String atcId, Model model) {
-        foundService.viewCountPlus(atcId);
-        FoundVO foundVO = foundService.foundgetdetail(atcId);
+    public String foundgetdetail(
+        @PathVariable("atcId") String atcId, Model model,
+        HttpServletRequest request, HttpServletResponse response) {
 
-        List<CommentVO> commentList =
+            Cookie[] cookies = request.getCookies();
+            Cookie viewCookie = null;
+            
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if ("lostViewLogs".equals(cookie.getName())) {
+                        viewCookie = cookie;
+                        break;
+                    }
+                }
+            }
+            
+            if (viewCookie != null) {
+                if (!viewCookie.getValue().contains("[" + atcId + "]")) {
+                    foundService.viewCountPlus(atcId);
+                    
+                    // 기존 값에 누적하지 않고, 현재 atcId 한 개만 깔끔하게 덮어씁니다.
+                    viewCookie.setValue("[" + atcId + "]"); 
+                    viewCookie.setPath("/");
+                    viewCookie.setMaxAge(60 * 60 * 1); // 1시간 유지
+                    response.addCookie(viewCookie);
+                }
+            } else {
+                // 'lostViewLogs' 쿠키가 아예 존재하지 않는 최초의 클라이언트인 경우
+                foundService.viewCountPlus(atcId); // 조회수 증가 호출
+                
+                // 새로운 쿠키를 생성하여 현재 글 id를 담습니다.
+                Cookie newCookie = new Cookie("lostViewLogs", "[" + atcId + "]");
+                newCookie.setPath("/");
+                newCookie.setMaxAge(60 * 60 * 24); // 24시간 유지
+                response.addCookie(newCookie);     // 브라우저로 최초 쿠키 발급
+            }
+
+            FoundVO foundVO = foundService.foundgetdetail(atcId);
+
+            List<CommentVO> commentList =
                 foundCommentService.getCommentsByNum(
                         foundVO.getNum(),
                         foundVO.getDataSource()
                 );
 
-        model.addAttribute("foundVO", foundVO);
-        model.addAttribute("commentList", commentList);
-        model.addAttribute("kakaoMapJsKey", kakaoMapConfig.getJsKey());
+            model.addAttribute("foundVO", foundVO);
+            model.addAttribute("commentList", commentList);
+            model.addAttribute("kakaoMapJsKey", kakaoMapConfig.getJsKey());
 
-        return "found/detail";
+            return "found/detail";
     }
     
     //======수정화면==

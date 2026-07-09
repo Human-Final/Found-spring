@@ -25,6 +25,9 @@ import com.human.found.infrastructure.map.KakaoMapConfig;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 
 @Controller
@@ -158,16 +161,51 @@ public class LostController {
     }
     //==상세보기==
     @GetMapping("/api/lost/detail/{atcId}")
-    public String lostDetaile(@PathVariable("atcId")String atcId,Model model) {
-        lostService.viewCountPlus(atcId);
-        LostVO lostVO=lostService.lostdetail(atcId);
+    public String lostDetaile(
+        @PathVariable("atcId")String atcId,Model model,
+        HttpServletRequest request, HttpServletResponse response) {
 
-        model.addAttribute("lostVO", lostVO);
-        model.addAttribute("comments", lostCommentService.getComments(
-            lostVO.getNum(), lostVO.getDataSource())
-        );
-        model.addAttribute("kakaoMapJsKey", kakaoMapConfig.getJsKey());
-        return "lost/detail";
+            Cookie[] cookies = request.getCookies();
+            Cookie viewCookie = null;
+            
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if ("lostViewLogs".equals(cookie.getName())) {
+                        viewCookie = cookie;
+                        break;
+                    }
+                }
+            }
+            
+            if (viewCookie != null) {
+                if (!viewCookie.getValue().contains("[" + atcId + "]")) {
+                    lostService.viewCountPlus(atcId);
+                    
+                    // 기존 값에 누적하지 않고, 현재 atcId 한 개만 깔끔하게 덮어씁니다.
+                    viewCookie.setValue("[" + atcId + "]"); 
+                    viewCookie.setPath("/");
+                    viewCookie.setMaxAge(60 * 60 * 1); // 1시간 유지
+                    response.addCookie(viewCookie);
+                }
+            } else {
+                // 'lostViewLogs' 쿠키가 아예 존재하지 않는 최초의 클라이언트인 경우
+                lostService.viewCountPlus(atcId); // 조회수 증가 호출
+                
+                // 새로운 쿠키를 생성하여 현재 글 id를 담습니다.
+                Cookie newCookie = new Cookie("lostViewLogs", "[" + atcId + "]");
+                newCookie.setPath("/");
+                newCookie.setMaxAge(60 * 60 * 24); // 24시간 유지
+                response.addCookie(newCookie);     // 브라우저로 최초 쿠키 발급
+            }
+            
+            LostVO lostVO=lostService.lostdetail(atcId);
+
+            model.addAttribute("lostVO", lostVO);
+            model.addAttribute("comments", lostCommentService.getComments(
+                lostVO.getNum(), lostVO.getDataSource())
+            );
+            model.addAttribute("kakaoMapJsKey", kakaoMapConfig.getJsKey());
+            return "lost/detail";
     }
     
     //수정

@@ -8,6 +8,196 @@
   <link rel="stylesheet" th:href="@{/css/search/search.css}">
   
 </head>
+<style>
+/* 독립된 통합 검색 전체 박스 컨테이너 */
+.integrated-search-box {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 16px !important;
+  padding: 32px !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05) !important;
+  max-width: 100% !important;
+  margin: 0 auto 30px auto !important;
+  box-sizing: border-box !important;
+}
+
+/* 상단 검색어 입력 및 버튼 한 줄 정렬 */
+.main-search-bar-row {
+  display: flex !important;
+  gap: 12px !important;
+  width: 100% !important;
+  margin-bottom: 24px !important;
+  align-items: center !important;
+}
+
+.search-input-field-wrap {
+  position: relative !important;
+  flex: 1 !important;
+}
+
+.search-field-icon {
+  position: absolute !important;
+  left: 20px !important;
+  top: 40% !important;
+  transform: translateY(-50%) !important;
+  color: #94a3b8 !important;
+  font-size: 1.5rem !important;
+  line-height: 1 !important;
+}
+
+/* 큼직하고 시원한 인풋창 디자인 */
+#keywordInput {
+  width: 100% !important;
+  height: 56px !important;
+  padding: 0 20px 0 54px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 14px !important;
+  font-size: 1.05rem !important;
+  color: #1e293b !important;
+  background-color: #f8fafc !important;
+  transition: all 0.2s ease !important;
+  box-sizing: border-box !important;
+}
+
+#keywordInput:focus {
+  outline: none !important;
+  border-color: #2563eb !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15) !important;
+}
+
+/* 세련되고 묵직한 네이비/블루 버튼 */
+.main-search-submit-btn {
+  height: 56px !important;
+  padding: 0 36px !important;
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 14px !important;
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s ease !important;
+  white-space: nowrap !important;
+}
+
+.main-search-submit-btn:hover {
+  background-color: #1d4ed8 !important;
+}
+
+/* 하단 필터들을 널찍하게 띄워 배치하는 컨테이너 */
+.sub-filter-flex-container {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  gap: 40px !important;
+  align-items: center !important;
+  padding-top: 24px !important; 
+  border-top: 1px solid #f1f5f9 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.ai-tags-section {
+  margin-top: 20px !important;
+  margin-bottom: 24px !important; /* 🚀 AI 분석 칩들이 아래 구분선과 부드러운 간격을 유지하게 합니다 */
+  width: 100% !important;
+  clear: both !important;
+  box-sizing: border-box !important;
+}
+
+.filter-flex-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+}
+
+.filter-header-label {
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  color: #475569 !important;
+  white-space: nowrap !important;
+}
+
+/* 동글동글하고 여백 있는 칩 디자인 */
+.modern-chip-group {
+  display: flex !important;
+  gap: 8px !important;
+}
+
+.modern-chip {
+  height: 38px !important;
+  padding: 0 20px !important;
+  background-color: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 20px !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  color: #64748b !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.modern-chip:hover {
+  background-color: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+
+.modern-chip.active {
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+/* 날짜 인풋 그룹 마진 및 테두리 정리 */
+.modern-date-input-group {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.modern-date-input-group input[type="date"] {
+  height: 38px !important;
+  padding: 0 14px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  font-size: 0.9rem !important;
+  color: #334155 !important;
+  background-color: #ffffff !important;
+  outline: none !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+}
+
+.modern-date-input-group input[type="date"]:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+}
+
+.date-tilde-text {
+  color: #94a3b8 !important;
+  font-weight: 600 !important;
+}
+
+.ai-tag-chip {
+  height: 34px !important;
+  padding: 0 14px !important;
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  background-color: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #475569 !important;
+  cursor: default !important;
+  box-shadow: none !important;
+}
+
+.ai-tag-chip:hover {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+}
+
+</style>
 
 <body class="search-board">
 
@@ -18,101 +208,109 @@
   <section class="search-hero">
     <div>
       <h2>통합 검색</h2>
-      <p>분실물과 습득물을 한 번에 검색하고 결과를 확인해보세요</p>
+      <p>물건의 색상, 이름, 분실이나 습득지역과 날짜 등을 입력하면 더 자세한 검색이 가능합니다</p>
     </div>
 
   </section>
 
-  <section class="search-filter-box">
-    <form th:action="@{/search}" method="get" class="search-input-row">
-
+  <section class="integrated-search-box">
+    <form th:action="@{/search}" method="get" id="searchForm">
       <input type="hidden" name="searchMode" value="hybrid">
+      <input type="hidden" name="boardType" id="boardTypeInput" th:value="${conditionDTO != null ? conditionDTO.boardType : 'all'}">
+      <input type="hidden" name="isUserSelect" id="isUserSelectInput" th:value="${param.isUserSelect != null ? param.isUserSelect : 'false'}">
 
-      <div class="search-input-wrap">
-        <span class="search-icon">⌕</span>
-
-        <input
-          type="text"
-          id="keywordInput"
-          name="keyword"
-          th:value="${conditionDTO != null ? conditionDTO.keyword : keyword}"
-          placeholder="검색어를 입력하세요...">
+      <!-- 1. 거대하고 트렌디한 검색바 영역 -->
+      <div class="main-search-bar-row">
+        <div class="search-input-field-wrap">
+          <span class="search-field-icon">⌕</span>
+          <input
+            type="text"
+            id="keywordInput"
+            name="keyword"
+            th:value="${conditionDTO != null ? conditionDTO.keyword : keyword}"
+            placeholder="예:'공원에서 파란색 휴대폰을 잃어버렸습니다 / 습득했습니다'"
+            autocomplete="off">
+        </div>
+        <button type="submit" id="searchBtn" class="main-search-submit-btn">검색</button>
       </div>
 
-      <button type="submit" id="searchBtn" class="search-submit-btn">
-        검색
-      </button>
+      <div class="filter-section ai-tags-section" 
+          th:if="${conditionDTO != null and conditionDTO.keyword != null and !conditionDTO.keyword.blank}"
+          style="margin-top: 24px; width: 100%; clear: both; box-sizing: border-box;">
+            
+        <div class="ai-analysis-title-wrap" style="margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+          <span class="filter-label" style="color: #475569; font-weight: 700; font-size: 0.9rem; margin: 0;">검색어 AI 분석</span>
+        </div>
+        
+        <div class="modern-chip-group ai-detected-chips" style="display: flex; flex-wrap: wrap; gap: 8px;">
+          
+          <!-- 1. 게시판 분류 -->
+          <button type="button" class="modern-chip ai-tag-chip" style="background-color: #f8fafc; border-color: #cbd5e1; color: #475569;">
+            게시판- [[${conditionDTO.boardType == 'found' ? '습득물' : (conditionDTO.boardType == 'lost' ? '분실물' : '전체')}]]
+          </button>
 
+          <!-- 2. 날짜 범위 -->
+          <button type="button" class="modern-chip ai-tag-chip" 
+                  th:if="${(conditionDTO.startDate != null and !conditionDTO.startDate.blank) or (conditionDTO.endDate != null and !conditionDTO.endDate.blank)}">
+            날짜- [[${conditionDTO.startDate != null and !conditionDTO.startDate.blank ? conditionDTO.startDate : '시작일 무제한'}]] ~ [[${conditionDTO.endDate != null and !conditionDTO.endDate.blank ? conditionDTO.endDate : '오늘까지'}]]
+          </button>
+
+          <!-- 3. 카테고리 -->
+          <button type="button" class="modern-chip ai-tag-chip" 
+                  th:if="${conditionDTO.category != null and conditionDTO.category != '기타' and conditionDTO.category != 'all' and !conditionDTO.category.blank}">
+            분류- [[${conditionDTO.category}]]
+          </button>
+
+          <!-- 4. 장소 -->
+          <button type="button" class="modern-chip ai-tag-chip" 
+                  th:if="${conditionDTO.place != null and !conditionDTO.place.blank}">
+            📍 [[${conditionDTO.place}]]
+          </button>
+
+          <!-- 🚀 5. [핵심] 실제 색상명에 맞게 배경색이 다이나믹하게 변하는 색상 칩 -->
+          <!-- data-color-name 속성에 추출된 색상 한글 이름을 담아둡니다 -->
+          <button type="button" class="modern-chip ai-tag-chip dynamic-color-chip" 
+                  id="aiColorChip"
+                  th:if="${conditionDTO.color != null and !conditionDTO.color.blank}"
+                  th:data-color-name="${conditionDTO.color}">
+            색- [[${conditionDTO.color}]]
+          </button>
+
+          <!-- 6. 핵심 키워드 리스트 -->
+          <button type="button" class="modern-chip ai-tag-chip" 
+                  th:each="keyword : ${conditionDTO.coreKeywords}" 
+                  th:if="${conditionDTO.coreKeywords != null and !conditionDTO.coreKeywords.isEmpty()}">
+            키워드- [[${keyword}]]
+          </button>
+          
+        </div>
+      </div>
+
+      <!-- 2. 여유롭고 명확하게 분리된 하단 필터 섹션 -->
+      <div class="sub-filter-flex-container">
+        
+        <!-- 검색 범위 세션 -->
+        <div class="filter-flex-item">
+          <span class="filter-header-label">검색 범위</span>
+          <div id="boardTypeFilter" class="modern-chip-group">
+            <button type="button" class="modern-chip" data-board-type="all">전체</button>
+            <button type="button" class="modern-chip" th:classappend="${conditionDTO != null and conditionDTO.boardType == 'lost'} ? 'active'" data-board-type="lost">분실물</button>
+            <button type="button" class="modern-chip" th:classappend="${conditionDTO != null and conditionDTO.boardType == 'found'} ? 'active'" data-board-type="found">습득물</button>
+          </div>
+        </div>
+
+        <!-- 날짜 범위 세션 -->
+        <div class="filter-flex-item">
+          <span class="filter-header-label">날짜 범위</span>
+          <div class="modern-date-input-group">
+            <input type="date" name="startDate" id="startDateInput" th:value="${conditionDTO != null ? conditionDTO.startDate : ''}">
+            <span class="date-tilde-text">~</span>
+            <input type="date" name="endDate" id="endDateInput" th:value="${conditionDTO != null ? conditionDTO.endDate : ''}">
+          </div>
+        </div>
+
+      </div>
     </form>
-
-    <div class="search-filter-row">
-      <div class="filter-section">
-        <span class="filter-label">검색 범위</span>
-
-        <div id="boardTypeFilter" class="chip-group">
-          <button type="button" class="chip active" data-board-type="">전체</button>
-          <button type="button" class="chip" data-board-type="lost">분실물</button>
-          <button type="button" class="chip" data-board-type="found">습득물</button>
-        </div>
-      </div>
-
-      <div class="filter-section status-section">
-        <span class="filter-label">상태</span>
-
-        <div id="statusFilter" class="chip-group">
-          <button type="button" class="chip active" data-status="">전체</button>
-          <button type="button" class="chip" data-status="progress">진행중</button>
-          <button type="button" class="chip" data-status="done">완료</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="filter-section ai-tags-section" 
-          th:if="${conditionDTO != null and conditionDTO.coreKeywords != null and !conditionDTO.coreKeywords.isEmpty()}"
-          style="margin-top: 16px; width: 100%; clear: both;">
-          
-      <span class="filter-label" style="color: #007bff; font-weight: bold;">검색어 태그 분석 - </span>
-      
-      <div class="chip-group ai-detected-chips">
-        <!-- 자동으로 감지된 AI 매칭 게시판 태그 -->
-        <button type="button" class="chip ai-chip" style="border-color: #007bff; background-color: #e6f0ff; color: #007bff; cursor: default;">
-          🎯 [[${conditionDTO.boardType == 'found' ? '습득물 검색' : (conditionDTO.boardType == 'lost' ? '분실물 검색' : '전체 검색')}]]
-        </button>
-
-        <!-- 추출된 카테고리 태그 -->
-        <button type="button" class="chip ai-chip" th:if="${conditionDTO.category != null}" style="border-color: #6c757d; background-color: #f8f9fa; color: #495057; cursor: default;">
-          📦 [[${conditionDTO.category}]]
-        </button>
-
-        <!-- 추출된 장소 태그 -->
-        <button type="button" class="chip ai-chip" th:if="${conditionDTO.place != null}" style="border-color: #198754; background-color: #e8f5e9; color: #198754; cursor: default;">
-          📍 [[${conditionDTO.place}]]
-        </button>
-
-        <!-- 추출된 색상 태그 -->
-        <button type="button" class="chip ai-chip" th:if="${conditionDTO.color != null}" style="border-color: #ffc107; background-color: #fffde7; color: #ff9800; cursor: default;">
-          🎨 [[${conditionDTO.color}]]
-        </button>
-
-        <!-- 추출된 핵심 명사 키워드 리스트 반복 출력 -->
-        <button type="button" class="chip ai-chip" th:each="keyword : ${conditionDTO.coreKeywords}" style="border-color: #0dcaf0; background-color: #e0f7fa; color: #00838f; cursor: default;">
-          🔑 [[${keyword}]]
-        </button>
-      </div>
-    </div>
-
-    <div class="filter-section ai-error-section" 
-          th:if="${conditionDTO != null and (conditionDTO.coreKeywords == null || conditionDTO.coreKeywords.isEmpty()) and conditionDTO.keyword != null and !conditionDTO.keyword.blank}" 
-          style="width: 100%; margin-top: 16px; clear: both;">
-          
-      <div style="display: inline-flex; align-items: center; gap: 6px; background-color: #fff3cd; border: 1px solid #ffe69c; color: #664d03; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-        <span style="font-size: 1rem; line-height: 1;">⚠️</span>
-        <span><strong style="color: #b91c1c;">ai 검색 미실시</strong> : 검색어를 확인해주세요. (일반 검색 결과로 대체 출력합니다.)</span>
-      </div>
-      
-    </div>
-
-
   </section>
 
   <div class="search-count-sort">
@@ -168,13 +366,6 @@
               사용자
             </span>
           </div>
-
-          <span class="color-tag"
-                  th:if="${item.boardType == 'found' and item.color != null and item.color != ''}"
-                  th:text="${item.color}"
-                  style="background-color: #fffde7; border: 1px solid #ffc107; color: #ff9800; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 2px;">
-              색상
-          </span>
 
           <span class="status-tag"
                 th:classappend="${item.done == 1} ? ' status-tag-done' : ' status-tag-progress'"
@@ -246,7 +437,9 @@
         searchMode='hybrid',
         keyword=${conditionDTO.keyword},
         boardType=${conditionDTO.boardType},
-        status=${conditionDTO.status},
+        startDate=${conditionDTO.startDate},
+        endDate=${conditionDTO.endDate},
+        isUserSelect=${param.isUserSelect},
         page=${paging.startPage - 1},
         size=${paging.size}
       )}"
@@ -260,7 +453,9 @@
         searchMode='hybrid',   
         keyword=${conditionDTO.keyword},
         boardType=${conditionDTO.boardType},
-        status=${conditionDTO.status},
+        startDate=${conditionDTO.startDate},
+        endDate=${conditionDTO.endDate},
+        isUserSelect=${param.isUserSelect},
         page=${pageNum},
         size=${paging.size}
       )}"
@@ -276,7 +471,9 @@
         searchMode='hybrid',
         keyword=${conditionDTO.keyword},
         boardType=${conditionDTO.boardType},
-        status=${conditionDTO.status},
+        startDate=${conditionDTO.startDate},
+        endDate=${conditionDTO.endDate},
+        isUserSelect=${param.isUserSelect},
         page=${paging.endPage + 1},
         size=${paging.size}
       )}"
@@ -291,13 +488,123 @@
 <div th:replace="layout/footer :: footerFragment"></div>
 
 <script>
+  // 1. URL 파라미터 및 인풋창 조기 복구 (태그가 존재할 때만 실행)
   const currentParams = new URLSearchParams(window.location.search);
   const keywordInput = document.querySelector("#keywordInput");
 
   if (keywordInput) {
     keywordInput.value = currentParams.get("keyword") || keywordInput.value || "";
   }
+
+  // 2. HTML 문서 로드가 완전히 끝난 후 안전하게 내부 로직 실행
+  document.addEventListener("DOMContentLoaded", function () {
+
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+    
+    const startDateInput = document.getElementById("startDateInput");
+    const endDateInput = document.getElementById("endDateInput");
+    if (startDateInput) startDateInput.setAttribute("max", todayStr);
+    if (endDateInput) endDateInput.setAttribute("max", todayStr);
+    
+    // [A] AI 컬러 칩 배경색 다이나믹 주입 로직
+    const colorChip = document.getElementById("aiColorChip");
+    if (colorChip) {
+      const colorName = colorChip.getAttribute("data-color-name").trim();
+      
+      const colorMap = {
+        "블랙": { bg: "#1e293b", text: "#ffffff", border: "#0f172a" },
+        "검정": { bg: "#1e293b", text: "#ffffff", border: "#0f172a" },
+        "흰색": { bg: "#ffffff", text: "#475569", border: "#cbd5e1" },
+        "화이트": { bg: "#ffffff", text: "#475569", border: "#cbd5e1" },
+        "핑크": { bg: "#fce7f3", text: "#db2777", border: "#fbcfe8" },
+        "분홍": { bg: "#fce7f3", text: "#db2777", border: "#fbcfe8" },
+        "레드": { bg: "#fee2e2", text: "#dc2626", border: "#fca5a5" },
+        "빨강": { bg: "#fee2e2", text: "#dc2626", border: "#fca5a5" },
+        "블루": { bg: "#dbeafe", text: "#2563eb", border: "#bfdbfe" },
+        "파랑": { bg: "#dbeafe", text: "#2563eb", border: "#bfdbfe" },
+        "옐로우": { bg: "#fef9c3", text: "#ca8a04", border: "#fef08a" },
+        "노랑": { bg: "#fef9c3", text: "#ca8a04", border: "#fef08a" },
+        "그린": { bg: "#dcfce7", text: "#16a34a", border: "#bbf7d0" },
+        "초록": { bg: "#dcfce7", text: "#16a34a", border: "#bbf7d0" },
+        "그레이": { bg: "#e2e8f0", text: "#475569", border: "#cbd5e1" },
+        "회색": { bg: "#e2e8f0", text: "#475569", border: "#cbd5e1" }
+      };
+
+      if (colorMap[colorName]) {
+        colorChip.style.setProperty("background-color", colorMap[colorName].bg, "important");
+        colorChip.style.setProperty("color", colorMap[colorName].text, "important");
+        colorChip.style.setProperty("border-color", colorMap[colorName].border, "important");
+      }
+    }
+
+    // [B] 날짜 인풋창 파라미터 복구 로직
+    const paramStartDate = currentParams.get("startDate") || "";
+    const paramEndDate = currentParams.get("endDate") || "";
+    
+    if (paramStartDate) document.getElementById("startDateInput").value = paramStartDate;
+    if (paramEndDate) document.getElementById("endDateInput").value = paramEndDate;
+
+
+    // [C] 페이지 로드 시 URL 파라미터를 읽어 기존 선택된 boardType 칩 활성화 복구
+    const isUserSelect = currentParams.get("isUserSelect") === "true";
+    const paramBoardType = currentParams.get("boardType") || "all";
+    const initBoardTypeChips = document.querySelectorAll("#boardTypeFilter .modern-chip");
+    const isUserSelectInput = document.getElementById("isUserSelectInput");
+    const boardTypeInput = document.getElementById("boardTypeInput");
+
+    if (isUserSelect) {
+      // 유저가 직접 수동 필터를 클릭해서 검색했던 결과 페이지라면 해당 버튼에 불을 켭니다.
+      initBoardTypeChips.forEach(chip => {
+        const chipValue = chip.getAttribute("data-board-type") || "all";
+        if (chipValue === paramBoardType) {
+          document.querySelectorAll("#boardTypeFilter .modern-chip").forEach(c => c.classList.remove("active"));
+          chip.classList.add("active");
+          boardTypeInput.value = paramBoardType;
+        }
+      });
+      if (isUserSelectInput) isUserSelectInput.value = "true";
+    } else {
+      // 아무것도 안 누르고 검색했거나, 칩을 토글 해제해서 온 경우: 모든 불을 끄고 RAG 판단 모드로 백업
+      document.querySelectorAll("#boardTypeFilter .modern-chip").forEach(c => c.classList.remove("active"));
+      boardTypeInput.value = "all";
+      if (isUserSelectInput) isUserSelectInput.value = "false"; 
+    }
+    
+    
+    // [D] 검색 범위 (boardType) 칩 클릭 및 토글 해제 이벤트 제어
+    const boardTypeChips = document.querySelectorAll("#boardTypeFilter .modern-chip");
+
+    boardTypeChips.forEach(chip => {
+      chip.addEventListener("click", function () {
+        const currentType = this.getAttribute("data-board-type") || "all";
+
+        // 1. 이미 파랗게 선택된 상태(active)인 칩을 또 눌렀을 때 (토글 해제 -> AI 자유 모드)
+        if (this.classList.contains("active")) {
+          this.classList.remove("active");   // 불을 끄고 완전히 회색 상태로 만듦
+          boardTypeInput.value = "all";       // 데이터는 당연히 all 전송
+          if (isUserSelectInput) isUserSelectInput.value = "false"; // 유저 수동 플래그 해제 (AI 자유 판단 유도)
+          return;
+        }
+
+        // 2. 새로운 칩을 일반 클릭했을 때 (전체, 분실물, 습득물 공통 강제 지정 모드)
+        boardTypeChips.forEach(c => c.classList.remove("active"));
+        this.classList.add("active"); // 본인만 파란 불 점등
+        
+        boardTypeInput.value = currentType; // 해당 값 ("all", "lost", "found") 세팅
+        if (isUserSelectInput) isUserSelectInput.value = "true"; // 유저 수동 모드 활성화 (UI 선택값 강제 반영 지시)
+      });
+    });
+
+  });
 </script>
+
+
+
+
 
 </body>
 </html>
