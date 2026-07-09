@@ -26,30 +26,95 @@
         <div id="chatBox" class="chat-box">
 
             <!-- 기존 DB 메시지 출력 -->
-            <div th:each="msg : ${messages}"
-                 class="chat-message"
-                 th:classappend="${msg.senderId == loginId} ? ' mine' : ''">
+            <th:block th:each="msg, stat : ${messages}">
 
-                <span class="sender"
-                      th:text="${msg.senderId}">
-                    user
-                </span>
+                <!-- 날짜 구분선 -->
+                <div class="date-divider"
+                     th:if="${stat.index == 0
+                          or #temporals.format(messages[stat.index - 1].createdAt, 'yyyy-MM-dd')
+                             != #temporals.format(msg.createdAt, 'yyyy-MM-dd')}"
+                     th:text="${#temporals.format(msg.createdAt, 'yyyy년 M월 d일')}">
+                    2026년 7월 7일
+                </div>
 
-                <span class="bubble"
-                      th:text="${msg.content}">
-                    내용
-                </span>
+                <div class="chat-message"
+                     th:attr="data-date=${#temporals.format(msg.createdAt, 'yyyy-MM-dd')}"
+                     th:classappend="${msg.senderId == loginId} ? ' mine' : ''">
 
-                <span class = "chat-time"
-                    th:text="${#temporals.format(msg.createdAt, 'a h:mm')}">
-                    12:00
-                </span>
+                    <span class="sender" th:text="${msg.senderId}">
+                        user
+                    </span>
 
-            </div>
+                    <span class="bubble">
+
+                        <!-- 첨부파일이 있는 메시지 -->
+                        <th:block th:if="${msg.fileList != null and !msg.fileList.isEmpty()}">
+
+                            <th:block th:each="file : ${msg.fileList}">
+
+                                <!-- 이미지 파일 -->
+                                <img th:if="${#strings.endsWith(file.saveName.toLowerCase(), '.jpg')
+                                          or #strings.endsWith(file.saveName.toLowerCase(), '.jpeg')
+                                          or #strings.endsWith(file.saveName.toLowerCase(), '.png')
+                                          or #strings.endsWith(file.saveName.toLowerCase(), '.gif')
+                                          or #strings.endsWith(file.saveName.toLowerCase(), '.webp')
+                                          or #strings.endsWith(file.saveName.toLowerCase(), '.jfif')}"
+                                     th:src="${file.filePath}"
+                                     class="chat-img">
+
+                                <!-- 일반 파일 -->
+                                <a th:unless="${#strings.endsWith(file.saveName.toLowerCase(), '.jpg')
+                                          or #strings.endsWith(file.saveName.toLowerCase(), '.jpeg')
+                                          or #strings.endsWith(file.saveName.toLowerCase(), '.png')
+                                          or #strings.endsWith(file.saveName.toLowerCase(), '.gif')
+                                          or #strings.endsWith(file.saveName.toLowerCase(), '.webp')
+                                          or #strings.endsWith(file.saveName.toLowerCase(), '.jfif')}"
+                                   th:href="${file.filePath}"
+                                   th:text="'📎 ' + ${file.originalName}"
+                                   download>
+                                    파일
+                                </a>
+
+                            </th:block>
+
+                        </th:block>
+
+                        <!-- 일반 텍스트 메시지 -->
+                        <span th:if="${msg.fileList == null or msg.fileList.isEmpty()}"
+                              th:text="${msg.content}">
+                            내용
+                        </span>
+
+                    </span>
+
+                    <span class="chat-time"
+                          th:text="${#temporals.format(msg.createdAt, 'a h:mm')}">
+                        12:00
+                    </span>
+                    
+                <span th:if="${msg.senderId == loginId 
+                            and msg.read == 0 
+                            and stat.index == messages.size() - 1}"
+                    class="read-status">
+                    안읽음
+                </span>         
+                </div>
+
+            </th:block>
 
         </div>
 
         <div class="chat-input">
+
+            <input id="fileInput"
+                   type="file"
+                   style="display:none;"
+                   onchange="sendFileMessage()">
+
+            <button type="button"
+                    onclick="document.getElementById('fileInput').click()">
+                📎
+            </button>
 
             <input id="messageInput"
                    type="text"
@@ -68,41 +133,94 @@
 </main>
 
 <script th:inline="javascript">
-    const chatNum = [[${chatNum}]];
-    const loginId = [[${loginId}]];
+    const chatNum = /*[[${chatNum}]]*/ 0;
+    const loginId = /*[[${loginId}]]*/ "";
+    const csrfToken = /*[[${_csrf.token}]]*/ "";
+    const csrfHeader = /*[[${_csrf.headerName}]]*/ "";
 
     let stompClient = null;
     let connected = false;
+    let lastMessageDate = null;
 
-    // SockJS 연결
-    const socket = new SockJS("/ws-stomp");
-    stompClient = Stomp.over(socket);
+    function connectWebSocket() {
 
-    // 필요 없으면 로그 끄기
-    // stompClient.debug = null;
+        const socket = new SockJS("/ws-stomp");
+        stompClient = Stomp.over(socket);
 
-    stompClient.connect({}, function () {
+        stompClient.debug = null;
 
-        connected = true;
+        stompClient.connect({}, function () {
 
-        console.log("STOMP 연결 성공");
-        console.log("구독 주소:", "/sub/chat/room/" + chatNum);
+            connected = true;
 
-        // 현재 채팅방 구독
-        stompClient.subscribe("/sub/chat/room/" + chatNum, function (message) {
+            console.log("웹소켓 연결 성공");
 
-            console.log("수신 메시지:", message.body);
+            const messageInput = document.getElementById("messageInput");
+            messageInput.disabled = false;
+            messageInput.placeholder = "메시지를 입력하세요.";
 
-            const msg = JSON.parse(message.body);
+            stompClient.subscribe("/sub/chat/room/" + chatNum, function (message) {
 
-            // 수신 즉시 화면에 추가
-            appendMessage(msg);
+                const msg = JSON.parse(message.body);
+
+                appendMessage(msg);
+
+                // 내가 아닌 상대방 메시지를 받으면 즉시 읽음 처리
+                if (String(msg.senderId) !== String(loginId)) {
+                    readChatRoom();
+                }
+            
+            stompClient.subscribe("/sub/chat/room/" + chatNum + "/read", function (message) {
+
+                const readerId = message.body;
+
+                // 내가 읽은 알림이면 무시
+                if (String(readerId) === String(loginId)) {
+                    return;
+                }
+
+                // 상대방이 읽었으면 내 화면의 안읽음 제거
+                document.querySelectorAll(".read-status").forEach(function (el) {
+                    el.remove();
+                });
+
+            });         
+
+            });
+
+            // 채팅방 입장 성공 시 기존 메시지 읽음 처리
+            readChatRoom();
+
+        }, function (error) {
+
+            connected = false;
+
+            console.error("연결 실패", error);
+
+            const messageInput = document.getElementById("messageInput");
+            messageInput.disabled = true;
+            messageInput.placeholder = "채팅 서버와 연결이 끊어졌습니다. 자동 재연결 중...";
+
+            setTimeout(connectWebSocket, 5000);
+
         });
 
-    }, function (error) { 
-        connected = false;
-        console.error("STOMP 연결 실패:", error);
-    });
+    }
+
+    // 채팅방 읽음 처리
+    function readChatRoom() {
+
+        fetch("/chat/room/" + chatNum + "/read", {
+            method: "POST",
+            headers: {
+                [csrfHeader]: csrfToken
+            }
+        })
+        .catch(function (error) {
+            console.error("읽음 처리 실패:", error);
+        });
+
+    }
 
     function sendMessage() {
 
@@ -118,8 +236,6 @@
             return;
         }
 
-        console.log("전송 메시지:", content);
-
         stompClient.send("/pub/chat/message", {}, JSON.stringify({
             chatNum: chatNum,
             senderId: loginId,
@@ -130,17 +246,58 @@
         input.focus();
     }
 
+    async function sendFileMessage() {
+
+        const fileInput = document.getElementById("fileInput");
+        const file = fileInput.files[0];
+
+        if (!file) {
+            return;
+        }
+
+        if (!connected) {
+            alert("채팅 서버 연결 중입니다. 잠시 후 다시 시도해 주세요.");
+            fileInput.value = "";
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("chatNum", chatNum);
+        formData.append("file", file);
+
+        const response = await fetch("/chat/file/upload", {
+            method: "POST",
+            headers: {
+                [csrfHeader]: csrfToken
+            },
+            body: formData
+        });
+
+        const msg = await response.json();
+
+        stompClient.send("/pub/chat/message", {}, JSON.stringify(msg));
+
+        fileInput.value = "";
+    }
+
     function appendMessage(msg) {
 
         const chatBox = document.getElementById("chatBox");
 
         if (!chatBox) {
-            console.error("chatBox를 찾을 수 없습니다.");
             return;
+        }
+
+        const msgDate = getDateKey(msg.createdAt);
+
+        if (lastMessageDate !== msgDate) {
+            appendDateDivider(msg.createdAt);
+            lastMessageDate = msgDate;
         }
 
         const messageDiv = document.createElement("div");
         messageDiv.classList.add("chat-message");
+        messageDiv.dataset.date = msgDate;
 
         if (String(msg.senderId) === String(loginId)) {
             messageDiv.classList.add("mine");
@@ -152,21 +309,101 @@
 
         const bubble = document.createElement("span");
         bubble.classList.add("bubble");
-        bubble.textContent = msg.content;
+
+        if (msg.fileList && msg.fileList.length > 0) {
+
+            msg.fileList.forEach(function (file) {
+
+                if (isImageFile(file.saveName)) {
+                    const img = document.createElement("img");
+                    img.src = file.filePath;
+                    img.classList.add("chat-img");
+                    bubble.appendChild(img);
+                } else {
+                    const link = document.createElement("a");
+                    link.href = file.filePath;
+                    link.download = file.originalName;
+                    link.textContent = "📎 " + file.originalName;
+                    bubble.appendChild(link);
+                }
+
+            });
+
+        } else {
+            bubble.textContent = msg.content;
+        }
 
         const time = document.createElement("span");
         time.classList.add("chat-time");
-        time.textContent = formatChatTime(msg.createdAt);
+
+        const timeText = document.createElement("span");
+        timeText.textContent = formatChatTime(msg.createdAt);
+        time.appendChild(timeText);
+
+        if (String(msg.senderId) === String(loginId)) {
+
+            // 내가 새 메시지를 보내면 기존 안읽음 제거 후 마지막 내 메시지에만 표시
+            document.querySelectorAll(".read-status").forEach(function (el) {
+                el.remove();
+            });
+
+            const readStatus = document.createElement("span");
+            readStatus.classList.add("read-status");
+            readStatus.textContent = "안읽음";
+            time.appendChild(readStatus);
+
+        } else {
+
+            // 상대방이 메시지를 보내면 내 이전 메시지는 읽은 것으로 보고 안읽음 제거
+            document.querySelectorAll(".read-status").forEach(function (el) {
+                el.remove();
+            });
+        }
 
         messageDiv.appendChild(sender);
         messageDiv.appendChild(bubble);
         messageDiv.appendChild(time);
 
         chatBox.appendChild(messageDiv);
-
         chatBox.scrollTop = chatBox.scrollHeight;
+    }
 
-        console.log("화면 추가 완료:", messageDiv);
+    function isImageFile(fileName) {
+        if (!fileName) {
+            return false;
+        }
+
+        const lowerName = fileName.toLowerCase();
+
+        return lowerName.endsWith(".jpg")
+            || lowerName.endsWith(".jpeg")
+            || lowerName.endsWith(".png")
+            || lowerName.endsWith(".gif")
+            || lowerName.endsWith(".webp")
+            || lowerName.endsWith(".jfif");
+    }
+
+    function getDateKey(createdAt) {
+        const date = createdAt ? new Date(createdAt) : new Date();
+
+        return date.getFullYear() + "-" +
+            String(date.getMonth() + 1).padStart(2, "0") + "-" +
+            String(date.getDate()).padStart(2, "0");
+    }
+
+    function appendDateDivider(createdAt) {
+        const chatBox = document.getElementById("chatBox");
+        const date = createdAt ? new Date(createdAt) : new Date();
+
+        const divider = document.createElement("div");
+        divider.classList.add("date-divider");
+
+        divider.textContent =
+            date.getFullYear() + "년 " +
+            (date.getMonth() + 1) + "월 " +
+            date.getDate() + "일";
+
+        chatBox.appendChild(divider);
     }
 
     function formatChatTime(createdAt) {
@@ -180,7 +417,17 @@
     }
 
     window.addEventListener("load", function () {
+
+        // 웹소켓 실행
+        connectWebSocket();
+
         const chatBox = document.getElementById("chatBox");
+        const messageList = document.querySelectorAll(".chat-message");
+        const lastMessage = messageList[messageList.length - 1];
+
+        if (lastMessage) {
+            lastMessageDate = lastMessage.dataset.date;
+        }
 
         if (chatBox) {
             chatBox.scrollTop = chatBox.scrollHeight;

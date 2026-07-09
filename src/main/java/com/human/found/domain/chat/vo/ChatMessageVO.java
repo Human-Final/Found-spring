@@ -17,4 +17,6 @@ public class ChatMessageVO {
     private LocalDateTime createdAt;
 
     private List<ChatFileVO> fileList;
+
+    private Integer read;
 }

@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 public class FileUtil {
     //상위 폴더
-    private final String UPLOAD_PATH = "//192.168.0.53/260126/0608/found/file/";
+    private final String UPLOAD_PATH = "//192.168.0.53/260126/0608/배민선, 박상화, 김태연, 신민철/file/";
 
     public List<Map<String, Object>> uploadFiles(MultipartFile[] files, String atcId, String type) {
         List<Map<String, Object>> fileList = new ArrayList<>();
