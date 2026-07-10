@@ -47,7 +47,7 @@ public class FoundPortalServiceImpl implements FoundPortalService {
 
         LocalDate startDate = targetDate;
         LocalDate endDate = targetDate;
-        // LocalDate sixMonthsAgo = today.minusMonths(1);
+        // LocalDate sixMonthsAgo = tgoday.minusMonths(1);
 
         List<FoundPortalApiItemVO> allItems = new ArrayList<>();
 
