@@ -17,11 +17,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.human.found.domain.comment.service.LostCommentService;
-import com.human.found.domain.lost.service.LostPoliceService;
 import com.human.found.domain.lost.service.LostService;
 import com.human.found.domain.lost.vo.LostVO;
 import com.human.found.global.common.paging.PagingVO;
 import com.human.found.infrastructure.map.KakaoMapConfig;
+import com.human.found.infrastructure.police.lostAPI.service.LostPoliceService;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;

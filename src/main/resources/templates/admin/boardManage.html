@@ -517,17 +517,6 @@
 
     const filterForm = document.getElementById("filterForm");
 
-    //다운로드
-    const downloadBtn=document.getElementById("downloadBtn");
-    if(downloadBtn){
-      downloadBtn.addEventListener("click",()=>{
-        const activeTab = document.querySelector(".admin-tabs .active").textContent.trim();
-        const boardType = activeTab === "분실물" ? "lost" : "found";
-
-        filterForm.action = `/admin/${boardType}/download`;
-        filterForm.submit();
-      });
-    }
     //순수 검색/필터링 시 1페이지로 리셋하는 이벤트 리스너
     if(filterForm){
       filterForm.addEventListener("submit",(e)=>{

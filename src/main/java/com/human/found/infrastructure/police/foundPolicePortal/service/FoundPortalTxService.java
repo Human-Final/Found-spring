@@ -286,6 +286,10 @@ public class FoundPortalTxService {
             return "전자기기";
         }
 
+        if (mainPart.contains("지갑")) {
+            return "지갑";
+        }
+
         if (mainPart.contains("카드")) {
             return "카드";
         }
