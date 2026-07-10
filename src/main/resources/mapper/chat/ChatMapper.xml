@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.human.found.domain.chat.mapper.ChatMapper">
+
+    <!-- 채팅방 ResultMap -->
+    <resultMap id="ChatRoomMap" type="com.human.found.domain.chat.vo.ChatRoomVO">
+        <id property="chatNum" column="chat_num"/>
+        <result property="lostNum" column="lost_num"/>
+        <result property="foundNum" column="found_num"/>
+        <result property="userIdA" column="user_id_a"/>
+        <result property="userIdB" column="user_id_b"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="title" column="title"/>
+        <result property="userName" column="user_name"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="userALastRead" column="user_a_last_read"/>
+        <result property="userBLastRead" column="user_b_last_read"/>
+    </resultMap>
+
+    <!-- 채팅 메시지 + 첨부파일 ResultMap -->
+    <resultMap id="ChatMessageMap" type="com.human.found.domain.chat.vo.ChatMessageVO">
+
+        <!-- 채팅 메시지 정보 -->
+        <id property="messageNum" column="message_num"/>
+        <result property="chatNum" column="chat_num"/>
+        <result property="senderId" column="sender_id"/>
+        <result property="content" column="content"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="read" column="is_read"/>
+
+        <!-- 첨부파일 목록 -->
+        <collection property="fileList"
+                    javaType="ArrayList"
+                    ofType="com.human.found.domain.chat.vo.ChatFileVO">
+
+            <id property="fileNum" column="file_num"/>
+            <result property="messageNum" column="file_message_num"/>
+            <result property="originalName" column="original_name"/>
+            <result property="saveName" column="save_name"/>
+            <result property="filePath" column="file_path"/>
+            <result property="fileSize" column="file_size"/>
+            <result property="createdAt" column="file_created_at"/>
+
+        </collection>
+
+    </resultMap>
+
+    <!-- 채팅방 중복 확인 -->
+    <select id="findChatRoom" resultMap="ChatRoomMap">
+        SELECT
+            chat_num,
+            lost_num,
+            found_num,
+            user_id_a,
+            user_id_b,
+            created_at
+        FROM chat_room
+        WHERE
+            (
+                (#{lostNum} IS NOT NULL AND lost_num = #{lostNum})
+                OR
+                (#{foundNum} IS NOT NULL AND found_num = #{foundNum})
+            )
+            AND (
+                (user_id_a = #{userIdA} AND user_id_b = #{userIdB})
+                OR
+                (user_id_a = #{userIdB} AND user_id_b = #{userIdA})
+            )
+        LIMIT 1
+    </select>
+
+    <!-- 채팅방 생성 -->
+    <insert id="insertChatRoom"
+            parameterType="com.human.found.domain.chat.vo.ChatRoomVO"
+            useGeneratedKeys="true"
+            keyProperty="chatNum">
+        INSERT INTO chat_room (
+            lost_num,
+            found_num,
+            user_id_a,
+            user_id_b
+        )
+        VALUES (
+            #{lostNum},
+            #{foundNum},
+            #{userIdA},
+            #{userIdB}
+        )
+    </insert>
+
+    <!-- 채팅방 번호로 조회 -->
+    <select id="findChatRoomByChatNum" resultMap="ChatRoomMap">
+        SELECT
+            chat_num,
+            lost_num,
+            found_num,
+            user_id_a,
+            user_id_b,
+            created_at
+        FROM chat_room
+        WHERE chat_num = #{chatNum}
+    </select>
+
+    <!-- 내 채팅방 목록 -->
+    <select id="findMyChatRooms" resultMap="ChatRoomMap">
+        SELECT
+            cr.chat_num,
+            cr.lost_num,
+            cr.found_num,
+            cr.user_id_a,
+            cr.user_id_b,
+            cr.created_at,
+
+            CASE
+                WHEN cr.found_num IS NOT NULL AND IFNULL(f.is_deleted, 1) = 0 THEN f.fd_sbjt
+                WHEN cr.lost_num IS NOT NULL AND IFNULL(l.is_deleted, 1) = 0 THEN l.lst_sbjt
+                ELSE '삭제된 게시글입니다.'
+            END AS title,
+
+            CASE
+                WHEN cr.found_num IS NOT NULL THEN IFNULL(f.is_deleted, 1)
+                WHEN cr.lost_num IS NOT NULL THEN IFNULL(l.is_deleted, 1)
+                ELSE 1
+            END AS is_deleted,
+
+            CASE
+                WHEN cr.user_id_a = #{loginId} THEN ub.name
+                ELSE ua.name
+            END AS user_name
+
+        FROM chat_room cr
+
+        LEFT JOIN found f
+            ON cr.found_num = f.num
+
+        LEFT JOIN lost l
+            ON cr.lost_num = l.num
+
+        LEFT JOIN user ua
+            ON cr.user_id_a = ua.id
+
+        LEFT JOIN user ub
+            ON cr.user_id_b = ub.id
+
+        WHERE cr.user_id_a = #{loginId}
+        OR cr.user_id_b = #{loginId}
+
+        ORDER BY cr.created_at DESC
+    </select>
+
+    <!-- 메시지 저장 -->
+    <insert id="insertMessage"
+            parameterType="com.human.found.domain.chat.vo.ChatMessageVO"
+            useGeneratedKeys="true"
+            keyProperty="messageNum">
+        INSERT INTO chat_message (
+            chat_num,
+            sender_id,
+            content
+        )
+        VALUES (
+            #{chatNum},
+            #{senderId},
+            #{content}
+        )
+    </insert>
+
+    <!-- 채팅방 메시지 목록 조회 -->
+    <select id="findMessagesByChatNum"
+            parameterType="long"
+            resultMap="ChatMessageMap">
+
+        SELECT
+            m.message_num,
+            m.chat_num,
+            m.sender_id,
+            m.content,
+            m.created_at,
+
+            CASE
+                WHEN m.sender_id = cr.user_id_a THEN
+                    CASE WHEN IFNULL(cr.user_b_last_read, 0) >= m.message_num THEN 1 ELSE 0 END
+                WHEN m.sender_id = cr.user_id_b THEN
+                    CASE WHEN IFNULL(cr.user_a_last_read, 0) >= m.message_num THEN 1 ELSE 0 END
+                ELSE 0
+            END AS is_read,
+
+            f.file_num,
+            f.message_num AS file_message_num,
+            f.original_name,
+            f.save_name,
+            f.file_path,
+            f.file_size,
+            f.created_at AS file_created_at
+
+        FROM chat_message m
+
+        JOIN chat_room cr
+            ON m.chat_num = cr.chat_num
+
+        LEFT JOIN chat_file f
+            ON m.message_num = f.message_num
+
+        WHERE m.chat_num = #{chatNum}
+
+        ORDER BY
+            m.created_at ASC,
+            m.message_num ASC,
+            f.file_num ASC
+
+    </select>
+
+    <!-- 메시지 번호로 첨부파일 목록 조회 -->
+    <select id="findFilesByMessageNum"
+            parameterType="long"
+            resultType="com.human.found.domain.chat.vo.ChatFileVO">
+        SELECT
+            file_num,
+            message_num,
+            original_name,
+            save_name,
+            file_path,
+            file_size,
+            created_at
+        FROM chat_file
+        WHERE message_num = #{messageNum}
+        ORDER BY file_num ASC
+    </select>
+
+    <!-- 채팅 첨부파일 저장 -->
+    <insert id="insertChatFile"
+            parameterType="com.human.found.domain.chat.vo.ChatFileVO">
+        INSERT INTO chat_file (
+            message_num,
+            original_name,
+            save_name,
+            file_path,
+            file_size
+        )
+        VALUES (
+            #{messageNum},
+            #{originalName},
+            #{saveName},
+            #{filePath},
+            #{fileSize}
+        )
+    </insert>
+
+    <!-- 습득 게시글에 연결된 채팅방 목록 조회 -->
+    <select id="findRoomsByFoundNum" resultMap="ChatRoomMap">
+        SELECT
+            chat_num,
+            lost_num,
+            found_num,
+            user_id_a,
+            user_id_b,
+            created_at
+        FROM chat_room
+        WHERE found_num = #{foundNum}
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 분실 게시글에 연결된 채팅방 목록 조회 -->
+    <select id="findRoomsByLostNum" resultMap="ChatRoomMap">
+        SELECT
+            chat_num,
+            lost_num,
+            found_num,
+            user_id_a,
+            user_id_b,
+            created_at
+        FROM chat_room
+        WHERE lost_num = #{lostNum}
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 습득 게시글 작성자 아이디 조회 -->
+    <select id="findFoundWriter" resultType="string">
+        SELECT id
+        FROM found
+        WHERE num = #{foundNum}
+          AND is_deleted = 0
+    </select>
+
+    <!-- 분실 게시글 작성자 아이디 조회 -->
+    <select id="findLostWriter" resultType="string">
+        SELECT id
+        FROM lost
+        WHERE num = #{lostNum}
+          AND is_deleted = 0
+    </select>
+
+    <!-- 습득 게시글 atcId 조회 -->
+    <select id="findFoundAtcId" resultType="string">
+        SELECT atc_id
+        FROM found
+        WHERE num = #{foundNum}
+          AND is_deleted = 0
+    </select>
+
+    <!-- 분실 게시글 atcId 조회 -->
+    <select id="findLostAtcId" resultType="string">
+        SELECT atc_id
+        FROM lost
+        WHERE num = #{lostNum}
+          AND is_deleted = 0
+    </select>
+
+    <!-- 채팅방 삭제 -->
+    <delete id="deleteChatRooms">
+        DELETE
+        FROM chat_room
+        WHERE chat_num IN
+        <foreach collection="chatNums"
+                item="chatNum"
+                open="("
+                separator=","
+                close=")">
+            #{chatNum}
+        </foreach>
+    </delete>    
+
+    <!-- 채팅방 입장 시 읽음 처리 -->
+    <update id="updateLastReadMessage">
+        UPDATE chat_room
+        SET
+            user_a_last_read =
+                CASE WHEN user_id_a = #{loginId}
+                    THEN #{lastMessageNum}
+                    ELSE user_a_last_read
+                END,
+            user_b_last_read =
+                CASE WHEN user_id_b = #{loginId}
+                    THEN #{lastMessageNum}
+                    ELSE user_b_last_read
+                END
+        WHERE chat_num = #{chatNum}
+    </update>    
+
+    <!-- 마지막 메시지 번호 -->
+    <select id="findLastMessageNum" resultType="long">
+        SELECT IFNULL(MAX(message_num), 0)
+        FROM chat_message
+        WHERE chat_num = #{chatNum}
+    </select>
+
+</mapper>

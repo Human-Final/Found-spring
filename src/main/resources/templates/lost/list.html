@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>분실 게시판</title>
+
+  <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <link rel="stylesheet" th:href="@{/css/board/list.css}">
+</head>
+
+<body class="lost-board">
+
+<div th:replace="layout/header :: headerFragment"></div>
+
+<main class="board-page">
+
+  <section class="board-hero lost">
+    <div>
+      <h2>분실 게시판</h2>
+      <p>분실한 물건을 등록하고 도움을 요청하세요</p>
+    </div>
+
+    <a th:href="@{/api/write(boardType='lost')}" class="write-btn">글쓰기</a>
+  </section>
+
+  <section class="filter-box-advanced" 
+         style="background: #fff5f5; padding: 25px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #fcdada; box-shadow: 0 4px 12px rgba(253, 218, 218, 0.2);">
+    <form id="advancedSearchForm" onsubmit="return false;" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;">
+      
+      <!-- 1층: 대분류 -->
+      <div class="form-group">
+        <label for="mainCategorySelect" style="font-weight: 600; display: block; margin-bottom: 6px; color: #444;">물품 분류 (대분류)</label>
+        <select id="mainCategorySelect" style="width: 100%; padding: 10px; border: 1px solid #f5c2c2; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; cursor: pointer;">
+          <option value="">대분류 선택</option>
+          <option value="가방">가방</option>
+          <option value="귀금속">귀금속</option>
+          <option value="도서">도서</option>
+          <option value="의류">의류</option>
+          <option value="자동차">자동차</option>
+          <option value="핸드폰">핸드폰</option>
+          <option value="전자기기">전자기기</option>
+          <option value="지갑">지갑</option>
+          <option value="카드">카드</option>
+          <option value="기타">기타</option>
+        </select>
+      </div>
+
+      <!-- 1층: 소분류 -->
+      <div class="form-group">
+        <label for="subCategorySelect" style="font-weight: 600; display: block; margin-bottom: 6px; color: #444;">물품 분류 (소분류)</label>
+        <select id="subCategorySelect" style="width: 100%; padding: 10px; border: 1px solid #f5c2c2; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; cursor: pointer;">
+          <option value="">소분류 선택</option>
+        </select>
+      </div>
+
+      <!-- 1층: 분실자명 -->
+      <div class="form-group">
+        <label for="authorInput" style="font-weight: 600; display: block; margin-bottom: 6px; color: #555;">분실자명 (작성자ID)</label>
+        <input type="text" id="authorInput" th:value="${selectedAuthor}" placeholder="작성자명 입력..." 
+              style="width: 100%; padding: 10px; border: 1px solid #f5c2c2; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; box-sizing: border-box;">
+      </div>
+
+      <!-- 2층: 진행 상태 -->
+      <div class="form-group">
+        <label style="font-weight: 600; display: block; margin-bottom: 6px; color: #555;">진행 상태</label>
+        <select id="statusSelect" style="width: 100%; padding: 10px; border: 1px solid #f5c2c2; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; cursor: pointer;">
+          <option value="" th:selected="${selectedStatus == null || selectedStatus == ''}">전체</option>
+          <option value="진행중" th:selected="${selectedStatus == '진행중'}">진행중</option>
+          <option value="완료" th:selected="${selectedStatus == '완료'}">완료</option>
+        </select>
+      </div>
+
+      <!-- 2층: 기간 설정 -->
+      <div class="form-group" style="grid-column: span 2; display: flex; gap: 12px; align-items: flex-end;">
+        <div style="flex: 1;">
+          <label style="font-weight: 600; display: block; margin-bottom: 6px; color: #555;">분실일자 범위</label>
+          <input type="date" id="startDateInput" th:value="${startDate}" 
+                th:max="${#calendars.format(#calendars.createNow(), 'yyyy-MM-dd')}"
+                style="width: 100%; padding: 9px; border: 1px solid #f5c2c2; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; box-sizing: border-box;">
+        </div>
+        <span style="padding-bottom: 12px; color: #999; font-weight: bold;">~</span>
+        <div style="flex: 1;">
+          <input type="date" id="endDateInput" th:value="${endDate}" 
+                th:max="${#calendars.format(#calendars.createNow(), 'yyyy-MM-dd')}"
+                style="width: 100%; padding: 9px; border: 1px solid #f5c2c2; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; box-sizing: border-box;">
+        </div>
+        <div style="flex: 1.5; margin-left: 10px;">
+          <label for="keywordInput" style="font-weight: 600; display: block; margin-bottom: 6px; color: #555;">물품명</label>
+          <input type="text" id="keywordInput" th:value="${keyword}" placeholder="습득물명 입력..." 
+                style="width: 100%; padding: 10px; border: 1px solid #f5c2c2; border-radius: 6px; background-color: #ffffff; color: #333; outline: none; box-sizing: border-box;">
+        </div>
+      </div>
+
+      <!-- 3층: [가운데 정렬 버튼 그룹] 초기화와 검색하기를 나란히 센터 배치 -->
+      <div class="form-group" style="grid-column: 1 / -1; display: flex; justify-content: center; gap: 12px; margin-top: 10px;">
+        
+        <!-- 초기화 버튼 (차분하고 연한 핑크베이지 테두리 스타일) -->
+        <button type="button" id="resetBtn" 
+                style="background: #ffffff; color: #555; padding: 11px 30px; border: 1px solid #f5c2c2; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 15px; transition: all 0.2s;"
+                onmouseover="this.style.background='#fff0f0'" 
+                onmouseout="this.style.background='#ffffff'">
+          🔄 초기화
+        </button>
+
+        <!-- 검색하기 버튼 (오션 네이비 블루 스타일) -->
+        <button type="button" id="searchSubmitBtn" 
+                style="background: #1e3d59; color: white; padding: 11px 40px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 15px; transition: background 0.2s;"
+                onmouseover="this.style.background='#173047'" 
+                onmouseout="this.style.background='#1e3d59'">
+          🔍 검색하기
+        </button>
+        
+      </div>
+
+    </form>
+  </section>
+
+  <div class="count-sort">
+    <p class="total-count">총 <span th:text="${paging != null ? paging.totalCount : 0}">0</span>건</p>
+    <select class="sort-select" id="sortSelect">
+      <option value="latest">최신순</option>
+      <option value="oldest">오래된순</option>
+    </select>
+  </div>
+
+  <section class="post-grid">
+    <a 
+      th:each="lostVO : ${getList}"
+      th:href="@{/api/lost/detail/{atcId}(atcId=${lostVO.atcId})}"
+      class="post-card">
+
+      <div class="post-top">
+        <div class="tag-group">
+          <span class="type-tag lost">분실</span>
+          <span th:text="${lostVO.prdtClNm}" class="category-tag">카테고리</span>
+        </div>
+        <span class="status-tag"
+          th:classappend="${lostVO.done==1 ? 'status-tag-done' : 'status-tag-progress'}"
+          th:text="${lostVO.done == 1 ? '✓ 완료' : '○ 진행중'}">
+          상태
+        </span>
+      </div>
+
+      <h4 th:text="${lostVO.lstPrdtNm}" class="post-title">제목</h4>
+      <p th:text="${lostVO.lstSbjt}" 
+         th:title="${lostVO.lstSbjt}"
+         class="post-desc">글 내용</p>
+
+      <div class="post-divider"></div>
+
+      <div class="post-info lost-info">
+        <div class="info-item">
+          <strong>물품명</strong>
+          <p th:text="${lostVO.lstPrdtNm}">물품명</p>
+        </div>
+        <div class="info-item">
+          <strong>분실지역</strong>
+          <p th:text="${lostVO.lstPlace}">분실지역</p>
+        </div>
+        <div class="info-item">
+          <strong>분실일자</strong>
+          <p th:text="${#temporals.format(lostVO.lstYmd, 'yyyy-MM-dd')}">분실일자</p>
+        </div>
+        <div class="info-item">
+          <strong>물품분류</strong>
+          <p th:text="${lostVO.prdtClNm}">물품분류</p>
+        </div>
+        <div class="info-item author-item">
+          <strong>작성자</strong>
+          <p th:text="${lostVO.id !=null ? lostVO.id : lostVO.lstPlace}">작성자</p>
+        </div>                
+      </div>
+      <div class="post-bottom">
+        <div>
+          <span>작성날짜 : </span>
+          <span th:text="${lostVO.createdAt != null ? #temporals.format(lostVO.createdAt, 'yyyy-MM-dd') : ''}">작성날짜</span>
+        </div>
+        <div class="post-counts">
+          <span>
+            조회 수 : <span th:text="${lostVO.viewCount !=null ? lostVO.viewCount+'회' : '0'+'회'}"></span>            
+          </span>
+          <span>
+            댓글 수 : <span th:text="${lostVO.commentCount !=null ? lostVO.commentCount+'개' : 0+'개'}"></span>
+          </span>
+        </div>
+      </div>
+    </a>
+  </section>
+ 
+  <div class="pagination-container" th:if="${paging != null and paging.totalCount > 0}" style="display: flex; justify-content: center; margin-top: 30px; gap: 5px; width: 100%;">
+
+  <!-- 1. [이전] 블록 이동 버튼 -->
+  <a class="page-link prev" 
+     th:if="${paging.prev}"
+     th:href="@{/api/lost(page=${paging.startPage - 1}, category=${selectedCategories}, subCategory=${selectedSubCategory}, startDate=${startDate}, endDate=${endDate}, author=${selectedAuthor}, status=${selectedStatus}, keyword=${keyword}, sort=${sort})}"
+     style="padding: 8px 12px; border: 1px solid #fcdada; border-radius: 4px; color: #1e3d59; text-decoration: none; background: #ffffff; font-size: 14px;">
+    이전
+  </a>
+
+  <!-- 2. [페이지 번호 루프] th:if 조건을 추가하여 혹시라도 startPage가 0이거나 endPage가 0인 유령 현상을 완전히 무력화합니다 -->
+  <th:block th:if="${paging.startPage > 0 and paging.endPage > 0}" th:each="num : ${#numbers.sequence(paging.startPage, paging.endPage)}">
+    <a class="page-link" 
+       th:classappend="${paging.page == num} ? 'active' : ''"
+       th:text="${num}"
+       th:href="@{/api/lost(page=${num}, category=${selectedCategories}, subCategory=${selectedSubCategory}, startDate=${startDate}, endDate=${endDate}, author=${selectedAuthor}, status=${selectedStatus}, keyword=${keyword}, sort=${sort})}"
+       th:style="${paging.page == num} ? 
+                 'padding: 8px 14px; border: 1px solid #1e3d59; border-radius: 4px; color: #ffffff; background: #1e3d59; font-weight: bold; text-decoration: none; font-size: 14px;' : 
+                 'padding: 8px 14px; border: 1px solid #fcdada; border-radius: 4px; color: #555; background: #ffffff; text-decoration: none; font-size: 14px;'">
+      1
+    </a>
+  </th:block>
+
+  <!-- 3. [다음] 블록 이동 버튼 -->
+  <a class="page-link next" 
+     th:if="${paging.next}"
+     th:href="@{/api/lost(page=${paging.endPage + 1}, category=${selectedCategories}, subCategory=${selectedSubCategory}, startDate=${startDate}, endDate=${endDate}, author=${selectedAuthor}, status=${selectedStatus}, keyword=${keyword}, sort=${sort})}"
+     style="padding: 8px 12px; border: 1px solid #fcdada; border-radius: 4px; color: #1e3d59; text-decoration: none; background: #ffffff; font-size: 14px;">
+    다음
+  </a>
+
+</div>
+
+</main>
+
+<div th:replace="layout/footer :: footerFragment"></div>
+
+<script>
+  const currentParams = new URLSearchParams(window.location.search);
+  const mainSelect = document.getElementById("mainCategorySelect");
+  const subSelect = document.getElementById("subCategorySelect");
+
+  // 화면 진입 시 주소창 조건에 맞게 인풋창 값 복원
+  if(document.querySelector("#keywordInput")) document.querySelector("#keywordInput").value = currentParams.get("keyword") || "";
+  if(document.querySelector("#authorInput")) document.querySelector("#authorInput").value = currentParams.get("author") || "";
+  if(document.querySelector("#statusSelect")) document.querySelector("#statusSelect").value = currentParams.get("status") || "";
+  if(document.querySelector("#startDateInput")) document.querySelector("#startDateInput").value = currentParams.get("startDate") || "";
+  if(document.querySelector("#endDateInput")) document.querySelector("#endDateInput").value = currentParams.get("endDate") || "";
+  if(document.querySelector("#sortSelect")) document.querySelector("#sortSelect").value = currentParams.get("sort") || "latest";
+
+  // 작성 사양 100% 매칭 소분류 데이터 맵
+  const subCategoryMap = JSON.parse('{' +
+    '"가방":["여성용가방","남성용가방","기타가방"],' +
+    '"귀금속":["반지","목걸이","귀걸이","시계","기타"],' +
+    '"도서":["학습서적","소설","컴퓨터서적","만화책","기타서적"],' +
+    '"의류":["여성의류","남성의류","아기의류","모자","신발","기타의류"],' +
+    '"자동차":["자동차열쇠","네비게이션","자동차번호판","임시번호판","기타용품"],' +
+    '"핸드폰":["삼성휴대폰","LG휴대폰","아이폰","기타휴대폰","기타통신기기"],' +
+    '"전자기기":["태블릿","스마트워치","무선이어폰","카메라","기타용품"],' +
+    '"지갑":["여성용 지갑","남성용 지갑","기타 지갑"],' +
+    '"카드":["신용(체크)카드","일반카드","교통카드","기타카드"]' +
+  '}');
+
+  function updateSubCategoryOptions(mainValue, currentSubValue) {
+    if (!subSelect) return;
+    subSelect.innerHTML = '<option value="">소분류 선택</option>';
+    
+    if (mainValue && subCategoryMap[mainValue]) {
+      subCategoryMap[mainValue].forEach(function(sub) {
+        const opt = document.createElement("option");
+        opt.value = sub;
+        opt.innerText = sub;
+        if (sub === currentSubValue) opt.selected = true;
+        subSelect.appendChild(opt);
+      });
+    }
+  }
+
+  // 대분류 상자 변경 센서 부착
+  if (mainSelect) {
+    mainSelect.addEventListener("change", function() {
+      updateSubCategoryOptions(this.value, "");
+    });
+  }
+
+  // 새로고침 시 기존에 선택했던 조건 복원 스위치 기동
+  const urlMainCat = currentParams.get("category") || "";
+  const urlSubCat = currentParams.get("subCategory") || "";
+  if (mainSelect && urlMainCat) {
+    mainSelect.value = urlMainCat;
+    updateSubCategoryOptions(urlMainCat, urlSubCat);
+  }
+
+  async function getCategoryLabel(prdtClNm) {
+      if (!prdtClNm) return "기타";
+
+      if (["가방", "백"].some(word => prdtClNm.includes(word))) return "가방";
+      if (["귀금속", "반지", "목걸이", "귀걸이", "시계"].some(word => prdtClNm.includes(word))) return "귀금속";
+      if (["도서", "책", "서적", "소설"].some(word => prdtClNm.includes(word))) return "도서";
+      if (["의류", "모자", "신발"].some(word => prdtClNm.includes(word))) return "의류";
+      if (["자동차", "네비", "번호판"].some(word => prdtClNm.includes(word))) return "자동차";
+      if (["전자", "핸드폰", "휴대폰", "아이폰", "노트북", "컴퓨터"].some(word => prdtClNm.includes(word))) return "전자기기";
+      if (prdtClNm.includes("지갑")) return "지갑";
+      if (prdtClNm.includes("카드")) return "카드";
+
+      return "기타";
+    }
+
+  // 모든 필드를 비우고 파라미터가 없는 첫 기본 화면으로 새로고침하는 함수
+  function resetAdvancedSearchForm() {
+    // 1. 모든 input 텍스트 및 날짜창 값 비우기
+    document.getElementById("keywordInput").value = "";
+    document.getElementById("authorInput").value = "";
+    document.getElementById("startDateInput").value = "";
+    document.getElementById("endDateInput").value = "";
+
+    // 2. 셀렉트 박스들을 기본 선택(전체)으로 변경
+    document.getElementById("mainCategorySelect").value = "";
+    document.getElementById("statusSelect").value = "";
+    
+    // 소분류는 대분류가 초기화되었으므로 가판대를 비워줍니다.
+    document.getElementById("subCategorySelect").value = "";
+    document.getElementById("subCategorySelect").innerHTML = '<option value="">소분류 선택</option>';
+
+    // 3. 주소창 뒤의 검색 조건을 모두 깨끗이 지우고 첫 전체 목록 주소로 이동시킵니다.
+    window.location.href = "/api/lost";
+  }
+
+  // 초기화 버튼 이벤트 연결
+  document.getElementById("resetBtn").addEventListener("click", resetAdvancedSearchForm);
+
+  async function loadBoardList() {
+    const params = new URLSearchParams();
+    
+    // 1. 엘리먼트 안전하게 낚아채기
+    const mainSelect = document.getElementById("mainCategorySelect");
+    const subSelect = document.getElementById("subCategorySelect");
+    const keywordInput = document.getElementById("keywordInput");
+    const authorInput = document.getElementById("authorInput");
+    const statusSelect = document.getElementById("statusSelect");
+    const startDateInput = document.getElementById("startDateInput");
+    const endDateInput = document.getElementById("endDateInput");
+    const sortSelect = document.querySelector("#sortSelect");
+
+    // 2. 값 가공 및 유효성 검증 (글자가 "선택"이거나 비어있으면 아예 파라미터에 담지 않습니다)
+    const mainCat = mainSelect ? mainSelect.value : "";
+    const subCat = subSelect ? subSelect.value : "";
+    const keyword = keywordInput ? keywordInput.value.trim() : "";
+    const author = authorInput ? authorInput.value.trim() : "";
+    const status = statusSelect ? statusSelect.value : "";
+    const startDate = startDateInput ? startDateInput.value : "";
+    const endDate = endDateInput ? endDateInput.value : "";
+
+    // 3. ➔ [핵심 방어선] 진짜 알맹이 데이터가 있을 때만 쿼리 스트링에 적재
+    if (mainCat && mainCat !== "" && !mainCat.includes("선택")) params.set("category", mainCat);
+    if (subCat && subCat !== "" && !subCat.includes("선택")) params.set("subCategory", subCat);
+    if (keyword && keyword !== "") params.set("keyword", keyword);
+    if (author && author !== "") params.set("author", author);
+    if (status && status !== "" && !status.includes("전체")) params.set("status", status);
+    if (startDate && startDate !== "") params.set("startDate", startDate);
+    if (endDate && endDate !== "") params.set("endDate", endDate);
+    
+    // 정렬 세팅
+    if (sortSelect) params.set("sort", sortSelect.value);
+
+    // 4. 무조건 1페이지부터 검색 결과가 시작되도록 고정 (페이지 꼬임 방지)
+    params.set("page", "1");
+
+    console.log("🚀 [최종 파라미터 빌드 완료]: " + params.toString());
+
+    // 통합 관문 주소로 새로고침 점프!
+    window.location.href = "/api/lost?" + params.toString();
+  }
+
+  // 최종 리스너 결합 및 마무리 마감
+  if (document.getElementById("searchSubmitBtn")) {
+    document.getElementById("searchSubmitBtn").addEventListener("click", loadBoardList);
+  }
+  if (document.querySelector("#sortSelect")) {
+    document.querySelector("#sortSelect").addEventListener("change", loadBoardList);
+  }
+
+  function resetAdvancedSearchForm() {
+    window.location.href = "/api/lost";
+  }
+
+  // 4. [검색하기] 버튼 클릭 시 함수가 발동되도록 이벤트 장치 추가 바인딩
+  document.getElementById("searchSubmitBtn").addEventListener("click", loadBoardList);
+
+  bindCategoryFilter();
+  bindStatusFilter();
+  bindSubCategorySelectEvent();
+</script>
+
+</body>
+</html>

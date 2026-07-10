@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta name="_csrf" th:content="${_csrf.token}">
+  <meta name="_csrf_header" th:content="${_csrf.headerName}">
+  <meta charset="UTF-8">
+  <title>로그인</title>
+
+  <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <link rel="stylesheet" th:href="@{/css/user/login.css}">
+</head>
+
+<body>
+
+<div th:replace="layout/header :: headerFragment"></div>
+
+<main class="auth-page">
+
+  <div class="login-modal">
+    <div class="login-header">
+      <h2>로그인</h2>
+      <a href="/" class="close-btn">×</a>
+    </div>
+
+    <div class="tab-menu">
+      <a href="/login" class="active">로그인</a>
+      <a href="/join">회원가입</a>
+    </div>
+
+    <div class="login-content">
+
+      <!-- 회원탈퇴 완료 메시지 -->
+      <div th:if="${message}" class="alert-message">
+        <span th:text="${message}"></span>
+      </div>
+
+      <form th:action="@{/login}" method="post">
+        <input type="hidden"
+               id="csrfToken"
+               th:name="${_csrf.parameterName}"
+               th:value="${_csrf.token}">
+
+        <div class="form-group">
+          <label for="id">아이디</label>
+          <div class="input-wrap">
+            <input type="text" id="id" name="id" placeholder="아이디 입력">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="pw">비밀번호</label>
+          <div class="input-wrap">
+            <input type="password" id="pw" name="pw" placeholder="비밀번호 입력">
+            <span class="eye-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </span>
+          </div>
+        </div>
+
+        <button type="submit" class="login-submit">로그인</button>
+
+        <label>
+          <input type="checkbox" name="remember-me" style="margin-top:15px;" checked>
+          로그인 유지
+        </label>
+      </form>
+
+      <div class="login-helper" style="margin-top: 15px; text-align: center; font-size: 14px;">
+        <a href="/find-id" style="color: #666; text-decoration: none;">아이디 찾기</a>
+        <span class="divider" style="margin: 0 10px; color: #ccc; font-size: 12px;">|</span>
+        <a href="/find-pw" style="color: #666; text-decoration: none;">비밀번호 찾기</a>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- 휴면 계정 해제 모달 -->
+<div class="dormant-modal-overlay" th:if="${param.dormant != null}">
+  <div class="dormant-modal">
+    <div class="dormant-modal-header">
+      <h3>휴면 계정 해제</h3>
+      <a href="/login" class="dormant-close-btn">×</a>
+    </div>
+
+    <div class="dormant-modal-body">
+      <p class="dormant-message">
+        휴면 계정입니다.<br>
+        등록된 이메일로 발송된 인증번호를 입력해주세요.
+      </p>
+
+      <input type="text"
+             id="dormantCode"
+             maxlength="6"
+             placeholder="인증번호 6자리"
+             class="dormant-code-input">
+
+      <button type="button"
+              class="dormant-submit-btn"
+              onclick="verifyDormantCode()">
+        휴면 해제
+      </button>
+
+      <p class="dormant-sub-text">
+        인증번호가 만료된 경우 다시 로그인하면 새 인증번호가 발송됩니다.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div th:replace="layout/footer :: footerFragment"></div>
+
+<script>
+function verifyDormantCode() {
+    const codeInput = document.getElementById("dormantCode");
+    const code = codeInput.value.trim();
+
+    if (!code) {
+        alert("인증번호를 입력해주세요.");
+        codeInput.focus();
+        return;
+    }
+
+    const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
+    const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+    
+    const formData = new URLSearchParams();
+    formData.append("code", code);
+
+
+    fetch("/api/verify-dormant-email-code", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            [csrfHeader]: csrfToken        },
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        if (data === "verified") {
+            alert("휴면 계정이 해제되었습니다. 다시 로그인해주세요.");
+            location.href = "/login";
+
+        } else if (data === "timeout") {
+            alert("인증번호가 만료되었습니다. 다시 로그인하여 인증번호를 재발급해주세요.");
+            location.href = "/login";
+
+        } else if (data === "wrong_code") {
+            alert("인증번호가 일치하지 않습니다.");
+
+        } else if (data === "no_request") {
+            alert("인증 요청 정보가 없습니다. 다시 로그인해주세요.");
+            location.href = "/login";
+
+        } else {
+            alert("인증 처리 중 오류가 발생했습니다.");
+        }
+    })
+    .catch(() => {
+        alert("인증 처리 중 오류가 발생했습니다.");
+    });
+}
+</script>
+
+</body>
+</html>

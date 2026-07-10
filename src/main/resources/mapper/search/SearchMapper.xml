@@ -1,0 +1,678 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.human.found.domain.search.mapper.SearchMapper">
+
+<!-- 일반 검색용(페이징 포함) : LIMIT랑 OFFSET 있음, 나중에 지울 것 -->
+<select id="totalLikeSearch"
+        parameterType="com.human.found.domain.search.dto.SearchConditionDTO"
+        resultType="com.human.found.domain.search.vo.SearchResultVO">
+    SELECT * 
+    FROM (
+        SELECT 
+            atc_id AS atcId,
+            id,
+            clr_nm AS color,
+            dep_place AS place,
+            fd_filepath_img AS imagePath,
+            fd_prdt_nm AS title,
+            fd_sbjt AS content,
+            DATE(fd_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'user' AS dataSource,
+            'found' AS boardType,
+            CONCAT('found_user_', atc_id) AS searchKey
+        FROM found
+        WHERE is_deleted = 0
+
+        UNION ALL
+
+        SELECT 
+            atc_id AS atcId,
+            id,
+            clr_nm AS color,
+            dep_place AS place,
+            fd_filepath_img AS imagePath,
+            fd_prdt_nm AS title,
+            fd_sbjt AS content,
+            DATE(fd_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'police' AS dataSource,
+            'found' AS boardType,
+            CONCAT('found_police_', atc_id) AS searchKey
+        FROM found_police
+        WHERE is_deleted = 0
+
+        UNION ALL
+
+        SELECT 
+            atc_id AS atcId,
+            id,
+            clr_nm AS color,
+            dep_place AS place,
+            fd_filepath_img AS imagePath,
+            fd_prdt_nm AS title,
+            fd_sbjt AS content,
+            DATE(fd_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'portal' AS dataSource,
+            'found' AS boardType,
+            CONCAT('found_portal_', atc_id) AS searchKey
+        FROM found_portal
+        WHERE is_deleted = 0    
+
+        UNION ALL
+
+        SELECT 
+            atc_id AS atcId,
+            id,
+            null AS color,
+            lst_place AS place,
+            lst_filepath_img AS imagePath,
+            lst_prdt_nm AS title,
+            lst_sbjt AS content,
+            DATE(lst_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'user' AS dataSource,
+            'lost' AS boardType,
+            CONCAT('lost_user_', atc_id) AS searchKey
+        FROM lost
+        WHERE is_deleted = 0    
+
+        UNION ALL
+
+        SELECT 
+            atc_id AS atcId,
+            id,
+            null AS color,
+            lst_place AS place,
+            lst_filepath_img AS imagePath,
+            lst_prdt_nm AS title,
+            lst_sbjt AS content,
+            DATE(lst_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'police' AS dataSource,
+            'lost' AS boardType,
+            CONCAT('lost_police_', atc_id) AS searchKey
+        FROM lost_police
+        WHERE is_deleted = 0    
+    ) AS total_board
+   
+   <where>
+        <if test="keyword != null and keyword != ''">
+            AND (
+                title LIKE CONCAT('%', #{keyword}, '%')
+                OR content LIKE CONCAT('%', #{keyword}, '%')
+                OR place LIKE CONCAT('%', #{keyword}, '%')
+                OR category LIKE CONCAT('%', #{keyword}, '%')
+                OR color LIKE CONCAT('%', #{keyword}, '%')
+
+                OR REPLACE(title, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
+                OR REPLACE(content, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
+                OR REPLACE(place, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
+                OR REPLACE(category, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
+                OR REPLACE(color, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
+            )
+        </if>
+
+        <if test="boardType != null and boardType != '' and boardType!= 'all'">
+            AND boardType = #{boardType}
+        </if>
+
+        <if test="status != null and status != '' and status != 'all'">
+          <choose>
+            <when test = "status == 'done'">
+                AND done = 1
+            </when>
+            <when test = "status == 'progress'">
+                AND done = 0
+            </when>
+          </choose>
+        </if>
+
+        <if test="category != null and category != '' and category != 'all'">
+            AND category LIKE CONCAT('%', #{category}, '%')
+        </if>
+
+        <if test="color != null and color != ''">
+            AND color LIKE CONCAT('%', #{color}, '%')
+        </if>
+
+        <if test="place != null and place != ''">
+            AND place LIKE CONCAT ('%', #{place}, '%')
+        </if>
+
+        <!-- 이 날짜부터-->
+        <if test="startDate != null and startDate != ''">
+            AND eventDate &gt;= #{startDate}
+        </if>
+
+        <!-- 이 날짜까지-->
+        <if test="endDate != null and endDate != ''">
+            AND eventDate &lt;= #{endDate}
+        </if>
+
+   </where>
+
+   ORDER BY eventDate DESC    
+   LIMIT #{size} OFFSET #{offset}
+    
+</select>
+
+<!-- 일반 검색용(리미트 없음) -->
+<select id="candidateLikeSearch"
+        parameterType="com.human.found.domain.search.dto.SearchConditionDTO"
+        resultType="com.human.found.domain.search.vo.SearchResultVO">
+    SELECT * 
+    FROM (
+        SELECT 
+            atc_id AS atcId,
+            id,
+            clr_nm AS color,
+            dep_place AS place,
+            fd_filepath_img AS imagePath,
+            fd_prdt_nm AS title,
+            fd_sbjt AS content,
+            DATE(fd_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'user' AS dataSource,
+            'found' AS boardType,
+            CONCAT('found_user_', atc_id) AS searchKey
+        FROM found
+        WHERE is_deleted = 0
+
+        UNION ALL
+
+        SELECT 
+            atc_id AS atcId,
+            id,
+            clr_nm AS color,
+            dep_place AS place,
+            fd_filepath_img AS imagePath,
+            fd_prdt_nm AS title,
+            fd_sbjt AS content,
+            DATE(fd_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'police' AS dataSource,
+            'found' AS boardType,
+            CONCAT('found_police_', atc_id) AS searchKey
+        FROM found_police
+        WHERE is_deleted = 0
+
+        UNION ALL
+
+        SELECT 
+            atc_id AS atcId,
+            id,
+            clr_nm AS color,
+            dep_place AS place,
+            fd_filepath_img AS imagePath,
+            fd_prdt_nm AS title,
+            fd_sbjt AS content,
+            DATE(fd_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'portal' AS dataSource,
+            'found' AS boardType,
+            CONCAT('found_portal_', atc_id) AS searchKey
+        FROM found_portal
+        WHERE is_deleted = 0    
+
+        UNION ALL
+
+        SELECT 
+            atc_id AS atcId,
+            id,
+            null AS color,
+            lst_place AS place,
+            lst_filepath_img AS imagePath,
+            lst_prdt_nm AS title,
+            lst_sbjt AS content,
+            DATE(lst_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'user' AS dataSource,
+            'lost' AS boardType,
+            CONCAT('lost_user_', atc_id) AS searchKey
+        FROM lost
+        WHERE is_deleted = 0    
+
+        UNION ALL
+
+        SELECT 
+            atc_id AS atcId,
+            id,
+            null AS color,
+            lst_place AS place,
+            lst_filepath_img AS imagePath,
+            lst_prdt_nm AS title,
+            lst_sbjt AS content,
+            DATE(lst_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'police' AS dataSource,
+            'lost' AS boardType,
+            CONCAT('lost_police_', atc_id) AS searchKey
+        FROM lost_police
+        WHERE is_deleted = 0    
+    ) AS total_board
+   
+    <where>
+
+        <!-- boardType은 검색 대상 게시판이라 hard filter -->
+        <if test="boardType != null and boardType != '' and boardType != 'all'">
+            AND boardType = #{boardType}
+        </if>
+
+        <!-- status도 명시된 경우만 hard filter -->
+        <if test="status != null and status != '' and status != 'all'">
+            <choose>
+                <when test="status == 'done'">
+                    AND done = 1
+                </when>
+                <when test="status == 'progress'">
+                    AND done = 0
+                </when>
+            </choose>
+        </if>
+
+        <!-- LIKE 후보 조건: 원문 keyword + 공백 제거 keyword + LLM coreKeywords를 모두 OR로 넓게 검색 -->
+        <if test="
+            (keyword != null and keyword != '')
+            or (coreKeywords != null and coreKeywords.size() > 0)
+        ">
+            AND (
+                1 = 0
+
+                <!-- 사용자가 입력한 원문 검색어 -->
+                <if test="keyword != null and keyword != ''">
+                    OR (
+                        title LIKE CONCAT('%', #{keyword}, '%')
+                        OR content LIKE CONCAT('%', #{keyword}, '%')
+                        OR place LIKE CONCAT('%', #{keyword}, '%')
+                        OR category LIKE CONCAT('%', #{keyword}, '%')
+                        OR COALESCE(color, '') LIKE CONCAT('%', #{keyword}, '%')
+
+                        OR REPLACE(title, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
+                        OR REPLACE(content, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
+                        OR REPLACE(place, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
+                        OR REPLACE(category, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
+                        OR REPLACE(COALESCE(color, ''), ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
+                    )
+                </if>
+
+                <!-- LLM이 뽑은 핵심 단어 검색 -->
+                <if test="coreKeywords != null and coreKeywords.size() > 0">
+                    <foreach collection="coreKeywords" item="kw">
+                        OR (
+                            title LIKE CONCAT('%', #{kw}, '%')
+                            OR content LIKE CONCAT('%', #{kw}, '%')
+                            OR place LIKE CONCAT('%', #{kw}, '%')
+                            OR category LIKE CONCAT('%', #{kw}, '%')
+                            OR COALESCE(color, '') LIKE CONCAT('%', #{kw}, '%')
+
+                            OR REPLACE(title, ' ', '') LIKE CONCAT('%', REPLACE(#{kw}, ' ', ''), '%')
+                            OR REPLACE(content, ' ', '') LIKE CONCAT('%', REPLACE(#{kw}, ' ', ''), '%')
+                            OR REPLACE(place, ' ', '') LIKE CONCAT('%', REPLACE(#{kw}, ' ', ''), '%')
+                            OR REPLACE(category, ' ', '') LIKE CONCAT('%', REPLACE(#{kw}, ' ', ''), '%')
+                            OR REPLACE(COALESCE(color, ''), ' ', '') LIKE CONCAT('%', REPLACE(#{kw}, ' ', ''), '%')
+                        )
+                    </foreach>
+                </if>
+            )
+        </if>
+
+    </where>
+
+   ORDER BY eventDate DESC    
+    
+</select>
+
+<!--하이브리드 검색 페이징은 서비스에서 함. 일반 검색이 없어지면 얘도 지워져야 함-->
+<select id="countTotalSearch"
+        parameterType="com.human.found.domain.search.dto.SearchConditionDTO"
+        resultType="int">
+    
+    SELECT count(*)
+    FROM (
+        SELECT 
+            atc_id AS atcId,
+            id,
+            clr_nm AS color,
+            dep_place AS place,
+            fd_filepath_img AS imagePath,
+            fd_prdt_nm AS title,
+            fd_sbjt AS content,
+            DATE(fd_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'user' AS dataSource,
+            'found' AS boardType,
+            CONCAT('found_user_', atc_id) AS searchKey
+        FROM found
+        WHERE is_deleted = 0
+
+        UNION ALL
+
+        SELECT 
+            atc_id AS atcId,
+            id,
+            clr_nm AS color,
+            dep_place AS place,
+            fd_filepath_img AS imagePath,
+            fd_prdt_nm AS title,
+            fd_sbjt AS content,
+            DATE(fd_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'police' AS dataSource,
+            'found' AS boardType,
+            CONCAT('found_police_', atc_id) AS searchKey
+        FROM found_police
+        WHERE is_deleted = 0
+
+        UNION ALL
+
+        SELECT 
+            atc_id AS atcId,
+            id,
+            clr_nm AS color,
+            dep_place AS place,
+            fd_filepath_img AS imagePath,
+            fd_prdt_nm AS title,
+            fd_sbjt AS content,
+            DATE(fd_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'portal' AS dataSource,
+            'found' AS boardType,
+            CONCAT('found_portal_', atc_id) AS searchKey
+        FROM found_portal
+        WHERE is_deleted = 0    
+
+        UNION ALL
+
+        SELECT 
+            atc_id AS atcId,
+            id,
+            null AS color,
+            lst_place AS place,
+            lst_filepath_img AS imagePath,
+            lst_prdt_nm AS title,
+            lst_sbjt AS content,
+            DATE(lst_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'user' AS dataSource,
+            'lost' AS boardType,
+            CONCAT('lost_user_', atc_id) AS searchKey
+        FROM lost
+        WHERE is_deleted = 0    
+
+        UNION ALL
+
+        SELECT 
+            atc_id AS atcId,
+            id,
+            null AS color,
+            lst_place AS place,
+            lst_filepath_img AS imagePath,
+            lst_prdt_nm AS title,
+            lst_sbjt AS content,
+            DATE(lst_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'police' AS dataSource,
+            'lost' AS boardType,
+            CONCAT('lost_police_', atc_id) AS searchKey
+        FROM lost_police
+        WHERE is_deleted = 0    
+    ) AS total_board
+   
+   <where>
+        <if test="keyword != null and keyword != ''">
+            AND (
+                title LIKE CONCAT('%', #{keyword}, '%')
+                OR content LIKE CONCAT('%', #{keyword}, '%')
+                OR place LIKE CONCAT('%', #{keyword}, '%')
+                OR category LIKE CONCAT('%', #{keyword}, '%')
+                OR color LIKE CONCAT('%', #{keyword}, '%')
+
+                OR REPLACE(title, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
+                OR REPLACE(content, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
+                OR REPLACE(place, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
+                OR REPLACE(category, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
+                OR REPLACE(color, ' ', '') LIKE CONCAT('%', #{keywordNoSpace}, '%')
+            )
+        </if>
+
+        <if test="boardType != null and boardType != '' and boardType != 'all'">
+            AND boardType = #{boardType}
+        </if>
+
+        <if test="status != null and status != '' and status != 'all'">
+            <choose>
+                <when test="status == 'done'">
+                    AND done = 1
+                </when>
+                <when test="status == 'progress'">
+                    AND done = 0
+                </when>
+            </choose>
+        </if>
+
+        <if test="category != null and category != '' and category != 'all'">
+            AND category LIKE CONCAT('%', #{category}, '%')
+        </if>
+
+        <if test="color != null and color != ''">
+            AND color LIKE CONCAT('%', #{color}, '%')
+        </if>
+
+        <if test="place != null and place != ''">
+            AND place LIKE CONCAT('%', #{place}, '%')
+        </if>
+
+        <if test="startDate != null and startDate != ''">
+            AND eventDate &gt;= #{startDate}
+        </if>
+
+        <if test="endDate != null and endDate != ''">
+            AND eventDate &lt;= #{endDate}
+        </if>
+   </where>
+
+
+</select>
+
+<!-- LLM 검색용 -->
+<select id="llmSearch"
+        parameterType="com.human.found.domain.search.dto.SearchConditionDTO"
+        resultType="com.human.found.domain.search.vo.SearchResultVO">
+    SELECT * 
+    FROM (
+        SELECT 
+            atc_id AS atcId,
+            id,
+            clr_nm AS color,
+            dep_place AS place,
+            fd_filepath_img AS imagePath,
+            fd_prdt_nm AS title,
+            fd_sbjt AS content,
+            DATE(fd_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'user' AS dataSource,
+            'found' AS boardType,
+            CONCAT('found_user_', atc_id) AS searchKey
+        FROM found
+        WHERE is_deleted = 0
+
+        UNION ALL
+
+        SELECT 
+            atc_id AS atcId,
+            id,
+            clr_nm AS color,
+            dep_place AS place,
+            fd_filepath_img AS imagePath,
+            fd_prdt_nm AS title,
+            fd_sbjt AS content,
+            DATE(fd_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'police' AS dataSource,
+            'found' AS boardType,
+            CONCAT('found_police_', atc_id) AS searchKey
+        FROM found_police
+        WHERE is_deleted = 0
+
+        UNION ALL
+
+        SELECT 
+            atc_id AS atcId,
+            id,
+            clr_nm AS color,
+            dep_place AS place,
+            fd_filepath_img AS imagePath,
+            fd_prdt_nm AS title,
+            fd_sbjt AS content,
+            DATE(fd_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'portal' AS dataSource,
+            'found' AS boardType,
+            CONCAT('found_portal_', atc_id) AS searchKey
+        FROM found_portal
+        WHERE is_deleted = 0    
+
+        UNION ALL
+
+        SELECT 
+            atc_id AS atcId,
+            id,
+            null AS color,
+            lst_place AS place,
+            lst_filepath_img AS imagePath,
+            lst_prdt_nm AS title,
+            lst_sbjt AS content,
+            DATE(lst_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'user' AS dataSource,
+            'lost' AS boardType,
+            CONCAT('lost_user_', atc_id) AS searchKey
+        FROM lost
+        WHERE is_deleted = 0    
+
+        UNION ALL
+
+        SELECT 
+            atc_id AS atcId,
+            id,
+            null AS color,
+            lst_place AS place,
+            lst_filepath_img AS imagePath,
+            lst_prdt_nm AS title,
+            lst_sbjt AS content,
+            DATE(lst_ymd) AS eventDate,
+            prdt_cl_nm AS category,
+            done,
+            'police' AS dataSource,
+            'lost' AS boardType,
+            CONCAT('lost_police_', atc_id) AS searchKey
+        FROM lost_police
+        WHERE is_deleted = 0    
+    ) AS total_board
+   
+   <where>
+
+        <!-- boardType은 검색 대상 게시판이라 hard filter -->
+        <if test="boardType != null and boardType != '' and boardType != 'all'">
+            AND boardType = #{boardType}
+        </if>
+
+        <!-- status도 명시된 경우만 hard filter -->
+        <if test="status != null and status != '' and status != 'all'">
+            <choose>
+                <when test="status == 'done'">
+                    AND done = 1
+                </when>
+                <when test="status == 'progress'">
+                    AND done = 0
+                </when>
+            </choose>
+        </if>
+
+        <if test="startDate != null and startDate != ''">
+            AND eventDate &gt;= #{startDate}
+        </if>
+
+        <if test="endDate != null and endDate != ''">
+            AND eventDate &lt;= #{endDate}
+        </if>
+
+        <!-- LLM 후보 조건 -->
+        <choose>
+            <when test="coreKeywords != null and coreKeywords.size() > 0">
+                AND (
+                    1 = 0
+
+                    <foreach collection="coreKeywords" item="kw">
+                        OR (
+                            title LIKE CONCAT('%', #{kw}, '%')
+                            OR content LIKE CONCAT('%', #{kw}, '%')
+
+                            OR REPLACE(title, ' ', '') LIKE CONCAT('%', REPLACE(#{kw}, ' ', ''), '%')
+                            OR REPLACE(content, ' ', '') LIKE CONCAT('%', REPLACE(#{kw}, ' ', ''), '%')
+                        )
+                    </foreach>
+                )
+            </when>
+
+            <otherwise>
+                AND (
+                    1 = 0
+
+                    <if test="category != null and category != '' and category != 'all'">
+                        OR (
+                            category LIKE CONCAT('%', #{category}, '%')
+                            OR title LIKE CONCAT('%', #{category}, '%')
+                            OR content LIKE CONCAT('%', #{category}, '%')
+                        )
+                    </if>
+
+                    <if test="color != null and color != ''">
+                        OR (
+                            color LIKE CONCAT('%', #{color}, '%')
+                            OR title LIKE CONCAT('%', #{color}, '%')
+                            OR content LIKE CONCAT('%', #{color}, '%')
+                        )
+                    </if>
+
+                    <if test="place != null and place != ''">
+                        OR (
+                            place LIKE CONCAT('%', #{place}, '%')
+                            OR title LIKE CONCAT('%', #{place}, '%')
+                            OR content LIKE CONCAT('%', #{place}, '%')
+                        )
+                    </if>
+                )
+            </otherwise>
+        </choose>
+
+    </where>
+
+   ORDER BY eventDate DESC 
+
+</select>
+
+</mapper>

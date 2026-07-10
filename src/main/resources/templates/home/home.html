@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>분실물 센터</title>
+
+  <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <link rel="stylesheet" th:href="@{/css/home/home.css}">
+  
+</head>
+
+<body>
+  
+  <div th:replace="layout/header :: headerFragment"></div>
+
+  <!-- 팝업들을 감싸는 보이지 않는 가로 정렬 컨테이너 (여기가 안 겹치게 쫘르르 나열해 주는 핵심입니다) -->
+  <div style="position: fixed; top: 100px; left: 50px; z-index: 9999; display: flex; flex-direction: row; flex-wrap: wrap; gap: 24px; pointer-events: none; max-width: calc(100vw - 100px);">
+    
+    <!-- 실제 팝업 루프 (컨트롤러에서 넘긴 popupNoticeList 사용) -->
+    <div th:each="popupNotice : ${popupNoticeList}" 
+          th:if="${popupNotice.isPlanned == 1}" 
+          class="main-notice-popup" 
+          th:id="'popup-window-' + ${popupNotice.num}"
+          style="background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); border-radius: 12px; width: max-content; max-width: 450px; overflow: hidden; font-family: sans-serif; pointer-events: auto;">
+        
+        <!-- 팝업 본문 영역 (기존 padding: 24px; 을 제거하고 세부 조절합니다) -->
+        <div class="popup-body" style="text-align: center; background: #ffffff;">
+            
+            <!-- [CASE 1] 이미지가 있는 경우: 여백을 최소화하여 이미지 크기에 딱 맞춤 -->
+            <div th:if="${popupNotice.imagePath != null and !#strings.isEmpty(popupNotice.imagePath)}" 
+                class="popup-image-content" 
+                style="padding: 16px 16px 4px 16px;"> <!-- 윗여백과 옆여백만 살짝 주고, 아래 버튼과의 간격은 줄임 -->
+                <a th:href="@{/api/notices/detail(num=${popupNotice.num})}" style="display: block;">
+                    <img th:src="${popupNotice.imagePath}" alt="공지사항 팝업 이미지" 
+                        style="width: 100%; height: auto; display: block; border-radius: 8px; max-height: 450px; object-fit: contain;">
+                </a>
+            </div>
+            
+            <!-- [CASE 2] 이미지가 없는 경우: 기존의 세련된 텍스트 느낌 그대로 패딩 유지 -->
+            <div th:unless="${popupNotice.imagePath != null and !#strings.isEmpty(popupNotice.imagePath)}" 
+                class="popup-text-content" 
+                style="text-align: left; padding: 24px;"> <!-- 텍스트 전용 패딩 적용 -->
+                <!-- 전체 영역을 상세페이지 링크로 감싸고, 마우스 커서를 포인터로 변경 및 미세한 클릭 효과 부여 -->
+                <a th:href="@{/api/notices/detail(num=${popupNotice.num})}" 
+                  style="text-decoration: none; display: block; color: inherit; transition: opacity 0.2s ease;"
+                  onmouseover="this.style.opacity='0.85'" 
+                  onmouseout="this.style.opacity='1.0'">
+                    
+                    <div style="display: inline-block; background: #eff6ff; color: #1d4ed8; font-size: 11px; font-weight: bold; padding: 4px 8px; border-radius: 4px; margin-bottom: 10px; letter-spacing: -0.3px;">NOTICE</div>
+                    
+                    <!-- 제목 -->
+                    <h3 th:text="${popupNotice.title}" style="font-size: 18px; margin: 0 0 14px 0; color: #1e293b; font-weight: 700; line-height: 1.4; border-bottom: 2px solid #eff6ff; padding-bottom: 12px;">공지 제목</h3>
+                    
+                    <!-- 내용 -->
+                    <p th:text="${popupNotice.content}" style="font-size: 14px; color: #475569; line-height: 1.6; white-space: pre-wrap; max-height: 250px; overflow-y: auto; margin: 0;"></p>
+                
+                </a>
+            </div>
+            
+        </div>
+
+        
+        
+        <div class="popup-footer" style="background: #f8fafc; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9;">
+            <label style="cursor: pointer; color: #64748b; font-size: 13px; display: flex; align-items: center; user-select: none;">
+                <input type="checkbox" th:id="'cookie-check-' + ${popupNotice.num}" style="margin-right: 6px; width: 15px; height: 15px; accent-color: #2563eb; cursor: pointer;"> 오늘 하루 보지 않기
+            </label>
+            <button type="button" th:onclick="'closeNoticePopup(' + ${popupNotice.num} + ')'" 
+                    style="background: #2563eb; color: #ffffff; border: none; padding: 7px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">닫기</button>
+        </div>
+        
+    </div>
+  </div>
+
+
+  <main class="main-container">
+    <section class="hero">
+      <div class="hero-pin">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M12 21s7-4.8 7-11a7 7 0 0 0-14 0c0 6.2 7 11 7 11z"></path>
+          <circle cx="12" cy="10" r="2.5"></circle>
+        </svg>
+      </div>
+
+      <h1>분실물 센터</h1>
+      <p>잃어버린 물건을 찾고, 습득한 물건의 주인을 찾아드립니다</p>
+
+      <form class="search-box" 
+            th:action="@{/search}" 
+            method="get">
+        
+        <input type="hidden" name="searchMode" value="hybrid">
+        
+        <input type="text" 
+               name="keyword"
+               placeholder="예 : '분홍색 핸드폰' / '검정 지갑 잃어버렸어요'" />
+        <button type="submit">검색</button>
+      </form>
+
+      <div class="weekly-status">
+        <span>지난 7일 현황</span>
+      </div>
+
+      <div class="stats">
+        <div>
+          <strong th:text="${countWeeklyFound ?: 0}">0</strong>
+          <span>습득물</span>
+        </div>
+        <div>
+          <strong th:text="${countWeeklyLost ?: 0}">0</strong>
+          <span>분실물</span>
+        </div>
+        <div>
+          <strong th:text="${countWeeklyDone ?: 0}">0</strong>
+          <span>해결 완료</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="menu-cards">
+      <a th:href="@{/api/found}" class="card">
+        <div class="card-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m21 16-9 5-9-5V8l9-5 9 5v8z"></path>
+            <path d="m3.3 7.5 8.7 5 8.7-5"></path>
+            <path d="M12 22V12"></path>
+          </svg>
+        </div>
+        <h3>습득 게시판</h3>
+        <p>주우신 물건을 등록해 주세요</p>
+      </a>
+
+      <a th:href="@{/api/lost}" class="card">
+        <div class="card-icon red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 8v5"></path>
+            <path d="M12 16h.01"></path>
+          </svg>
+        </div>
+        <h3>분실 게시판</h3>
+        <p>잃어버린 물건은 여기!</p>
+      </a>
+
+      <a th:href="@{/api/notices/list}" class="card">
+        <div class="card-icon blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7"></path>
+            <path d="M13.7 21a2 2 0 0 1-3.4 0"></path>
+          </svg>
+        </div>
+        <h3>공지사항</h3>
+        <p>읽어주세요</p>
+      </a>
+
+      <a th:href="@{api/write}" class="card">
+        <div class="card-icon purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
+          </svg>
+        </div>
+        <h3>글쓰기</h3>
+        <p>게시글 등록</p>
+      </a>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h3 class="section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7"></path>
+            <path d="M13.7 21a2 2 0 0 1-3.4 0"></path>
+          </svg>
+          공지사항
+        </h3>
+        <a href="/api/notices/list" class="more">더보기 →</a>
+      </div>
+
+      <!-- 공지사항이 없을 때를 대비한 예외 처리 부모 태그 -->
+      <div class="notice-list-container" th:if="${not #lists.isEmpty(recentNotices)}">
+        
+        <!-- 1. 개별 공지사항 행(Row) 자체를 반복시킵니다 -->
+        <div class="notice-line" th:each="noticeVO : ${recentNotices}" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          
+          <div class="notice-left-content" style="display: flex; align-items: center; gap: 10px;">
+            <span class="notice-badge">공지</span>
+            
+            <!-- 2. 클릭 시 해당 글 상세로 이동하는 링크 (제목 영역) -->
+            <a th:href="@{/api/notices/detail(num=${noticeVO.num})}" 
+              style="color: inherit; text-decoration: none;">
+              <strong th:text="${noticeVO.title}">공지사항 제목 위치</strong>
+            </a>
+          </div>
+          
+          <!-- 3. 날짜는 우측 정렬 등을 위해 분리 -->
+          <time th:text="${#temporals.format(noticeVO.createdAt, 'yyyy. M. d.')}" style="color: #888; font-size: 0.9em;">2026. 6. 4.</time>
+        </div>
+
+      </div>
+      
+      <!-- 공지사항이 아예 없을 때 출력할 메시지 (선택 사항) -->
+      <div th:if="${#lists.isEmpty(recentNotices)}" style="padding: 20px; text-align: center; color: #999;">
+        등록된 최신 공지사항이 없습니다.
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h3 class="section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m21 16-9 5-9-5V8l9-5 9 5v8z"></path>
+            <path d="m3.3 7.5 8.7 5 8.7-5"></path>
+            <path d="M12 22V12"></path>
+          </svg>
+          최근 습득물
+        </h3>
+        <a th:href="@{/api/found}" class="more">더보기 →</a>
+      </div>
+
+      <div class="post-grid">
+        <a 
+          th:each="foundVO : ${recentFoundList}"
+          th:href="@{/api/found/detail/{atcId}(atcId=${foundVO.atcId})}"
+          class="post-card">
+
+          <div class="post-top">
+            <div class="post-tags">
+              <span class="badge badge-found">습득</span>
+
+              <span class="${foundVO.prdtClNm}">기타</span>
+            </div>
+
+              <span class="status"
+                th:classappend="${foundVO.done==1 ? 'status-done' : 'status-progress'}"
+                th:text="${foundVO.done == 1 ? '✓ 완료' : '○ 진행중'}">
+                  ○ 진행중
+              </span>
+          </div>
+          <h4 th:text="${foundVO.fdPrdtNm}">습득물 제목</h4>
+
+          <p th:text="${foundVO.fdSbjt}">습득물 내용</p>
+
+          <div class="post-bottom">
+            <div class="post-meta">
+              <span th:text="${foundVO.id !=null 
+                and !#strings.isEmpty(#strings.trim(foundVO.id))
+                ? #strings.trim(foundVO.id) : foundVO.depPlace
+                }">
+                작성자
+              </span>
+
+              <span th:text="${foundVO.fdYmd !=null 
+                ? #temporals.format(foundVO.fdYmd, 'yyyy.MM.dd')
+                : '-'}">
+                작성날짜
+              </span>
+            </div>
+          </div>
+        </a>
+
+        <p class="empty-text"
+          th:if="${recentFoundList == null
+            or #lists.isEmpty(recentFoundList)}">
+          등록된 습득물이 없습니다.
+        </p>
+
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h3 class="section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 17l6-6 4 4 8-8"></path>
+            <path d="M14 7h7v7"></path>
+          </svg>
+          최근 분실물
+        </h3>
+        <a th:href="@{/api/lost}" class="more">더보기 →</a>
+      </div>
+
+      <div class="post-grid">
+        <a 
+          th:each="lostVO : ${recentLostList}"
+          th:href="@{/api/lost/detail/{atcId}(atcId=${lostVO.atcId})}"
+          class="post-card">
+
+          <div class="post-top">
+            <div class="post-tags">
+              <span class="badge badge-lost">분실</span>
+
+              <span class="${lostVO.prdtClNm}">기타</span>
+            </div>
+
+              <span class="status"
+                th:classappend="${lostVO.done==1 ? 'status-done' : 'status-progress'}"
+                th:text="${lostVO.done == 1 ? '✓ 완료' : '○ 진행중'}">
+                  ○ 진행중
+              </span>
+          </div>
+          <h4 th:text="${lostVO.lstPrdtNm}">습득물 제목</h4>
+
+          <p th:text="${lostVO.lstSbjt}">습득물 내용</p>
+
+          <div class="post-bottom">
+            <div class="post-meta">
+              <span th:text="${lostVO.id !=null 
+                and !#strings.isEmpty(#strings.trim(lostVO.id))
+                ? #strings.trim(lostVO.id) : lostVO.lstPlace
+                }">
+                작성자
+              </span>
+
+              <span th:text="${lostVO.lstYmd !=null 
+                ? #temporals.format(lostVO.lstYmd, 'yyyy.MM.dd')
+                : '-'}">
+                작성날짜
+              </span>
+            </div>
+          </div>
+        </a>
+
+        <p class="empty-text"
+          th:if="${recentLostList == null
+            or #lists.isEmpty(recentLostList)}">
+          등록된 분실물이 없습니다.
+        </p>     
+
+      </div>
+    </section>
+  </main>
+
+  <div th:replace="layout/footer :: footerFragment"></div>
+
+</body>
+<script>
+    // 1. 페이지가 로드되면 실행되는 함수 (쿠키 확인 후 팝업 숨김)
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('.main-notice-popup').forEach(function(popup) {
+            const num = popup.id.replace('popup-window-', '');
+            // 해당 공지사항 번호로 된 '그만보기' 쿠키가 있다면 화면에서 숨김
+            if (getNoticeCookie("done-popup-" + num) === "true") {
+                popup.style.display = "none";
+            }
+        });
+    });
+
+    // 2. 닫기 버튼 클릭 시 실행되는 함수 (쿠키 저장 및 창 숨기기)
+    function closeNoticePopup(num) {
+        const checkElement = document.getElementById('cookie-check-' + num);
+        if (checkElement && checkElement.checked) {
+            setNoticeCookie("done-popup-" + num, "true", 1);
+        }
+        
+        const popupElement = document.getElementById('popup-window-' + num);
+        if (popupElement) {
+            // display: none 대신 투명하게 숨겨서 자리를 유지시킵니다.
+            popupElement.style.visibility = "hidden"; 
+        }
+    }
+
+    // 3. 쿠키 설정 함수 (만료 날짜 계산 포함)
+    function setNoticeCookie(name, value, days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        document.cookie = name + "=" + value + "; expires=" + date.toUTCString() + "; path=/";
+    }
+
+    // 4. 저장된 쿠키 읽어오는 함수
+    function getNoticeCookie(name) {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for(let i = 0; i < ca.length; i++) {
+            let c = ca[i].trim();
+            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+</script>
+
+</html>

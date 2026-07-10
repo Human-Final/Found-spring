@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>습득 게시글 상세조회 | 분실물 센터</title>
+
+  <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <link rel="stylesheet" th:href="@{/css/board/detail.css}">
+
+</head>
+
+<body class="found-board">
+
+<div th:replace="~{layout/header :: headerFragment}"></div>
+
+<main class="detail-page">
+
+  <section class="detail-hero">
+    <div>
+      <h2>습득 게시판 상세조회</h2>
+      <p>습득한 물건의 상세 정보를 확인하세요</p>
+    </div>
+
+    <div class="breadcrumb">
+      <span>홈</span>
+      <span>›</span>
+      <span>습득 게시판</span>
+      <span>›</span>
+      <span>상세조회</span>
+    </div>
+  </section>
+
+  <section class="detail-card">
+
+    <div class="detail-top">
+
+      <div class="detail-main">
+
+        <div class="tag-group">
+          <span class="type-tag found">습득</span>
+          <span class="category-tag" th:text="${foundVO.prdtClNm}">카테고리</span>
+
+          <span th:if="${foundVO.done == 0}" class="status-tag progress">진행중</span>
+          <span th:if="${foundVO.done == 1}" class="status-tag done">완료</span>
+        </div>
+
+        <h1 class="detail-title"
+            th:text="${foundVO.fdPrdtNm}">
+          제목
+        </h1>
+
+        <div class="info-box">
+
+          <div class="info-column">
+            <div class="info-row">
+              <span class="info-label">물품명</span>
+              <span class="info-value" th:text="${foundVO.fdPrdtNm}">반지갑</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">색상명</span>
+              <span class="info-value" th:text="${foundVO.clrNm}">검정색</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">습득지역</span>
+              <span class="info-value" th:text="${foundVO.depPlace}">서울특별시 강남구 역삼동</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">습득일자</span>
+              <span class="info-value"
+                    th:text="${#temporals.format(foundVO.fdYmd, 'yyyy-MM-dd')}">
+                2026-06-21 14:30
+              </span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">보관장소</span>
+              <span class="info-value" th:text="${foundVO.depPlace}">보관장소</span>
+            </div>
+          </div>
+
+          <div class="info-column">
+            <div class="info-row">
+              <span class="info-label">작성자</span>
+              <span class="info-value"
+                    th:text="${foundVO.id != null ? foundVO.id : '기관/API'}">
+                홍길동
+              </span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">처리상태</span>
+              <span class="info-value">
+                <span th:if="${foundVO.done == 0}" class="status-tag progress">진행중</span>
+                <span th:if="${foundVO.done == 1}" class="status-tag done">완료</span>
+              </span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">조회수</span>
+              <span th:text="${foundVO.viewCount!=0 ? foundVO.viewCount : 0}">0</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">물품분류</span>
+              <span class="info-value" th:text="${foundVO.prdtClNm}">지갑</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">데이터출처</span>
+              <span class="info-value"
+                    th:text="${foundVO.dataSource == 'user' ? '사용자 등록글' : (foundVO.dataSource == 'police' ? '경찰청 API' : '포털기관 API')}">
+                사용자 등록글
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-box">         
+          <p class="detail-summary"
+            th:text="${foundVO.fdSbjt}">
+            내용
+          </p>  
+        </div>
+
+      </div>
+
+      <aside class="detail-image-area">
+        <!-- 첨부파일이 있는 경우 : 리스트로 받아서 슬라이드-->
+        <div th:if="${foundVO.dataSource == 'user'
+                  and foundVO.fileList != null
+                  and not #lists.isEmpty(foundVO.fileList)}"
+             class="media-slider"
+             id="mediaSlider">
+
+          <div class="media-track">
+        
+            <div th:each="file, stat : ${foundVO.fileList}"
+                 th:if="${file.saveName != null and file.saveName != ''}"
+                 th:with="fileName=${file.saveName == null 
+                          ? '' 
+                          : #strings.toLowerCase(file.saveName)}"
+                 class="media-slide"
+                 th:classappend="${stat.index == 0} ? ' active' : ''">
+
+              <!-- 이미지 -->
+              <img th:if="${file.saveName != null and file.saveName != ''
+                          and (#strings.endsWith(fileName, '.jpg')
+                          or #strings.endsWith(fileName, '.jpeg')
+                          or #strings.endsWith(fileName, '.png')
+                          or #strings.endsWith(fileName, '.gif')
+                          or #strings.endsWith(fileName, '.webp'))}"
+                    th:src="@{'/images/found/' + ${file.saveName}}"
+                    th:alt="${file.saveName}"
+                    class="slide-media">
+
+              <!-- 동영상 -->
+              <div th:if="${file.saveName != null and file.saveName != ''
+                        and (#strings.endsWith(fileName, '.mp4')
+                        or #strings.endsWith(fileName, '.webm')
+                        or #strings.endsWith(fileName, '.mov'))}"
+                    class="video-wrap">
+
+                <video class="slide-media slide-video"
+                       preload="metadata"
+                       controls>
+                  <source th:src="@{'/images/found/' + ${file.saveName}}">
+                    브라우저가 동영상을 지원하지 않습니다
+                </video>
+
+                <div class="video-hint">동영상을 클릭해 재생하세요</div>
+              </div>              
+            </div>
+          
+            <button type="button"
+                    class="slide-btn prev-btn"
+                    th:if="${#lists.size(foundVO.fileList) > 1}">
+              ‹
+            </button>
+
+            <button type="button"
+                    class="slide-btn next-btn"
+                    th:if="${#lists.size(foundVO.fileList) > 1}">
+              ›
+            </button>
+
+            <div class="slide-counter"
+                th:if="${#lists.size(foundVO.fileList) > 1}">
+              <span id="currentSlide">1</span>
+              /
+              <span th:text="${#lists.size(foundVO.fileList)}">1</span>
+            </div>
+          </div>
+        </div>  
+
+        <!-- 업로드 첨부파일이 없고 API/XML 이미지가 있는 경우 -->
+        <div th:if="${foundVO.dataSource != 'user'
+                    and foundVO.fdFilepathImg != null
+                    and foundVO.fdFilepathImg != ''}"
+            class="image-box has-image">
+
+          <img th:src="${foundVO.fdFilepathImg}"
+               alt="습득물 이미지">
+        </div>
+
+        <!-- 아무 이미지도 없는 경우 -->
+        <div th:if="${(foundVO.dataSource != 'user'
+                      and (foundVO.fdFilepathImg == null or foundVO.fdFilepathImg == ''))
+                    or (foundVO.dataSource == 'user'
+                      and (foundVO.fileList == null or #lists.isEmpty(foundVO.fileList))
+                      and (foundVO.fdFilepathImg == null or foundVO.fdFilepathImg == ''))}"
+            class="image-box no-image-box">
+          <span class="no-image">등록된 이미지가 없습니다</span>
+        </div>
+
+        <p class="image-caption"
+          th:if="${(foundVO.fileList != null and not #lists.isEmpty(foundVO.fileList))
+                or (foundVO.fdFilepathImg != null and foundVO.fdFilepathImg != '')}">
+          등록된 첨부파일
+        </p>
+
+      </aside>
+
+    </div>
+
+    <section class="map-section">
+      <h3 class="section-title">위치 정보</h3>
+
+      <div class="map-box">
+        <div id="kakaoMap"></div>
+        <div id="mapMessage" class="map-message">
+            위치 정보를 표시할 수 없습니다.
+        </div>
+      </div>
+
+      <p class="map-address"
+         th:text="|지도 기준 위치: ${foundVO.depPlace}|">
+        지도 기준 위치: 보관장소
+      </p>
+    </section>
+
+    <div class="detail-actions">
+
+      <a th:href="@{/api/found}" class="detail-btn list-btn">
+        ← 목록으로
+      </a>
+
+      <!-- 문의하기 : 사용자 등록글 + 본인 글이 아닐 때만 -->
+      <form th:if="${#authorization.expression('isAuthenticated()')
+                    and foundVO.dataSource == 'user'}"
+            th:action="@{/chat/found/{num}(num=${foundVO.num})}"
+            method="post">
+
+        <button type="submit" class="detail-btn chat-btn"
+                th:text="${foundVO.id == #authentication.name ? '채팅목록' : '채팅하기'}">
+          채팅하기
+        </button>
+      </form>
+      
+      <!-- 작성자 본인만 수정 가능-->
+      <th:block th:if="${#authorization.expression('isAuthenticated()') 
+                        and foundVO.dataSource == 'user' 
+                        and foundVO.id == #authentication.name}">
+
+        <a th:href="@{/api/found/detail/{atcId}/edit(atcId=${foundVO.atcId})}"
+           class="detail-btn edit-btn">
+          수정하기
+        </a>
+      </th:block>
+
+      <form class="delete-form"
+            th:if="${#authorization.expression('hasRole(''ADMIN'')')
+                    or #authorization.expression('hasRole(''MANAGER'')')
+                    or (#authorization.expression('isAuthenticated()')
+                        and foundVO.dataSource == 'user'
+                        and foundVO.id == #authentication.name)}"
+            th:action="@{/api/found/{atcId}(atcId=${foundVO.atcId})}"
+            method="post"
+            th:data-admin="${#authorization.expression('hasRole(''ADMIN'')')
+                             or #authorization.expression('hasRole(''MANAGER'')')}"
+            onsubmit="return validatePostDelete(this);">
+        
+          <input type="hidden" name="_method" value="delete">  
+        
+          <div class="post-delete-password-area"
+               th:classappend="${errorMessage == null ? ' is-hidden' : ''}">
+            
+            <label for="postDeletePasswordInput">비밀번호 확인</label>
+          
+            <input type="password"
+                   id="postDeletePasswordInput"
+                   name="password"
+                   class="post-delete-password-input"
+                  placeholder="비밀번호 입력"
+                  autocomplete="current-password">
+
+            <p class="post-delete-error"
+               th:if="${errorMessage != null}"
+               th:text="${errorMessage}">
+              비밀번호가 일치하지 않습니다.
+            </p>
+         </div>
+
+        <button type="submit" 
+                class="detail-btn delete-btn post-delete-btn"
+                th:text="${errorMessage !=null ? '비밀번호 확인 후 삭제' : '삭제하기'}">
+          삭제하기
+        </button>
+      </form>
+    </div>
+
+    <!-- 댓글 영역 -->
+    <section class="comment-section">
+      <h3 class="section-title">댓글</h3>
+
+      <form th:if="${#authorization.expression('isAuthenticated()')}"
+            th:action="@{/api/found/{num}/comments(num=${foundVO.num})}"
+            method="post"
+            class="comment-form">
+          
+          <input type="hidden" 
+                 name="atcId" 
+                 th:value="${foundVO.atcId}">
+
+          <input type="hidden"
+                name="dataSource"
+                th:value="${foundVO.dataSource}">
+
+          <textarea name="content"
+                    placeholder="댓글은 500자까지 입력 가능합니다."
+                    maxlength="500"
+                    required></textarea>
+
+          <button type="submit">등록</button>
+      </form>
+
+      <p th:if="${!#authorization.expression('isAuthenticated()')}"
+         class="comment-login-message">
+        댓글을 작성하려면 로그인이 필요합니다.
+      </p>
+
+      <div class="comment-list">
+
+        <p th:if="${commentList == null or #lists.isEmpty(commentList)}"
+           class="no-comment">
+          등록된 댓글이 없습니다.
+        </p>
+
+        <div th:each="comment : ${commentList}"
+             class="comment-item">
+
+          <div class="comment-head">
+            <strong th:text="${comment.id}">작성자</strong>
+
+            <span th:text="${#temporals.format(comment.updatedAt, 'yyyy-MM-dd HH:mm')}">
+              작성 시간
+            </span>
+          </div>
+
+          <p class="comment-content"
+             th:text="${comment.content}">
+            댓글 내용
+          </p>
+
+          <form th:if="${#authentication.name == comment.id}"
+                th:action="@{/api/found/comments/{commentNum}/update(commentNum=${comment.commentNum})}"
+                method="post"
+                class="comment-update-form is-hidden">
+
+            <input type="hidden" name="atcId" th:value="${foundVO.atcId}">
+
+            <textarea name="content"
+                      class="comment-update-textarea"
+                      rows="3"
+                      maxlength="500"
+                      th:text="${comment.content}"
+                      required>
+              </textarea>
+
+            <button type="submit" class="comment-update-btn">
+              수정완료
+            </button>
+          </form>
+
+          <div class="comment-actions"
+               th:if="${#authentication.name == comment.id
+                     or #authorization.expression('hasRole(''ADMIN'')')
+                     or #authorization.expression('hasRole(''MANAGER'')')}">
+
+            <button type="button"
+                    class="comment-edit-toggle-btn"
+                    th:if="${#authentication.name == comment.id}"
+                    th:action="@{/api/found/detail/{atcId}/edit(atcId=${foundVO.atcId})}"
+                    >
+              수정
+            </button>
+
+            <form th:action="@{/api/found/comments/{commentNum}/delete(commentNum=${comment.commentNum})}"
+                  method="post"
+                  onsubmit="return confirm('댓글을 삭제하시겠습니까?')">
+
+              <input type="hidden" name="atcId" th:value="${foundVO.atcId}">
+
+              <button type="submit" class="comment-delete-btn">
+                삭제
+              </button>
+            </form>
+
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </section>
+
+</main>
+
+<div th:replace="~{layout/footer :: footerFragment}"></div>
+
+<script th:inline="javascript">
+  function validatePostDelete(form){
+    const passwordArea = form.querySelector(".post-delete-password-area");
+    const passwordInput = form.querySelector(".post-delete-password-input");
+    const deleteBtn = form.querySelector(".post-delete-btn");
+    const isAdmin = form.dataset.admin === "true";
+
+    if(isAdmin){
+      return confirm("정말 게시글을 삭제하시겠습니까?");
+    }
+
+    if(passwordArea.classList.contains("is-hidden")){
+      passwordArea.classList.remove("is-hidden")
+      passwordInput.focus();
+      deleteBtn.textContent = "비밀번호 확인 후 삭제";
+      return false;
+    }
+
+    const password = passwordInput.value.trim();
+
+    if(password === ""){
+      alert("비밀번호를 입력해 주세요.")
+      passwordInput.focus();
+      return false;
+    }
+
+    return confirm("게시글을 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.")
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const editButtons = document.querySelectorAll(".comment-edit-toggle-btn");
+
+    editButtons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        const commentItem = button.closest(".comment-item");
+        const updateForm = commentItem.querySelector(".comment-update-form");
+
+        if (!updateForm) {
+          return;
+        }
+
+        updateForm.classList.toggle("is-hidden");
+        button.textContent = updateForm.classList.contains("is-hidden")
+          ? "수정"
+          : "취소";
+      });
+    });
+  });
+
+</script>
+
+<!-- 카카오맵 SDK -->
+<script
+  type="text/javascript"
+  th:src="|//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoMapJsKey}&libraries=services&autoload=false|">
+</script>
+
+<script th:inline="javascript">
+  /* Kakao Map
+    - foundVO.depPlace 값을 기준으로 지도 표시
+    - 1차: 주소 검색
+    - 2차: 키워드 검색
+    - 실패 시: "위치 정보를 표시할 수 없습니다." */
+  document.addEventListener("DOMContentLoaded", function () {
+    const mapAddress = String(/*[[${foundVO.depPlace}]]*/ "").trim();
+
+    const mapContainer = document.getElementById("kakaoMap");
+    const mapMessage = document.getElementById("mapMessage");
+
+    function showMapMessage(message) {
+      if (mapContainer) {
+        mapContainer.style.display = "none";
+      }
+
+      if (mapMessage) {
+        mapMessage.textContent = message;
+        mapMessage.style.display = "flex";
+      }
+    }
+
+    function hideMapMessage() {
+      if (mapContainer) {
+        mapContainer.style.display = "block";
+      }
+
+      if (mapMessage) {
+        mapMessage.style.display = "none";
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    if (!mapContainer || !mapMessage) {
+      console.error("카카오맵 영역 또는 메시지 영역을 찾을 수 없습니다.");
+      return;
+    }
+
+    if (!mapAddress) {
+      showMapMessage("위치 정보를 표시할 수 없습니다.");
+      return;
+    }
+
+    if (!window.kakao || !kakao.maps) {
+      showMapMessage("카카오맵을 불러올 수 없습니다.");
+      console.error("kakao.maps 객체가 없습니다. SDK 로드 여부를 확인하세요.");
+      return;
+    }
+
+    kakao.maps.load(function () {
+      const geocoder = new kakao.maps.services.Geocoder();
+      const places = new kakao.maps.services.Places();
+
+      geocoder.addressSearch(mapAddress, function (result, status) {
+        if (status === kakao.maps.services.Status.OK && result.length > 0) {
+          drawMap(result[0].y, result[0].x, "습득 위치", mapAddress);
+          return;
+        }
+
+        places.keywordSearch(mapAddress, function (data, status) {
+          if (status !== kakao.maps.services.Status.OK || data.length === 0) {
+            showMapMessage("위치 정보를 표시할 수 없습니다.");
+            return;
+          }
+
+          const place = findBestPlace(data, mapAddress);
+
+          drawMap(
+            place.y,
+            place.x,
+            place.place_name || "습득 위치",
+            place.road_address_name || place.address_name || mapAddress
+          );
+        });
+      });
+
+      function findBestPlace(data, keyword) {
+        const normalizedKeyword = keyword.replace(/\s/g, "");
+
+        return data.find(function (place) {
+          const placeName = String(place.place_name || "").replace(/\s/g, "");
+          return placeName.includes(normalizedKeyword);
+        }) || data[0];
+      }
+
+      function drawMap(lat, lng, title, address) {
+        hideMapMessage();
+
+        const coords = new kakao.maps.LatLng(Number(lat), Number(lng));
+
+        const map = new kakao.maps.Map(mapContainer, {
+          center: coords,
+          level: 4
+        });
+
+        const marker = new kakao.maps.Marker({
+          map: map,
+          position: coords
+        });
+
+        const infowindow = new kakao.maps.InfoWindow({
+          content:
+            '<div style="min-width:180px;text-align:center;padding:8px 10px;font-size:12px;line-height:1.4;">' +
+              '<strong style="display:block;color:#0f172a;">' + escapeHtml(title) + '</strong>' +
+              '<span style="display:block;margin-top:3px;color:#64748b;font-weight:700;">' + escapeHtml(address) + '</span>' +
+            '</div>'
+        });
+
+        infowindow.open(map, marker);
+
+        map.setCenter(coords);
+
+        setTimeout(function () {
+          map.relayout();
+          map.setCenter(coords);
+        }, 100);
+      }
+    });
+  });
+
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const slider = document.querySelector("#mediaSlider");
+
+    if(!slider){
+      return;
+    }
+
+    const slides = slider.querySelectorAll(".media-slide");
+    const prevBtn = slider.querySelector(".prev-btn");
+    const nextBtn = slider.querySelector(".next-btn");
+    const currentSlide = slider.querySelector("#currentSlide");
+
+    if(slides.length === 0){
+      return;
+    }
+
+    let currentIndex = 0;
+    let autoTimer = null;
+    const AUTO_DELAY = 1000;
+
+    function pauseAllVideos(){
+      slider.querySelectorAll("video").forEach(video => {
+        video.pause();
+      });
+    }
+
+    function updateCounter(){
+      if(currentSlide){
+        currentSlide.textContent = currentIndex + 1;
+      }
+    }
+
+    function showSlide(nextIndex){
+      pauseAllVideos();
+
+      slides[currentIndex].classList.remove("active");
+
+      currentIndex = nextIndex;
+
+      if(currentIndex < 0){
+        currentIndex = slides.length -1;
+      }
+
+      if(currentIndex >= slides.length){
+        currentIndex = 0;
+      }
+
+      slides[currentIndex].classList.add("active");
+      updateCounter();
+    }
+
+    function nextSlide(){
+      showSlide(currentIndex + 1);
+    }
+
+    function prevSlide(){
+      showSlide(currentIndex -1);
+    }
+
+    function startAutoSlide(){
+      stopAutoSlide();
+
+      if(slides.length <= 1){
+        return;
+      }
+
+      autoTimer = setInterval(() => {
+        nextSlide();
+      }, AUTO_DELAY);
+    }
+
+    function stopAutoSlide(){
+      if(autoTimer){
+        clearInterval(autoTimer);
+        autoTimer = null;
+      }
+    }
+
+    if(nextBtn){
+      nextBtn.addEventListener("click", () => {
+          nextSlide();
+          startAutoSlide();
+      });
+    }
+
+    if(prevBtn){
+      prevBtn.addEventListener("click", () => {
+          prevSlide();
+          startAutoSlide();
+      });
+    }
+
+    slider.querySelectorAll("video").forEach(video => {
+      video.addEventListener("play", () => {
+        stopAutoSlide();
+      });
+
+      video.addEventListener("ended", () => {
+        nextSlide();
+        startAutoSlide();
+      });
+    });
+
+    updateCounter();
+    startAutoSlide();
+  });
+</script>
+
+</body>
+</html>

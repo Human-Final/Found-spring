@@ -1,0 +1,253 @@
+.auth-page {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 60px;
+}
+
+.login-modal {
+  width: 420px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.16);
+  overflow: hidden;
+}
+
+.login-header {
+  height: 62px;
+  padding: 0 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.login-header h2 {
+  font-size: 17px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.close-btn {
+  color: #64748b;
+  font-size: 24px;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.tab-menu {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 48px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tab-menu a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  border-bottom: 2px solid transparent;
+}
+
+.tab-menu a.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+}
+
+.login-content {
+  padding: 22px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.input-wrap {
+  position: relative;
+}
+
+.input-wrap input {
+  width: 100%;
+  height: 44px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0 14px;
+  outline: none;
+  font-size: 14px;
+  color: #0f172a;
+  background: #f8fafc;
+}
+
+.input-wrap input:focus {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.input-wrap input::placeholder {
+  color: #94a3b8;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+}
+
+.login-submit {
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.login-submit:hover {
+  background: #1d4ed8;
+}
+
+/* 회원탈퇴/안내 메시지 */
+.alert-message {
+  margin-bottom: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #dcfce7;
+  border: 1px solid #16a34a;
+  color: #166534;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+/* 로그인 버튼 아래의 아이디 찾기, 비밀번호 찾기 버튼 */
+.login-helper {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.login-helper a {
+  color: #666;
+  text-decoration: none;
+}
+
+.login-helper a:hover {
+  text-decoration: underline;
+}
+
+.login-helper .divider {
+  margin: 0 10px;
+  color: #ccc;
+  font-size: 12px;
+}
+
+/* 휴면 계정 해제 모달*/
+.dormant-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.dormant-modal {
+  width: 420px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.dormant-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #eee;
+}
+
+.dormant-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.dormant-close-btn {
+  font-size: 28px;
+  line-height: 1;
+  color: #999;
+  text-decoration: none;
+}
+
+.dormant-modal-body {
+  padding: 24px;
+}
+
+.dormant-message {
+  margin: 0 0 18px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.dormant-code-input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.dormant-code-input:focus {
+  outline: none;
+  border-color: #4f7cff;
+}
+
+.dormant-submit-btn {
+  width: 100%;
+  height: 48px;
+  margin-top: 14px;
+  border: none;
+  border-radius: 8px;
+  background: #222;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dormant-submit-btn:hover {
+  background: #111;
+}
+
+.dormant-sub-text {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #777;
+}

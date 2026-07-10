@@ -1,0 +1,60 @@
+# ==========================================
+# Gradle & Build Output
+# ==========================================
+.gradle
+.gradletasknamecache
+build/
+**/build/
+!**/src/**/build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Gradle Wrapper
+gradle-app.setting
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+!gradle/wrapper/gradle-wrapper.jar
+
+# ==========================================
+# IDEs (STS, Eclipse, IntelliJ, VS Code)
+# ==========================================
+
+### STS & Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+# 암호화를 위해 비밀번호가 들어간 파일은 깃에서 제외
+src/main/resources/application-jasypt.properties
+
+# 이것도 제외하는게 가장 마음이 편합니다..
+application.properties
+
+# 카카오맵 인증키
+application.yml
