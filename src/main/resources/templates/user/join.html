@@ -50,7 +50,7 @@
                             minlength="4"
                             pattern="^[a-zA-Z0-9_]{4,20}$"
                             title="아이디는 영문과 숫자, _(언더바)만 사용 가능하며 4~20자로 입력해주세요."
-                            placeholder="영문, 숫자 4~20자"
+                            placeholder="영문, 숫자 4~20자, _(언더바) 사용 가능"
                             oninput="resetIdCheck(); validateIdFormat();">
 
                         <button type="button"
@@ -225,7 +225,7 @@
         }
 
         if (!idRegex.test(id)) {
-            result.innerText = "아이디는 영문, 숫자, _(언더바)만 사용할 수 있습니다.";
+            result.innerText = "아이디는 영문과 숫자, _(언더바)만 사용 가능하며 4~20자로 입력해주세요.";
             result.style.color = "red";
             return false;
         }
@@ -238,7 +238,7 @@
     function checkId() {
         const id = document.getElementById("id").value;
         const result = document.getElementById("idCheckResult");
-        const idRegex = /^[a-zA-Z0-9_]+$/;
+        const idRegex = /^[a-zA-Z0-9_]{4,20}$/;
 
         if (id.trim() === "") {
             alert("아이디를 입력하세요.");
@@ -250,10 +250,10 @@
         }
 
         if (!idRegex.test(id)) {
-            alert("아이디는 영문, 숫자, _(언더바)만 사용할 수 있습니다.");
+            alert("아이디는 영문과 숫자, _(언더바)만 사용 가능하며 4~20자로 입력해주세요.");
             isIdChecked = false;
             isIdAvailable = false;
-            result.innerText = "아이디는 영문, 숫자, _(언더바)만 사용할 수 있습니다.";
+            result.innerText = "아이디는 영문과 숫자, _(언더바)만 사용 가능하며 4~20자로 입력해주세요.";
             result.style.color = "red";
             return;
         }
@@ -378,11 +378,11 @@
 
     function validateJoinForm() {
         const id = document.getElementById("id").value;
-        const idRegex = /^[a-zA-Z0-9]+$/;
+        const idRegex = /^[a-zA-Z0-9_]{4,20}$/;
         const nameInput = document.getElementById("userName");
 
         if (!idRegex.test(id)) {
-            alert("아이디는 영문, 숫자, _(언더바)만 사용할 수 있습니다.");
+            alert("아이디는 영문과 숫자, _(언더바)만 사용 가능하며 4~20자로 입력해주세요.");
             return false;
         }
 

@@ -588,6 +588,7 @@
   });
 </script>
 
+<!-- 첨부파일 이미지 슬라이드 -->
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const slider = document.querySelector("#mediaSlider");
@@ -607,7 +608,8 @@
 
     let currentIndex = 0;
     let autoTimer = null;
-    const AUTO_DELAY = 1000;
+    const IMAGE_DELAY = 1000;
+    const VIDEO_DELAY = 3000;
 
     function pauseAllVideos(){
       slider.querySelectorAll("video").forEach(video => {
@@ -619,6 +621,13 @@
       if(currentSlide){
         currentSlide.textContent = currentIndex + 1;
       }
+    }
+
+    function getCurrentDelay() {
+      const currentSlideEl = slides[currentIndex];
+      const hasVideo = currentSlideEl.querySelector("video") !== null;
+
+      return hasVideo ? VIDEO_DELAY : IMAGE_DELAY;
     }
 
     function showSlide(nextIndex){
@@ -655,14 +664,15 @@
         return;
       }
 
-      autoTimer = setInterval(() => {
+      autoTimer = setTimeout(() => {
         nextSlide();
-      }, AUTO_DELAY);
+        startAutoSlide();
+      }, getCurrentDelay());
     }
 
     function stopAutoSlide(){
       if(autoTimer){
-        clearInterval(autoTimer);
+        clearTimeout(autoTimer);
         autoTimer = null;
       }
     }

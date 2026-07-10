@@ -1,6 +1,7 @@
 package com.human.found.infrastructure.police.foundPolicePortal.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,72 +16,136 @@ import com.human.found.infrastructure.police.foundPolicePortal.vo.FoundPortalApi
 
 import lombok.RequiredArgsConstructor;
 
+
+
 @Service
 @RequiredArgsConstructor
 public class FoundPortalTxService {
 
     private final FoundPortalMapper foundPortalMapper;
     private final FoundPoliceMapper foundPoliceMapper;
+    private static final int BATCH_SIZE = 500;
 
     @Transactional
-    public int replaceFoundPortalItems(List<FoundPortalApiItemVO> items, LocalDate today, LocalDate sixMonthsAgo) {
+    public int upsertFoundPortalItems(
+            List<FoundPortalApiItemVO> items, 
+            LocalDate today, 
+            LocalDate sixMonthsAgo) {
 
-        foundPortalMapper.deleteAllFoundPortal();
+        // foundPortalMapper.deleteAllFoundPortal();
 
-        int insertCount = 0;
-
-        Set<String> insertedAtcIds = new HashSet<>();
-
-        for (FoundPortalApiItemVO item : items) {
-
-            if (item.getAtcId() == null || item.getAtcId().trim().isEmpty()) {
-                continue;
-            }
-
-            String atcId = item.getAtcId().trim();
-
-            if (!insertedAtcIds.add(atcId)) {
-                continue;
-            }
-
-            if (item.getFdYmd() == null || item.getFdYmd().trim().isEmpty()) {
-                continue;
-            }
-
-            LocalDate fdYmd;
-
-            try {
-                fdYmd = LocalDate.parse(item.getFdYmd());
-            } catch (Exception e) {
-                System.out.println("날짜 파싱 실패 fdYmd = " + item.getFdYmd());
-                continue;
-            }
-
-            if (fdYmd.isBefore(sixMonthsAgo) || fdYmd.isAfter(today)) {
-                continue;
-            }
-
-            FoundVO foundVO = new FoundVO();
-
-            foundVO.setAtcId(atcId);
-            foundVO.setClrNm(item.getClrNm());
-            foundVO.setDepPlace(item.getDepPlace());
-            foundVO.setFdFilepathImg(item.getFdFilepathImg());
-            foundVO.setFdPrdtNm(item.getFdPrdtNm());
-            foundVO.setFdSbjt(item.getFdSbjt());
-            foundVO.setFdYmd(fdYmd.atStartOfDay());
-            String originalPrdtClNm = item.getPrdtClNm(); //카테고리 기본형태 대분류>소분류 임시저장
-            foundVO.setPrdtClNm(getCategoryLabel(originalPrdtClNm)); //임시저장에서 메서드 활용 대분류 걸러내기
-            foundVO.setPrdtCategory(getSubCategoryLabel(originalPrdtClNm)); //임시저장에서 메서드 활용 소분류 걸러내기
-
-            foundVO.setDone(hasCompleteMark(item.getFdSbjt()) ? 1 : 0);
-
-            foundPortalMapper.insertFoundPortal(foundVO);
-
-            insertCount++;
+        List<FoundVO> foundList = convertItems(items, today, sixMonthsAgo);
+        
+        if(foundList.isEmpty()){
+            return 0;
         }
 
-        return insertCount;
+        int saveCount = 0;
+
+        for (int i = 0; i < foundList.size(); i += BATCH_SIZE) {
+            
+            int end = Math.min(i + BATCH_SIZE, foundList.size());
+
+            List<FoundVO> batchList = foundList.subList(i, end);
+
+            foundPortalMapper.upsertFoundPortal(batchList);
+            saveCount += batchList.size();
+        }
+
+        // upsert가 정상 완료된 뒤 오래된 데이터 삭제
+        foundPortalMapper.markOldFoundPortalDeleted(sixMonthsAgo.atStartOfDay());
+
+        return saveCount;
+    }
+
+    // API item 목록을 저장용 FoundVO 목록으로 변환
+    private List<FoundVO> convertItems(
+            List<FoundPortalApiItemVO> items,
+            LocalDate today,
+            LocalDate sixMonthsAgo) {
+
+        List<FoundVO> foundList = new ArrayList<>();
+        Set<String> insertedAtcIds = new HashSet<>();
+
+        if (items == null || items.isEmpty()) {
+            return foundList;
+        }
+
+        for (FoundPortalApiItemVO item : items) {
+            FoundVO foundVO = convertToFoundVO(item, today, sixMonthsAgo);
+
+            if (foundVO == null) {
+                continue;
+            }
+
+            if (!insertedAtcIds.add(foundVO.getAtcId())) {
+                continue;
+            }
+
+            foundList.add(foundVO);
+        }
+
+        return foundList;
+    }
+
+    // API item 1건을 FoundVO 1건으로 반환
+    private FoundVO convertToFoundVO(
+            FoundPortalApiItemVO item,
+            LocalDate today,
+            LocalDate sixMonthsAgo){
+
+        if(item == null){
+            return null;
+        }
+
+        if (item.getAtcId() == null || item.getAtcId().trim().isEmpty()) {
+            return null;
+        }
+    
+        if (item.getFdYmd() == null || item.getFdYmd().trim().isEmpty()) {
+            return null;
+        }
+
+        String atcId = item.getAtcId().trim();
+
+        LocalDate fdYmd;
+
+        try{
+            fdYmd = LocalDate.parse(item.getFdYmd().trim());
+        }catch (Exception e){
+            System.out.println("날짜 피싱 실패 fdYmd = " + item.getFdYmd());
+            return null;
+        }
+
+        if(fdYmd.isBefore(sixMonthsAgo) || fdYmd.isAfter(today)){
+            return null;
+        }
+
+        FoundVO foundVO = new FoundVO();
+
+        foundVO.setAtcId(atcId);
+        foundVO.setClrNm(item.getClrNm());
+        foundVO.setDepPlace(item.getDepPlace());
+        foundVO.setFdFilepathImg(item.getFdFilepathImg());
+        foundVO.setFdPrdtNm(item.getFdPrdtNm());
+        foundVO.setFdSbjt(item.getFdSbjt());
+        foundVO.setFdYmd(fdYmd.atStartOfDay());
+        
+        // 카테고리 기본형태 대분류>소분류 임시저장
+        String originalPrdtClNm = item.getPrdtClNm(); 
+
+        // 대분류
+        foundVO.setPrdtClNm(getCategoryLabel(originalPrdtClNm)); 
+
+        // 소분류
+        foundVO.setPrdtCategory(getSubCategoryLabel(originalPrdtClNm)); 
+
+        // 제목(물품명)에 '완료'가 있으면 완료 처리
+        boolean isDone = hasCompleteMark(item.getFdPrdtNm());
+
+        foundVO.setDone((isDone ? 1 : 0));
+
+        return foundVO;
     }
 
     @Transactional
@@ -153,9 +218,16 @@ public class FoundPortalTxService {
         return insertCount;
     }
 
-    private boolean hasCompleteMark(String title) {
-        return title != null && title.contains("완료");
-    }
+    private boolean hasCompleteMark(String value) {
+        if (value == null || value.trim().isEmpty()) {
+           return false;
+        }
+
+        String text = value.trim();
+
+        return text.contains("완료")
+                || text.contains("연락");
+    }   
 
     private String getCategoryLabel(String prdtClNm) {
         if (prdtClNm == null || prdtClNm.trim().isEmpty()) {
