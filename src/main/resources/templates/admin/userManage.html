@@ -9,6 +9,7 @@
   <link rel="stylesheet" th:href="@{/css/common/common.css}">
   <link rel="stylesheet" th:href="@{/css/admin/sidebar.css}">
   <link rel="stylesheet" th:href="@{/css/admin/userManage.css}">
+  
 </head>
 
 <body class="admin-user-page"
@@ -157,14 +158,16 @@
           <input type="date"
                  name="startDate"
                  class="filter-date"
-                 th:value="${conditionDTO.startDate}">
+                 th:value="${conditionDTO.startDate}"
+                 th:attr="max=${today}">
 
           <span class="date-separator">~</span>
 
           <input type="date"
                  name="endDate"
                  class="filter-date"
-                 th:value="${conditionDTO.endDate}">
+                 th:value="${conditionDTO.endDate}"
+                 th:attr="max=${today}">
 
           <div class="date-shortcuts">
             
@@ -780,7 +783,7 @@ document.addEventListener("DOMContentLoaded", () => {
     clearInputError(telInput);
 
     const namePattern = /^[가-힣a-zA-Z]{2,20}$/;
-    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$/;
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|kr|net)$/;
     const telPattern = /^010[0-9]{8}$/;
 
     if (name === "") {
@@ -799,7 +802,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (!emailPattern.test(email)) {
-      showInputError(emailInput, "이메일은 영문/숫자 형식이어야 하며 .com으로 끝나야 합니다.");
+      showInputError(emailInput, "이메일은 영문/숫자 형식이어야 하며 .com/.kr/.net으로 끝나야 합니다.");
       return;
     }
 
@@ -1045,13 +1048,13 @@ document.addEventListener("DOMContentLoaded", () => {
     clearInputError(emailInput);
     clearInputError(telInput);
 
-    const idPattern = /^[a-zA-Z0-9]{4,20}$/;
+    const idPattern = /^[a-zA-Z0-9_]{4,20}$/;
     const namePattern = /^[가-힣a-zA-Z]{2,20}$/;
-    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$/;
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|kr|net)$/;
     const telPattern = /^010[0-9]{8}$/;
 
     if (!idPattern.test(id)) {
-      showInputError(idInput, "아이디는 영문/숫자 4~20자로 입력해야 합니다.");
+      showInputError(idInput, "아이디는 영문/숫자/_(언더바)를 사용하여 4~20자로 입력해야 합니다.");
       return;
     }
 
@@ -1079,7 +1082,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (!emailPattern.test(email)) {
-      showInputError(emailInput, "이메일은 영문/숫자 형식이어야 하며 .com으로 끝나야 합니다.");
+      showInputError(emailInput, "이메일은 영문/숫자 형식이어야 하며 .com/.kr/.net으로 끝나야 합니다.");
       return;
     }
 

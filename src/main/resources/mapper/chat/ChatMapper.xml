@@ -18,6 +18,8 @@
         <result property="isDeleted" column="is_deleted"/>
         <result property="userALastRead" column="user_a_last_read"/>
         <result property="userBLastRead" column="user_b_last_read"/>
+        <result property="lastMessage" column="last_message"/>
+        <result property="lastMessageTime" column="last_message_time"/>
     </resultMap>
 
     <!-- 채팅 메시지 + 첨부파일 ResultMap -->
@@ -114,6 +116,9 @@
             cr.user_id_b,
             cr.created_at,
 
+            lm.content AS last_message,
+            lm.created_at AS last_message_time,
+
             CASE
                 WHEN cr.found_num IS NOT NULL AND IFNULL(f.is_deleted, 1) = 0 THEN f.fd_sbjt
                 WHEN cr.lost_num IS NOT NULL AND IFNULL(l.is_deleted, 1) = 0 THEN l.lst_sbjt
@@ -131,24 +136,35 @@
                 ELSE ua.name
             END AS user_name
 
-        FROM chat_room cr
+            FROM chat_room cr
 
-        LEFT JOIN found f
-            ON cr.found_num = f.num
+            LEFT JOIN (
+                SELECT cm1.chat_num,
+                    cm1.content,
+                    cm1.created_at
+                FROM chat_message cm1
+                INNER JOIN (
+                    SELECT chat_num,
+                        MAX(message_num) AS last_message_num
+                    FROM chat_message
+                    GROUP BY chat_num
+                ) cm2
+                ON cm1.chat_num = cm2.chat_num
+                AND cm1.message_num = cm2.last_message_num
+            ) lm
+            ON cr.chat_num = lm.chat_num
 
-        LEFT JOIN lost l
-            ON cr.lost_num = l.num
+            LEFT JOIN found f
+                ON cr.found_num = f.num
 
-        LEFT JOIN user ua
-            ON cr.user_id_a = ua.id
+            LEFT JOIN lost l
+                ON cr.lost_num = l.num
 
-        LEFT JOIN user ub
-            ON cr.user_id_b = ub.id
+            LEFT JOIN user ua
+                ON cr.user_id_a = ua.id
 
-        WHERE cr.user_id_a = #{loginId}
-        OR cr.user_id_b = #{loginId}
-
-        ORDER BY cr.created_at DESC
+            LEFT JOIN user ub
+                ON cr.user_id_b = ub.id
     </select>
 
     <!-- 메시지 저장 -->
