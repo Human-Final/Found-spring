@@ -162,11 +162,11 @@
   font-size: 12px;
 }
 
-/* 휴면 계정 해제 모달*/
+/* 휴면 계정 해제 모달 */
 .dormant-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(15, 23, 42, 0.42);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -175,31 +175,42 @@
 
 .dormant-modal {
   width: 420px;
-  background: #fff;
+  background: #ffffff;
   border-radius: 16px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.16);
   overflow: hidden;
 }
 
 .dormant-modal-header {
+  height: 68px;
+  padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .dormant-modal-header h3 {
   margin: 0;
   font-size: 20px;
   font-weight: 700;
+  color: #0f172a;
 }
 
 .dormant-close-btn {
-  font-size: 28px;
-  line-height: 1;
-  color: #999;
+  width: 32px;
+  height: 32px;
+  color: #94a3b8;
   text-decoration: none;
+  font-size: 32px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dormant-close-btn:hover {
+  color: #64748b;
 }
 
 .dormant-modal-body {
@@ -208,24 +219,53 @@
 
 .dormant-message {
   margin: 0 0 18px;
-  font-size: 15px;
-  line-height: 1.6;
-  color: #333;
+  font-size: 14px;
+  line-height: 1.65;
+  color: #475569;
+  font-weight: 400;
+}
+
+.dormant-code-wrap {
+  position: relative;
+  width: 100%;
 }
 
 .dormant-code-input {
   width: 100%;
   height: 46px;
-  padding: 0 14px;
-  border: 1px solid #ddd;
+  padding: 0 72px 0 14px;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   font-size: 15px;
+  color: #0f172a;
+  background: #ffffff;
   box-sizing: border-box;
+  outline: none;
 }
 
 .dormant-code-input:focus {
-  outline: none;
-  border-color: #4f7cff;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.dormant-code-input::placeholder {
+  color: #94a3b8;
+}
+
+.dormant-timer {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  pointer-events: none;
+}
+
+.dormant-timer.expired {
+  color: #dc2626;
 }
 
 .dormant-submit-btn {
@@ -234,20 +274,26 @@
   margin-top: 14px;
   border: none;
   border-radius: 8px;
-  background: #222;
-  color: #fff;
+  background: #2563eb;
+  color: #ffffff;
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
 }
 
 .dormant-submit-btn:hover {
-  background: #111;
+  background: #1d4ed8;
+}
+
+.dormant-submit-btn:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
 }
 
 .dormant-sub-text {
   margin: 14px 0 0;
   font-size: 13px;
   line-height: 1.5;
-  color: #777;
+  color: #64748b;
+  font-weight: 400;
 }

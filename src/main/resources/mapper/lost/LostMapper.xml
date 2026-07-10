@@ -119,7 +119,7 @@ view_count,
 FROM lost_police
 WHERE 
         is_deleted=0
-ORDER BY lst_ymd DESC
+ORDER BY lst_ymd DESC, num DESC
 LIMIT #{size}
 OFFSET #{offset}
 
@@ -203,8 +203,8 @@ OFFSET #{offset}
     ) combined
 
     <choose>
-            <when test="sort == 'oldest'">ORDER BY combined.lst_ymd ASC</when>
-            <otherwise>ORDER BY combined.lst_ymd DESC</otherwise>
+            <when test="sort == 'oldest'">ORDER BY combined.lst_ymd ASC, num ASC</when>
+            <otherwise>ORDER BY combined.lst_ymd DESC, num DESC</otherwise>
     </choose>
     LIMIT #{paging.offset}, #{paging.size}
 </select>
@@ -280,7 +280,6 @@ resultMap="LostDetailResultMap">
         FROM lost_police
         WHERE is_deleted=0 And atc_id = #{atcId}
         ) combined_lost LEFT JOIN lost_file f on combined_lost.atc_id=f.atc_id
-        ORDER BY f.id ASC
 </select>
 
     <update id="viewCountPlus" parameterType="string">
@@ -409,7 +408,7 @@ FROM (
     SELECT *
     FROM lost
     WHERE is_deleted = 0
-    ORDER BY created_at DESC
+    ORDER BY created_at DESC, num DESC
     LIMIT #{size} OFFSET #{offset}
 </select>
 

@@ -312,6 +312,67 @@
       cursor: pointer;
     }
 
+        /*버튼 비활성화*/
+    .radio-card.disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    }
+    
+    /*삭제 버튼 고정*/
+    .file-item {
+    position: relative;
+    } 
+
+    .delete-file-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+
+    width: 24px;
+    height: 24px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: rgba(0,0,0,.6);
+    color: white;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    /**/
+    .file-item.delete-pending {
+    opacity: .45;
+}
+
+.file-item.delete-pending img {
+    filter: grayscale(100%);
+}
+
+    /*수정 삭제 이미지 흐리게*/
+
+    .file-item.delete-pending {
+    opacity: 0.45;
+  }
+ 
+.file-item.delete-pending::after {
+    content: "삭제 예정";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    background: rgba(220,38,38,.9);
+    color: white;
+
+    padding: 6px 10px;
+    border-radius: 20px;
+}
+
     @media (max-width: 768px) {
       .write-card {
         padding: 20px;
@@ -322,3 +383,5 @@
         grid-template-columns: 1fr;
       }
     }
+
+

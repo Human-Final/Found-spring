@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:fragment="adminSidebar(activeMenu)">
+
+<aside class="admin-sidebar">
+
+    <button type="button" class="sidebar-toggle-btn" id="sidebarToggle">
+      <svg class="sidebar-toggle-icon" viewBox="0 0 24 24" fill="none">
+        <path d="M4 6h16M4 12h16M4 18h16"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    <nav class="admin-side-menu">
+
+      <a th:href="@{/admin/lost}"
+         th:classappend="${activeMenu=='board'} ? ' active'">
+        <i data-lucide="panel-top"></i>
+        <span>게시글 관리</span>
+      </a>
+
+      <a th:href="@{/admin/users}"
+         th:classappend="${activeMenu=='user'} ? ' active'">
+        <i data-lucide="user-round"></i>
+        <span>회원 관리</span>
+      </a>
+
+    </nav>
+
+</aside>
+
+</th:block>
+
+</html>

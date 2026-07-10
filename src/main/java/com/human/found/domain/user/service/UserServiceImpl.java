@@ -1,5 +1,7 @@
 package com.human.found.domain.user.service;
 
+import static com.human.found.global.common.validation.UserValidationRules.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,17 +54,24 @@ public class UserServiceImpl implements UserService {
     // 회원의 비밀번호 조회용 이메일 인증
     @Override
     public String sendPwEmail(String email, HttpSession session) {
+
+        if (isInvalidEmail(email)) {
+            return "invalid_email";
+        }
+
+        String cleanEmail = email.trim();
+
         java.util.Random random = new java.util.Random();
         String verificationCode = String.format("%06d", random.nextInt(1000000));
         long expiresAt = System.currentTimeMillis() + (3 * 60 * 1000);
 
         session.setAttribute("pwEmailAuthCode", verificationCode);
-        session.setAttribute("pwEmailAuthTarget", email);
+        session.setAttribute("pwEmailAuthTarget", cleanEmail);
         session.setAttribute("pwEmailAuthExpires", expiresAt);
 
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(email);
+            message.setTo(cleanEmail);
             message.setSubject("[FOUND-AI기반 내 물건 찾기 서비스] 비밀번호 재설정 인증번호입니다."); 
             message.setText("안녕하세요. 비밀번호 재설정을 위한 인증번호입니다.\n"
                     + "요청하신 인증번호 6자리는 [" + verificationCode + "] 입니다.\n"
@@ -78,13 +87,24 @@ public class UserServiceImpl implements UserService {
     // 비밀번호 찾기 이메일 인증코드 처리
     @Override
     public String verifyPwCode(String inputCode, String email, HttpSession session) {
+        if (isInvalidEmail(email)) {
+            return "no_request";
+        }
+
+        if (isInvalidAuthCode(inputCode)) {
+            return "wrong_code";
+        }
+
+        String cleanEmail = email.trim();
+        String cleanInputCode = inputCode.trim();        
+        
         String sessionCode = (String) session.getAttribute("pwEmailAuthCode");
         String sessionEmail = (String) session.getAttribute("pwEmailAuthTarget");
         Long expiresAt = (Long) session.getAttribute("pwEmailAuthExpires");
 
-        if (expiresAt == null || sessionCode == null || !email.equals(sessionEmail)) return "no_request";
+        if (expiresAt == null || sessionCode == null || !cleanEmail.equals(sessionEmail)) return "no_request";
         if (System.currentTimeMillis() > expiresAt) { return "timeout"; }
-        if (!sessionCode.equals(inputCode)) return "wrong_code";
+        if (!sessionCode.equals(cleanInputCode)) return "wrong_code";
 
         session.setAttribute("pwVerifiedStatus", true);
         return "verified";
@@ -139,17 +159,24 @@ public class UserServiceImpl implements UserService {
     // 회원가입 사용자 이메일 확인하기
     @Override
     public String sendJoinEmail(String email, HttpSession session) {
+
+         if (isInvalidEmail(email)) {
+            return "invalid_email";
+        }
+
+        String cleanEmail = email.trim();
+        
         java.util.Random random = new java.util.Random();
         String verificationCode = String.format("%06d", random.nextInt(1000000));
         long expiresAt = System.currentTimeMillis() + (3 * 60 * 1000);
 
         session.setAttribute("joinEmailAuthCode", verificationCode);
-        session.setAttribute("joinEmailAuthTarget", email);
+        session.setAttribute("joinEmailAuthTarget", cleanEmail);
         session.setAttribute("joinEmailAuthExpires", expiresAt);
 
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(email);
+            message.setTo(cleanEmail);
             message.setSubject("[FOUND-AI기반 내 물건 찾기 서비스] 회원가입 이메일 인증번호입니다."); 
             message.setText("안녕하세요. 회원가입을 환영합니다.\n"
                     + "요청하신 가입 인증번호 6자리는 [" + verificationCode + "] 입니다.\n"
@@ -165,13 +192,24 @@ public class UserServiceImpl implements UserService {
     // 회원가입 이메일 인증코드 알맞은지 확인하기
     @Override
     public String verifyJoinCode(String inputCode, String email, HttpSession session) {
+        if (isInvalidEmail(email)) {
+            return "no_request";
+        }
+
+        if (isInvalidAuthCode(inputCode)) {
+            return "wrong_code";
+        }
+
+        String cleanEmail = email.trim();
+        String cleanInputCode = inputCode.trim();        
+        
         String sessionCode = (String) session.getAttribute("joinEmailAuthCode");
         String sessionEmail = (String) session.getAttribute("joinEmailAuthTarget");
         Long expiresAt = (Long) session.getAttribute("joinEmailAuthExpires");
 
-        if (expiresAt == null || sessionCode == null || !email.equals(sessionEmail)) return "no_request";
+        if (expiresAt == null || sessionCode == null || !cleanEmail.equals(sessionEmail)) return "no_request";
         if (System.currentTimeMillis() > expiresAt) { session.invalidate(); return "timeout"; }
-        if (!sessionCode.equals(inputCode)) return "wrong_code";
+        if (!sessionCode.equals(cleanInputCode)) return "wrong_code";
 
         return "verified";
     }
@@ -184,8 +222,13 @@ public class UserServiceImpl implements UserService {
 
         // 아이디 형식 검사
         // 영문과 숫자만 허용, 4~20자
-        if (user.getId() == null || !user.getId().matches("^[a-zA-Z0-9]{4,20}$")) {
-            return "아이디는 영문과 숫자만 사용 가능하며 4~20자로 입력해주세요.";
+        // if (user.getId() == null || !user.getId().matches(USER_ID_REGEX)) {
+        //     return USER_ID_MESSAGE;
+        // }
+
+
+        if (user == null) {
+            return "회원가입 정보가 없습니다.";
         }
 
         // 아이디 중복
@@ -202,23 +245,30 @@ public class UserServiceImpl implements UserService {
             return "비밀번호가 일치하지 않습니다.";
         }
 
+        String passwordErrorMessage =
+            validatePasswordMessage(user.getPw(), "비밀번호를 입력해주세요.");
+
+        if (passwordErrorMessage != null) {
+            return passwordErrorMessage;
+        }
+
         // 비밀번호 길이
-        if (user.getPw().length() < 8) {
-            return "비밀번호는 8자 이상이어야 합니다.";
-        }
+        // if (user.getPw().length() < 8) {
+        //     return "비밀번호는 8자 이상이어야 합니다.";
+        // }
 
-        // 비밀번호 조합 검사
-        // 대문자, 소문자, 숫자, 특수문자 중 3가지 이상 포함
-        int count = 0;
+        // // 비밀번호 조합 검사
+        // // 대문자, 소문자, 숫자, 특수문자 중 3가지 이상 포함
+        // int count = 0;
 
-        if (user.getPw().matches(".*[A-Z].*")) count++;
-        if (user.getPw().matches(".*[a-z].*")) count++;
-        if (user.getPw().matches(".*[0-9].*")) count++;
-        if (user.getPw().matches(".*[^a-zA-Z0-9].*")) count++;
+        // if (user.getPw().matches(".*[A-Z].*")) count++;
+        // if (user.getPw().matches(".*[a-z].*")) count++;
+        // if (user.getPw().matches(".*[0-9].*")) count++;
+        // if (user.getPw().matches(".*[^a-zA-Z0-9].*")) count++;
 
-        if (count < 3) {
-            return "대문자, 소문자, 숫자, 특수문자 중 3가지 이상 포함해야 합니다.";
-        }
+        // if (count < 3) {
+        //     return "대문자, 소문자, 숫자, 특수문자 중 3가지 이상 포함해야 합니다.";
+        // }
 
         // 검증 통과
         return null;
@@ -304,28 +354,30 @@ public class UserServiceImpl implements UserService {
     public void updateUserPassword(String id, String newPw) {
 
         // 서비스단 진입 확인용
-        System.out.println("[서비스단] updateUserPassword 비즈니스 로직 가동 시작");
-        System.out.println("[서비스단] 입력 파라미터 글자수: " + (newPw != null ? newPw.length() : "null"));
+        // System.out.println("[서비스단] updateUserPassword 비즈니스 로직 가동 시작");
+        // System.out.println("[서비스단] 입력 파라미터 글자수: " + (newPw != null ? newPw.length() : "null"));
 
         // 기존 비밀번호 조합 검사 로직 적용
         if (newPw == null || newPw.trim().isEmpty()) {
             throw new IllegalArgumentException("새 비밀번호를 입력해주세요.");
         }
 
-        if (newPw.length() < 8) {
-            throw new IllegalArgumentException("비밀번호는 8자 이상이어야 합니다.");
-        }
+        requireValidPassword(newPw, "새 비밀번호를 입력해주세요.");
 
-        int count = 0;
+        // if (newPw.length() < 8) {
+        //     throw new IllegalArgumentException("비밀번호는 8자 이상이어야 합니다.");
+        // }
 
-        if (newPw.matches(".*[A-Z].*")) count++;
-        if (newPw.matches(".*[a-z].*")) count++;
-        if (newPw.matches(".*[0-9].*")) count++;
-        if (newPw.matches(".*[^a-zA-Z0-9].*")) count++;
+        // int count = 0;
 
-        if (count < 3) {
-            throw new IllegalArgumentException("대문자, 소문자, 숫자, 특수문자 중 3가지 이상 포함해야 합니다.");
-        }
+        // if (newPw.matches(".*[A-Z].*")) count++;
+        // if (newPw.matches(".*[a-z].*")) count++;
+        // if (newPw.matches(".*[0-9].*")) count++;
+        // if (newPw.matches(".*[^a-zA-Z0-9].*")) count++;
+
+        // if (count < 3) {
+        //     throw new IllegalArgumentException("대문자, 소문자, 숫자, 특수문자 중 3가지 이상 포함해야 합니다.");
+        // }
 
         // 검증 통과 시 암호화하여 DB 업데이트 진행
         String encryptedPw = passwordEncoder.encode(newPw);
@@ -354,6 +406,9 @@ public class UserServiceImpl implements UserService {
 
         // 3. 새 비밀번호를 입력한 경우에만 암호화해서 세팅, 입력 안 했으면 기존 암호 유지
         if (userVO.getPw() != null && !userVO.getPw().trim().isEmpty()) {
+            
+            requireValidPassword(userVO.getPw(), "새 비밀번호를 입력해주세요.");
+            
             String encodedNewPw = passwordEncoder.encode(userVO.getPw());
             userVO.setPw(encodedNewPw);
         } else {
@@ -451,6 +506,42 @@ public class UserServiceImpl implements UserService {
     // 휴면 계정 해제
     public void dormantReActive(String id){
         userMapper.updateReActive(id);
+    }
+
+    // 유효성 검사
+    private String validatePasswordMessage(String password, String requiredMessage) {
+        if (password == null || password.trim().isEmpty()) {
+            return requiredMessage;
+        }
+
+        String trimmedPassword = password.trim();
+
+        if (trimmedPassword.length() < PASSWORD_MIN_SIZE 
+                || trimmedPassword.length() > PASSWORD_MAX_SIZE) {
+            return PASSWORD_SIZE_MESSAGE;
+        }
+
+        if (!isValidPasswordComplexity(trimmedPassword)) {
+            return PASSWORD_COMPLEXITY_MESSAGE;
+        }
+
+        return null;
+    }
+
+    private void requireValidPassword(String password, String requiredMessage) {
+        String errorMessage = validatePasswordMessage(password, requiredMessage);
+
+        if (errorMessage != null) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    private boolean isInvalidEmail(String email) {
+        return email == null || !email.trim().matches(USER_EMAIL_REGEX);
+    }
+
+    private boolean isInvalidAuthCode(String code) {
+        return code == null || !code.trim().matches("^[0-9]{6}$");
     }
 
 }

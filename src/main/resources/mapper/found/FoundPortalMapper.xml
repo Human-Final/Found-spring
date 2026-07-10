@@ -15,10 +15,11 @@
 
 </select>
 
-<insert id="insertFoundPortal"
-        parameterType="com.human.found.domain.found.vo.FoundVO">
-
-    INSERT INTO found_portal(
+<!-- atc_id(unique 설정 필수)가 이미 있으면 insert 대신 update 실행 -->
+<!-- 배치를 위해 foreach로 values 여러 줄 생성 -->
+<insert id="upsertFoundPortal"
+        parameterType="java.util.List">
+    INSERT INTO found_portal (
         atc_id,
         clr_nm,
         dep_place,
@@ -30,24 +31,47 @@
         prdt_category,
         done,
         is_deleted
-    )VALUES (
-        #{atcId},
-        #{clrNm},
-        #{depPlace},
-        #{fdFilepathImg},
-        #{fdPrdtNm},
-        #{fdSbjt},
-        #{fdYmd},
-        #{prdtClNm},
-        #{prdtCategory},
-        #{done},
-        #{isDeleted}
     )
-
+    VALUES
+    <foreach collection="list" item="item" separator=",">
+        (
+            #{item.atcId},
+            #{item.clrNm},
+            #{item.depPlace},
+            #{item.fdFilepathImg},
+            #{item.fdPrdtNm},
+            #{item.fdSbjt},
+            #{item.fdYmd},
+            #{item.prdtClNm},
+            #{item.prdtCategory},
+            #{item.done},
+            0
+        )
+    </foreach>
+    ON DUPLICATE KEY UPDATE
+        clr_nm = VALUES(clr_nm),
+        dep_place = VALUES(dep_place),
+        fd_filepath_img = VALUES(fd_filepath_img),
+        fd_prdt_nm = VALUES(fd_prdt_nm),
+        fd_sbjt = VALUES(fd_sbjt),
+        fd_ymd = VALUES(fd_ymd),
+        prdt_cl_nm = VALUES(prdt_cl_nm),
+        prdt_category = VALUES(prdt_category),
+        done = VALUES(done),
+        is_deleted = 0
 </insert>
 
-<delete id="deleteAllFoundPortal">
+<!-- 오래된 데이터 삭제-->
+<update id="markOldFoundPortalDeleted">
+    UPDATE found_portal
+    SET is_deleted = 1
+    WHERE fd_ymd &lt; #{baseDate}
+</update>
+
+<!-- <delete id="deleteAllFoundPortal">
     DELETE FROM found_portal
-</delete>
+</delete> -->
+
+
 
 </mapper>

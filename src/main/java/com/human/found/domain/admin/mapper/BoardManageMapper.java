@@ -59,4 +59,9 @@ public interface BoardManageMapper {
     // 관리자 습득물 삭제된 게시글 미리보기
     FoundVO selectAdminfoundDetailAtcId(@Param("atcId") String atcId); 
 
+    // 관리자 분실물 엑셀 다운로드
+    List<LostVO> selectLostListForExcel(AdminSearchVO searchVO);
+
+    // 관리자 습득물 엑셀 다운로드
+    List<FoundVO> selectFoundListForExcel(AdminSearchVO searchVO);
 }

@@ -22,4 +22,7 @@ public class ChatRoomVO {
 
     private Long userALastRead;
     private Long userBLastRead;
+
+    private String lastMessage;
+    private LocalDateTime lastMessageTime;
 }
