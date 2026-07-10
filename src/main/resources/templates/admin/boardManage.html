@@ -10,6 +10,7 @@
   <meta name="_csrf_header" th:content="${_csrf.headerName}">
 
   <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <link rel="stylesheet" th:href="@{/css/admin/sidebar.css}">
   <link rel="stylesheet" th:href="@{/css/admin/board.css}">
 </head>
 
@@ -27,49 +28,13 @@
   })();
 </script>
 
-
 <!-- 헤더 -->
 <header class="admin-header" th:replace="layout/header :: headerFragment">
 </header>
 
 <div class="admin-layout">
 
-  <!-- 사이드바 -->
-  <aside class="admin-sidebar">
-
-    <button type="button" class="sidebar-toggle-btn" id="sidebarToggle">
-      <svg class="sidebar-toggle-icon" viewBox="0 0 24 24" fill="none">
-        <path d="M4 6h16M4 12h16M4 18h16"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"/>
-      </svg>
-    </button>
-
-
-    <nav class="admin-side-menu">
-      <a th:href="@{/admin/lost}" class="active">
-        <i data-lucide="panel-top"></i>
-        <span>게시글 관리</span>
-      </a>
-
-      <a th:href="@{/api/admin/users}" >
-        <i data-lucide="user-round"></i>
-        <span>회원 관리</span>
-      </a>
-
-
-
-      <a th:href="@{/api/admin/stats}">
-        <i data-lucide="bar-chart-3"></i>
-        <span>통계 관리</span>
-      </a>
-
-
-   
-
-    </nav>
-  </aside>
+  <aside th:replace="layout/adminSidebar :: adminSidebar('board')"></aside>
 
   <!-- 본문 -->
   <main class="admin-main">
@@ -224,6 +189,7 @@
 
           <input type="date"
                  name="startDate"
+                 id="startDate"
                  class="filter-date"
                  th:value="${searchVO.startDate}">
 
@@ -231,6 +197,7 @@
 
           <input type="date"
                  name="endDate"
+                 id="endDate"
                  class="filter-date"
                  th:value="${searchVO.endDate}">
 
@@ -538,9 +505,29 @@
 
     // 전체 선택
     const btnSelectAllFilters=document.getElementById("btnSelectAllFilters");
-    const sidebarToggle = document.getElementById("sidebarToggle");
-    const filterForm = document.getElementById("filterForm");
+   // const sidebarToggle = document.getElementById("sidebarToggle");
     
+    const today = new Date();
+    const localToday = new Date(today.getTime()-today.getTimezoneOffset() * 60000)
+          .toISOString()
+          .slice(0,10);
+
+          document.getElementById("startDate").max = localToday;
+          document.getElementById("endDate").max = localToday;
+
+    const filterForm = document.getElementById("filterForm");
+
+    //다운로드
+    const downloadBtn=document.getElementById("downloadBtn");
+    if(downloadBtn){
+      downloadBtn.addEventListener("click",()=>{
+        const activeTab = document.querySelector(".admin-tabs .active").textContent.trim();
+        const boardType = activeTab === "분실물" ? "lost" : "found";
+
+        filterForm.action = `/admin/${boardType}/download`;
+        filterForm.submit();
+      });
+    }
     //순수 검색/필터링 시 1페이지로 리셋하는 이벤트 리스너
     if(filterForm){
       filterForm.addEventListener("submit",(e)=>{
@@ -706,6 +693,7 @@
     }
     restoreDateRangeActive();
 
+    
     /*사이드바*/
     if(sidebarToggle){
       sidebarToggle.addEventListener("click", function (){

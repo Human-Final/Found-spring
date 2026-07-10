@@ -46,16 +46,20 @@
           <span class="form-label">게시판 선택 <span class="required-mark">*</span></span>
 
           <div class="board-selector">
-            <label class="radio-card">
+            <label class="radio-card"
+            th:classappend="${isEdit and boardType == 'lost'}?'disabled':''">
               <input type="radio" name="boardType" value="FOUND" 
-                th:checked="${boardType == null or boardType == 'found'}" required>
+                th:checked="${boardType == null or boardType == 'found'}" 
+                th:disabled= "${isEdit and boardType == 'lost'}" required>
               <span class="radio-dot found" aria-hidden="true"></span>
               <span>습득물 등록</span>
             </label>
 
-            <label class="radio-card lost-card">
+            <label class="radio-card lost-card"
+            th:classappend="${isEdit and boardType == 'found'}?'disabled':''">
               <input type="radio" name="boardType" value="LOST" 
-                     th:checked="${boardType == 'lost'}" required>
+                     th:checked="${boardType == 'lost'}" 
+                     th:disabled= "${isEdit and boardType =='found'}"required>
               <span class="radio-dot lost" aria-hidden="true"></span>
               <span>분실물 등록</span>
             </label>
@@ -194,41 +198,43 @@
           <div class="file-grid"
                th:if="${boardType == 'found' and foundVO != null and foundVO.fileList != null}">
 
-              <label th:each="file : ${foundVO.fileList}"
-                     class="file-item">
-
-                <input type="checkbox"
-                       name="deleteFiles"
-                       th:value="${file.saveName}"
-                       class="delete-check">
+              <div th:each="file : ${foundVO.fileList}"
+                     class="file-item"
+                     th:data-file="${file.saveName}">
 
                 <img th:src="@{'/images/found/' + ${file.saveName}}"
                      th:alt="${file.fdFilepathImg}">
 
                 <span th:text="${file.fdFilepathImg}"></span>
 
-              </label>
+                <button type="button" class="delete-file-btn">
+                  ✕
+                </button>
+
+              </div>
           </div>
 
            <!--분실 수정 첨부파일-->
           <div class="file-grid"
                th:if="${boardType == 'lost' and lostVO != null and lostVO.fileList != null}">
 
-              <label th:each="file : ${lostVO.fileList}"
-                     class="file-item">
+              <div th:each="file : ${lostVO.fileList}"
+                     class="file-item"
+                     th:data-file="${file.saveName}">
 
-                <input type="checkbox"
-                       name="deleteFiles"
-                       th:value="${file.saveName}"
-                       class="delete-check">
 
                 <img th:src="@{'/images/lost/' + ${file.saveName}}"
                      th:alt="${file.lstFilepathImg}">
 
                 <span th:text="${file.lstFilepathImg}"></span>
 
-              </label>
+                <button type="button" class="delete-file-btn">
+                  ✕
+                </button>
+
+              </div>
           </div>
+          <div id="deleteFilesContainer"></div>
       </div>
 
         <div class="form-section">
@@ -274,6 +280,7 @@
     const fileName = document.querySelector("#fileName");
     const placeInput = document.querySelector("#depPlace");
 
+    let selectedFiles=[];
     function changeFormAction() {
       const checkedBoardType = document.querySelector("input[name='boardType']:checked");
 
@@ -336,17 +343,17 @@
 
     });
 
+    
     function updateFileName() {
-        const files = Array.from(fileUpload.files);
-
-        if (files.length === 0) {
+        
+        if (selectedFiles.length === 0) {
         fileName.textContent = "";
         return;
         }
 
-        fileName.textContent = files.length === 1
-        ? files[0].name
-        : files[0].name + " 외 " + (files.length - 1) + "개";
+        fileName.textContent = selectedFiles.length === 1
+        ? selectedFiles[0].name
+        : selectedFiles[0].name + " 외 " + (selectedFiles.length - 1) + "개";
     }
 
     boardTypeInputs.forEach(function (input) {
@@ -355,7 +362,31 @@
 
     changeFormAction();
 
-    fileUpload.addEventListener("change", updateFileName);
+    //파일선택
+    fileUpload.addEventListener("change", function(){
+
+    Array.from(fileUpload.files).forEach(file=>{
+      //같은 파일 중복 추가 방지
+
+      const exists = selectedFiles.some(f=>
+          f.name===file.name &&
+          f.size===file.size &&
+          f.lastModified===file.lastModified
+      );
+      if(!exists){
+        selectedFiles.push(file);
+      }
+    });
+    const dt=new DataTransfer();
+
+    selectedFiles.forEach(file=>dt.items.add(file));
+
+    fileUpload.files =dt.files;
+
+    updateFileName();
+  });
+
+
 
     uploadBox.addEventListener("dragover", function (event) {
         event.preventDefault();
@@ -367,12 +398,63 @@
     });
 
     uploadBox.addEventListener("drop", function (event) {
+       
         event.preventDefault();
         uploadBox.classList.remove("drag-over");
 
-        fileUpload.files = event.dataTransfer.files;
+        Array.from(event.dataTransfer.files).forEach(file=>{
+          const exists=selectedFiles.some(f=>
+              f.name === file.name &&
+              f.size === file.size &&
+              f.lastModified ===file.lastModified
+          );
+
+          if(!exists){
+            selectedFiles.push(file);
+          }
+        });
+        const dt =new DataTransfer();
+
+        selectedFiles.forEach(file=>dt.items.add(file));
+
+        fileUpload.files=dt.files;
         updateFileName();
     });
+
+    document.querySelectorAll(".delete-file-btn").forEach(btn=>{
+      btn.addEventListener("click",function(){
+
+        const item =this.closest(".file-item");
+        const fileName = item.dataset.file;
+
+        if(item.classList.contains("delete-pending")){
+          //취소
+          item.classList.remove("delete-pending");
+
+          const hidden = document.querySelector(
+            `input[name="deleteFiles"][value="${fileName}"]`
+          );
+          if(hidden){
+            hidden.remove();
+          }
+          this.innerHTML ="✕";
+        }else{
+
+          item.classList.add("delete-pending");
+
+
+          const input =document.createElement("input");
+          input.type="hidden";
+          input.name="deleteFiles";
+          input.value=fileName;
+
+          document.getElementById("deleteFilesContainer").appendChild(input);
+
+          this.innerHTML ="↩";
+        }
+      });
+    });
+    
 
     function setMaxDate(){
       const now = new Date();
@@ -385,24 +467,7 @@
 
     setMaxDate();
 
-    document.querySelectorAll(".delete-btn").forEach(btn => {
 
-        btn.addEventListener("click", async function() {
-
-            const saveName = this.dataset.saveName;
-
-            if(!confirm("삭제하시겠습니까?")){
-                return;
-            }
-
-            await fetch("/api/found/file/" + saveName,{
-                method:"DELETE"
-            });
-
-            this.closest(".file-item").remove();
-        });
-
-    });
 
 
   </script>

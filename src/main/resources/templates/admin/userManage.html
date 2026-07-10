@@ -7,6 +7,7 @@
   <title>회원 관리 | 분실물 센터</title>
 
   <link rel="stylesheet" th:href="@{/css/common/common.css}">
+  <link rel="stylesheet" th:href="@{/css/admin/sidebar.css}">
   <link rel="stylesheet" th:href="@{/css/admin/userManage.css}">
   
 </head>
@@ -35,31 +36,8 @@
 <div class="admin-layout">
 
   <!-- 사이드바 -->
-  <aside class="admin-sidebar">
 
-    <button type="button" class="sidebar-toggle-btn" id="sidebarToggle">
-      <svg class="sidebar-toggle-icon" viewBox="0 0 24 24" fill="none">
-          <path d="M4 6h16M4 12h16M4 18h16"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"/>
-      </svg>
-    </button>    
-
-    <nav class="admin-side-menu">
-
-      <a th:href="@{/admin/lost}">
-        <i data-lucide="panel-top"></i>
-        <span>게시글 관리</span>
-      </a>
-
-      <a th:href="@{/admin/users}" class="active">
-        <i data-lucide="user-round"></i>
-        <span>회원 관리</span>
-      </a>
-
-    </nav>
-  </aside>
+    <aside th:replace="layout/adminSidebar :: adminSidebar('user')"></aside>
 
   <!-- 본문 -->
   <main class="admin-main">

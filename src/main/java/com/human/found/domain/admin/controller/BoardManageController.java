@@ -106,6 +106,7 @@ public class BoardManageController {
             searchVO.setSize(50);
             searchVO.pageInfo(totalCount);
 
+            
             model.addAttribute("foundList", boardManagerService.searchFoundPage(searchVO));
             model.addAttribute("searchVO", searchVO);
             model.addAttribute("boardType", "found");
