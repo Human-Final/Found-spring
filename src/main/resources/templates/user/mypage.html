@@ -513,10 +513,10 @@
 
                 <div class="chat-list">
 
-                  <article class="chat-item" th:each="chatRoom : ${chatRooms}">
+                <article class="chat-item" th:each="chatRoom : ${chatRooms}">
 
                     <div class="chat-check">
-                      <input type="checkbox"
+                    <input type="checkbox"
                             name="chatNums"
                             th:value="${chatRoom.chatNum}"
                             th:if="${chatRoom.isDeleted == 1}">
@@ -525,36 +525,47 @@
                     <span class="chat-icon">채팅</span>
 
                     <div class="chat-info">
-                      <h3 class="item-title"
-                          th:text="${chatRoom.title}">
+                    <h3 class="item-title" th:text="${chatRoom.title}">
                         게시글 제목
-                      </h3>
+                    </h3>
 
-                      <p class="item-meta"
-                        th:text="|상대방: ${chatRoom.userName}|">
+                    <p class="item-meta" th:text="|상대방: ${chatRoom.userName}|">
                         상대방
-                      </p>
+                    </p>
+
+                    <p class="last-message"
+                        th:text="${chatRoom.lastMessage != null and chatRoom.lastMessage != '' 
+                                ? chatRoom.lastMessage 
+                                : '아직 메시지가 없습니다.'}">
+                        마지막 메시지
+                    </p>
+
+                    <p class="last-message-time"
+                        th:if="${chatRoom.lastMessageTime != null}"
+                        th:text="${#temporals.format(chatRoom.lastMessageTime, 'yyyy-MM-dd HH:mm')}">
+                        2026-07-09 12:00
+                    </p>
                     </div>
 
                     <div class="chat-action">
-                      <a th:if="${chatRoom.isDeleted == 0}"
+                    <a th:if="${chatRoom.isDeleted == 0}"
                         th:href="@{/chat/room/{chatNum}(chatNum=${chatRoom.chatNum})}"
                         class="primary-button">
                         입장
-                      </a>
+                    </a>
 
-                      <span th:if="${chatRoom.isDeleted == 1}"
+                    <span th:if="${chatRoom.isDeleted == 1}"
                             class="deleted-label">
                         삭제됨
-                      </span>
+                    </span>
                     </div>
 
-                  </article>
+                </article>
 
-                  <p class="empty-text"
+                <p class="empty-text"
                     th:if="${chatRooms == null or #lists.isEmpty(chatRooms)}">
                     참여 중인 채팅방이 없습니다.
-                  </p>
+                </p>
 
                 </div>
 
