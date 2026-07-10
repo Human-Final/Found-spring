@@ -154,7 +154,6 @@
               type="hidden"
               id="occurredAt"
               name="fdYmd">
-
         </div>
 
         <div class="form-section">
@@ -279,6 +278,7 @@
     const fileUpload = document.querySelector("#fileUpload");
     const fileName = document.querySelector("#fileName");
     const placeInput = document.querySelector("#depPlace");
+    const placeLabel = document.querySelector("#placeLabel")
 
     let selectedFiles=[];
     function changeFormAction() {
@@ -319,10 +319,18 @@
       dateLabel.textContent = isLost
         ? "분실일자"
         : "습득일자";
+        
 
       placeInput.name = isLost
         ? "lstPlace"
         : "depPlace"
+
+
+      // 화면 문구 변경
+      placeLabel.textContent = isLost
+        ? "분실지역"
+        : "습득지역";
+
     }
 
     postForm.addEventListener("submit", function (event){

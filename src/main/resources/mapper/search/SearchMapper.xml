@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.human.found.domain.search.mapper.SearchMapper">
 
-<!-- 일반 검색용(페이징 포함) : LIMIT랑 OFFSET 있음, 나중에 지울 것 -->
+<!-- 일반 검색용(페이징 포함) : LIMIT랑 OFFSET 있음 -->
 <select id="totalLikeSearch"
         parameterType="com.human.found.domain.search.dto.SearchConditionDTO"
         resultType="com.human.found.domain.search.vo.SearchResultVO">

@@ -57,8 +57,7 @@
         fd_ymd = VALUES(fd_ymd),
         prdt_cl_nm = VALUES(prdt_cl_nm),
         prdt_category = VALUES(prdt_category),
-        done = VALUES(done),
-        is_deleted = 0
+        done = VALUES(done)
 </insert>
 
 <!-- 오래된 데이터 삭제-->
