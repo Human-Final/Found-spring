@@ -1,10 +1,10 @@
-package com.human.found.infrastructure.police.foundPolicePortal.scheduler;
+package com.human.found.infrastructure.police.foundAPI.scheduler;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.human.found.infrastructure.police.foundPolicePortal.service.FoundPortalService;
-import com.human.found.infrastructure.police.foundPolicePortal.service.FoundPortalServiceImpl;
+import com.human.found.infrastructure.police.foundAPI.service.FoundPortalService;
+import com.human.found.infrastructure.police.foundAPI.service.FoundPortalServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,15 +28,4 @@ public class FoundPortalScheduler {
         }
     }
 
-    @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
-    public void runFoundPoliceApiByPortalLogic() {
-        try {
-            System.out.println("경찰청 습득물 API 포털 로직 재사용 수집 시작");
-            foundPortalService.saveFoundPoliceDataByPortalLogic();
-            System.out.println("경찰청 습득물 API 포털 로직 재사용 수집 완료");
-        } catch (Exception e) {
-            System.out.println("경찰청 습득물 API 포털 로직 재사용 수집 실패");
-            e.printStackTrace();
-        }
-    }
 }

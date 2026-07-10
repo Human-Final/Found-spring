@@ -37,9 +37,10 @@
                     2026년 7월 7일
                 </div>
 
-                <div class="chat-message"
-                     th:attr="data-date=${#temporals.format(msg.createdAt, 'yyyy-MM-dd')}"
-                     th:classappend="${msg.senderId == loginId} ? ' mine' : ''">
+            <div class="chat-message"
+                th:attr="data-date=${#temporals.format(msg.createdAt, 'yyyy-MM-dd')},
+                        data-read=${msg.read}"
+                th:classappend="${msg.senderId == loginId} ? ' mine' : ''">
 
                     <span class="sender" th:text="${msg.senderId}">
                         user
@@ -92,12 +93,10 @@
                         12:00
                     </span>
                     
-                <span th:if="${msg.senderId == loginId 
-                            and msg.read == 0 
-                            and stat.index == messages.size() - 1}"
+                <span th:if="${msg.senderId == loginId and msg.read == 0}"
                     class="read-status">
-                    안읽음
-                </span>         
+                    1
+                </span>      
                 </div>
 
             </th:block>
@@ -292,7 +291,10 @@
         messageDiv.classList.add("chat-message");
         messageDiv.dataset.date = msgDate;
 
-        if (String(msg.senderId) === String(loginId)) {
+        const isMine =
+            String(msg.senderId) === String(loginId);
+
+        if (isMine) {
             messageDiv.classList.add("mine");
         }
 
@@ -308,51 +310,49 @@
             msg.fileList.forEach(function (file) {
 
                 if (isImageFile(file.saveName)) {
+
                     const img = document.createElement("img");
                     img.src = file.filePath;
                     img.classList.add("chat-img");
+
                     bubble.appendChild(img);
+
                 } else {
+
                     const link = document.createElement("a");
                     link.href = file.filePath;
                     link.download = file.originalName;
                     link.textContent = "📎 " + file.originalName;
+
                     bubble.appendChild(link);
                 }
             });
 
         } else {
+
             bubble.textContent = msg.content;
         }
 
         const time = document.createElement("span");
         time.classList.add("chat-time");
-
-        const timeText = document.createElement("span");
-        timeText.textContent = formatChatTime(msg.createdAt);
-        time.appendChild(timeText);
-
-        if (String(msg.senderId) === String(loginId)) {
-
-            document.querySelectorAll(".read-status").forEach(function (el) {
-                el.remove();
-            });
-
-            const readStatus = document.createElement("span");
-            readStatus.classList.add("read-status");
-            readStatus.textContent = "안읽음";
-            time.appendChild(readStatus);
-
-        } else {
-
-            document.querySelectorAll(".read-status").forEach(function (el) {
-                el.remove();
-            });
-        }
+        time.textContent = formatChatTime(msg.createdAt);
 
         messageDiv.appendChild(sender);
         messageDiv.appendChild(bubble);
         messageDiv.appendChild(time);
+
+        /*
+        * 내가 보낸 메시지마다 각각 1 표시
+        * 기존 1은 삭제하지 않음
+        */
+        if (isMine) {
+
+            const readStatus = document.createElement("span");
+            readStatus.classList.add("read-status");
+            readStatus.textContent = "1";
+
+            messageDiv.appendChild(readStatus);
+        }
 
         chatBox.appendChild(messageDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
