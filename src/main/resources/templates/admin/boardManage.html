@@ -819,5 +819,135 @@
 
 </script>
 
+<!-- 게시글 엑셀 다운로드 -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const downloadBtn = document.getElementById("downloadBtn");
+
+    if (!downloadBtn) {
+      return;
+    }
+
+    downloadBtn.addEventListener("click", function () {
+      const params = new URLSearchParams();
+
+      // 1. 현재 Form의 action 주소에서 boardType(lost 또는 found) 추출
+      const filterForm = document.getElementById("filterForm");
+      let boardType = "";
+      
+      if (filterForm) {
+        const currentAction = filterForm.getAttribute("action") || "";
+        const actionPath = currentAction.split("?")[0]; // 쿼리스트링 분리
+        boardType = actionPath.substring(actionPath.lastIndexOf("/") + 1).trim();
+      }
+
+      // 2. 검색 필터 및 날짜 데이터 수집
+      const keywordInput = document.querySelector("input[name='keyword']");
+      const startDateInput = document.querySelector("input[name='startDate']");
+      const endDateInput = document.querySelector("input[name='endDate']");
+      const includeDeletedInput = document.querySelector("input[name='includeDeleted']:checked");
+
+      const keyword = keywordInput ? keywordInput.value.trim() : "";
+      const startDate = startDateInput ? startDateInput.value : "";
+      const endDate = endDateInput ? endDateInput.value : "";
+
+      if (keyword !== "") {
+        params.append("keyword", keyword);
+      }
+
+      // 3. 다중 선택 체크박스 배열 및 라벨 수집
+      const categoryLabels = [];
+      const statusLabels = [];
+      const sourceLabels = [];
+
+      // 카테고리 (지갑, 핸드폰 등)
+      document.querySelectorAll("input[name='categories']:checked")
+        .forEach(function (input) {
+          params.append("categories", input.value);
+          categoryLabels.push(getLabelText(input));
+        });
+
+      // 상태 (진행중, 완료)
+      document.querySelectorAll("input[name='doneList']:checked")
+        .forEach(function (input) {
+          params.append("doneList", input.value);
+          statusLabels.push(getLabelText(input));
+        });
+
+      // 데이터출처 (사용자, 경찰기관, 포털기관)
+      document.querySelectorAll("input[name='dataSources']:checked")
+        .forEach(function (input) {
+          params.append("dataSources", input.value);
+          sourceLabels.push(getLabelText(input));
+        });
+
+      if (startDate !== "") {
+        params.append("startDate", startDate);
+      }
+
+      if (endDate !== "") {
+        params.append("endDate", endDate);
+      }
+
+      if (includeDeletedInput) {
+        params.append("includeDeleted", "true");
+      }
+
+      // 4. 수집한 필터 정보로 안내창(confirm) 메시지 조립
+      const boardTypeName = (boardType === "lost") ? "분실물" : (boardType === "found") ? "습득물" : "게시글";
+      
+      const confirmMessage =
+        "현재 조건으로 " + boardTypeName + " 목록을 다운로드하시겠습니까?\n\n" +
+        "■ 게시판 종류: " + boardTypeName + "\n" +
+        "■ 검색어: " + (keyword || "전체") + "\n" +
+        "■ 삭제글 여부: " + (includeDeletedInput ? "삭제된 글만 보기" : "포함 안 함") + "\n" +
+        "■ 카테고리: " + (categoryLabels.length > 0 ? categoryLabels.join(", ") : "전체") + "\n" +
+        "■ 상태: " + (statusLabels.length > 0 ? statusLabels.join(", ") : "전체") + "\n" +
+        "■ 데이터출처: " + (sourceLabels.length > 0 ? sourceLabels.join(", ") : "전체") + "\n" +
+        "■ 등록일: " + getDateRangeText(startDate, endDate);
+
+      if (!confirm(confirmMessage)) {
+        return;
+      }
+
+      const queryString = params.toString();
+      
+      // 상위 @RequestMapping("/admin")에 맞춰 엔드포인트 기본값 세팅
+      const baseUrl = boardType === "lost" ? "/admin/lost/download" : "/admin/found/download";
+
+      // 5. 각 게시판별 전용 URL로 이동하여 다운로드 트리거
+      if (queryString) {
+        location.href = baseUrl + "?" + queryString;
+      } else {
+        location.href = baseUrl;
+      }
+    });
+  });
+
+  function getLabelText(input) {
+    const label = input.closest("label");
+    if (label) {
+      const span = label.querySelector("span");
+      return span ? span.textContent.trim() : label.textContent.trim();
+    }
+    return input.value;
+  }
+
+  function getDateRangeText(startDate, endDate) {
+    if (!startDate && !endDate) {
+      return "전체";
+    }
+    if (startDate && endDate) {
+      return startDate + " ~ " + endDate;
+    }
+    if (startDate) {
+      return startDate + " 이후";
+    }
+    return endDate + " 이전";
+  }
+</script>
+
+
+
 </body>
 </html>

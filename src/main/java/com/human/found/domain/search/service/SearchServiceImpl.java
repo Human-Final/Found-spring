@@ -11,6 +11,7 @@ import com.human.found.domain.search.dto.SearchConditionDTO;
 import com.human.found.domain.search.mapper.SearchMapper;
 import com.human.found.domain.search.vo.SearchResultVO;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -36,7 +37,7 @@ public class SearchServiceImpl implements SearchService{
 
     // LIKE + LLM 병합 검색
     @Override
-    public List<SearchResultVO> hybridSearch(SearchConditionDTO conditionDTO){
+    public List<SearchResultVO> hybridSearch(SearchConditionDTO conditionDTO, HttpServletRequest request){
         
         if (conditionDTO.getKeyword() == null || conditionDTO.getKeyword().isBlank()) {
             conditionDTO.pageInfo(0);
@@ -49,15 +50,14 @@ public class SearchServiceImpl implements SearchService{
 
         setKeywordNoSpace(conditionDTO);
 
-        // LIKE 기반 검색
-        List<SearchResultVO> likeList = searchMapper.candidateLikeSearch(conditionDTO);
-        
         // 자연어를 LLM 조건 DTO로 변환
-        SearchConditionDTO llmCondition = 
-            llmSearchService.interpret(conditionDTO.getKeyword());
-        
+        SearchConditionDTO llmCondition = llmSearchService.interpret(conditionDTO);
+
         // 사용자가 화면에서 선택한 필터 반영
-        applyUserFilters(conditionDTO, llmCondition);
+        applyUserFilters(conditionDTO, llmCondition, request);
+        
+        // LIKE 기반 검색
+        List<SearchResultVO> likeList = searchMapper.candidateLikeSearch(llmCondition);
 
         System.out.println("LLM boardType = " + llmCondition.getBoardType());
         System.out.println("LLM category = " + llmCondition.getCategory());
@@ -105,18 +105,30 @@ public class SearchServiceImpl implements SearchService{
     // LLM이 추론한 게 있어도 사용자 값이 덮어 씀
     // 카테고리, 상태, 분실/습득 같은 태그들이 동작하게 되면 메서드 추가되어야 함
     private void applyUserFilters(
-            SearchConditionDTO originalCondition, SearchConditionDTO llmCondition){
+        SearchConditionDTO originalCondition, SearchConditionDTO llmCondition, HttpServletRequest request){
 
-        if(originalCondition.getStatus() != null
-                && !originalCondition.getStatus().isBlank()
-                && !"all".equals(originalCondition.getStatus())){
-            llmCondition.setStatus(originalCondition.getStatus());
-        }
+        String isUserSelectParam = request.getParameter("isUserSelect");
+        boolean isUserSelect = "true".equals(isUserSelectParam);
         
-        if(originalCondition.getCategory() != null
-                && !originalCondition.getCategory().isBlank()
-                && !"all".equals(originalCondition.getCategory())){
-            llmCondition.setCategory(originalCondition.getCategory());
+        // 1. 분실물 / 습득물 여부 (boardType) 우선 반영
+        // 사용자가 UI에서 'all', 'lost', 'found'를 명시적으로 선택했다면 무조건 덮어씀
+        if (isUserSelect) {
+            llmCondition.setBoardType(originalCondition.getBoardType());
+            System.out.println("[필터 강제 고정 활성화] 유저 선택 값으로 덮어씀: " + originalCondition.getBoardType());
+        } else {
+            // 🤖 [RAG 자동 판단 모드] 사용자가 칩을 건드리지 않고 그냥 검색어만 친 경우라면,
+            // 자바가 개입하지 않고 파이썬 RAG 모델이 분석해서 돌려준 값(found 또는 lost)을 100% 신뢰하고 보존합니다!
+            System.out.println("[RAG 자율 모드 활성화] 파이썬 판단 값을 그대로 사용합니다: " + llmCondition.getBoardType());
+        }
+
+        // 2. 날짜 범위 (startDate, endDate) 우선 반영
+        // 사용자가 UI에서 시작 날짜를 명시적으로 골랐다면 덮어씀
+        if (originalCondition.getStartDate() != null && !originalCondition.getStartDate().isBlank()) {
+            llmCondition.setStartDate(originalCondition.getStartDate());
+        }
+        // 사용자가 UI에서 종료 날짜를 명시적으로 골랐다면 덮어씀
+        if (originalCondition.getEndDate() != null && !originalCondition.getEndDate().isBlank()) {
+            llmCondition.setEndDate(originalCondition.getEndDate());
         }
     }
 
