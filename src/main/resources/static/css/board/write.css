@@ -248,6 +248,16 @@
       gap:15px;
     }
 
+    .existing-files{
+    margin-bottom:20px;
+    }
+
+    #previewContainer{
+    display:flex;
+    flex-wrap:wrap;
+    gap:15px;
+}
+
     .file-item{
         width:150px;
         border:1px solid #ddd;
@@ -371,6 +381,10 @@
 
     padding: 6px 10px;
     border-radius: 20px;
+}
+
+    .hidden{
+    display:none;
 }
 
     @media (max-width: 768px) {
