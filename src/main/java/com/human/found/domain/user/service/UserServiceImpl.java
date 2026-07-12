@@ -499,7 +499,6 @@ public class UserServiceImpl implements UserService {
         }
 
         // 회원탈퇴 처리
-        
         userMapper.withdrawUser(id);
     }
 
