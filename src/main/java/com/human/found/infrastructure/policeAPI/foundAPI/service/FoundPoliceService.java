@@ -1,4 +1,4 @@
-package com.human.found.domain.found.service;
+package com.human.found.infrastructure.policeAPI.foundAPI.service;
 
 /**
  * 경찰청 습득물 API 관련 서비스 인터페이스

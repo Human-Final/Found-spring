@@ -3,11 +3,14 @@ package com.human.found.domain.lost.service;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.human.found.domain.chat.mapper.ChatMapper;
 import com.human.found.domain.lost.mapper.LostFileMapper;
 import com.human.found.domain.lost.mapper.LostMapper;
 import com.human.found.domain.lost.vo.LostFileVO;
@@ -27,6 +30,7 @@ public class LostServiceImpl implements LostService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final FileUtil fileUtil;
+    private final ChatMapper chatMapper;
 
     @Override
     @Transactional
@@ -52,8 +56,8 @@ public class LostServiceImpl implements LostService {
             // 파일 경로를 foundVO의 대표이미지 공간에 세팅
             lostVO.setLstFilepathImg("/images/lost/"+saveFileName);
 
-            System.out.println("atcId = " + lostVO.getAtcId());
-            System.out.println("대표이미지 = " + lostVO.getLstFilepathImg());
+            // System.out.println("atcId = " + lostVO.getAtcId());
+            // System.out.println("대표이미지 = " + lostVO.getLstFilepathImg());
 
             lostMapper.updateThumbnail(lostVO);
 
@@ -80,7 +84,12 @@ public class LostServiceImpl implements LostService {
     public List<LostVO> getLostlist(PagingVO pagingVO) {
         long totalCount = lostMapper.countLostList();
         pagingVO.pageInfo((int)totalCount);
-        return lostMapper.selectLostList(pagingVO);
+
+        List<LostVO> lostList = lostMapper.selectLostList(pagingVO);
+
+        setLostChatCounts(lostList);
+
+        return lostList;
     }
 
     // 다단 비동기 카테고리 필터링 및 동적 검색 처리 비즈니스 로직
@@ -96,9 +105,23 @@ public class LostServiceImpl implements LostService {
         if (endDate != null) endDate = endDate.trim();
         if (author != null) author = author.trim();
 
-        System.out.println("🔄 [서비스단] 복합 검색 및 페이징 기동 -> 현재 페이지: " + pagingVO.getPage());
-        return lostMapper.selectLostSearchList(category, subCategory, startDate, endDate, author, status, keyword, sort, pagingVO);
-    }
+        // System.out.println("서비스단] 복합 검색 및 페이징 기동 -> 현재 페이지: " + pagingVO.getPage());
+        List<LostVO> lostList =
+                lostMapper.selectLostSearchList(
+                    category,
+                    subCategory,
+                    startDate,
+                    endDate,
+                    author,
+                    status,
+                    keyword,
+                    sort,
+                    pagingVO
+                );
+
+        setLostChatCounts(lostList);
+
+        return lostList;    }
 
     // 페이징을 위한 총 결과갯수 카운트
     @Override
@@ -124,8 +147,10 @@ public class LostServiceImpl implements LostService {
         LostVO lost = lostMapper.selectDetailAtcId(atcId);
         // 글 존재여부
         if (lost == null) {
-            throw new RuntimeException("존재하지않는 게시글");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "게시글이 존재하지 않습니다");
         }
+        
         // 권한별 검증 분기
         if (!isAdmin) {
             // 일반유저 검증
@@ -180,8 +205,10 @@ public class LostServiceImpl implements LostService {
     public LostVO lostdetail(String atcId) {
         LostVO lostVO = lostMapper.selectDetailAtcId(atcId);
         if (lostVO == null) {
-            throw new RuntimeException("게시글이 존재하지 않습니다");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "게시글이 존재하지 않습니다");
         }
+
         if ("user".equals(lostVO.getDataSource())) {
             List<LostFileVO> filevo = lostFileMapper.findById(lostVO.getAtcId());
             lostVO.setFileList(filevo);
@@ -242,6 +269,30 @@ public class LostServiceImpl implements LostService {
 
         }
         
+    }
+
+    private void setLostChatCounts(List<LostVO> lostList) {
+
+        if (lostList == null || lostList.isEmpty()) {
+            return;
+        }
+
+        for (LostVO lost : lostList) {
+
+            if ("user".equals(lost.getDataSource())
+                    && lost.getNum() != null) {
+
+                int chatCount =
+                        chatMapper.countRoomsByLostNum(
+                                lost.getNum()
+                        );
+
+                lost.setChatCount(chatCount);
+
+            } else {
+                lost.setChatCount(0);
+            }
+        }
     }
 
 }

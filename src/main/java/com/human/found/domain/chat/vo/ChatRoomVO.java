@@ -25,4 +25,6 @@ public class ChatRoomVO {
 
     private String lastMessage;
     private LocalDateTime lastMessageTime;
+
+    private Integer unreadCount;
 }

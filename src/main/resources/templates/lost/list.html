@@ -177,11 +177,15 @@
         </div>
         <div class="post-counts">
           <span>
-            조회 수 : <span th:text="${lostVO.viewCount !=null ? lostVO.viewCount+'회' : '0'+'회'}"></span>            
+            조회 수 : <span th:text="${lostVO.viewCount !=null ? lostVO.viewCount+'회' : '0회'}"></span>            
           </span>
           <span>
-            댓글 수 : <span th:text="${lostVO.commentCount !=null ? lostVO.commentCount+'개' : 0+'개'}"></span>
+            댓글 수 : <span th:text="${lostVO.commentCount !=null ? lostVO.commentCount+'개' : '0개'}"></span>
           </span>
+          <span>
+            채팅 수 : <span th:text="${lostVO.chatCount !=null ? lostVO.chatCount+'개' : '0개'}"></span>
+          </span>
+
         </div>
       </div>
     </a>

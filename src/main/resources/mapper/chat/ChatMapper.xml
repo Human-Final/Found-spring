@@ -120,51 +120,87 @@
             lm.created_at AS last_message_time,
 
             CASE
-                WHEN cr.found_num IS NOT NULL AND IFNULL(f.is_deleted, 1) = 0 THEN f.fd_sbjt
-                WHEN cr.lost_num IS NOT NULL AND IFNULL(l.is_deleted, 1) = 0 THEN l.lst_sbjt
+                WHEN cr.found_num IS NOT NULL
+                    AND IFNULL(f.is_deleted, 1) = 0
+                    THEN f.fd_sbjt
+
+                WHEN cr.lost_num IS NOT NULL
+                    AND IFNULL(l.is_deleted, 1) = 0
+                    THEN l.lst_sbjt
+
                 ELSE '삭제된 게시글입니다.'
             END AS title,
 
             CASE
-                WHEN cr.found_num IS NOT NULL THEN IFNULL(f.is_deleted, 1)
-                WHEN cr.lost_num IS NOT NULL THEN IFNULL(l.is_deleted, 1)
+                WHEN cr.found_num IS NOT NULL
+                    THEN IFNULL(f.is_deleted, 1)
+
+                WHEN cr.lost_num IS NOT NULL
+                    THEN IFNULL(l.is_deleted, 1)
+
                 ELSE 1
             END AS is_deleted,
 
             CASE
-                WHEN cr.user_id_a = #{loginId} THEN ub.name
+                WHEN cr.user_id_a = #{loginId}
+                    THEN ub.name
                 ELSE ua.name
-            END AS user_name
+            END AS user_name,
 
-            FROM chat_room cr
+            (
+                SELECT COUNT(*)
+                FROM chat_message unread
+                WHERE unread.chat_num = cr.chat_num
+                AND unread.sender_id != #{loginId}
+                AND unread.message_num >
+                    CASE
+                        WHEN cr.user_id_a = #{loginId}
+                            THEN IFNULL(cr.user_a_last_read, 0)
+                        ELSE IFNULL(cr.user_b_last_read, 0)
+                    END
+            ) AS unread_count
 
-            LEFT JOIN (
-                SELECT cm1.chat_num,
-                    cm1.content,
-                    cm1.created_at
-                FROM chat_message cm1
-                INNER JOIN (
-                    SELECT chat_num,
-                        MAX(message_num) AS last_message_num
-                    FROM chat_message
-                    GROUP BY chat_num
-                ) cm2
+        FROM chat_room cr
+
+        LEFT JOIN (
+            SELECT
+                cm1.chat_num,
+                cm1.content,
+                cm1.created_at
+            FROM chat_message cm1
+
+            INNER JOIN (
+                SELECT
+                    chat_num,
+                    MAX(message_num) AS last_message_num
+                FROM chat_message
+                GROUP BY chat_num
+            ) cm2
                 ON cm1.chat_num = cm2.chat_num
-                AND cm1.message_num = cm2.last_message_num
-            ) lm
+            AND cm1.message_num = cm2.last_message_num
+        ) lm
             ON cr.chat_num = lm.chat_num
 
-            LEFT JOIN found f
-                ON cr.found_num = f.num
+        LEFT JOIN found f
+            ON cr.found_num = f.num
 
-            LEFT JOIN lost l
-                ON cr.lost_num = l.num
+        LEFT JOIN lost l
+            ON cr.lost_num = l.num
 
-            LEFT JOIN user ua
-                ON cr.user_id_a = ua.id
+        LEFT JOIN user ua
+            ON cr.user_id_a = ua.id
 
-            LEFT JOIN user ub
-                ON cr.user_id_b = ub.id
+        LEFT JOIN user ub
+            ON cr.user_id_b = ub.id
+
+        WHERE cr.user_id_a = #{loginId}
+        OR cr.user_id_b = #{loginId}
+
+        ORDER BY
+            CASE
+                WHEN lm.created_at IS NULL THEN cr.created_at
+                ELSE lm.created_at
+            END DESC
     </select>
 
     <!-- 메시지 저장 -->
@@ -361,6 +397,20 @@
         SELECT IFNULL(MAX(message_num), 0)
         FROM chat_message
         WHERE chat_num = #{chatNum}
+    </select>
+
+    <!-- 습득 게시글 채팅방 수 -->
+    <select id="countRoomsByFoundNum" resultType="int">
+        SELECT COUNT(*)
+        FROM chat_room
+        WHERE found_num = #{foundNum}
+    </select>
+
+    <!-- 분실 게시글 채팅방 수 -->
+    <select id="countRoomsByLostNum" resultType="int">
+        SELECT COUNT(*)
+        FROM chat_room
+        WHERE lost_num = #{lostNum}
     </select>
 
 </mapper>

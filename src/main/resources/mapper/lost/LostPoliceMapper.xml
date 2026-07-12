@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.human.found.domain.lost.mapper.LostPoliceMapper">
+<mapper namespace="com.human.found.infrastructure.policeAPI.lostAPI.mapper.LostPoliceMapper">
 
-    <insert id="insertLostPolice" parameterType="java.util.List">
+    <insert id="upsertLostPolice" parameterType="java.util.List">
         INSERT INTO lost_police (
             atc_id,
             lst_place,
@@ -20,8 +20,8 @@
             #{item.atcId},
             LEFT(#{item.lstPlace}, 100),   
             LEFT(#{item.lstPrdtNm}, 100),      
-            LEFT(#{item.lstSbjt}, 100),  
-            #{item.lstYmd}, <!-- 📌 STR_TO_DATE와 REPLACE를 제거하고 객체 그대로 주입 -->
+            #{item.lstSbjt}, /* 📌 text 타입이므로 굳이 LEFT로 안 자르고 원본 그대로 삽입 */
+            #{item.lstYmd}, 
             LEFT(#{item.prdtClNm}, 50),  
             LEFT(#{item.prdtCategory}, 50),
             0,                            
@@ -29,13 +29,21 @@
         )
         </foreach>
         ON DUPLICATE KEY UPDATE
-            lst_place    = VALUES(lst_place),
-            lst_prdt_nm  = VALUES(lst_prdt_nm),
-            lst_sbjt     = VALUES(lst_sbjt),
-            lst_ymd      = VALUES(lst_ymd),
-            prdt_cl_nm   = VALUES(prdt_cl_nm),
-            prdt_category= Values(prdt_category)
+            /* 중복 데이터 발생 시, 제목(lst_sbjt)에 '완료'가 포함되어 있다면 is_deleted를 1로 변경 */
+            is_deleted = IF(VALUES(lst_sbjt) LIKE '%완료%', 1, is_deleted),
+            
+            /* 제목에 '완료'가 들어가서 처리가 끝난 건이라면 done 컬럼도 함께 1로 상태 변경 */
+            done = IF(VALUES(lst_sbjt) LIKE '%완료%', 1, done),
+            
+            /* 무의미한 수정을 방지하기 위해 나머지 데이터는 기존 값 그대로 유지 (또는 자동 갱신) */
+            lst_place     = lst_place,
+            lst_prdt_nm   = lst_prdt_nm,
+            lst_sbjt      = lst_sbjt,
+            lst_ymd       = lst_ymd,
+            prdt_cl_nm    = prdt_cl_nm,
+            prdt_category = prdt_category
     </insert>
+
 
     <delete id="lostPoliceDelete">
         delete from lost_police
@@ -78,5 +86,14 @@
         FROM lost_police
         ORDER BY num DESC
     </select>
+
+    <!-- 6개월 지난 정보들은 삭제하기 -->
+    <update id="softDeleteOldLostPolice">
+        UPDATE lost_police 
+        SET is_deleted = 1,
+            updated_at = NOW()
+        WHERE lst_ymd &lt; #{deleteThreshold}
+        AND is_deleted = 0
+    </update>
 
 </mapper>

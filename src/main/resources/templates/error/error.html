@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>오류 발생</title>
+    <style>
+        body {
+            margin: 0;
+            background: #f8fafc;
+            font-family: Arial, sans-serif;
+            color: #1f2937;
+        }
+
+        .error-wrap {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .error-box {
+            width: 520px;
+            padding: 48px;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            text-align: center;
+        }
+
+        .code {
+            font-size: 64px;
+            font-weight: 800;
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 12px;
+            color: #111827;
+        }
+
+        p {
+            color: #6b7280;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .buttons {
+            margin-top: 28px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        a, button {
+            border: none;
+            padding: 12px 18px;
+            border-radius: 10px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .home {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .back {
+            background: #e5e7eb;
+            color: #374151;
+        }
+    </style>
+</head>
+<body>
+<div class="error-wrap">
+    <div class="error-box">
+        <div class="code" th:text="${status}">ERROR</div>
+
+        <h1>요청을 처리할 수 없습니다.</h1>
+
+        <p>
+            요청 처리 중 문제가 발생했습니다.<br>
+            잠시 후 다시 시도해 주세요.
+        </p>
+
+        <div class="buttons">
+            <a class="home" th:href="@{/}">홈으로 이동</a>
+            <button class="back" type="button" onclick="history.back()">이전 페이지</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

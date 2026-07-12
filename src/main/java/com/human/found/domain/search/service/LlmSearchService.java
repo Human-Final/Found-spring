@@ -58,7 +58,7 @@ public class LlmSearchService {
                 return defaultCondition();
             }
 
-            // ⚠️ 보장 로직: 파이썬이 혹시라도 "all"로 잘못 돌려주거나 누락했더라도, 
+            // 보장 로직: 파이썬이 혹시라도 "all"로 잘못 돌려주거나 누락했더라도, 
             // 사용자가 명시적으로 선택한 값이 있다면 스프링에서 최종 방어선으로 한 번 더 덮어써 줍니다.
             if (conditionDTO.getBoardType() != null 
                     && !"all".equals(conditionDTO.getBoardType())

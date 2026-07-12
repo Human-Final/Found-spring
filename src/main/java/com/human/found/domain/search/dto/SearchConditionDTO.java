@@ -24,4 +24,5 @@ public class SearchConditionDTO extends PagingVO {
     private String searchMode = "like";
     private String keywordNoSpace;
     private List<String> coreKeywords;
+    private List<String> likeKeywords;
 }

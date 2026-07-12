@@ -80,39 +80,76 @@
 </main>
 
 <!-- 휴면 계정 해제 모달 -->
-<div class="dormant-modal-overlay" th:if="${param.dormant != null}">
+<div class="dormant-modal-overlay"
+     th:if="${param.dormant != null}">
+
   <div class="dormant-modal">
+
     <div class="dormant-modal-header">
-      <h3>휴면 계정 해제</h3>
+      <h3>휴면 계정 안내</h3>
       <a href="/login" class="dormant-close-btn">×</a>
     </div>
 
     <div class="dormant-modal-body">
-      <p class="dormant-message">
-        휴면 계정입니다.<br>
-        등록된 이메일로 발송된 인증번호를 입력해주세요.
-      </p>
-      
-      <div class="dormant-code-wrap">
-        <input type="text"
-              id="dormantCode"
-              maxlength="6"
-              inputmode="numeric"
-              placeholder="인증번호 6자리"
-              class="dormant-code-input">
 
-        <span id="dormantTimer" class="dormant-timer">03:00</span>
-      </div>       
+      <!-- 1단계: 사용자가 메일 발송 선택 -->
+      <div id="dormantNoticeStep">
 
-      <button type="button"
-              class="dormant-submit-btn"
-              onclick="verifyDormantCode()">
-        휴면 해제
-      </button>
+        <p class="dormant-message">
+          현재 휴면 상태인 계정입니다.<br>
+          계정을 다시 사용하려면 이메일 인증이 필요합니다.
+        </p>
 
-      <p class="dormant-sub-text">
-        인증번호가 만료된 경우 다시 로그인하면 새 인증번호가 발송됩니다.
-      </p>
+        <button type="button"
+                id="sendDormantMailBtn"
+                class="dormant-submit-btn">
+          인증메일 받기
+        </button>
+
+        <p class="dormant-sub-text">
+          가입 시 등록한 이메일로 인증번호가 발송됩니다.
+        </p>
+
+      </div>
+
+      <!-- 2단계: 인증번호 입력 -->
+      <div id="dormantVerifyStep" hidden>
+
+        <p class="dormant-message">
+          등록된 이메일로 인증번호를 발송했습니다.<br>
+          인증번호 6자리를 입력해주세요.
+        </p>
+
+        <div class="dormant-code-wrap">
+
+          <input type="text"
+                 id="dormantCode"
+                 maxlength="6"
+                 inputmode="numeric"
+                 placeholder="인증번호 6자리"
+                 class="dormant-code-input">
+
+          <span id="dormantTimer"
+                class="dormant-timer">
+            03:00
+          </span>
+
+        </div>
+
+        <button type="button"
+                id="verifyDormantBtn"
+                class="dormant-submit-btn">
+          휴면 해제
+        </button>
+
+        <button type="button"
+                id="resendDormantMailBtn"
+                class="dormant-resend-btn">
+          인증메일 다시 받기
+        </button>
+
+      </div>
+
     </div>
   </div>
 </div>
@@ -121,21 +158,182 @@
 
 <script>
 let dormantCodeExpired = false;
+let dormantTimerId = null;
+let isSendingDormantMail = false;
+let isVerifyingDormantCode = false;
 
-// 휴면 인증번호 검증
-function verifyDormantCode() {
-    const codeInput = document.getElementById("dormantCode");
-    const code = codeInput.value.trim();
+document.addEventListener("DOMContentLoaded", function () {
+    const sendButton =
+        document.getElementById("sendDormantMailBtn");
 
-    if (dormantCodeExpired) {
-        alert("인증번호가 만료되었습니다. 다시 로그인하여 인증번호를 재발급해주세요.");
-        location.href = "/login";
+    const resendButton =
+        document.getElementById("resendDormantMailBtn");
+
+    const verifyButton =
+        document.getElementById("verifyDormantBtn");
+
+    const codeInput =
+        document.getElementById("dormantCode");
+
+    if (sendButton) {
+        sendButton.addEventListener("click", function () {
+            sendDormantAuthEmail(sendButton);
+        });
+    }
+
+    if (resendButton) {
+        resendButton.addEventListener("click", function () {
+            sendDormantAuthEmail(resendButton);
+        });
+    }
+
+    if (verifyButton) {
+        verifyButton.addEventListener(
+            "click",
+            verifyDormantCode
+        );
+    }
+
+    if (codeInput) {
+        codeInput.addEventListener("input", function () {
+            this.value = this.value
+                .replace(/[^0-9]/g, "")
+                .slice(0, 6);
+        });
+
+        codeInput.addEventListener("keydown", function (event) {
+            if (event.key !== "Enter") {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            verifyDormantCode();
+        });
+    }
+});
+
+
+async function sendDormantAuthEmail(button) {
+
+    // 더블클릭·연속 Enter 차단
+    if (isSendingDormantMail) {
         return;
     }
 
-    if (!code) {
-        alert("인증번호를 입력해주세요.");
-        codeInput.focus();
+    isSendingDormantMail = true;
+
+    const originalText = button.textContent;
+
+    button.disabled = true;
+    button.textContent = "메일 전송 중...";
+
+    try {
+        const csrfToken = document
+            .querySelector("meta[name='_csrf']")
+            .getAttribute("content");
+
+        const csrfHeader = document
+            .querySelector("meta[name='_csrf_header']")
+            .getAttribute("content");
+
+        const response = await fetch(
+            "/api/send-dormant-auth-email",
+            {
+                method: "POST",
+                headers: {
+                    [csrfHeader]: csrfToken
+                }
+            }
+        );
+
+        const data = await response.text();
+
+        if (data === "sent") {
+            document.getElementById(
+                "dormantNoticeStep"
+            ).hidden = true;
+
+            document.getElementById(
+                "dormantVerifyStep"
+            ).hidden = false;
+
+            const codeInput =
+                document.getElementById("dormantCode");
+
+            codeInput.disabled = false;
+            codeInput.value = "";
+            codeInput.focus();
+
+            document.getElementById(
+                "verifyDormantBtn"
+            ).disabled = false;
+
+            startDormantTimer();
+            return;
+        }
+
+        if (data === "no_request") {
+            alert(
+                "휴면 인증 요청 정보가 없습니다. 다시 로그인해주세요."
+            );
+            location.href = "/login";
+            return;
+        }
+
+        if (data === "not_dormant") {
+            alert("현재 휴면 상태가 아닌 계정입니다.");
+            location.href = "/login";
+            return;
+        }
+
+        if (data === "user_not_found") {
+            alert("회원 정보를 찾을 수 없습니다.");
+            location.href = "/login";
+            return;
+        }
+
+        if (data === "mail_error") {
+            alert(
+                "인증메일 발송에 실패했습니다. 잠시 후 다시 시도해주세요."
+            );
+            return;
+        }
+
+        alert("인증메일 발송 요청을 처리할 수 없습니다.");
+
+    } catch (error) {
+        console.error(error);
+
+        alert(
+            "인증메일 발송 중 오류가 발생했습니다."
+        );
+
+    } finally {
+        isSendingDormantMail = false;
+
+        button.disabled = false;
+        button.textContent = originalText;
+    }
+}
+
+
+async function verifyDormantCode() {
+
+    if (isVerifyingDormantCode) {
+        return;
+    }
+
+    const codeInput =
+        document.getElementById("dormantCode");
+
+    const code = codeInput.value.trim();
+
+    if (dormantCodeExpired) {
+        alert(
+            "인증번호가 만료되었습니다. 인증메일을 다시 받아주세요."
+        );
         return;
     }
 
@@ -145,85 +343,146 @@ function verifyDormantCode() {
         return;
     }
 
-    const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
-    const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
-    
-    const formData = new URLSearchParams();
-    formData.append("code", code);
+    isVerifyingDormantCode = true;
 
-    fetch("/api/verify-dormant-email-code", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            [csrfHeader]: csrfToken
-        },
-        body: formData
-    })
-    .then(response => response.text())
-    .then(data => {
+    const verifyButton =
+        document.getElementById("verifyDormantBtn");
+
+    verifyButton.disabled = true;
+    verifyButton.textContent = "인증 확인 중...";
+
+    try {
+        const csrfToken = document
+            .querySelector("meta[name='_csrf']")
+            .getAttribute("content");
+
+        const csrfHeader = document
+            .querySelector("meta[name='_csrf_header']")
+            .getAttribute("content");
+
+        const formData = new URLSearchParams();
+        formData.append("code", code);
+
+        const response = await fetch(
+            "/api/verify-dormant-email-code",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type":
+                        "application/x-www-form-urlencoded",
+                    [csrfHeader]: csrfToken
+                },
+                body: formData
+            }
+        );
+
+        const data = await response.text();
+
         if (data === "verified") {
-            alert("휴면 계정이 해제되었습니다. 다시 로그인해주세요.");
+            alert(
+                "휴면 계정이 해제되었습니다. 다시 로그인해주세요."
+            );
+
             location.href = "/login";
-
-        } else if (data === "timeout") {
-            alert("인증번호가 만료되었습니다. 다시 로그인하여 인증번호를 재발급해주세요.");
-            location.href = "/login";
-
-        } else if (data === "wrong_code") {
-            alert("인증번호가 일치하지 않습니다.");
-
-        } else if (data === "no_request") {
-            alert("인증 요청 정보가 없습니다. 다시 로그인해주세요.");
-            location.href = "/login";
-
-        } else {
-            alert("인증 처리 중 오류가 발생했습니다.");
-        }
-    })
-    .catch(() => {
-        alert("인증 처리 중 오류가 발생했습니다.");
-    });
-}
-
-// 타이머
-document.addEventListener("DOMContentLoaded", function () {
-    const timerEl = document.getElementById("dormantTimer");
-    const codeInput = document.getElementById("dormantCode");
-    const submitBtn = document.querySelector(".dormant-submit-btn");
-
-    if (!timerEl || !codeInput || !submitBtn) {
-        return;
-    }
-
-    let remainingSeconds = 180;
-
-    const timer = setInterval(function () {
-        const minutes = String(Math.floor(remainingSeconds / 60)).padStart(2, "0");
-        const seconds = String(remainingSeconds % 60).padStart(2, "0");
-
-        timerEl.textContent = `${minutes}:${seconds}`;
-
-        if (remainingSeconds <= 0) {
-            clearInterval(timer);
-
-            dormantCodeExpired = true;
-
-            timerEl.textContent = "만료";
-            timerEl.classList.add("expired");
-
-            codeInput.disabled = true;
-            submitBtn.disabled = true;
-
             return;
         }
 
+        if (data === "timeout") {
+            dormantCodeExpired = true;
+
+            alert(
+                "인증번호가 만료되었습니다. 인증메일을 다시 받아주세요."
+            );
+            return;
+        }
+
+        if (data === "wrong_code") {
+            alert("인증번호가 일치하지 않습니다.");
+            codeInput.focus();
+            return;
+        }
+
+        if (data === "no_request") {
+            alert(
+                "인증 요청 정보가 없습니다. 다시 로그인해주세요."
+            );
+
+            location.href = "/login";
+            return;
+        }
+
+        alert("인증 처리 중 오류가 발생했습니다.");
+
+    } catch (error) {
+        console.error(error);
+        alert("인증 처리 중 오류가 발생했습니다.");
+
+    } finally {
+        isVerifyingDormantCode = false;
+
+        verifyButton.disabled = false;
+        verifyButton.textContent = "휴면 해제";
+    }
+}
+
+// 타이머
+function startDormantTimer() {
+
+    if (dormantTimerId !== null) {
+        clearInterval(dormantTimerId);
+    }
+
+    dormantCodeExpired = false;
+
+    let remainingSeconds = 180;
+
+    const timerElement =
+        document.getElementById("dormantTimer");
+
+    const codeInput =
+        document.getElementById("dormantCode");
+
+    const verifyButton =
+        document.getElementById("verifyDormantBtn");
+
+    timerElement.classList.remove("expired");
+    codeInput.disabled = false;
+    verifyButton.disabled = false;
+
+    updateTimerText();
+
+    dormantTimerId = setInterval(function () {
         remainingSeconds--;
+
+        updateTimerText();
+
+        if (remainingSeconds <= 0) {
+            clearInterval(dormantTimerId);
+            dormantTimerId = null;
+
+            dormantCodeExpired = true;
+
+            timerElement.textContent = "만료";
+            timerElement.classList.add("expired");
+
+            codeInput.disabled = true;
+            verifyButton.disabled = true;
+        }
     }, 1000);
 
-    codeInput.addEventListener("input", function () {
-        this.value = this.value.replace(/[^0-9]/g, "").slice(0, 6);
-    });
-});
+    function updateTimerText() {
+        const minutes = String(
+            Math.floor(remainingSeconds / 60)
+        ).padStart(2, "0");
+
+        const seconds = String(
+            remainingSeconds % 60
+        ).padStart(2, "0");
+
+        timerElement.textContent =
+            `${minutes}:${seconds}`;
+    }
+}
 </script>
 
 

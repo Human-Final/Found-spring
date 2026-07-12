@@ -12,6 +12,8 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import com.human.found.domain.auth.handler.LoginSuccessHandler;
 import com.human.found.domain.auth.service.CustomUserDetailsService;
 
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -50,6 +52,9 @@ public class SecurityConfig {
              )
              
             .authorizeHttpRequests(auth -> auth
+
+                // 에러 페이지 처리 요청은 권한 검사에서 제외
+                .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
 
                 // 공지사항 작성/수정/삭제는 관리자 + 담당자만
                 .requestMatchers(
@@ -93,18 +98,21 @@ public class SecurityConfig {
                     "/api/public/send-auth-email", 
                     "/api/public/verify-email-code",
                     "/user/welcome",
-                    "/api/verify-dormant-email-code"
+                    "/api/send-dormant-auth-email",
+                    "/api/verify-dormant-email-code",
+                    "/error",
+                    "/error/**"
                 ).permitAll()
 
                 // 나머지는 모두 허용
                 .anyRequest().permitAll()
             )
 
+            // Spring Security에서 발생한 권한 부족을 403 상태로 전달
             .exceptionHandling(exception -> exception
-                .accessDeniedHandler((request, response, accessDeniedException) -> {
-                    request.getSession().setAttribute("errorMessage", "관리자 권한이 아닙니다.");
-                    response.sendRedirect(request.getContextPath() + "/");
-                })
+                .accessDeniedHandler((request, response, accessDeniedException) ->
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN)            
+                )
             )
 
             // 로그인 설정

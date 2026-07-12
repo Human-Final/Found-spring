@@ -3,6 +3,7 @@ package com.human.found.domain.lost.controller;
 import java.security.Principal;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,14 +15,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.human.found.domain.comment.service.LostCommentService;
-import com.human.found.domain.lost.service.LostPoliceService;
 import com.human.found.domain.lost.service.LostService;
 import com.human.found.domain.lost.vo.LostVO;
 import com.human.found.global.common.paging.PagingVO;
 import com.human.found.infrastructure.map.KakaoMapConfig;
+import com.human.found.infrastructure.policeAPI.lostAPI.service.LostPoliceService;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -33,7 +35,6 @@ import jakarta.servlet.http.HttpServletResponse;
 @Controller
 @AllArgsConstructor
 public class LostController {
-    private final LostPoliceService lostPoliceService; 
     private final LostService lostService;
     private final LostCommentService lostCommentService;
     private final KakaoMapConfig kakaoMapConfig;
@@ -199,6 +200,12 @@ public class LostController {
             }
             
             LostVO lostVO=lostService.lostdetail(atcId);
+
+            if(lostVO == null){
+                throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "존재하지 않는 게시글입니다.");
+            }
+
 
             model.addAttribute("lostVO", lostVO);
             model.addAttribute("comments", lostCommentService.getComments(

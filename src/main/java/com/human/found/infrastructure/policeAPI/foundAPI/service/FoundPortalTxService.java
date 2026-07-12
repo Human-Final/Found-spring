@@ -1,4 +1,4 @@
-package com.human.found.infrastructure.police.foundPolicePortal.service;
+package com.human.found.infrastructure.policeAPI.foundAPI.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -9,10 +9,10 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.human.found.domain.found.mapper.FoundPoliceMapper;
 import com.human.found.domain.found.vo.FoundVO;
-import com.human.found.infrastructure.police.foundPolicePortal.mapper.FoundPortalMapper;
-import com.human.found.infrastructure.police.foundPolicePortal.vo.FoundPortalApiItemVO;
+import com.human.found.infrastructure.policeAPI.foundAPI.mapper.FoundPoliceMapper;
+import com.human.found.infrastructure.policeAPI.foundAPI.mapper.FoundPortalMapper;
+import com.human.found.infrastructure.policeAPI.foundAPI.vo.FoundPortalApiItemVO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -65,6 +65,7 @@ public class FoundPortalTxService {
             LocalDate sixMonthsAgo) {
 
         List<FoundVO> foundList = new ArrayList<>();
+        
         Set<String> insertedAtcIds = new HashSet<>();
 
         if (items == null || items.isEmpty()) {
@@ -284,6 +285,10 @@ public class FoundPortalTxService {
                 mainPart.contains("노트북") ||
                 prdtClNm.contains("컴퓨터")) { // 원본 텍스트 유연성 확보
             return "전자기기";
+        }
+
+        if (mainPart.contains("지갑")) {
+            return "지갑";
         }
 
         if (mainPart.contains("카드")) {

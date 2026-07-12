@@ -1,5 +1,6 @@
 package com.human.found.domain.search.service;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,7 +27,7 @@ public class SearchServiceImpl implements SearchService{
     @Override
     public List<SearchResultVO> totalLikeSearch(SearchConditionDTO conditionDTO) {
        
-        setKeywordNoSpace(conditionDTO);
+        prepareLikeKeywords(conditionDTO);
 
         int totalCount = searchMapper.countTotalSearch(conditionDTO);
         conditionDTO.pageInfo(totalCount);
@@ -37,9 +38,13 @@ public class SearchServiceImpl implements SearchService{
 
     // LIKE + LLM 병합 검색
     @Override
-    public List<SearchResultVO> hybridSearch(SearchConditionDTO conditionDTO, HttpServletRequest request){
+    public List<SearchResultVO> hybridSearch(
+            SearchConditionDTO conditionDTO, 
+            HttpServletRequest request){
         
-        if (conditionDTO.getKeyword() == null || conditionDTO.getKeyword().isBlank()) {
+        if (conditionDTO.getKeyword() == null 
+                || conditionDTO.getKeyword().isBlank()) {
+
             conditionDTO.pageInfo(0);
             return List.of();
         }
@@ -47,17 +52,28 @@ public class SearchServiceImpl implements SearchService{
         System.out.println("===== hybridSearch 실행 =====");
         System.out.println("keyword = " + conditionDTO.getKeyword());
         System.out.println("searchMode = " + conditionDTO.getSearchMode());
+        
+        //사용자 원문을 LIKE 검색용으로 준비
+        prepareLikeKeywords(conditionDTO);
 
-        setKeywordNoSpace(conditionDTO);
-
-        // 자연어를 LLM 조건 DTO로 변환
+        // 자연어를 LLM 조건 DTO로 변환하여 별도 생성
         SearchConditionDTO llmCondition = llmSearchService.interpret(conditionDTO);
 
-        // 사용자가 화면에서 선택한 필터 반영
+        // 사용자가 화면에서 선택한 필터 우선 적용
         applyUserFilters(conditionDTO, llmCondition, request);
-        
-        // LIKE 기반 검색
-        List<SearchResultVO> likeList = searchMapper.candidateLikeSearch(llmCondition);
+
+        // LLM DTO에도 원문 LIKE 검색값을 그대로 전달
+        llmCondition.setKeyword(conditionDTO.getKeyword());
+        prepareLikeKeywords(llmCondition);
+
+        List<SearchResultVO> likeList =searchMapper.candidateLikeSearch(llmCondition);
+        List<SearchResultVO> llmList = List.of();
+
+        if (hasLlmCondition(llmCondition)) {
+            llmList = searchMapper.llmSearch(llmCondition);
+        }else {
+            System.out.println("LLM 실행 안 됨");
+        }
 
         System.out.println("LLM boardType = " + llmCondition.getBoardType());
         System.out.println("LLM category = " + llmCondition.getCategory());
@@ -74,23 +90,14 @@ public class SearchServiceImpl implements SearchService{
         conditionDTO.setPlace(llmCondition.getPlace());
         conditionDTO.setCoreKeywords(llmCondition.getCoreKeywords());
 
-        // LLM 기반 검색
-        List<SearchResultVO> llmList = List.of();
-
-        if (hasLlmCondition(llmCondition)) {
-            llmList = searchMapper.llmSearch(llmCondition);
-            System.out.println("LLM 검색 실행됨");
-        }else {
-            System.out.println("LLM 실행 안 됨");
-        }
-
-        System.out.println("LLM 결과 수 = " + llmList.size());
+        // System.out.println("LLM 결과 수 = " + llmList.size());
 
 
-        // like + LLM 
-        List<SearchResultVO> mergedList = mergeSearchResults(likeList, llmList, llmCondition);
+        // like + LLM 병합, 중복 제거 + 점수 정렬 
+        List<SearchResultVO> mergedList = 
+                mergeSearchResults(likeList, llmList, llmCondition, conditionDTO);
 
-        System.out.println("병합 결과 수 = " + mergedList.size());
+        // System.out.println("병합 결과 수 = " + mergedList.size());
 
         // 병합 결과 기준 페이징
         conditionDTO.pageInfo(mergedList.size());
@@ -114,11 +121,11 @@ public class SearchServiceImpl implements SearchService{
         // 사용자가 UI에서 'all', 'lost', 'found'를 명시적으로 선택했다면 무조건 덮어씀
         if (isUserSelect) {
             llmCondition.setBoardType(originalCondition.getBoardType());
-            System.out.println("[필터 강제 고정 활성화] 유저 선택 값으로 덮어씀: " + originalCondition.getBoardType());
+            // System.out.println("[필터 강제 고정 활성화] 유저 선택 값으로 덮어씀: " + originalCondition.getBoardType());
         } else {
-            // 🤖 [RAG 자동 판단 모드] 사용자가 칩을 건드리지 않고 그냥 검색어만 친 경우라면,
+            // [RAG 자동 판단 모드] 사용자가 칩을 건드리지 않고 그냥 검색어만 친 경우라면,
             // 자바가 개입하지 않고 파이썬 RAG 모델이 분석해서 돌려준 값(found 또는 lost)을 100% 신뢰하고 보존합니다!
-            System.out.println("[RAG 자율 모드 활성화] 파이썬 판단 값을 그대로 사용합니다: " + llmCondition.getBoardType());
+            // System.out.println("[RAG 자율 모드 활성화] 파이썬 판단 값을 그대로 사용합니다: " + llmCondition.getBoardType());
         }
 
         // 2. 날짜 범위 (startDate, endDate) 우선 반영
@@ -137,22 +144,27 @@ public class SearchServiceImpl implements SearchService{
     private List<SearchResultVO> mergeSearchResults(
             List<SearchResultVO> likeList,
             List<SearchResultVO> llmList,
-            SearchConditionDTO llmCondition
+            SearchConditionDTO llmCondition,
+            SearchConditionDTO conditionDTO
     ){
         Map<String, SearchResultVO> resultMap = new LinkedHashMap<>();
 
+        // LIKE 결과 먼저 등록
         for(SearchResultVO item : likeList){
             item.setMatchType("LIKE");
             resultMap.put(item.getSearchKey(), item);
         }
-    
+        
+        // LLM 결과 병합
         for(SearchResultVO item : llmList){
             String key = item.getSearchKey();
 
             if(resultMap.containsKey(key)){
+                // 동일한 게시글이 LIKE와 LLM 양쪽에서 검색된 경우
                 SearchResultVO existing = resultMap.get(key);
                 existing.setMatchType("LIKE || LLM");
             } else{
+                // LLM 검색에서만 추가된 게시글
                 item.setMatchType("LLM");
                 resultMap.put(key, item);
             }
@@ -160,100 +172,263 @@ public class SearchServiceImpl implements SearchService{
 
         // 병합이 끝난 뒤 최종 관련도 점수 계산
         for (SearchResultVO item : resultMap.values()){
-            item.setMatchScore(calculateTotalPriority(item, llmCondition));
+            int matchScore =
+                calculateTotalPriority(
+                        item,
+                        conditionDTO,
+                        llmCondition
+                );
+
+            item.setMatchScore(matchScore);        
         }
 
-        return resultMap.values().stream()
-                    .sorted(
-                        Comparator
-                            // 관련도 점수 높은 순
-                            .comparing(
-                                SearchResultVO::getMatchScore,
-                                Comparator.nullsLast(Comparator.reverseOrder())
+        // 1순위 : 관련도 점수 높은 순
+        // 2순위 : 같은 점수면 최신 날짜순
+        return resultMap.values()
+                .stream()
+                .sorted(
+                    Comparator
+                        .comparingInt(
+                            SearchResultVO::getMatchScore
+                        )
+                        .reversed()
+                        .thenComparing(
+                            SearchResultVO::getEventDate,
+                            Comparator.nullsLast(
+                                Comparator.reverseOrder()
                             )
-                            // 같은 점수면 최신 날짜순
-                            .thenComparing(
-                                SearchResultVO::getEventDate,
-                                Comparator.nullsLast((Comparator.reverseOrder()))
-                            )                            
-                    )
-                    .toList();
+                        )
+                )
+                .toList();
     }
 
 
     // 점수 계산 메서드
     private int calculateTotalPriority(
-            SearchResultVO item, SearchConditionDTO conditionDTO){
-        
+            SearchResultVO item,
+            SearchConditionDTO conditionDTO,
+            SearchConditionDTO llmCondition) {
+
         int score = 0;
 
-        // LIKE와 LLM 둘 다 걸린 결과 최우선
-        if("LIKE || LLM".equals(item.getMatchType())){
-            score += 100;
-        }else if("LIKE".equals(item.getMatchType()) || "LLM".equals(item.getMatchType())){
-            score += 50;
-        }
+        // LLM 핵심 물건명 일치 여부
+        List<String> coreKeywords =
+                llmCondition.getCoreKeywords();
 
-        String category = conditionDTO.getCategory();
-        String place = conditionDTO.getPlace();
-        String color = conditionDTO.getColor();        
-        List<String> coreKeywords = conditionDTO.getCoreKeywords();
+        boolean titleCoreMatch = false;
+        boolean contentCoreMatch = false;
 
-        if (coreKeywords != null && !coreKeywords.isEmpty()) {
-            for (String kw : coreKeywords) {
-                if (containsText(item.getTitle(), kw)) {
-                    score += 200;
-                } else if (containsText(item.getContent(), kw)) {
-                    score += 120;
-                } else if (containsText(item.getCategory(), kw)) {
-                    score += 60;
+        if (coreKeywords != null
+                && !coreKeywords.isEmpty()) {
+
+            for (String keyword : coreKeywords) {
+
+                if (containsText(
+                        item.getTitle(),
+                        keyword)) {
+
+                    titleCoreMatch = true;
+                }
+
+                if (containsText(
+                        item.getContent(),
+                        keyword)) {
+
+                    contentCoreMatch = true;
                 }
             }
         }
 
-        // 카테고리 일치 : 100점
-        if(category != null && !category.isBlank() && !"all".equals(category)){
-            if(containsText(item.getCategory(), category)
-                    || containsText(item.getTitle(), category)
-                    || containsText(item.getContent(), category)){
-                score += 100;
+        // LLM이 분석한 카테고리와 DB 카테고리 일치 여부
+        String category =
+                llmCondition.getCategory();
+
+        boolean hasValidCategory =
+                category != null
+                && !category.isBlank()
+                && !"all".equals(category)
+                && !"기타".equals(category);
+
+        boolean categoryMatch =
+                hasValidCategory
+                && containsText(
+                        item.getCategory(),
+                        category
+                );
+
+        // 코어키워드가 있을 때 최우선 점수 구간 설정
+        if (coreKeywords != null
+                && !coreKeywords.isEmpty()) {
+
+            if (hasValidCategory) {
+
+                // 제목의 핵심 물건명과 카테고리가 모두 일치
+                if (titleCoreMatch
+                        && categoryMatch) {
+
+                    score += 10000;
+
+                // 내용의 핵심 물건명과 카테고리가 모두 일치
+                } else if (contentCoreMatch
+                        && categoryMatch) {
+
+                    score += 8000;
+
+                // 핵심 물건명은 없지만 같은 물품 카테고리
+                } else if (categoryMatch) {
+
+                    score += 3000;
+
+                // 핵심 물건명 문자열은 있지만 카테고리가 불일치
+                // 예: 비닐봉지(...원피스), DB 분류 가방
+                } else if (titleCoreMatch
+                        || contentCoreMatch) {
+
+                    score += 1000;
+                }
+
+            } else {
+
+                // 유효한 카테고리가 없는 경우에는 코어키워드만으로 판단
+                if (titleCoreMatch) {
+
+                    score += 10000;
+
+                } else if (contentCoreMatch) {
+
+                    score += 8000;
+                }
+            }
+
+        // 코어키워드가 없으면 카테고리를 우선 반영
+        } else if (categoryMatch) {
+
+            score += 3000;
+        }
+
+        // 검색 경로 기본 점수
+        // 코어키워드 점수보다 훨씬 작게 설정
+        if ("LIKE || LLM".equals(
+                item.getMatchType())) {
+
+            score += 30;
+
+        } else if ("LLM".equals(
+                item.getMatchType())) {
+
+            score += 20;
+
+        } else if ("LIKE".equals(
+                item.getMatchType())) {
+
+            score += 10;
+        }
+
+        // 사용자 원문 전체 일치
+        String originalKeyword =
+                conditionDTO.getKeyword();
+
+        if (originalKeyword != null
+                && !originalKeyword.isBlank()) {
+
+            if (containsText(
+                    item.getTitle(),
+                    originalKeyword)) {
+
+                score += 300;
+
+            } else if (containsText(
+                    item.getContent(),
+                    originalKeyword)) {
+
+                score += 150;
             }
         }
 
-        // 장소 일치 : 30점
-        if (place != null && !place.isBlank() && !"all".equals(place)) {
-            if (containsText(item.getPlace(), place)
-                    || containsText(item.getTitle(), place)
-                    || containsText(item.getContent(), place)) {
+        // 사용자 원문 분리 단어 점수
+        List<String> likeKeywords =
+                conditionDTO.getLikeKeywords();
+
+        int likeKeywordScore = 0;
+
+        if (likeKeywords != null) {
+            for (String keyword : likeKeywords) {
+
+                if (containsText(
+                        item.getTitle(),
+                        keyword)) {
+
+                    likeKeywordScore += 20;
+
+                } else if (containsText(
+                        item.getContent(),
+                        keyword)) {
+
+                    likeKeywordScore += 10;
+
+                } else if (containsText(
+                        item.getCategory(),
+                        keyword)) {
+
+                    likeKeywordScore += 5;
+                }
+            }
+        }
+
+        // 특징어가 많아도 최대 60점까지만 반영
+        score += Math.min(
+                likeKeywordScore,
+                60
+        );
+
+        // LLM이 정규화한 색상
+        // 핵심 물건명과 카테고리가 일치하는 결과들 사이에서만 세부 순위 보정
+        String color =
+                llmCondition.getColor();
+
+        if (color != null
+                && !color.isBlank()
+                && !"all".equals(color)) {
+
+            if (containsText(
+                    item.getColor(),
+                    color)
+                || containsText(
+                    item.getTitle(),
+                    color)
+                || containsText(
+                    item.getContent(),
+                    color)) {
+
                 score += 30;
             }
         }
 
-        // 색상 일치 : 20점
-        if (color != null && !color.isBlank() && !"all".equals(color)) {
-            if (containsText(item.getColor(), color)
-                    || containsText(item.getTitle(), color)
-                    || containsText(item.getContent(), color)) {
+        // LLM이 추출한 장소
+        String place =
+                llmCondition.getPlace();
+
+        if (place != null
+                && !place.isBlank()
+                && !"all".equals(place)) {
+
+            if (containsText(
+                    item.getPlace(),
+                    place)
+                || containsText(
+                    item.getTitle(),
+                    place)
+                || containsText(
+                    item.getContent(),
+                    place)) {
+
                 score += 20;
             }
         }
-        
+
         return score;
     }
 
-
-    // 검색 결과가 LLM이 뽑은 조건을 실제로 포함하는지 확인하는 보조 메서드
-    private boolean containsText(String source, String keyword){
-        if(source == null || keyword == null){
-            return false;
-        }
-
-        // 공백 없애기 : 관련도 점수 계산할 때 띄어쓰기로 검색결과가 달라지는 것을 방지
-        String normalizedSource = source.replaceAll("\\s+", "");
-        String normalizedKeyword = keyword.replaceAll("\\s+", "");
-
-        return normalizedSource.contains(normalizedKeyword);
-    }
 
     // LLM 실행 여부 : 카데고리, 색상, 장소, 분실/습득 날짜(범위)가 있으면 LLM 실행
     private boolean hasLlmCondition(SearchConditionDTO condition) {
@@ -283,11 +458,55 @@ public class SearchServiceImpl implements SearchService{
     }
 
     // LIKE 검색 시 공백 제거 후 비교
-    private void setKeywordNoSpace(SearchConditionDTO conditionDTO){
-        if (conditionDTO.getKeyword() != null){
-            conditionDTO.setKeywordNoSpace(
-                conditionDTO.getKeyword().replaceAll("\\s+", ""));
+    private void prepareLikeKeywords(SearchConditionDTO conditionDTO){
+        
+        String keyword = conditionDTO.getKeyword();
+
+        if (keyword == null || keyword.isBlank()) {
+            conditionDTO.setKeyword("");
+            conditionDTO.setKeywordNoSpace("");
+            conditionDTO.setLikeKeywords(List.of());
+            return;
         }
+
+        String trimmedKeyword = keyword.trim();
+
+        conditionDTO.setKeyword(trimmedKeyword);
+
+        conditionDTO.setKeywordNoSpace(
+                trimmedKeyword.replaceAll("\\s+", "")
+        );
+
+        conditionDTO.setLikeKeywords(
+                Arrays.stream(trimmedKeyword.split("\\s+"))
+                        .map(String::trim)
+                        .filter(word -> !word.isBlank())
+                        .distinct()
+                        .toList()
+        );
+    }
+
+    // 검색 결과가 특정 검색어를 포함하는지 확인
+    private boolean containsText(
+            String source,
+            String keyword) {
+
+        if (source == null
+                || keyword == null
+                || keyword.isBlank()) {
+
+            return false;
+        }
+
+        String normalizedSource =
+                source.replaceAll("\\s+", "");
+
+        String normalizedKeyword =
+                keyword.replaceAll("\\s+", "");
+
+        return normalizedSource.contains(
+                normalizedKeyword
+        );
     }
 
 }

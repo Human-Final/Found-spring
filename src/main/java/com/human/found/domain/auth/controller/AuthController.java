@@ -190,41 +190,6 @@ public class AuthController {
 
         userService.updateUserPassword(userId, newPassword);
         return "SUCCESS";
-    }
-
-    @ResponseBody
-    @PostMapping("/api/verify-dormant-email-code")
-    public String verifyDormantEmailCode(
-            @RequestParam("code") String code,
-            HttpSession session) {
-
-        String sessionCode = (String) session.getAttribute("dormantAuthCode");
-        String userId = (String) session.getAttribute("dormantAuthUserId");
-        Long expiresAt = (Long) session.getAttribute("dormantAuthExpires");
-
-        if(sessionCode == null || userId == null || expiresAt == null){
-            return "no_request";
-        }
-
-        if(System.currentTimeMillis() > expiresAt){
-            session.removeAttribute("dormantAuthCode");
-            session.removeAttribute("dormantAuthUserId");
-            session.removeAttribute("dormantAuthExpires");
-            return "timeout";
-        }
-
-        if(!sessionCode.equals(code)){
-            return "wrong_code";
-        }
-
-        userService.dormantReActive(userId);
-
-        session.removeAttribute("dormantAuthCode");
-        session.removeAttribute("dormantAuthUserId");
-        session.removeAttribute("dormantAuthExpires");
-
-        return "verified";
-    }
-    
+    }   
 
 }
