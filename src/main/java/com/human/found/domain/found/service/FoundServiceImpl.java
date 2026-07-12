@@ -3,11 +3,14 @@ package com.human.found.domain.found.service;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.human.found.domain.chat.mapper.ChatMapper;
 import com.human.found.domain.found.mapper.FoundFileMapper;
 import com.human.found.domain.found.mapper.FoundMapper;
 import com.human.found.domain.found.vo.FoundFileVO;
@@ -27,6 +30,7 @@ public class FoundServiceImpl implements FoundService {
     private final FoundFileMapper foundfilemapper;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final ChatMapper chatMapper;
     // 공통 파일 유틸 주입
     private final FileUtil fileUtil;
 
@@ -85,7 +89,12 @@ public class FoundServiceImpl implements FoundService {
     public List<FoundVO> getFoundList(PagingVO pagingVO) {
         long totalCount = foundMapper.countFoundList();
         pagingVO.pageInfo((int) totalCount);
-        return foundMapper.selectFoundList(pagingVO);
+
+        List<FoundVO> foundList = foundMapper.selectFoundList(pagingVO);
+
+        setFoundChatCounts(foundList);
+
+        return foundList;
     }
 
     // 조회 수 올리기
@@ -118,7 +127,23 @@ public class FoundServiceImpl implements FoundService {
         // System.out.println("🔄 [습득물 서비스단] 복합 검색 엔진 기동 -> 현재 페이지: " + pagingVO.getPage());
 
         // 매퍼 인터페이스로 모든 인자 토스
-        return foundMapper.selectFoundSearchList(category, subCategory, colorSelect, startDate, endDate, author, status, keyword, sort, pagingVO);
+        List<FoundVO> foundList =
+                foundMapper.selectFoundSearchList(
+                    category,
+                    subCategory,
+                    colorSelect,
+                    startDate,
+                    endDate,
+                    author,
+                    status,
+                    keyword,
+                    sort,
+                    pagingVO
+                );
+
+        setFoundChatCounts(foundList);
+
+        return foundList;    
     }
 
     // 페이징을 위한 조회결과 갯수 세기
@@ -152,9 +177,11 @@ public class FoundServiceImpl implements FoundService {
         // 습득물 번호(atcId)으로 게시글 정보 가져오기
 
         FoundVO found = foundMapper.selectDetailatcId(atcId);
+        
         // 글 존재여부
         if (found == null) {
-            throw new RuntimeException("존재하지 않는 게시글");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "게시글이 존재하지 않습니다");
         }
 
         // 권한별 검증 분기
@@ -163,24 +190,24 @@ public class FoundServiceImpl implements FoundService {
 
             // 외부 수집 데이터(id가 null인 것 포함)는 일반 유저가 절대 삭제 불가하도록 방어
             if (!"user".equals(found.getDataSource())) {
-                throw new RuntimeException("공공데이터 삭제할수 없습니다");
+                throw new RuntimeException("공공데이터는 삭제할 수 없습니다.");
             }
 
             // 본인이 쓴 글인지 검증(글에 저장된 작성자 id 와 로그인한 id 비교)
             if (found.getId() == null || !found.getId().equals(loginid)) {
-                throw new RuntimeException("본인이 작성한 글만 삭제할 수 있습니다");
+                throw new RuntimeException("본인이 작성한 글만 삭제할 수 있습니다.");
             }
 
             // 입력된 비밀번호(inputpw)가 db의 회원 비밀번호와 일치하는지
             if (inputpw == null || inputpw.trim().isEmpty()) {
-                throw new RuntimeException("비밀번호를 입력해 주세요");
+                throw new RuntimeException("비밀번호를 입력해 주세요.");
             }
 
             // 2. [공통] 회원 테이블에서 현재 로그인한 유저(또는 관리자) 정보 가져오기
             UserVO user = userMapper.findById(loginid);
 
             if (user == null) {
-                throw new RuntimeException("회원 정보를 찾을 수 없습니다");
+                throw new RuntimeException("회원 정보를 찾을 수 없습니다.");
             }
 
             // 비밀번호 검증
@@ -217,8 +244,10 @@ public class FoundServiceImpl implements FoundService {
         // atcid 만 넘겨서 union 조회
         FoundVO foundVo = foundMapper.selectDetailatcId(atcId);
         if (foundVo == null) {
-            throw new RuntimeException("게시글이 존재하지 않습니다");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "게시글이 존재하지 않습니다");
         }
+        
         if ("user".equals(foundVo.getDataSource())) {
             List<FoundFileVO> fileList = foundfilemapper.findById(foundVo.getAtcId());
 
@@ -284,6 +313,33 @@ public class FoundServiceImpl implements FoundService {
             }
         }
 
+    }
+
+    // 채팅 수 카운트 조회
+    private void setFoundChatCounts(List<FoundVO> foundList) {
+
+        if (foundList == null || foundList.isEmpty()) {
+            return;
+        }
+
+        for (FoundVO found : foundList) {
+
+            // chat_room.found_num은 사용자 등록 found 테이블만 참조
+            if ("user".equals(found.getDataSource())
+                    && found.getNum() != null) {
+
+                int chatCount =
+                        chatMapper.countRoomsByFoundNum(
+                                found.getNum()
+                        );
+
+                found.setChatCount(chatCount);
+
+            } else {
+                // 경찰청·포털 데이터는 채팅방 없음
+                found.setChatCount(0);
+            }
+        }
     }
 
 }

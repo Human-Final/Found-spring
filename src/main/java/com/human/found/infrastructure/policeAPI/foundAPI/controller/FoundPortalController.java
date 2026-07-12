@@ -1,10 +1,10 @@
-package com.human.found.infrastructure.police.foundAPI.controller;
+package com.human.found.infrastructure.policeAPI.foundAPI.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.human.found.infrastructure.police.foundAPI.service.FoundPortalServiceImpl;
+import com.human.found.infrastructure.policeAPI.foundAPI.service.FoundPortalServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 

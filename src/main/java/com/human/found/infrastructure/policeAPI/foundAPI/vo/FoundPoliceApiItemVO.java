@@ -1,4 +1,4 @@
-package com.human.found.infrastructure.police.foundAPI.vo;
+package com.human.found.infrastructure.policeAPI.foundAPI.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

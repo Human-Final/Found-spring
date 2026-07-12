@@ -1,4 +1,4 @@
-package com.human.found.infrastructure.police.foundAPI.mapper;
+package com.human.found.infrastructure.policeAPI.foundAPI.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

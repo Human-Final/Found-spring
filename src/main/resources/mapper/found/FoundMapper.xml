@@ -23,6 +23,7 @@
     <result property="viewCount" column="view_count"/>
     <result property="dataSource" column="dataSource"/>
     <result property="commentCount" column="commentCount"/>
+    <result property="chatCount" column="chatCount"/>
 
     <collection property="fileList"  javaType="ArrayList" ofType="com.human.found.domain.found.vo.FoundFileVO">
         <id property="id" column="file_id"/>

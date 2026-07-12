@@ -67,4 +67,8 @@ public interface ChatMapper {
 
     // 마지막 메시지 번호
     Long findLastMessageNum(@Param("chatNum") Long chatNum);
+
+    // 습득/분실 채팅 수 카운트
+    int countRoomsByFoundNum(Long foundNum);
+    int countRoomsByLostNum(Long lostNum);
 }

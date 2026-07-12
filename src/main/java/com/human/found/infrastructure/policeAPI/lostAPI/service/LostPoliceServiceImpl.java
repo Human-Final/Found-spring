@@ -1,4 +1,4 @@
-package com.human.found.infrastructure.police.lostAPI.service;
+package com.human.found.infrastructure.policeAPI.lostAPI.service;
 
 import java.io.ByteArrayInputStream;
 import java.net.URI;
@@ -26,7 +26,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.human.found.domain.lost.vo.LostVO;
-import com.human.found.infrastructure.police.lostAPI.mapper.LostPoliceMapper;
+import com.human.found.infrastructure.policeAPI.lostAPI.mapper.LostPoliceMapper;
 
 @Service
 public class LostPoliceServiceImpl implements LostPoliceService{
@@ -44,7 +44,7 @@ public class LostPoliceServiceImpl implements LostPoliceService{
     //initialDelay = 5000 5초뒤에 경찰청 분실물 API자료 갖고오는 테스트용 코드
     //스케줄러 메서드
     //매일 새벽 1시에 자동으로 아래 fetchAndSaveLostGoods 메서드 호출하기
-    @Scheduled(initialDelay = 5000)
+    @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
     public void ScheduledSavePoliceLost() {
         System.out.println("⏰ [스케줄러 시작] 기존 데이터를 삭제하고 경찰청의 모든 유실물 데이터를 처음부터 끝까지 수집합니다.");
         

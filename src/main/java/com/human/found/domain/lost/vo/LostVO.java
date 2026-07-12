@@ -29,6 +29,7 @@ public class LostVO {
     private int commentCount;
     private long viewCount;
     private String lstFilepathImg;
+    private int chatCount;
     
 
 }

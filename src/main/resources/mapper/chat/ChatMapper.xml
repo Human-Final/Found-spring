@@ -399,4 +399,18 @@
         WHERE chat_num = #{chatNum}
     </select>
 
+    <!-- 습득 게시글 채팅방 수 -->
+    <select id="countRoomsByFoundNum" resultType="int">
+        SELECT COUNT(*)
+        FROM chat_room
+        WHERE found_num = #{foundNum}
+    </select>
+
+    <!-- 분실 게시글 채팅방 수 -->
+    <select id="countRoomsByLostNum" resultType="int">
+        SELECT COUNT(*)
+        FROM chat_room
+        WHERE lost_num = #{lostNum}
+    </select>
+
 </mapper>

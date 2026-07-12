@@ -7,9 +7,9 @@
     경찰청 습득물 API 전용 Mapper
 
     연결되는 Java Mapper:
-    com.human.found.infrastructure.police.foundAPI.mapper.FoundPoliceMapper
+    com.human.found.infrastructure.policeAPI.foundAPI.mapper.FoundPoliceMapper
 -->
-<mapper namespace="com.human.found.infrastructure.police.foundAPI.mapper.FoundPoliceMapper">
+<mapper namespace="com.human.found.infrastructure.policeAPI.foundAPI.mapper.FoundPoliceMapper">
 
     <!--
         경찰청 물품 고유번호(atc_id) 중복 확인

@@ -1,4 +1,4 @@
-package com.human.found.infrastructure.police.lostAPI.service;
+package com.human.found.infrastructure.policeAPI.lostAPI.service;
 
 import java.util.List;
 

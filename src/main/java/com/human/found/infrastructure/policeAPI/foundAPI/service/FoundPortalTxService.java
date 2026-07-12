@@ -1,4 +1,4 @@
-package com.human.found.infrastructure.police.foundAPI.service;
+package com.human.found.infrastructure.policeAPI.foundAPI.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.human.found.domain.found.vo.FoundVO;
-import com.human.found.infrastructure.police.foundAPI.mapper.FoundPoliceMapper;
-import com.human.found.infrastructure.police.foundAPI.mapper.FoundPortalMapper;
-import com.human.found.infrastructure.police.foundAPI.vo.FoundPortalApiItemVO;
+import com.human.found.infrastructure.policeAPI.foundAPI.mapper.FoundPoliceMapper;
+import com.human.found.infrastructure.policeAPI.foundAPI.mapper.FoundPortalMapper;
+import com.human.found.infrastructure.policeAPI.foundAPI.vo.FoundPortalApiItemVO;
 
 import lombok.RequiredArgsConstructor;
 

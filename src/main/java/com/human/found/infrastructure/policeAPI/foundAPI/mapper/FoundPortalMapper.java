@@ -1,4 +1,4 @@
-package com.human.found.infrastructure.police.foundAPI.mapper;
+package com.human.found.infrastructure.policeAPI.foundAPI.mapper;
 
 import java.time.LocalDateTime;
 import java.util.List;

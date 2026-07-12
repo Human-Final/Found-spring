@@ -32,4 +32,6 @@ public class FoundVO {
     private String dataSource;
     private long viewCount;
     private int commentCount;
+    private int chatCount;
+
 }

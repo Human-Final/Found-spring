@@ -1,4 +1,4 @@
-package com.human.found.infrastructure.police.foundAPI.service;
+package com.human.found.infrastructure.policeAPI.foundAPI.service;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -13,8 +13,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.human.found.infrastructure.police.foundAPI.vo.FoundPortalApiItemVO;
-import com.human.found.infrastructure.police.foundAPI.vo.FoundPortalApiResponseVO;
+import com.human.found.infrastructure.policeAPI.foundAPI.vo.FoundPortalApiItemVO;
+import com.human.found.infrastructure.policeAPI.foundAPI.vo.FoundPortalApiResponseVO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,9 +26,6 @@ public class FoundPortalServiceImpl implements FoundPortalService {
 
     @Value("${portal.api.url}")
     private String apiUrl;
-
-    @Value("${police.api.url}")
-    private String policeApiUrl;
 
     @Value("${police.api.key}")
     private String serviceKey;
@@ -47,7 +44,7 @@ public class FoundPortalServiceImpl implements FoundPortalService {
 
         LocalDate startDate = targetDate;
         LocalDate endDate = targetDate;
-        // LocalDate sixMonthsAgo = tgoday.minusMonths(1);
+        LocalDate sixMonthsAgo = today.minusMonths(1);
 
         List<FoundPortalApiItemVO> allItems = new ArrayList<>();
 
@@ -57,10 +54,10 @@ public class FoundPortalServiceImpl implements FoundPortalService {
                 .queryParam("serviceKey", serviceKey)
                 .queryParam("pageNo", pageNo)
                 .queryParam("numOfRows", numOfRows)
-                // .queryParam("START_YMD", sixMonthsAgo.format(DateTimeFormatter.BASIC_ISO_DATE))
-                .queryParam("START_YMD", startDate.format(DateTimeFormatter.BASIC_ISO_DATE))
-                // .queryParam("END_YMD", today.format(DateTimeFormatter.BASIC_ISO_DATE))
-                .queryParam("END_YMD", endDate.format(DateTimeFormatter.BASIC_ISO_DATE))
+                .queryParam("START_YMD", sixMonthsAgo.format(DateTimeFormatter.BASIC_ISO_DATE))
+                // .queryParam("START_YMD", startDate.format(DateTimeFormatter.BASIC_ISO_DATE))
+                .queryParam("END_YMD", today.format(DateTimeFormatter.BASIC_ISO_DATE))
+                // .queryParam("END_YMD", endDate.format(DateTimeFormatter.BASIC_ISO_DATE))
                 .build(false)
                 .toUriString();
 
@@ -112,8 +109,8 @@ public class FoundPortalServiceImpl implements FoundPortalService {
         int saveCount = foundPortalTxService.upsertFoundPortalItems(
                 allItems,
                 today,
-                // sixMonthsAgo
-                startDate
+                sixMonthsAgo
+                // startDate
         );
 
         System.out.println("최근 6개월 포털기관 습득물 API 재수집 완료");

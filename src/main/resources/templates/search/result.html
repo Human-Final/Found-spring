@@ -439,7 +439,7 @@
         boardType=${conditionDTO.boardType},
         startDate=${conditionDTO.startDate},
         endDate=${conditionDTO.endDate},
-        isUserSelect=${param.isUserSelect},
+        isUserSelect=${param.isUserSelect != null ? param.isUserSelect[0] : null},
         page=${paging.startPage - 1},
         size=${paging.size}
       )}"
@@ -455,7 +455,7 @@
         boardType=${conditionDTO.boardType},
         startDate=${conditionDTO.startDate},
         endDate=${conditionDTO.endDate},
-        isUserSelect=${param.isUserSelect},
+      isUserSelect=${param.isUserSelect != null ? param.isUserSelect[0] : null},
         page=${pageNum},
         size=${paging.size}
       )}"
@@ -473,7 +473,7 @@
         boardType=${conditionDTO.boardType},
         startDate=${conditionDTO.startDate},
         endDate=${conditionDTO.endDate},
-        isUserSelect=${param.isUserSelect},
+        isUserSelect=${param.isUserSelect != null ? param.isUserSelect[0] : null},
         page=${paging.endPage + 1},
         size=${paging.size}
       )}"
