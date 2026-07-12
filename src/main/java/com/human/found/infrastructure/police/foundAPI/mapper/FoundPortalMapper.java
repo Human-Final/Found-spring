@@ -1,4 +1,4 @@
-package com.human.found.infrastructure.police.foundPolicePortal.mapper;
+package com.human.found.infrastructure.police.foundAPI.mapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,7 +11,7 @@ import com.human.found.domain.found.vo.FoundVO;
 @Mapper
 public interface FoundPortalMapper {
 
-    // 경찰청 습득물 batch upsert
+    // 포털 습득물 batch upsert
     int upsertFoundPortal(@Param("list") List<FoundVO> list);
 
     // 포털기관 6개월 이전 데이터 논리삭제

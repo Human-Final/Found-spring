@@ -3,21 +3,43 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.human.found.domain.found.mapper.FoundPoliceMapper">
+<!--
+    경찰청 습득물 API 전용 Mapper
 
-    <!-- atc_id 중복 확인 -->
+    연결되는 Java Mapper:
+    com.human.found.infrastructure.police.foundAPI.mapper.FoundPoliceMapper
+-->
+<mapper namespace="com.human.found.infrastructure.police.foundAPI.mapper.FoundPoliceMapper">
+
+    <!--
+        경찰청 물품 고유번호(atc_id) 중복 확인
+
+        atc_id는 found_police 테이블에서 UNIQUE이므로
+        삭제 여부와 관계없이 동일한 atc_id가 존재하는지 확인한다.
+
+        반환값
+        - 0: 저장된 데이터 없음
+        - 1 이상: 이미 저장된 데이터 존재
+    -->
     <select id="existsByAtcId"
             parameterType="string"
             resultType="int">
+
         SELECT COUNT(*)
         FROM found_police
         WHERE atc_id = #{atcId}
-          AND is_deleted = 0
+
     </select>
 
-    <!-- 경찰청 습득물 저장 -->
+    <!--
+        경찰청 API에서 조회한 습득물 데이터를
+        found_police 테이블에 저장한다.
+
+        parameterType은 경찰청 API 데이터를 담는 FoundVO이다.
+    -->
     <insert id="insertFoundPolice"
             parameterType="com.human.found.domain.found.vo.FoundVO">
+
         INSERT INTO found_police (
             atc_id,
             id,
@@ -28,7 +50,6 @@
             fd_sbjt,
             fd_ymd,
             prdt_cl_nm,
-            prdt_category,
             done,
             is_deleted
         )
@@ -42,14 +63,21 @@
             #{fdSbjt},
             #{fdYmd},
             #{prdtClNm},
-            #{prdtCategory},
             #{done},
             #{isDeleted}
         )
+
     </insert>
 
+    <!--
+        found_police 테이블에 저장된
+        경찰청 습득물 데이터를 전부 삭제한다.
+    -->
     <delete id="deleteAllFoundPolice">
-        delete from found_police
+
+        DELETE
+        FROM found_police
+
     </delete>
 
 </mapper>

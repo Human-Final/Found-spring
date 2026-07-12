@@ -1,4 +1,4 @@
-package com.human.found.infrastructure.police.foundPolicePortal.service;
+package com.human.found.infrastructure.police.foundAPI.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -9,10 +9,10 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.human.found.domain.found.mapper.FoundPoliceMapper;
 import com.human.found.domain.found.vo.FoundVO;
-import com.human.found.infrastructure.police.foundPolicePortal.mapper.FoundPortalMapper;
-import com.human.found.infrastructure.police.foundPolicePortal.vo.FoundPortalApiItemVO;
+import com.human.found.infrastructure.police.foundAPI.mapper.FoundPoliceMapper;
+import com.human.found.infrastructure.police.foundAPI.mapper.FoundPortalMapper;
+import com.human.found.infrastructure.police.foundAPI.vo.FoundPortalApiItemVO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -65,6 +65,7 @@ public class FoundPortalTxService {
             LocalDate sixMonthsAgo) {
 
         List<FoundVO> foundList = new ArrayList<>();
+        
         Set<String> insertedAtcIds = new HashSet<>();
 
         if (items == null || items.isEmpty()) {
