@@ -1,5 +1,6 @@
-package com.human.found.domain.lost.mapper;
+package com.human.found.infrastructure.police.lostAPI.mapper;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -11,7 +12,7 @@ import com.human.found.domain.lost.vo.LostVO;
 public interface LostPoliceMapper {
     
     // 경찰청 분실물 정보 DB삽입
-    int insertLostPolice(List<LostVO> lostList);
+    int upsertLostPolice(List<LostVO> lostList);
     
     // 경찰청 분실물 정보 불러오기
     List<LostVO> selectLostPoliceList();
@@ -22,5 +23,7 @@ public interface LostPoliceMapper {
     // 경찰청 분실물 정보 전체 삭제
     void lostPoliceDelete();
 
+    // 6개월 지난 경찰청 분실물 정보 삭제
+    int softDeleteOldLostPolice(@Param("deleteThreshold") LocalDateTime deleteThreshold);
     
 }

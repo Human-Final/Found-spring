@@ -3,6 +3,7 @@ package com.human.found.domain.found.controller;
 import java.security.Principal;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.human.found.domain.comment.service.FoundCommentService;
@@ -211,6 +213,11 @@ public class FoundController {
             }
 
             FoundVO foundVO = foundService.foundgetdetail(atcId);
+
+            if(foundVO == null){
+                throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "존재하지 않는 게시글입니다.");
+            }
 
             List<CommentVO> commentList =
                 foundCommentService.getCommentsByNum(

@@ -175,7 +175,6 @@
               type="hidden"
               id="occurredAt"
               name="fdYmd">
-
         </div>
 
         <div class="form-section">
@@ -310,6 +309,7 @@
     const placeInput = document.querySelector("#depPlace");
     const colorSection = document.querySelector("#colorSection");
     const colorInput = document.querySelector("#color");
+    const placeLabel = document.querySelector("#placeLabel")
 
     let selectedFiles=[];
 
@@ -429,6 +429,7 @@
       dateLabel.textContent = isLost
         ? "분실일자"
         : "습득일자";
+        
 
       placeInput.name = isLost
         ? "lstPlace"
@@ -446,6 +447,12 @@
           colorInput.name = "clrNm";
 
       }
+
+      // 화면 문구 변경
+      placeLabel.textContent = isLost
+        ? "분실지역"
+        : "습득지역";
+
     }
 
     
