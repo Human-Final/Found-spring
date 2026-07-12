@@ -11,7 +11,7 @@
 
 </head>
 <body>
-  <div th:replace="layout/header :: headerFragment"></div>
+ <!-- <div th:replace="layout/header :: headerFragment"></div>-->
 
   <main class="page">
     <section class="write-card">
@@ -131,6 +131,22 @@
           >
         </div>
 
+        <div id="colorSection" class="form-section">
+
+          <label class="form-label">색상명</label>
+
+          <input 
+              type="text"
+              id="color"
+              name="color"
+              class="form-control title-input"
+              placeholder="예) 검정, 흰색, 파랑"
+               maxlength="30">
+
+        </div>
+
+
+
         <div class="form-section">
             <label for="occurredAt" class="form-label">
               <span id="dateLabel">습득일자 </span>
@@ -191,19 +207,22 @@
           </textarea>
         </div>
 
-        <div th:if="${isEdit == true}" class="existing-files">
-          <h3>기존 첨부파일</h3>
+        <div class="existing-files">
+          
+          <h3 th:if="${isEdit == true}" >기존 첨부파일</h3>
+
+          <div id="previewContainer" class="file-grid">
 
           <!--습득 수정 첨부파일-->
-          <div class="file-grid"
-               th:if="${boardType == 'found' and foundVO != null and foundVO.fileList != null}">
+          <div th:if="${boardType == 'found' and foundVO != null}"
+                      th:each="file : ${foundVO?.fileList}"
+                      class="file-item"
+                      th:data-file="${file.saveName}"
+                      th:data-original="${file.fdFilepathImg}">
 
-              <div th:each="file : ${foundVO.fileList}"
-                     class="file-item"
-                     th:data-file="${file.saveName}">
 
                 <img th:src="@{'/images/found/' + ${file.saveName}}"
-                     th:alt="${file.fdFilepathImg}">
+                     th:alt="${file.fdFilepathImg}">  
 
                 <span th:text="${file.fdFilepathImg}"></span>
 
@@ -211,16 +230,17 @@
                   ✕
                 </button>
 
-              </div>
+              
           </div>
-
+          
            <!--분실 수정 첨부파일-->
-          <div class="file-grid"
-               th:if="${boardType == 'lost' and lostVO != null and lostVO.fileList != null}">
+          <div th:if="${boardType == 'lost' and lostVO != null}"
+                th:each="file : ${lostVO?.fileList}"
+                class="file-item"
+                th:data-file="${file.saveName}"
+                th:data-original="${file.lstFilepathImg}">
 
-              <div th:each="file : ${lostVO.fileList}"
-                     class="file-item"
-                     th:data-file="${file.saveName}">
+            
 
 
                 <img th:src="@{'/images/lost/' + ${file.saveName}}"
@@ -231,16 +251,19 @@
                 <button type="button" class="delete-file-btn">
                   ✕
                 </button>
-
-              </div>
+        
+          
           </div>
-          <div id="deleteFilesContainer"></div>
-      </div>
+          </div>
+        </div> 
+
+        <div id="deleteFilesContainer"></div>
 
         <div class="form-section">
           <span class="form-label">첨부파일</span>
           <label class="upload-box" id="uploadBox">
             <input type="file" id="fileUpload" name="files" multiple>
+            
             <span>
               <span class="upload-icon" aria-hidden="true">↥</span>
               <p class="upload-main">파일을 드래그하거나 클릭하여 업로드</p>
@@ -248,7 +271,8 @@
               <p class="file-name" id="fileName"></p>
             </span>
           </label>
-        </div>
+          
+          
 
         <div class="form-actions">
           <button type="button" class="action-button cancel-button" onclick="history.back()">
@@ -279,8 +303,88 @@
     const fileUpload = document.querySelector("#fileUpload");
     const fileName = document.querySelector("#fileName");
     const placeInput = document.querySelector("#depPlace");
+    const colorSection = document.querySelector("#colorSection");
 
     let selectedFiles=[];
+
+    const previewContainer = document.querySelector("#previewContainer");
+
+    let existingFiles = [];
+
+    document.querySelectorAll(".file-item[data-original]").forEach(item=>{
+
+        existingFiles.push(item.dataset.original);
+    });
+
+    console.log("기존 파일:", existingFiles);
+
+    function isDuplicate(file){
+
+      console.log("검사 파일:", file.name);
+      console.log("기존 파일 목록:", existingFiles);
+
+      // 기존 파일 검사
+      if(existingFiles.includes(file.name)){
+          console.log("기존 이미지 중복");
+          return true;
+          }
+
+          // 새로 선택한 파일 검사
+          return selectedFiles.some(f =>
+              f.name === file.name &&
+              f.size === file.size
+          );
+      }
+    
+    function createPreview(file){
+
+    const div=document.createElement("div");
+
+    div.className="file-item";
+    
+
+    const img=document.createElement("img");
+
+    img.src=URL.createObjectURL(file);
+
+
+    const span=document.createElement("span");
+
+    span.textContent=file.name;
+
+
+    const btn=document.createElement("button");
+
+    btn.type="button";
+    btn.className="delete-file-btn";
+    btn.innerHTML="✕";
+
+
+    btn.onclick=function(){
+
+        // 새로 추가한 이미지 삭제
+        selectedFiles = selectedFiles.filter(f => f !== file);
+
+
+
+        // 미리보기 화면 제거
+        div.remove();
+
+
+        // 파일명 표시 갱신
+        updateFileName();
+
+    };
+
+
+    div.appendChild(img);
+    div.appendChild(span);
+    div.appendChild(btn);
+
+     console.log("추가 위치:", previewContainer);
+    previewContainer.appendChild(div);
+}
+
     function changeFormAction() {
       const checkedBoardType = document.querySelector("input[name='boardType']:checked");
 
@@ -323,7 +427,19 @@
       placeInput.name = isLost
         ? "lstPlace"
         : "depPlace"
+
+        if(isLost){
+
+        colorSection.classList.add("hidden");
+
+        }else{
+
+        colorSection.classList.remove("hidden");
+
+        }
     }
+
+    
 
     postForm.addEventListener("submit", function (event){
       changeFormAction();
@@ -362,29 +478,41 @@
 
     changeFormAction();
 
-    //파일선택
     fileUpload.addEventListener("change", function(){
 
+
     Array.from(fileUpload.files).forEach(file=>{
-      //같은 파일 중복 추가 방지
 
-      const exists = selectedFiles.some(f=>
-          f.name===file.name &&
-          f.size===file.size &&
-          f.lastModified===file.lastModified
-      );
-      if(!exists){
+      
+        if(isDuplicate(file)){
+            alert(file.name+" 은 이미 등록된 파일입니다.");
+            return;
+        }
+
+
         selectedFiles.push(file);
-      }
+
+        console.log(previewContainer);
+        createPreview(file);
+
     });
-    const dt=new DataTransfer();
 
-    selectedFiles.forEach(file=>dt.items.add(file));
 
-    fileUpload.files =dt.files;
+const dt=new DataTransfer();
 
-    updateFileName();
-  });
+
+selectedFiles.forEach(file=>{
+    dt.items.add(file);
+});
+
+
+fileUpload.files=dt.files;
+
+
+updateFileName();
+
+
+});
 
 
 
@@ -403,14 +531,14 @@
         uploadBox.classList.remove("drag-over");
 
         Array.from(event.dataTransfer.files).forEach(file=>{
-          const exists=selectedFiles.some(f=>
-              f.name === file.name &&
-              f.size === file.size &&
-              f.lastModified ===file.lastModified
-          );
 
+          if(isDuplicate(file)){
+          alert(file.name+" 은 이미 등록된 파일입니다.");
+          return;
+          }
           if(!exists){
             selectedFiles.push(file);
+            createPreview(file)
           }
         });
         const dt =new DataTransfer();
