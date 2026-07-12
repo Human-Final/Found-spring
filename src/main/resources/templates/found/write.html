@@ -133,18 +133,20 @@
 
         <div id="colorSection" class="form-section">
 
-          <label class="form-label">색상명</label>
+          <label for="color" class="form-label">
+            색상명
+          </label>
 
-          <input 
-              type="text"
-              id="color"
-              name="clrNm"
-              th:value="${isEdit == true 
-                 ? (boardType == 'lost' ? '' : foundVO.clrNm)
-                  : ''}"
-              class="form-control title-input"
-              placeholder="예) 검정, 흰색, 파랑"
-               maxlength="30">
+            <input 
+                type="text"
+                id="color"
+                name="clrNm"
+                th:value="${isEdit == true and boardType == 'found'
+                ? foundVO.clrNm
+                : ''}"
+                class="form-control title-input"
+                placeholder="예) 검정, 흰색, 파랑"
+                maxlength="30">
 
         </div>
 
@@ -307,6 +309,7 @@
     const fileName = document.querySelector("#fileName");
     const placeInput = document.querySelector("#depPlace");
     const colorSection = document.querySelector("#colorSection");
+    const colorInput = document.querySelector("#color");
 
     let selectedFiles=[];
 
@@ -431,15 +434,18 @@
         ? "lstPlace"
         : "depPlace"
 
-        if(isLost){
+      if(isLost){
 
-        colorSection.classList.add("hidden");
+      colorSection.classList.add("hidden");
+      colorInput.name = "";
 
-        }else{
+      }else{
 
-        colorSection.classList.remove("hidden");
+          colorSection.classList.remove("hidden");
+          colorInput.disabled = false;
+          colorInput.name = "clrNm";
 
-        }
+      }
     }
 
     
