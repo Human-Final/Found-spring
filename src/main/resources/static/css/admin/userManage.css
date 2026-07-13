@@ -785,13 +785,13 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
 }
 
 /* 기존 회원 수정 시 취소 버튼 */
-.user-manage-table tbody tr.editing .detail-btn {
+.user-manage-table tbody tr.editing .cancel-edit-btn {
   background: #ffffff;
   border-color: #fbbf24;
   color: #92400e;
 }
 
-.user-manage-table tbody tr.editing .detail-btn:hover {
+.user-manage-table tbody tr.editing .cancel-edit-btn:hover {
   background: #fffbeb;
 }
 
@@ -853,25 +853,29 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
 }
 
 .table-actions {
-  min-height: 58px;
+  text-align: center;
+  vertical-align: middle;
+  padding: 8px;
+}
+
+.table-action-buttons {
+  min-height: 40px;
+
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  flex-wrap: nowrap;
+
+  white-space: nowrap;
 }
 
-.table-actions button,
-.table-actions a {
+.table-action-buttons button,
+.table-action-buttons a {
   flex-shrink: 0;
 }
 
-.table-actions form {
-  display: inline-flex;
-}
-
 .edit-btn,
-.detail-btn,
+.cancel-edit-btn,
 .stop-btn,
 .release-btn {
   min-width: 64px;
@@ -891,6 +895,11 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
   justify-content: center;
 }
 
+/* 취소 버튼은 수정 모드 전까지 완전히 숨김 */
+.cancel-edit-btn[hidden] {
+  display: none; 
+}
+
 .edit-btn {
   border: 1px solid #b7d3ff;
   color: #0b63f6;
@@ -900,12 +909,12 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
   background: #f0f6ff;
 }
 
-.detail-btn {
+.cancel-edit-btn {
   border: 1px solid #d7dee9;
   color: #1e293b;
 }
 
-.detail-btn:hover {
+.cancel-edit-btn:hover {
   background: #f8fafc;
   border-color: #b7d3ff;
   color: #0b63f6;

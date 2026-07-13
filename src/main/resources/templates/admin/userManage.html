@@ -359,12 +359,12 @@
                       class="edit-btn">
                 수정
               </button>           
-              <!--
-              <a th:href="@{/admin/users/detail/{id}(id=${user.id})}"
-                 class="detail-btn"
-                 th:data-detail-url="@{/admin/users/detail/{id}(id=${user.id})}">
-                상세보기
-              </a>-->
+              <!-- 수정 모드에서만 표시 -->
+              <button type="button"
+                      class="cancel-edit-btn"
+                      hidden>
+                취소
+              </button>
             </td>
           </tr>
         </tbody>
@@ -610,16 +610,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // 상세보기 버튼 동작
- document.querySelectorAll(".detail-btn").forEach(button => {
-    button.addEventListener("click", function(event){
+  // 수정 취소 버튼 동작
+  document.querySelectorAll(".cancel-edit-btn").forEach(button => {
+    button.addEventListener("click", function () {
       const row = this.closest("tr");
-
-      // 수정 모드일 때는 취소로 동작
-      if(row.classList.contains("editing")){
-        event.preventDefault();
-        cancelEditMode(row);
-      }
+      cancelEditMode(row);
     });
   });
 
@@ -640,10 +635,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const editBtn = row.querySelector(".edit-btn");
-    const detailBtn = row.querySelector(".detail-btn");
+    const cancelBtn = row.querySelector(".cancel-edit-btn");
 
     editBtn.textContent = "적용";
-    detailBtn.textContent = "취소";
+    cancelBtn.hidden = false;
   }
   
 
@@ -661,10 +656,10 @@ document.addEventListener("DOMContentLoaded", () => {
     row.classList.remove("editing");
 
     const editBtn = row.querySelector(".edit-btn");
-    const detailBtn = row.querySelector(".detail-btn");
-
+    const cancelBtn = row.querySelector(".cancel-edit-btn");
+    
     editBtn.textContent = "수정";
-    detailBtn.textContent = "상세보기";
+    cancelBtn.hidden = true;
   }
 
 
@@ -864,10 +859,10 @@ document.addEventListener("DOMContentLoaded", () => {
     row.classList.remove("editing");
 
     const editBtn = row.querySelector(".edit-btn");
-    const detailBtn = row.querySelector(".detail-btn");
+    const cancelBtn = row.querySelector(".cancel-edit-btn");
     
     editBtn.textContent = "수정";
-    detailBtn.textContent = "상세보기";
+    cancelBtn.hidden = true;
   }
 
 
@@ -973,7 +968,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       <td class="table-actions">
         <button type="button" class="edit-btn apply-new-user-btn">적용</button>
-        <button type="button" class="detail-btn cancel-new-user-btn">취소</button>
+        <button type="button" class="cancel-new-user-btn">취소</button>
       </td>
     `;
 

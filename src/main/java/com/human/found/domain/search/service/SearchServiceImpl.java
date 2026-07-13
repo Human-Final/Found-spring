@@ -280,7 +280,6 @@ public class SearchServiceImpl implements SearchService{
                     score += 3000;
 
                 // 핵심 물건명 문자열은 있지만 카테고리가 불일치
-                // 예: 비닐봉지(...원피스), DB 분류 가방
                 } else if (titleCoreMatch
                         || contentCoreMatch) {
 
