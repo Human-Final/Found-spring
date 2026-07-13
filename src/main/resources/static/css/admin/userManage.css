@@ -876,6 +876,7 @@ body.sidebar-collapsed .sidebar-toggle-btn::after {
 
 .edit-btn,
 .cancel-edit-btn,
+.cancel-new-user-btn,
 .stop-btn,
 .release-btn {
   min-width: 64px;
