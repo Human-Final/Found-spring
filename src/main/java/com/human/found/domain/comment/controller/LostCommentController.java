@@ -44,14 +44,7 @@ public class LostCommentController {
         // 유저가 작성한 게시글에 댓글 달렸다면 해당 유저에게 이메일 전송해주기
         if (atcId != null && atcId.startsWith("USER")) {
             String userEmail=lostCommentService.findUserEmailByAtcId(atcId);
-            String mailErrorMessage = lostCommentService.emailNotify(userEmail, atcId);
-            
-            if (mailErrorMessage != null) {
-                rttr.addFlashAttribute("errorMessage", mailErrorMessage);
-            }
-                        
-            // System.out.println(num);
-            // System.out.println(userEmail);
+            lostCommentService.emailNotify(userEmail, atcId);
         }
 
         return "redirect:/api/lost/detail/" + atcId;

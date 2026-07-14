@@ -44,13 +44,7 @@ public class FoundCommentController {
         // 유저가 작성한 게시글에 댓글 달렸다면 해당 유저에게 이메일 전송해주기
         if (atcId != null && atcId.startsWith("USER")) {
             String userEmail=foundCommentService.findUserEmailByAtcId(atcId);
-            String mailErrorMessage = foundCommentService.emailNotify(userEmail, atcId);
-
-            if(mailErrorMessage != null){
-                rttr.addFlashAttribute("errorMessage", mailErrorMessage);
-            }
-            // System.out.println(atcId);
-            // System.out.println(userEmail);
+            foundCommentService.emailNotify(userEmail, atcId);
         }
         
         foundCommentService.insertComment(commentVO);

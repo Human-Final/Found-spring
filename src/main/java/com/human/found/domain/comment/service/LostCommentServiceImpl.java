@@ -2,13 +2,14 @@ package com.human.found.domain.comment.service;
 
 import java.util.List;
 
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.human.found.domain.comment.mapper.LostCommentMapper;
 import com.human.found.domain.comment.vo.CommentVO;
-import org.springframework.mail.SimpleMailMessage; 
-import org.springframework.mail.javamail.JavaMailSender;
 
 import lombok.RequiredArgsConstructor;
 
@@ -57,11 +58,12 @@ public class LostCommentServiceImpl implements LostCommentService{
         return lostCommentMapper.findUserEmailByAtcId(atcId);
     }
 
+    @Async
     @Override
-    public String emailNotify(String userEmail, String atcId) {
+    public void emailNotify(String userEmail, String atcId) {
         try {
             if (userEmail == null || userEmail.isBlank()) {
-                return null;
+                return;
             }    
 
             SimpleMailMessage message = new SimpleMailMessage();
@@ -76,14 +78,14 @@ public class LostCommentServiceImpl implements LostCommentService{
             mailSender.send(message); // 🚀 실제 메일 발송!
             // System.out.println("[메일 알림] 댓글 작성 알림 이메일 발송 성공 -> " + userEmail);
             
-            return null;
+            return;
             
         } catch (Exception e) {
             // 💡 메일 발송에 실패해도 로그만 찍고 넘어가므로, 댓글 등록 프로세스는 안전하게 유지됩니다.
             // System.err.println("[메일 알림 에러] 이메일 발송 중 문제가 발생했습니다: " + e.getMessage());
             e.printStackTrace();
-
-            return "[메일 알림 에러] 이메일 발송 중 문제가 발생했습니다.";
+            System.err.println("[메일 알림/에러] 이메일 발송 중 문제가 발생했습니다: " + e.getMessage());
+            return;
         }
     }
 }
