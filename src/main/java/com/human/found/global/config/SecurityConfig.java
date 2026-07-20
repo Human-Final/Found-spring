@@ -124,7 +124,7 @@ public class SecurityConfig {
                 .successHandler(loginSuccessHandler)
                 .failureUrl("/login?error=true")
                 .permitAll()
-            )
+            )   
 
             // 개발용 로그인 유지
             .rememberMe(remember -> remember

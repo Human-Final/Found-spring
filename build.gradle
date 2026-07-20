@@ -44,9 +44,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 
-	//Swagger
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
-
 	// validation 라이브러리 추가
   	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
@@ -63,6 +60,8 @@ dependencies {
 	// 엑셀 파일 다운로드
 	implementation 'org.apache.poi:poi-ooxml:5.2.5'
 	
+	// Swagger API 문서
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17'
 }
 
 tasks.named('test') {

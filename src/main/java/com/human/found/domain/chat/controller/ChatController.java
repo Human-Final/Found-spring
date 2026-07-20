@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +21,6 @@ import com.human.found.domain.chat.vo.ChatFileVO;
 import com.human.found.domain.chat.vo.ChatMessageVO;
 import com.human.found.domain.chat.vo.ChatRoomVO;
 import com.human.found.infrastructure.file.FileUtil;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import lombok.RequiredArgsConstructor;
 
@@ -40,9 +41,9 @@ public class ChatController {
     public String createFoundChatRoom(@PathVariable Long num,
                                       Principal principal) {
 
-        String loginId = principal.getName();
+        String loginId = getLoginId(principal);
 
-        // ChatMapper에서 습득 게시글 작성자만 조회
+        // 습득 게시글 작성자 조회
         String writerId = chatService.getFoundWriter(num);
 
         if (writerId == null) {
@@ -62,7 +63,6 @@ public class ChatController {
 
         ChatRoomVO room = chatService.createChatRoom(chatRoom);
 
-        // 다른 사용자는 본인의 1:1 채팅방으로 바로 이동
         return "redirect:/chat/room/" + room.getChatNum();
     }
 
@@ -75,9 +75,9 @@ public class ChatController {
     public String createLostChatRoom(@PathVariable Long num,
                                      Principal principal) {
 
-        String loginId = principal.getName();
+        String loginId = getLoginId(principal);
 
-        // ChatMapper에서 분실 게시글 작성자만 조회
+        // 분실 게시글 작성자 조회
         String writerId = chatService.getLostWriter(num);
 
         if (writerId == null) {
@@ -97,7 +97,6 @@ public class ChatController {
 
         ChatRoomVO room = chatService.createChatRoom(chatRoom);
 
-        // 다른 사용자는 본인의 1:1 채팅방으로 바로 이동
         return "redirect:/chat/room/" + room.getChatNum();
     }
 
@@ -110,22 +109,24 @@ public class ChatController {
                                  Model model,
                                  Principal principal) {
 
-        String loginId = principal.getName();
+        String loginId = getLoginId(principal);
 
-        // 게시글 작성자 조회
+        // 습득 게시글 작성자 조회
         String writerId = chatService.getFoundWriter(num);
 
         if (writerId == null) {
             return "redirect:/api/found";
         }
 
-        // 작성자가 아닌 사용자는 전체 채팅 목록 접근 차단
+        // 작성자가 아닌 사용자는 전체 채팅방 목록 접근 차단
         if (!writerId.equals(loginId)) {
             String atcId = chatService.getFoundAtcId(num);
+
             return "redirect:/api/found/detail/" + atcId;
         }
 
-        List<ChatRoomVO> chatRooms = chatService.getRoomsByFoundNum(num);
+        List<ChatRoomVO> chatRooms =
+                chatService.getRoomsByFoundNum(num);
 
         model.addAttribute("loginId", loginId);
         model.addAttribute("chatRooms", chatRooms);
@@ -144,22 +145,24 @@ public class ChatController {
                                 Model model,
                                 Principal principal) {
 
-        String loginId = principal.getName();
+        String loginId = getLoginId(principal);
 
-        // 게시글 작성자 조회
+        // 분실 게시글 작성자 조회
         String writerId = chatService.getLostWriter(num);
 
         if (writerId == null) {
             return "redirect:/api/lost";
         }
 
-        // 작성자가 아닌 사용자는 전체 채팅 목록 접근 차단
+        // 작성자가 아닌 사용자는 전체 채팅방 목록 접근 차단
         if (!writerId.equals(loginId)) {
             String atcId = chatService.getLostAtcId(num);
+
             return "redirect:/api/lost/detail/" + atcId;
         }
 
-        List<ChatRoomVO> chatRooms = chatService.getRoomsByLostNum(num);
+        List<ChatRoomVO> chatRooms =
+                chatService.getRoomsByLostNum(num);
 
         model.addAttribute("loginId", loginId);
         model.addAttribute("chatRooms", chatRooms);
@@ -178,20 +181,22 @@ public class ChatController {
                            Model model,
                            Principal principal) {
 
-        String loginId = principal.getName();
+        String loginId = getLoginId(principal);
 
-        ChatRoomVO room = chatService.getChatRoomByChatNum(chatNum);
+        ChatRoomVO room =
+                chatService.getChatRoomByChatNum(chatNum);
 
         if (room == null) {
             return "redirect:/mypage";
         }
 
         // 채팅방 참여자가 아닌 사용자는 접근 차단
-        if (!loginId.equals(room.getUserIdA()) && !loginId.equals(room.getUserIdB())) {
+        if (!isChatRoomParticipant(room, loginId)) {
             return "redirect:/mypage";
         }
 
-        List<ChatMessageVO> messages = chatService.getMessages(chatNum);
+        List<ChatMessageVO> messages =
+                chatService.getMessages(chatNum);
 
         model.addAttribute("chatNum", chatNum);
         model.addAttribute("loginId", loginId);
@@ -203,18 +208,30 @@ public class ChatController {
 
     /**
      * 채팅 첨부파일 업로드
-     * - 파일 메시지를 먼저 chat_message에 저장
+     * - 채팅방 참여자 검증
+     * - 파일 메시지를 chat_message에 저장
      * - 저장된 message_num으로 chat_file 저장
      * - 저장된 메시지를 JSON으로 반환
      */
     @PostMapping("/chat/file/upload")
     @ResponseBody
-    public ChatMessageVO uploadChatFile(@RequestParam("chatNum") Long chatNum,
-                                        @RequestParam("file") MultipartFile file,
-                                        Principal principal) {
+    public ChatMessageVO uploadChatFile(
+            @RequestParam("chatNum") Long chatNum,
+            @RequestParam("file") MultipartFile file,
+            Principal principal) {
 
-        // 브라우저에서 개발자도구로 admin 변경되는거 방지
-        String senderId = principal.getName();
+        // 인증된 사용자 아이디를 발신자 아이디로 사용
+        String senderId = getLoginId(principal);
+
+        // 빈 파일 요청 차단
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "업로드할 파일이 없습니다."
+            );
+        }
+
+        // 메시지 저장 전에 채팅방 존재 및 참여자 여부 검증
+        validateChatRoomParticipant(chatNum, senderId);
 
         // 1. 채팅 메시지 먼저 저장
         ChatMessageVO message = new ChatMessageVO();
@@ -228,53 +245,130 @@ public class ChatController {
         MultipartFile[] files = {file};
 
         List<Map<String, Object>> uploadedFiles =
-                fileUtil.uploadFiles(files, String.valueOf(message.getMessageNum()), "chat");
+                fileUtil.uploadFiles(
+                        files,
+                        String.valueOf(message.getMessageNum()),
+                        "chat"
+                );
+
+        if (uploadedFiles == null || uploadedFiles.isEmpty()) {
+            throw new IllegalStateException(
+                    "파일 저장에 실패했습니다."
+            );
+        }
 
         Map<String, Object> fileInfo = uploadedFiles.get(0);
 
         // 3. chat_file 테이블 저장
         ChatFileVO chatFile = new ChatFileVO();
         chatFile.setMessageNum(message.getMessageNum());
-        chatFile.setOriginalName((String) fileInfo.get("originalname"));
-        chatFile.setSaveName((String) fileInfo.get("saveFileName"));
-        chatFile.setFileSize((Long) fileInfo.get("fileSize"));
+        chatFile.setOriginalName(
+                (String) fileInfo.get("originalname")
+        );
+        chatFile.setSaveName(
+                (String) fileInfo.get("saveFileName")
+        );
+        chatFile.setFileSize(
+                (Long) fileInfo.get("fileSize")
+        );
 
-        // 화면에서 접근할 경로
-        chatFile.setFilePath("/images/chat/" + fileInfo.get("saveFileName"));
+        // 브라우저에서 접근할 파일 경로
+        chatFile.setFilePath(
+                "/images/chat/" + fileInfo.get("saveFileName")
+        );
 
         chatService.saveChatFile(chatFile);
 
-        // 4. 화면 출력용 fileList 세팅
+        // 4. 화면 출력용 첨부파일 목록 설정
         List<ChatFileVO> fileList = new ArrayList<>();
         fileList.add(chatFile);
+
         message.setFileList(fileList);
 
         return message;
     }
 
-    // 게시글 삭제 시 채팅방 삭제
+    /**
+     * 마이페이지에서 채팅방 삭제
+     */
     @PostMapping("/mypage/chat/delete")
-    public String deleteChatRooms(@RequestParam List<Long> chatNums) {
+    public String deleteChatRooms(
+            @RequestParam List<Long> chatNums) {
+
         chatService.deleteChatRooms(chatNums);
 
         return "redirect:/mypage#myChats";
-
     }
 
-    // 채팅방 입장 시 마지막 메시지까지 읽음 처리
+    /**
+     * 채팅방 입장 시 마지막 메시지까지 읽음 처리
+     */
     @PostMapping("/chat/room/{chatNum}/read")
     @ResponseBody
     public void readChatRoom(@PathVariable Long chatNum,
-                            Principal principal) {
+                             Principal principal) {
 
-        String loginId = principal.getName();
+        String loginId = getLoginId(principal);
+
+        // 읽음 처리 전에 채팅방 참여자 여부 검증
+        validateChatRoomParticipant(chatNum, loginId);
 
         chatService.readChatRoom(chatNum, loginId);
 
-        // 같은 방 구독자들에게 "이 사람이 읽었다" 알림 전송
+        // 같은 채팅방 구독자에게 읽음 이벤트 전송
         messagingTemplate.convertAndSend(
                 "/sub/chat/room/" + chatNum + "/read",
                 loginId
         );
+    }
+
+    /**
+     * 현재 인증된 사용자의 아이디를 반환하는 공통 메서드
+     */
+    private String getLoginId(Principal principal) {
+
+        if (principal == null) {
+            throw new AccessDeniedException(
+                    "로그인이 필요한 기능입니다."
+            );
+        }
+
+        return principal.getName();
+    }
+
+    /**
+     * 로그인 사용자가 채팅방 참여자인지 확인
+     */
+    private boolean isChatRoomParticipant(
+            ChatRoomVO room,
+            String loginId) {
+
+        return loginId.equals(room.getUserIdA())
+                || loginId.equals(room.getUserIdB());
+    }
+
+    /**
+     * 채팅방 존재 여부와 참여자 여부를 검증
+     */
+    private ChatRoomVO validateChatRoomParticipant(
+            Long chatNum,
+            String loginId) {
+
+        ChatRoomVO room =
+                chatService.getChatRoomByChatNum(chatNum);
+
+        if (room == null) {
+            throw new IllegalArgumentException(
+                    "존재하지 않는 채팅방입니다."
+            );
+        }
+
+        if (!isChatRoomParticipant(room, loginId)) {
+            throw new AccessDeniedException(
+                    "해당 채팅방에 접근할 권한이 없습니다."
+            );
+        }
+
+        return room;
     }
 }
