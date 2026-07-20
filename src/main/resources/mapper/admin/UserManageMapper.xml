@@ -47,7 +47,18 @@
                 WHEN 'MANAGER' THEN 2
                 ELSE 3
             END,
-            sign_up DESC
+            CASE
+                WHEN is_deleted = 1 THEN 4
+                ELSE
+                    CASE status
+                        WHEN 'active' THEN 1
+                        WHEN 'dormant' THEN 2
+                        WHEN 'blocked' THEN 3
+                        ELSE 5
+                    END
+            END,
+            sign_up DESC,
+            id ASC
     </select>
 
     <!-- 유저 1명 조회(탈퇴회원 포함) -->
@@ -92,7 +103,18 @@
                 WHEN 'MANAGER' THEN 2
                 ELSE 3
             END,
-            sign_up DESC
+            CASE
+                WHEN is_deleted = 1 THEN 4
+                ELSE
+                    CASE status
+                        WHEN 'active' THEN 1
+                        WHEN 'dormant' THEN 2
+                        WHEN 'blocked' THEN 3
+                        ELSE 5
+                    END
+            END,
+            sign_up DESC,
+            id ASC
         LIMIT #{size}
         OFFSET #{offset}
 
@@ -135,7 +157,18 @@
                 WHEN 'MANAGER' THEN 2
                 ELSE 3
             END,
-            sign_up DESC
+            CASE
+                WHEN is_deleted = 1 THEN 4
+                ELSE
+                    CASE status
+                        WHEN 'active' THEN 1
+                        WHEN 'dormant' THEN 2
+                        WHEN 'blocked' THEN 3
+                        ELSE 5
+                    END
+            END,
+            sign_up DESC,
+            id ASC
     </select>
 
     <!-- 관리자페이지에서 회원 추가 -->
