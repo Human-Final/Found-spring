@@ -44,7 +44,7 @@ public class LostPoliceServiceImpl implements LostPoliceService{
     //initialDelay = 5000 5초뒤에 경찰청 분실물 API자료 갖고오는 테스트용 코드
     //스케줄러 메서드
     //매일 새벽 1시에 자동으로 아래 fetchAndSaveLostGoods 메서드 호출하기
-    @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 1 * * *", zone = "Asia/Seoul")
     public void ScheduledSavePoliceLost() {
         System.out.println("⏰ [스케줄러 시작] 기존 데이터를 삭제하고 경찰청의 모든 유실물 데이터를 처음부터 끝까지 수집합니다.");
         
@@ -67,7 +67,7 @@ public class LostPoliceServiceImpl implements LostPoliceService{
                 pageNo++; // 다음 페이지 준비
                 
                 // 안전장치: 너무 무한루프가 돌지 않도록 최대 30페이지(3만 건)까지만 수집하도록 제한
-                if (pageNo > 1) {
+                if (pageNo > 30) {
                     break;
                 }
                 
