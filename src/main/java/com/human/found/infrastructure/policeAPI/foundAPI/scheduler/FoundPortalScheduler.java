@@ -1,15 +1,16 @@
 package com.human.found.infrastructure.policeAPI.foundAPI.scheduler;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.human.found.infrastructure.policeAPI.foundAPI.service.FoundPortalService;
-import com.human.found.infrastructure.policeAPI.foundAPI.service.FoundPortalServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
+// @Profile("!replace-test")
 public class FoundPortalScheduler {
 
     private final FoundPortalService foundPortalService;
@@ -27,5 +28,7 @@ public class FoundPortalScheduler {
             e.printStackTrace();
         }
     }
+
+
 
 }

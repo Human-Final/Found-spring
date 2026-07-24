@@ -18,5 +18,8 @@ public interface FoundPortalMapper {
     int markOldFoundPortalDeleted(@Param("baseDate") LocalDateTime baseDate);
 
     // int existsByAtcId(String atcId);
-    // int deleteAllFoundPortal();
+    int deleteAllFoundPortal();
+
+    // 포털 습득물 batch insert
+    int insertFoundPortalBatch(@Param("list") List<FoundVO> foundList);
 }
