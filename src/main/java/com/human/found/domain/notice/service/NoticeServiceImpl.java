@@ -15,7 +15,7 @@ import com.human.found.global.common.paging.PagingVO;
 public class NoticeServiceImpl implements NoticeService {
 
     private final NoticeMapper noticeMapper;
-    private final String uploadPath = "\\\\192.168.0.53\\260126\\0608\\배민선, 박상화, 김태연, 신민철\\file\\notice\\"; // 서버 내 실제 파일 저장 경로
+    private final String uploadPath = "/home/ubuntu/upload_images/notice/"; // 서버 내 실제 파일 저장 경로
 
     public NoticeServiceImpl(NoticeMapper noticeMapper) {
         this.noticeMapper = noticeMapper;
@@ -120,9 +120,11 @@ public class NoticeServiceImpl implements NoticeService {
                 
                 // 5) 파일 경로 (file_path) 가상 웹 주소 지정
                 String filePath = "/images/notice/" + saveName;
+
+                File targetFile = new File(folder, saveName);
                 
                 // 6) 실제 네트워크 공유 폴더 세부 경로 내부로 물리 파일 전송 저장 수행
-                notice.getUploadFile().transferTo(new File(uploadPath + saveName));
+                notice.getUploadFile().transferTo(targetFile);
                 
                 // 7) [교정 완료] 보내주신 NoticeFileVO 사양 그대로 1:1 결합 변수 바인딩 조립
                 com.human.found.domain.notice.vo.NoticeFileVO fileVO = new com.human.found.domain.notice.vo.NoticeFileVO();

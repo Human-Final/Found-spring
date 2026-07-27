@@ -9,21 +9,20 @@ public class WebMvcConfig implements WebMvcConfigurer {
     
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 브라우저가 /images/notice/파일명 으로 이미지를 달라고 요청하면
-        // 강의실 공유 폴더 네트워크 주소(\\192.168.0.53\...\notice\) 내부를 뒤져서 파일을 배달해 줍니다.
+        // 1) 공지사항 가상 주소 연결
         registry.addResourceHandler("/images/notice/**")
-                .addResourceLocations("file:////192.168.0.53/260126/0608/배민선, 박상화, 김태연, 신민철/file/notice/");
+                .addResourceLocations("file:/home/ubuntu/upload_images/notice/");
 
-        //습득물
+        // 2) 습득물 가상 주소 연결
         registry.addResourceHandler("/images/found/**")
-                .addResourceLocations("file:////192.168.0.53/260126/0608/배민선, 박상화, 김태연, 신민철/file/found/");
+                .addResourceLocations("file:/home/ubuntu/upload_images/found/");
         
-        //분실물
+        // 3) 분실물 가상 주소 연결
         registry.addResourceHandler("/images/lost/**")
-                .addResourceLocations("file:////192.168.0.53/260126/0608/배민선, 박상화, 김태연, 신민철/file/lost/");  
+                .addResourceLocations("file:/home/ubuntu/upload_images/lost/");  
                 
-        // 채팅
+        // 4) 채팅 가상 주소 연결
         registry.addResourceHandler("/images/chat/**")
-                .addResourceLocations("file:////192.168.0.53/260126/0608/배민선, 박상화, 김태연, 신민철/file/chat/");
+                .addResourceLocations("file:/home/ubuntu/upload_images/chat/");
     }
 }

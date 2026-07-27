@@ -14,7 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 public class FileUtil {
     //상위 폴더
-    private final String UPLOAD_PATH = "//192.168.0.53/260126/0608/배민선, 박상화, 김태연, 신민철/file/";
+    // 기존 사내 네트워크 주소(//192.168.0.53/...)를 지우고 아래 리눅스 경로로 변경
+    private final String UPLOAD_PATH = "/home/ubuntu/upload_images/";
+
 
     public List<Map<String, Object>> uploadFiles(MultipartFile[] files, String atcId, String type) {
         List<Map<String, Object>> fileList = new ArrayList<>();
