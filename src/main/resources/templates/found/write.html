@@ -266,12 +266,20 @@
         <div class="form-section">
           <span class="form-label">첨부파일</span>
           <label class="upload-box" id="uploadBox">
-            <input type="file" id="fileUpload" name="files" multiple>
+            <input 
+              type="file" 
+              id="fileUpload" 
+              name="files" 
+              multiple
+              accept=".jpg,.jpeg,.png,.gif,.webp,.mp4,.webm,.mov,.m4v,.avi">
             
             <span>
               <span class="upload-icon" aria-hidden="true">↥</span>
               <p class="upload-main">파일을 드래그하거나 클릭하여 업로드</p>
-              <p class="upload-sub">이미지, PDF, 문서 등</p>
+              <p class="upload-sub">
+                이미지(JPG, JPEG, PNG, GIF, WEBP) 및
+                동영상(MP4, WEBM, MOV, M4V, AVI)만 업로드할 수 있습니다.
+              </p>
               <p class="file-name" id="fileName"></p>
             </span>
           </label>
@@ -313,13 +321,83 @@
 
     let selectedFiles=[];
 
+    const ALLOWED_EXTENSIONS = new Set([
+      "jpg",
+      "jpeg",
+      "png",
+      "gif",
+      "webp",
+      "mp4",
+      "webm",
+      "mov",
+      "m4v",
+      "avi"
+    ]);
+
+    function getFileExtension(fileName){
+      const lastDotIndex = fileName.lastIndexOf(".");
+
+      if(lastDotIndex < 0 || lastDotIndex === fileName.length - 1){
+        return "";
+      }
+
+      return fileName
+        .substring(lastDotIndex + 1)
+        .toLowerCase();
+    }
+
+    function isAllowedFile(file) {
+      return ALLOWED_EXTENSIONS.has(
+        getFileExtension(file.name)
+      );
+    }
+
+    // selectedFiles(자바스크립트 배열)와 fileUpload.file(실제 HTML파일 입력값) 맞추기 
+    function syncFileInput(){
+      const dataTransfer = new DataTransfer();
+
+      selectedFiles.forEach(file =>{
+        dataTransfer.items.add(file);
+      });
+
+      fileUpload.files = dataTransfer.files;
+    }
+
+    function addFiles(files){
+      Array.from(files).forEach(file =>{
+        if(!isAllowedFile(file)){
+          alert(
+            file.name
+              + " 파일은 업로드할 수 없습니다.\n"
+              + "이미지 또는 동영상 파일만 선택해 주세요."            
+          );
+
+          return;
+        }
+
+        if(isDuplicate(file)){
+          alert(
+            file.name
+              + " 은 이미 등록된 파일입니다."
+          );
+
+          return;
+        }
+
+        selectedFiles.push(file);
+        createPreview(file);
+      });
+
+      syncFileInput();
+      updateFileName();
+    }
+
     const previewContainer = document.querySelector("#previewContainer");
 
     let existingFiles = [];
 
     document.querySelectorAll(".file-item[data-original]").forEach(item=>{
-
-        existingFiles.push(item.dataset.original);
+      existingFiles.push(item.dataset.original);
     });
 
     console.log("기존 파일:", existingFiles);
@@ -333,63 +411,49 @@
       if(existingFiles.includes(file.name)){
           console.log("기존 이미지 중복");
           return true;
-          }
-
-          // 새로 선택한 파일 검사
-          return selectedFiles.some(f =>
-              f.name === file.name &&
-              f.size === file.size
-          );
       }
+
+      // 새로 선택한 파일 검사
+      return selectedFiles.some(f =>
+        f.name === file.name &&
+        f.size === file.size
+      );
+    }
     
     function createPreview(file){
+      const div=document.createElement("div");
+      div.className="file-item";
+      const img=document.createElement("img");
+      img.src=URL.createObjectURL(file);
+      const span=document.createElement("span");
+      span.textContent=file.name;
+      const btn=document.createElement("button");
+      btn.type="button";
+      btn.className="delete-file-btn";
+      btn.innerHTML="✕";
 
-    const div=document.createElement("div");
-
-    div.className="file-item";
-    
-
-    const img=document.createElement("img");
-
-    img.src=URL.createObjectURL(file);
-
-
-    const span=document.createElement("span");
-
-    span.textContent=file.name;
-
-
-    const btn=document.createElement("button");
-
-    btn.type="button";
-    btn.className="delete-file-btn";
-    btn.innerHTML="✕";
-
-
-    btn.onclick=function(){
+      btn.onclick=function(){
 
         // 새로 추가한 이미지 삭제
         selectedFiles = selectedFiles.filter(f => f !== file);
 
-
-
         // 미리보기 화면 제거
         div.remove();
 
+        syncFileInput();
 
         // 파일명 표시 갱신
         updateFileName();
 
-    };
+      };
 
+      div.appendChild(img);
+      div.appendChild(span);
+      div.appendChild(btn);
 
-    div.appendChild(img);
-    div.appendChild(span);
-    div.appendChild(btn);
-
-     console.log("추가 위치:", previewContainer);
-    previewContainer.appendChild(div);
-}
+      console.log("추가 위치:", previewContainer);
+      previewContainer.appendChild(div);
+    }
 
     function changeFormAction() {
       const checkedBoardType = document.querySelector("input[name='boardType']:checked");
@@ -455,8 +519,6 @@
 
     }
 
-    
-
     postForm.addEventListener("submit", function (event){
       changeFormAction();
 
@@ -475,94 +537,46 @@
 
     });
 
-    
     function updateFileName() {
         
-        if (selectedFiles.length === 0) {
+      if (selectedFiles.length === 0) {
         fileName.textContent = "";
         return;
-        }
+      }
 
-        fileName.textContent = selectedFiles.length === 1
-        ? selectedFiles[0].name
-        : selectedFiles[0].name + " 외 " + (selectedFiles.length - 1) + "개";
+      fileName.textContent = selectedFiles.length === 1
+      ? selectedFiles[0].name
+      : selectedFiles[0].name + " 외 " + (selectedFiles.length - 1) + "개";
     }
 
     boardTypeInputs.forEach(function (input) {
-        input.addEventListener("change", changeFormAction);
+      input.addEventListener("change", changeFormAction);
     });
 
     changeFormAction();
 
-    fileUpload.addEventListener("change", function(){
-
-
-    Array.from(fileUpload.files).forEach(file=>{
-
-      
-        if(isDuplicate(file)){
-            alert(file.name+" 은 이미 등록된 파일입니다.");
-            return;
-        }
-
-
-        selectedFiles.push(file);
-
-        console.log(previewContainer);
-        createPreview(file);
-
+    // 파일 선택
+    fileUpload.addEventListener("change", ()=>{
+      addFiles(fileUpload.files);
     });
 
-
-const dt=new DataTransfer();
-
-
-selectedFiles.forEach(file=>{
-    dt.items.add(file);
-});
-
-
-fileUpload.files=dt.files;
-
-
-updateFileName();
-
-
-});
-
-
-
+    // 드래그 중
     uploadBox.addEventListener("dragover", function (event) {
-        event.preventDefault();
-        uploadBox.classList.add("drag-over");
+      event.preventDefault();
+      uploadBox.classList.add("drag-over");
     });
 
+    // 드래그 이탈
     uploadBox.addEventListener("dragleave", function () {
-        uploadBox.classList.remove("drag-over");
+      uploadBox.classList.remove("drag-over");
     });
 
+    // 파일 드롭
     uploadBox.addEventListener("drop", function (event) {
-       
-        event.preventDefault();
-        uploadBox.classList.remove("drag-over");
+      event.preventDefault();
+      uploadBox.classList.remove("drag-over");
 
-        Array.from(event.dataTransfer.files).forEach(file=>{
-
-          if(isDuplicate(file)){
-          alert(file.name+" 은 이미 등록된 파일입니다.");
-          return;
-          }
-
-
-          selectedFiles.push(file);
-          createPreview(file);
-        });
-        const dt =new DataTransfer();
-
-        selectedFiles.forEach(file=>dt.items.add(file));
-
-        fileUpload.files=dt.files;
-        updateFileName();
+      addFiles(event.dataTransfer.files);
     });
 
     document.querySelectorAll(".delete-file-btn").forEach(btn=>{
@@ -578,15 +592,15 @@ updateFileName();
           const hidden = document.querySelector(
             `input[name="deleteFiles"][value="${fileName}"]`
           );
+
           if(hidden){
             hidden.remove();
-          }
+          }         
+          
           this.innerHTML ="✕";
+          
         }else{
-
           item.classList.add("delete-pending");
-
-
           const input =document.createElement("input");
           input.type="hidden";
           input.name="deleteFiles";
@@ -605,14 +619,10 @@ updateFileName();
       const localToday = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
         .toISOString()
         .slice(0, 10);
-
-        occurredDateInput.max = localToday;
+      occurredDateInput.max = localToday;
     }
 
     setMaxDate();
-
-
-
 
   </script>
 </body>

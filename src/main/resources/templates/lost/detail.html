@@ -148,7 +148,9 @@
               <div th:if="${file.saveName != null and file.saveName != ''
                         and (#strings.endsWith(fileName, '.mp4')
                         or #strings.endsWith(fileName, '.webm')
-                        or #strings.endsWith(fileName, '.mov'))}"
+                        or #strings.endsWith(fileName, '.mov')
+                        or #strings.endsWith(fileName, '.m4v')
+                        or #strings.endsWith(fileName, '.avi'))}"
                     class="video-wrap">
 
                 <video class="slide-media slide-video"
