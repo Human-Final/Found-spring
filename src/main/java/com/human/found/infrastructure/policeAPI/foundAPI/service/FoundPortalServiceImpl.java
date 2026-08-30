@@ -48,8 +48,9 @@ public class FoundPortalServiceImpl implements FoundPortalService {
         LocalDate today = LocalDate.now();
         LocalDate sixMonthsAgo = today.minusMonths(6);
 
-        List<FoundPortalApiItemVO> allItems =
-                new ArrayList<>();
+        int totalUniqueCount = 0;
+        int totalSaveCount = 0;
+        int completedPageCount = 0;
 
         /*
          * API 전체 페이지에서 atcId 중복 제거
@@ -207,6 +208,8 @@ public class FoundPortalServiceImpl implements FoundPortalService {
             }
 
             int addedCount = 0;
+            List<FoundPortalApiItemVO> pageItems =
+                    new ArrayList<>();
 
             /*
              * API 수집 단계에서 atcId 중복을 제거합니다.
@@ -226,17 +229,35 @@ public class FoundPortalServiceImpl implements FoundPortalService {
                         item.getAtcId().trim();
 
                 if (collectedAtcIds.add(atcId)) {
-                    allItems.add(item);
+                    pageItems.add(item);
                     addedCount++;
                 }
             }
+
+            /*
+             * 전체 데이터를 메모리에 쌓지 않고 현재 페이지를 바로
+             * 변환·UPSERT합니다. 트랜잭션은 페이지 단위로 종료됩니다.
+             */
+            if (!pageItems.isEmpty()) {
+                totalSaveCount +=
+                        foundPortalTxService
+                            .upsertFoundPortalItems(
+                                pageItems,
+                                today,
+                                sixMonthsAgo
+                            );
+            }
+
+            totalUniqueCount += addedCount;
+            completedPageCount++;
 
             System.out.println(
                 "포털기관 습득물 API 응답 완료"
                 + " / pageNo = " + pageNo
                 + " / 응답 건수 = " + items.size()
                 + " / 신규 건수 = " + addedCount
-                + " / 누적 고유 건수 = " + allItems.size()
+                + " / 누적 고유 건수 = " + totalUniqueCount
+                + " / 누적 저장 건수 = " + totalSaveCount
                 + " / 첫 atcId = " + firstAtcId
                 + " / 마지막 atcId = " + lastAtcId
                 + " / 페이지 소요 시간 = "
@@ -273,7 +294,7 @@ public class FoundPortalServiceImpl implements FoundPortalService {
         long apiEndTime =
                 System.currentTimeMillis();
 
-        if (allItems.isEmpty()) {
+        if (totalUniqueCount == 0) {
             throw new IllegalStateException(
                 "수집된 포털기관 습득물 데이터가 0건이므로 "
                 + "DB 저장을 실행하지 않습니다."
@@ -287,10 +308,10 @@ public class FoundPortalServiceImpl implements FoundPortalService {
             "포털기관 습득물 API 수집 완료"
         );
         System.out.println(
-            "총 페이지 수 = " + pageNo
+            "총 페이지 수 = " + completedPageCount
         );
         System.out.println(
-            "총 고유 item 수 = " + allItems.size()
+            "총 고유 item 수 = " + totalUniqueCount
         );
         System.out.println(
             "API 수집 소요 시간 = "
@@ -298,7 +319,7 @@ public class FoundPortalServiceImpl implements FoundPortalService {
             + "ms"
         );
         System.out.println(
-            "DB UPSERT 시작"
+            "오래된 데이터 논리삭제 시작"
         );
         System.out.println(
             "========================================"
@@ -307,11 +328,9 @@ public class FoundPortalServiceImpl implements FoundPortalService {
         long dbStartTime =
                 System.currentTimeMillis();
 
-        int saveCount =
+        int markDeletedCount =
                 foundPortalTxService
-                    .upsertFoundPortalItems(
-                        allItems,
-                        today,
+                    .markOldFoundPortalDeleted(
                         sixMonthsAgo
                     );
 
@@ -328,10 +347,12 @@ public class FoundPortalServiceImpl implements FoundPortalService {
             "최근 6개월 포털기관 습득물 재수집 완료"
         );
         System.out.println(
-            "총 API item 수 = " + allItems.size()
+            "총 API item 수 = " + totalUniqueCount
         );
         System.out.println(
-            "총 저장 건수 = " + saveCount
+            "총 저장 건수 = " + totalSaveCount
+            + " / 오래된 데이터 논리삭제 건수 = "
+            + markDeletedCount
         );
         System.out.println(
             "API 수집 시간 = "

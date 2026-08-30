@@ -131,36 +131,8 @@ public class FoundPortalTxService {
             + "ms"
         );
 
-        System.out.println(
-            "오래된 포털기관 습득물 논리삭제 시작"
-            + " / 기준일 = " + sixMonthsAgo
-        );
-
-        long markDeletedStartTime =
-                System.currentTimeMillis();
-
-        int markDeletedCount =
-                foundPortalMapper
-                    .markOldFoundPortalDeleted(
-                        sixMonthsAgo.atStartOfDay()
-                    );
-
-        long markDeletedEndTime =
-                System.currentTimeMillis();
-
         long methodEndTime =
                 System.currentTimeMillis();
-
-        System.out.println(
-            "오래된 포털기관 습득물 논리삭제 완료"
-            + " / 처리 건수 = " + markDeletedCount
-            + " / 처리 시간 = "
-            + (
-                markDeletedEndTime
-                - markDeletedStartTime
-            )
-            + "ms"
-        );
 
         System.out.println(
             "FoundPortalTxService 전체 시간 = "
@@ -169,6 +141,19 @@ public class FoundPortalTxService {
         );
 
         return saveCount;
+    }
+
+    /**
+     * 모든 API 페이지가 정상 처리된 뒤에만 오래된 데이터를 논리삭제합니다.
+     */
+    @Transactional
+    public int markOldFoundPortalDeleted(
+            LocalDate sixMonthsAgo) {
+
+        return foundPortalMapper
+                .markOldFoundPortalDeleted(
+                    sixMonthsAgo.atStartOfDay()
+                );
     }
 
     /**
